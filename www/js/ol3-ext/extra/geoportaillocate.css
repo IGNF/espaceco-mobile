@@ -1,0 +1,61 @@
+.ol-control.ol-locate 
+{	top: 0.5em;
+	left: 3em;
+}
+
+.ol-control.ol-locate input
+{	font-size: 1em;
+}
+
+.ol-control.ol-locate .autocomplete
+{	position: absolute;
+	background-color: #fff;
+	border: 1px solid #369;
+	box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.ol-control.ol-locate.ol-loading .autocomplete,
+.ol-control.ol-locate.ol-collapse .autocomplete
+{	display: none;
+}
+
+.ol-control.ol-locate.ol-loading:before
+{	content: "";
+	position: absolute;
+	display: block;
+	width: 1em;
+	height: 1em;
+	right: 3px;
+	top: 50%;
+	-webkit-transform: translateY(-50%);
+	transform: translateY(-50%);
+	border: 3px solid #369;
+	border-radius: 100%;
+	box-sizing: border-box;
+	border-color: #369 transparent #369 transparent;
+	-webkit-animation: ol-loading 2s infinite ease;
+	animation: ol-loading 2s infinite ease;
+}
+@keyframes ol-loading {
+0% {
+    -webkit-transform: translateY(-50%) rotate(0deg);
+    transform: translateY(-50%) rotate(0deg);
+}
+100% {
+    -webkit-transform: translateY(-50%) rotate(360deg);
+    transform: translateY(-50%) rotate(360deg);
+}
+}
+
+.ol-control.ol-locate .autocomplete li
+{	display: block;
+	white-space: nowrap;
+	cursor: pointer;
+	padding: 0 0.5em;
+	font-size: 0.9em;
+}
+.ol-control.ol-locate .autocomplete li:hover
+{	background: #9cf;
+}

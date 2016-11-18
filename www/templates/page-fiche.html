@@ -1,0 +1,26 @@
+﻿<div data-role="header" data-back-button="true">Fiche</div>
+<div data-role="onglet">
+	<div class="trackingInfo">
+		<i class="backArrowBt"></i> retour à la fiche
+		<i class="fa fa-map-marker"></i>
+	</div>
+	<div data-role="onglet-bt">
+		<div data-list="info">
+			<i class="fa fa-id-card"></i>Fiche
+		</div><div data-list="signal">
+			<i class="fa fa-wifi fa-rotate-90"></i>Signaler
+		</div>
+	</div>
+
+	<!-- Fiche -->
+	<div class="fiche" data-role="onglet-li" data-list="info" >
+		<i>Pas de sélection...</i>
+		<button class="button" onclick="wapp.validFiche()">Modifier</button>
+		<ul></ul>
+		<button class="button" onclick="wapp.validFiche()">Modifier</button>
+	</div>
+
+	<!-- Signaler -->
+	<div class="signaler" data-role="onglet-li" data-list="signal" data-template="onglet-signaler"></div>
+
+</div>

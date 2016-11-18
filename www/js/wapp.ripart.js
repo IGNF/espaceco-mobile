@@ -1,0 +1,656 @@
+﻿/** Creation du compte > enregistrer les actions
+
+options:
+- infoElement : element pour l'info de connection : '#options .connect [data-input-role="info"] span.info'
+- formElement : formulaire de saisie d'une remontee : '#fiche2 [data-role="onglet-li"][data-list="signal"]'
+- countElement : compteur de remontees locale : '.georemsCount span'
+- listElement : ul pour l'affichage de la liste des remontees (doit contenir un template) : #signalements [data-role="content"]
+- profilElement : Affichage du profil de contribution : .profil
+- georemPage : Page d'affichage de la remontee : #georem
+- onShow {function} afficher le formulaire
+- formatGeorem {function} formater une georem avant envoi
+- messagePhoto {String} Message pour la prise de photo (text/html)
+*/
+RIPart.prototype.initialize = function(options)
+{	var self = this;
+
+	// Parametres
+	this.messagePhoto = $(options.messagePhoto);
+
+	// List
+	this.infoElement = $(options.infoElement);
+	this.formElement = $(options.formElement);
+	this.countElement = $(options.countElement);
+	this.listElement = $(options.listElement);
+	this.listElementTemplate = $('[data-role="template"]', options.listElement).html();
+	this.profilElement = $(options.profilElement || ".profil");
+	this.georemPage = $(options.georemPage || '#georem');
+
+	// Champs preremplis
+	this.onShow = options.onShow || function(){};
+	this.formatGeorem = options.formatGeorem || function(){};
+
+	// Recuperation de l'utilisateur
+	if (this.param.user) this.setUser (this.param.user, this.param.pwd);
+
+	// Overlay
+	this.overlay = new ol.layer.Vector(
+		{	source: new ol.source.Vector(), 
+			visible: false,
+			style: [
+				new ol.style.Style(
+				{	image: new ol.style.Circle(
+					{	stroke: new ol.style.Stroke({ color:[255,255,255, 0.5], width:6 }), 
+						radius:15 
+					})
+				}),
+				new ol.style.Style(
+				{	image: new ol.style.Circle(
+					{	stroke: new ol.style.Stroke({ color:[0, 153, 255, 1], width:3 }), 
+						radius:15 
+					}),
+					snapToPixel: true
+				})]
+		});
+	this.overlay.setMap(wapp.map);
+
+	// Gestion du formulaire de signalement
+	var formulaire = this.formElement;
+	$('.formulaire .cancel', formulaire).click(function()
+	{	self.cancelFormulaire(false);
+	});
+
+	this.target = new ol.control.Target({ visible: false });
+	wapp.map.addControl (this.target);
+	this.showFormulaire(false);
+
+	// Tracking du centre
+	$('.trackingInfo', formulaire.parent()).click(function()
+	{	self.target.setVisible(false);
+		$('body').removeClass("trackingGeorem");
+	});
+	$('.formulaire .trackPosition', formulaire).click(function()
+	{	var track = !self.target.getVisible();
+		if (track) 
+		{	$('body').addClass("trackingGeorem");
+			var lon = Number($(".lon", formulaire).val());
+			var lat = Number($(".lat", formulaire).val());
+			wapp.map.getView().setCenterAtLonlat([ lon, lat ]);
+		}
+		else 
+		{	$('body').removeClass("trackingGeorem");
+		}
+		self.target.setVisible(track);
+	});
+	wapp.map.getView().on("change:center", function()
+	{	if (this.target.getVisible())
+		{	var pos = wapp.map.getView().getCenter();
+			self.overlay.getSource().clear();
+			self.overlay.getSource().addFeature( new ol.Feature (new ol.geom.Point(pos)));
+			self.overlay.setVisible(true);
+			pos = ol.proj.transform(pos, wapp.map.getView().getProjection(),'EPSG:4326');
+			$(".lon", formulaire).val(pos[0]);
+			$(".lat", formulaire).val(pos[1]);
+		}
+	}, this);
+	
+	// Enregistement d'une remontee
+	$('.formulaire .save', formulaire).click(function()
+	{	var form = $(this).closest(".formulaire");
+		// Preformatage
+		var georem = 
+		{	lon: Number($(".lon", form).val()) || undefined, 
+			lat: Number($(".lat", form).val()) || undefined, 
+			sketch: undefined,
+			comment: $(".comment", form).val(),
+			photo: $('.photo img', form).data('photo') || false
+		}
+		var theme = wapp.selectInputVal($('[data-input="select"][data-param="theme"]', this.formElement));
+		if (theme)
+		{	georem.themes = '"'+theme+'"=>"1"';
+		}
+		georem.id_groupe = self.param.profil.id_groupe;
+		georem.groupe = self.param.profil.id_groupe;
+		self.formatGeorem.call (self, georem, form);
+		// Forcer la date au moment de la remontee
+		georem.date = (new Date()).toISOString().replace(/T|(\..*)/g,' ');
+
+		// Ajouter la remontee
+		wapp.wait("Enregistrement de la remontée");
+		self.saveLocalRem (georem, function(e)
+		{	wapp.wait(false);
+			wapp.notification (e.info);
+			// Reset photo
+			$(".photo img", formulaire).attr("src","")
+						.data("photo",false)
+						.hide();
+			$(".photo .fa-stack", formulaire).show();
+		})
+		self.cancelFormulaire();
+	});
+	this.onUpdate();
+
+	// Affichage des remontees
+	this.georemPage.on("showpage", function() 
+	{	wapp.map.updateSize(); 
+		// Enpecher les actions sur la carte
+		wapp.disableCtrl.disableMap(true);
+	});
+	this.georemPage.on("hidepage", function() 
+	{	setTimeout ( function ()
+		{	wapp.showPage('signalements'); 
+			wapp.map.updateSize();
+			wapp.disableCtrl.disableMap(false);
+		}, 100);
+	});
+				
+};
+
+
+/** delete a local rem
+* @param {Object} the rem to save
+* @param {function} a callback function
+*/
+RIPart.prototype.delLocalRem = function(i, options)
+{	// Chercher l'indice correspondant a une remontee
+	if (typeof(i) != 'number')
+	{	for (var k=0; k<this.param.georems.length; k++)
+		{	if (this.param.georems[k] === i)
+			{	i = k;
+				break;
+			}
+		}
+	}
+
+	var grem = this.param.georems[i];
+	if (grem)
+	{	// Supprimer
+		this.param.georems.splice(i,1);
+		// Supprimer la photo correspondante
+		if (grem.photo)
+		{	CordovApp.File.delFile (grem.photo);
+		}
+		this.saveParam();
+		this.onUpdate();
+	}
+
+}
+
+/** Save a new local rem
+* @param {Object} the rem to save
+* @param {function} a callback function
+*/
+RIPart.prototype.saveLocalRem = function(georem, cback)
+{	var self = this;
+	this.param.nbrem++;
+	this.param.georems.push(georem);
+	// Sauvegarde de la photo
+	if (georem.photo)
+	{	CordovApp.File.moveFile (georem.photo, "TMP/georem-"+this.param.nbrem+".jpg", 
+			function(file)
+			{	georem.photo = file.toURL();
+				self.saveParam();
+				if (cback) cback ({ error:false, info:"La remontée a été enregistrée." });
+			},
+			function()
+			{	georem.photo = false;
+				self.saveParam();
+				self.onUpdate();
+				if (cback) cback ({ error:'NOPHOTO', info:"Photo introuvable..." });
+			})
+	}
+	else 
+	{	this.saveParam();
+		if (cback) cback ({ error:false, info:"La remontée a été enregistrée." });
+	}
+	this.onUpdate();
+}
+
+/** Get the local rems
+*/
+RIPart.prototype.getLocalRems = function()
+{	return this.param.georems;
+}
+
+/** Post local rems to server
+*/
+RIPart.prototype.postLocalRems = function()
+{	var self = this;
+	var nb = this.countLocalRems();
+	var n = 0;
+
+	function postNext()
+	{	var p = self.countLocalRems();
+		// Ended ?
+		if (!p) 
+		{	wapp.wait(false);
+			return;
+		}
+		// Send next
+		for (var i=0; i<self.param.georems.length; i++)
+		{	var grem = self.param.georems[i];
+			if (!grem.id)
+			{	n++;
+				self.postLocalRem (i, { info: "Envoi des remontées ("+n+"/"+nb+")", cback: postNext });
+				break;
+			}
+		}
+	}
+
+	// Start sending...
+	if (nb) postNext();
+	else wapp.message ("Toutes les remarques ont déjà été envoyées..."," ");
+};
+
+
+/** Post local rem to server
+*/
+RIPart.prototype.postLocalRem = function(i, options)
+{	var self = this;
+	if (!options) options = {};
+
+	// Si i n'est pas un indice, c'est une remontee => chercher son indice
+	if (typeof(i) != 'number')
+	{	for (var k=0; k<self.param.georems.length; k++)
+		{	if (self.param.georems[k] === i)
+			{	i = k;
+				break;
+			}
+		}
+	}
+	// Envoyer la ieme
+	var grem = self.param.georems[i];
+	if (grem && !grem.id)
+	{	wapp.wait(options.info || "Envoi en cours...");
+		self.postGeorem ( grem, function(resp,e)
+		{	if (e)
+			{	wapp.wait(false);
+				wapp.message ("Impossible d'envoyer la remontée<br/><i>Erreur : "+e.status+" - "+e.statusText+"</i>",
+						"Connexion", 
+						{ ok:"ok", connect: (e.status===401) ? "Se connecter...":undefined },
+						function(b)
+						{	if (b=="connect") wapp.ripart.connectDialog();
+						});
+				self.saveParam();
+				self.onUpdate();
+			}
+			else
+			{	wapp.notification ("Remontée envoyée au serveur ("+resp.id+").");
+				self.param.georems[i] = resp;
+				if (grem.photo) self.param.georems[i].photo = grem.photo;
+				// Post Next
+				if (typeof(options.cback)=='function') options.cback();
+				else wapp.wait(false);
+				self.saveParam();
+				self.onUpdate();
+			}
+		});
+	}
+};
+
+/** Nombre de georems en attente
+*/
+RIPart.prototype.countLocalRems = function()
+{	var c = 0;
+	for (var i=0; i<this.param.georems.length; i++)
+	{	if (!this.param.georems[i].id) c++;
+	}
+	return c;
+};
+
+/** Mettre a jour les remontees
+*/
+RIPart.prototype.updateLocalRems = function()
+{	var self = this;
+	var n = 0;
+	var nb = self.param.georems.length;
+
+	function next()
+	{	// Ended ?
+		if (n == self.param.georems.length) 
+		{	wapp.wait(false);
+			return;
+		}
+		// Send next
+		for (var i=n; i<self.param.georems.length; i++)
+		{	var grem = self.param.georems[i];
+			n++;
+			if (grem.id)
+			{	self.updateLocalRem (i, { info: "Mise à jour ("+n+"/"+nb+")", cback: next });
+				break;
+			}
+		}
+	}
+
+	// Start...
+	next();
+};
+
+/** Mettre a jour une remontee
+*/
+RIPart.prototype.updateLocalRem = function(i, options)
+{	var self = this;
+	if (!options) options = {};
+	
+	// Chercher l'indice correspondant a une remontee
+	if (typeof(i) != 'number')
+	{	for (var k=0; k<this.param.georems.length; k++)
+		{	if (this.param.georems[k] === i)
+			{	i = k;
+				break;
+			}
+		}
+	}
+
+	var grem = this.param.georems[i];
+	if (grem && grem.id)
+	{	wapp.wait(options.info || "Opération en cours...");
+		self.getGeorem (grem.id, function(resp, e)
+		{	if (e)
+			{	wapp.wait(false);
+				wapp.message ("Impossible d'accéder à la remontée<br/><i>Erreur : "+e.status+" - "+e.statusText+"</i>",
+						"Connexion", 
+						{ ok:"ok", connect: (e.status===401) ? "Se connecter...":undefined },
+						function(b)
+						{	if (b=="connect") wapp.ripart.connectDialog();
+						});
+				self.saveParam();
+				self.onUpdate();
+			}
+			else
+			{	// wapp.notification ("Remontée mise à jour ("+resp.id+").");
+				self.param.georems[i] = resp;
+				if (grem.photo) self.param.georems[i].photo = grem.photo;
+				// Post Next
+				if (typeof(options.cback)=='function') options.cback();
+				else wapp.wait(false);
+				self.saveParam();
+				self.onUpdate();
+			}
+		});
+	}
+};
+
+/** Supprimer les remontees + dialogue de confirmation / type de réponse
+*/
+RIPart.prototype.delLocalRems = function()
+{	var self = this;
+	wapp.selectDialog (
+			{	all: "Toutes les remontées envoyées", 
+				rep: "Les remontées ayant eu une réponse",
+				close: "Seulement les remontées closes"
+			}, 
+			"", 
+			function(v)
+			{	var mess;
+				switch (v)
+				{	case "all": mess = "Vous allez supprimer toutes les remontées envoyées.";
+						break;
+					case "rep": mess = "Vous allez supprimer toutes les remontées ayant eu au moins une réponse.";
+						break;
+					case "close": mess = "Vous allez supprimer toutes les remontées closes.";
+						break;
+				}
+				wapp.message ( mess, "Suppression",
+				{	ok: "confirmer",
+					cancel: "annuler"
+				},
+				function (b)
+				{	if (b=="ok")
+					{	var n = 0;
+						var t = { 
+							submit:["submit"], 
+							pending:["pending","pending0","pending1"], 
+							close:["valid","valid0","reject","reject0"] 
+						};
+						t.rep = t.pending.concat(t.close);
+						t.all = t.rep.concat(t.submit);
+						for (var i=self.param.georems.length-1; i>=0; i--)
+						{	var statut = self.param.georems[i].statut;
+							if (statut && $.inArray(statut, t[v])>=0)
+							{	self.delLocalRem(i);
+							}
+						}
+					}
+				});
+			}, 
+			{	title: "Supprimer...",
+				confirm: true
+			} 
+		);
+};
+
+
+/** Afficher l'id de connexion dans les options
+*/
+RIPart.prototype.onUpdate = function()
+{	var self = this;
+
+	// Id connexion
+	if (this.isConnected()) 
+	{	this.infoElement
+			.html(this.param.user+" / &#x25cf;&#x25cf;&#x25cf;&#x25cf;&#x25cf;")
+			.parent().addClass("connected");
+		this.formElement.addClass("connected");
+	}
+	else 
+	{	this.infoElement.parent().removeClass("connected");
+		this.formElement.removeClass("connected");
+	}
+
+	// Affichage des groupes
+	var profil = this.param.profil || {};
+	$("img", this.profilElement).attr("src", profil.logo || "");
+	$(".title", this.profilElement).text(profil.titre || "");
+
+	// Gestion de la liste des remontees
+	var c = this.countLocalRems();
+	this.countElement.text(c);
+	if (c) this.countElement.parent().removeClass("hidden");
+	else this.countElement.parent().addClass("hidden");
+
+	// Affichage de la liste
+	var ul = $('ul', this.listElement).html("");
+	var grems = this.param.georems;
+	if (!grems.length) $(".nogeorem", this.listElement).show();
+	else
+	{	$(".nogeorem", this.listElement).hide();
+		for (var i=0; i<grems.length; i++)
+		{	li = $('<li>').html(this.listElementTemplate)
+				.addClass(grems[i].statut)
+				.appendTo(ul)
+				.data("grem", grems[i])
+				// Show georem page
+				.on ("click", function(e)
+				{	self.georemShow($(this).data("grem"));
+				});
+			wapp.dataAttributes(li, grems[i]);
+		}
+	}
+};
+
+/** Afficher les info de la remontee
+*/
+RIPart.prototype.georemShow = function(grem)
+{	var page = this.georemPage.data('grem', grem);
+	wapp.showPage(this.georemPage.attr("id"));
+	// Affichage
+	wapp.dataAttributes(page, grem);
+	// Gestion de la photo
+	if (grem.photo) $(".photo", page).attr('src', grem.photo).show();
+	else $(".photo", page).attr('src', "").hide();
+	if (grem.id) 
+	{	$(".send", page).hide();
+	}
+	else 
+	{	$(".send", page).show();
+	}
+	// Centrer la carte
+	wapp.map.getView().setCenterAtLonlat ([ grem.lon, grem.lat ]);
+};
+
+
+
+/** Envoyer la remontee courante
+*/
+RIPart.prototype.postCurrentRem = function()
+{	this.postLocalRem (this.georemPage.data('grem'));
+};
+
+/** Supprimer la remontée courante
+*/
+RIPart.prototype.delCurrentRem = function()
+{	wapp.hidePage();
+	this.delLocalRem (this.georemPage.data('grem'));
+}
+
+/** Dialog de connexion a l'espace collaboratif
+* @param {function} onShow a function called when the dialog is shown
+* @param {function} onQuit a function called when the dialog is closed
+*/
+RIPart.prototype.connectDialog = function (onShow, onQuit)
+{	var self = this;
+	var tp = CordovApp.template('dialog-connectripart');
+	var nom = $(".nom",tp);
+	var pwd = $(".pwd",tp);
+	wapp.dialog.show ( tp, 
+		{	title:"Connexion", 
+			classe: "connect", 
+			buttons: { cancel:"Annuler", deconnect: "Déconnexion", connect:"Connexion"},
+			callback: function(bt)
+			{	if (bt == "connect")
+				{	self.param.user = nom.val();
+					self.param.pwd = pwd.val();
+					wapp.wait("Connection au serveur...");
+					self.setUser (self.param.user, self.param.pwd);
+					self.checkUserInfo();
+				}
+				else if (bt=="deconnect")
+				{	self.param.user = self.param.pwd = null;
+					self.param.profil = null;
+					self.saveParam();
+				}
+				if (typeof (onQuit) == "function") onQuit({ dialog:tp, target: this });
+				self.onUpdate();
+			}
+		});
+	nom.focus().val(this.param.user);
+	pwd.val(this.param.pwd)
+	if (typeof (onShow) == "function") onShow({ dialog:tp, target: this });
+	self.saveParam();
+};
+
+/** Check user info : getUserInfo + save informations
+*/
+RIPart.prototype.checkUserInfo = function(success, fail)
+{	var self = this;
+
+	if (typeof(success) != "function")
+	{	success = function()
+		{	wapp.notification(_T("Connecté au service..."),"2s")
+		}
+	}
+	if (typeof(fail) != "function")
+	{	fail = function(error)
+		{	switch (error.status)
+			{	case 401: 
+					wapp.alert ("Utilisateur inconnu.","Accès interdit");
+					break;
+				default: 
+					wapp.alert (error.statusText);
+					break;
+			}
+		}
+	}
+
+	this.getUserInfo (function(rep, error)
+	{	wapp.wait(false);
+		if (error)
+		{	rep = {};
+			self.param.profil = null;
+			fail(error);
+		}
+		else 
+		{	self.param.profil = rep.profil;
+			self.param.groupes = rep.groupes;
+			self.param.themes = rep.themes;
+			success(rep);
+		}
+		self.saveParam();
+	});
+};
+
+/** On a deja une connexion
+*/
+RIPart.prototype.isConnected = function()
+{	return (this.param && this.param.profil) ? true:false;
+};
+
+/** Gestion de la page de signalement
+*/
+RIPart.prototype.showFormulaire = function(b)
+{	if (b===false)
+	{	this.formElement.removeClass('formulaire');
+		this.overlay.setVisible(false);
+	}
+	else
+	{	this.formElement.addClass('formulaire');
+		$('.formulaire .trackPosition', this.formElement).removeClass("tracking");
+		this.onShow(this.formElement);
+		
+		var theme = $('[data-input="select"][data-param="theme"]', this.formElement);
+		$('[data-input-role="option"]', theme).remove();
+		for (var i=0; i<this.param.themes.length; i++)
+		{	$("<div>").attr("data-input-role","option")
+					.attr("data-val", this.param.themes[i].id_groupe+"::"+this.param.themes[i].nom)
+					.text(this.param.themes[i].nom)
+			.appendTo(theme);
+		}
+		wapp.selectInput(theme);
+
+		var lon = Number($(".lon", this.formElement).val());
+		var lat = Number($(".lat", this.formElement).val());
+		pos = ol.proj.transform([lon, lat], 'EPSG:4326', wapp.map.getView().getProjection());
+		this.overlay.getSource().clear();
+		this.overlay.getSource().addFeature( new ol.Feature (new ol.geom.Point(pos)));
+		this.overlay.setVisible(true);
+		wapp.map.getView().setCenter(pos);
+	}
+	this.target.setVisible(false);
+	$('body').removeClass("trackingGeorem");
+};
+RIPart.prototype.cancelFormulaire = function(b)
+{	this.showFormulaire (false);
+}
+
+/** Take a photo using the camera
+*/
+RIPart.prototype.photo = function()
+{	var self = this;
+	var photoElt = $(".photo", this.formElement);
+	wapp.getPicture(function(url, button)
+	{	if (url) 
+		{	$("img", photoElt).attr("src",url+"?"+new Date().getTime())
+					.data("photo",url)
+					.show();
+			$(".fa-stack", photoElt).hide();
+		}
+		else
+		{	if (button=='del')
+			{	$("img", photoElt).attr("src","")
+						.data("photo",false)
+						.hide();
+				$(".fa-stack", photoElt).show();
+			}
+		}
+	},
+	null,
+	{	prompt: "Ajouter une photo",
+		message: this.mesagePhoto,
+		name: "TMP/photo.jpg",
+		buttons: $("img", photoElt).attr("src") ? { del:"supprimer", cancel:"annuler" } : false,
+		targetWidth: self.param.width || 1200,
+		targetHeight: self.param.heigth || 1200,
+		correctOrientation: (self.param.imgOrient!==false)
+	});
+};

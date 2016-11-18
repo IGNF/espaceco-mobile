@@ -1,0 +1,38 @@
+﻿<div data-role="header" data-back-button="true">Signalements...</div>
+
+<div data-role="content">
+
+	<h3 class="nogeorem">Aucune signalement en cours...</h3>
+	
+	<div class="buttons">
+		<button class="button big-button georemsCount" onclick="wapp.ripart.postLocalRems();">
+			<i class="fa fa-paper-plane"></i>
+			Envoyer les remontées en attente (<span></span>)...
+		</button><br/>
+		<button class="button big-button" onclick="wapp.ripart.updateLocalRems();">
+			<i class="fa fa-refresh"></i>
+			Mettre à jour...
+		</button>
+		<button class="button big-button" onclick="wapp.ripart.delLocalRems();">
+			<i class="fa fa-trash"></i>
+			Supprimer...
+		</button>
+	</div>
+
+	<!-- Liste des remontees -->
+	<ul data-role="list">
+		<li data-role="template">
+			<i class="photo fa fa-camera" data-attr="photo" data-nnull="1"></i>
+			<div data-attr="date" style="float:right"></div>
+			<div class="info">
+				<span data-attr="id" data-prefix="#"></span>
+				<span data-attr="commune" data-prefix=" - "></span>
+				<span data-attr="id_dep" data-prefix="(" data-suffix=")"></span>
+			</div>
+			<div data-attr="comment"></div>
+			<div class="small" data-attr="themes" data-format-array="%nom% (%groupe%)" data-sep=", "></div>
+			<div><span data-attr="rep" data-array-length="1"></span> réponse(s)</div>
+		</li>
+	</ul>
+</div>
+

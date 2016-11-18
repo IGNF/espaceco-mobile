@@ -1,0 +1,42 @@
+﻿<div data-role="header" data-back-button="true">Options...</div>
+<div data-role="content">
+	<ul>
+		<li class="title">
+			Affichage
+		</li>
+		<li data-input="check" data-param="rotmap">
+			<label>Rotation de la carte </label>
+			<div data-input-role="info">Autoriser la rotation de la carte.</div>
+		</li>
+		<li data-input="check" data-param="zoombt" data-default=true>
+			<label>Boutons de zoom </label>
+			<div data-input-role="info">Afficher les boutons de zoom sur la carte.</div>
+		</li>
+
+<!--
+		<li data-input="text" data-param="toto">
+			<input type="text"/><i class="clear-input"></i>
+			<div data-input-role="info">Entrez un nom.</div>
+		</li>
+-->
+		<li class="title">
+			Remontée d'information
+		</li>
+		<li data-input="custom" class="connect" onclick="wapp.ripart.connectDialog();">
+			<label class="">Identifiant de connexion </label>
+			<div data-input-role="info"><span class="deconnected">Vous n'êtes pas connecté.</span><span class="connected"></span></div>
+		</li>
+
+		<li class="title">
+			Divers
+		</li>
+<!--
+	  
+		<li data-input="button" onclick="wapp.resetHelp();">
+			<label>Réinitialiser l'aide en ligne</label>
+			<div data-input-role="info">L'aide en ligne ne s'affiche qu'une seule fois. 
+			Vous pouvez la réactiver pour un nouveau parcours guidé.</div>
+		</li>
+-->
+	</ul>
+</div>

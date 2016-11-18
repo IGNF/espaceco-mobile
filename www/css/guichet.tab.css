@@ -1,0 +1,104 @@
+/**
+	Tablette horizontale
+*/
+@media screen and (orientation:landscape) and (min-width:1024px) 
+{
+
+#fiche
+{	width:50%;
+}
+
+#fiche label,
+#fiche input,
+#fiche [data-input-role].selected
+{	width:100%;
+}
+
+[data-page="fiche"] #map
+{	width:50%;
+	left:auto;
+}
+[data-page="fiche"] #map .menuCtrl,
+[data-page="fiche"] #map .ol-zoom
+{	display: block;
+}
+
+#layers
+{	width: 50%;
+}
+
+}
+
+/**
+	Tablette verticale
+*/
+@media screen and (orientation:portrait) and (min-height:1024px) {
+
+#fiche
+{	height: 65%;
+	top: 35%;
+}
+
+[data-page="fiche"] #map
+{	height:35%;
+	bottom:auto;
+}
+
+}
+
+/**
+	Smartphone
+*/
+
+#fiche .trackingInfo
+{	display: none;
+	line-height: 2em;
+	padding: 0 0.5em;
+	font-size: 1.5em;
+}
+#fiche .trackingInfo .fa
+{	float: right;
+	line-height: 1.5em;
+	font-size: 1.5em;
+}
+
+@media screen and (orientation:landscape) and (max-width:1023px), 
+screen and (orientation:portrait) and (max-height:1023px) 
+{	
+
+body.trackingGeorem #fiche.visible
+{	-webkit-transform: translate3d(0, 100%, 0)!important;
+	transform: translate3d(0, 100%, 0)!important;
+	margin-top: -3em;
+}
+
+body.trackingGeorem #fiche [data-role="onglet-bt"],
+body.trackingGeorem #fiche [data-role="header"]
+{	display: none;
+}
+body.trackingGeorem #fiche [data-role="onglet"]
+{	top:0;
+}
+body.trackingGeorem #fiche .trackingInfo
+{	display: block;
+}
+
+}
+
+@media screen and (max-width:600px) 
+{
+
+#fiche
+{	font-size: 1.3em;
+}
+#fiche .fiche label,
+#fiche .fiche input,
+#fiche .fiche [data-input-role].selected
+{	width:100%;
+}
+#fiche .fiche ul
+{	margin: 0;
+}
+
+}
+

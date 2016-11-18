@@ -1,0 +1,60 @@
+﻿<div class="noconnect">
+	<p>
+		Merci de vous connecter afin de faire une remontée sur un point géodésique.
+		<br/>
+		<i>
+			Vous devez au préalable vous être inscrit sur
+			<a href="https://qlf-collaboratif.ign.fr/collaboratif-site/login" target="_system">
+				l'Espace Collaboratif</a>
+			pour pouvoir contribuer dans ce groupe.
+		</i>
+	</p>
+	<input class="button big-button" type="button" value="Connexion" onclick="wapp.ripart.connectDialog()" />
+</div>
+
+<div class="connect profil">
+	<span class="title"></span>
+	<img />
+</div>
+
+<div class="connect info">
+	<p>
+
+	</p>
+	<button class="button big-button" onclick="wapp.ripart.showFormulaire();">Faire une remontée</button>
+</div>
+
+<div class="connect formulaire">
+	<ul class="default">
+		<li>
+			Position : 
+			<button class="trackPosition button">
+				<i class="fa fa-map-marker"></i>
+				déplacer
+			</button><br/>
+			<input type="text" class="lon" /> , <input type="text" class="lat" />
+		</li>
+
+		<li data-input="select" data-param="theme">
+			<label>Thème</label>
+		</li>
+
+		<li>
+			Commentaire :
+			<textarea class="comment"></textarea>
+		</li>
+		
+		<li class="photo">
+			<img onclick="wapp.ripart.photo();" />
+			<span class="fa-stack fa-lg" onclick="wapp.ripart.photo();">
+				<i class="fa fa-camera fa-stack-1x"></i>
+				<i class="fa fa-ban fa-stack-2x text-danger"></i>
+			</span>
+		</li>
+	</ul>
+	<div class="buttons">
+		<div data-role="dialogBt" class="cancel" >Annuler</div>
+		<div data-role="dialogBt" class="save" >Enregistrer</div>
+	</div>
+	<br/>
+</div>
