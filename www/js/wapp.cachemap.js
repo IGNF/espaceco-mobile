@@ -1,0 +1,476 @@
+/** Sauvegarde des tuilles en cache
+* @param {} options
+*	- loadPage : "#loadMap" page de chargement avec les boutons de chargement
+*	- listMap: '#cartes [data-list="maps"] ul' liste de cartes
+*/
+var CacheMap = function(options)
+{	var self = this;
+
+	// Carte en cours d'edition
+	var currentMap;
+	var currentId=0;
+
+	this.listMap = $(options.listMap);
+	this.liTemplate = $('[data-role="template"]', this.listMap).html();
+	this.page = this.listMap.closest('[data-role="page"]');
+	this.loadPage = $(options.loadPage);
+
+	if (!wapp.param.options.cacheRoot)
+	{	CordovApp.File.getDirectory('SD', function(d)
+			{	wapp.param.options.cacheRoot = d.nativeURL;
+			});
+	}
+
+	// Initialisation
+	$('.ok', this.loadPage).click(loadMapDlg);
+	$('.cancel', this.loadPage).click(cancelLoadMap);
+	$('.addmap', this.page).click(function() { addCacheMap(); });
+	
+	$(this.page).on("showpage", function(e)
+	{	showWroot();
+	});
+
+	if (!wapp.param.cacheMap) wapp.param.cacheMap=[];
+
+	for (var i=0; i<wapp.param.cacheMap.length; i++) 
+	{	var cmap = wapp.param.cacheMap[i];
+		addCacheMap(cmap);
+	}
+
+	/* Afficher la root dans le bouton
+	*/
+	function showWroot()
+	{	if (wapp.param.options.cacheRoot) $(".cacheroot", self.page).text(CordovApp.File.getFileName(wapp.param.options.cacheRoot.replace(/\/$/,"")));
+		else $(".cacheroot", self.page).text("-");
+	};
+
+	// Carte en cache
+	var CacheMap = function (title)
+	{	this.nom = title;
+		this.length = 0;
+		this.date = (new Date()).toISODateString();
+		this.minZoom = -1;
+		this.maxZoom = -1;
+		this.extent = ol.extent.createEmpty();
+		this.extents = [];
+	};
+
+	/* Recupere un liste des id-fichier de la carte
+	*	@param {CacheMap} smap la carte 
+	*	@param {function} callback fonction qui renvoie la liste et le nombre de fichiers concernes
+	*	@param {} list a modifier, default liste vide
+	*	@param {boolean} remove si true supprime les fichiers de la liste, default false
+	*/
+	function getCacheFiles(smap, callback, list, remove)
+	{	// File list
+		var lfile = {};
+		if (list) lfile = list;
+		if (!smap.extents.length) 
+		{	callback(lfile, 0);
+			return;
+		}
+		var layercache = new ol.layer.Geoportail("GEOGRAPHICALGRIDSYSTEMS.MAPS", { hidpi: false, key: apiKey });
+		var cache = new ol.cache.Tile (layercache);
+		// 
+		var nb = 0;
+		var pos = 0;
+		// Fin de list
+		cache.on("saveend", function(e)
+		{	// Suivant
+			pos++;
+			if (pos<smap.extents.length)
+			{	cache.save(smap.minZoom, smap.maxZoom, smap.extents[pos]);
+			}
+			else
+			{	callback(lfile, nb);
+			}
+		});
+		// Nouveau fichier a traiter
+		cache.on("save", function(e)
+		{	if (remove)
+			{	if (lfile[e.id]) 
+				{	lfile[e.id] = false;
+					nb++;
+				}
+			}
+			else 
+			{	if (!lfile[e.id])
+				{	lfile[e.id] = e;
+					nb++;
+				}
+			}
+		});
+		// Lancer la recherche
+		cache.save(smap.minZoom, smap.maxZoom, smap.extents[pos]);
+	};
+
+	/* Supprimer les fichiers de la carte du cache
+	*	@param {CacheMap} smap carte a supprimer
+	*/
+	function removeCacheFiles(smap)
+	{	// Carte non chargee
+		if (!smap.length) return;
+		// Supprimer les fichiers
+		var todel = {};
+		var pos = 0;
+
+		// Supression des fichiers sur le disque
+		function deleteFiles()
+		{	for (var i in todel)
+			{	if (todel[i]) CordovApp.File.delFile ((wapp.param.options.cacheRoot||"")+"geoportail/"+i);
+			}
+			smap.length = 0;
+			updateCacheMapInfo (smap);
+			wapp.wait(false);
+		}
+
+		// Restaurer les fichiers utilises par d'autres cartes
+		function restoreFiles()
+		{	// Fin de la liste
+			if (pos >= wapp.param.cacheMap.length) 
+			{	setTimeout (deleteFiles, 200);
+			}
+			// Carte en cours
+			else if (wapp.param.cacheMap[pos]===smap || !wapp.param.cacheMap[pos].length)
+			{	// Suivant
+				pos++;
+				restoreFiles();
+			}
+			// Autre carte
+			else
+			{	var cmap = wapp.param.cacheMap[pos];
+				// Ne pas supprimer les fichiers utilises par d'autres
+				getCacheFiles(cmap, function (l)
+					{	todel = l;
+						// suivant
+						pos++;
+						restoreFiles();
+					}, todel, true);
+			}
+		}
+	
+		wapp.wait("Supression...");
+		setTimeout (function()
+		{	// Fichiers de la carte
+			getCacheFiles (smap, function(list)
+			{	todel = list;
+				restoreFiles();
+			});
+		}, 200);
+	};
+
+	/* Supprimer la carte du cache
+	*	@param {CacheMap} smap carte a supprimer
+	*	@param {boolean} noprompt pour sauter l'etape de confirmation
+	*/
+	function removeCacheMap(smap, noprompt)
+	{	wapp.help.hide();
+		// Ask for deletion
+		if (!noprompt)
+		{	wapp.message(_T("Voulez-vous supprimer la carte ?"), _T("Suppression"), [_T("Annuler"),_T("OK")],
+				function (button)
+				{	if (button == "2") 
+					{	removeCacheMap(smap,true);
+					}
+				}
+			);
+			return;
+		}
+		// Remove from params
+		for (var i=0; i<wapp.param.cacheMap.length; i++)
+		{	if (wapp.param.cacheMap[i] === smap) wapp.param.cacheMap.splice(i,1);
+		}
+		// Remove associated list
+		var l = $('li', self.listMap);
+		for (var i=0; i<l.length; i++)
+		{	if ($(l[i]).data("map")===smap)
+			{	l[i].remove();
+				break;
+			}
+		}
+
+		// Remove associated layers
+		var layercache = wapp.map.getLayersByName("cache_"+smap.id);
+		wapp.map.getLayersByName("cache")[0].getLayers().remove(layercache[0]);
+
+		// Remove associated files
+		removeCacheFiles (smap);
+	};
+
+	/* Mettre a jour les info de la carte
+	*	@param {CacheMap} smap carte a afficher
+	*/
+	function updateCacheMapInfo (smap)
+	{	var li, l = $('li', self.listMap);
+		for (var i=0; i<l.length; i++)
+		{	if ($(l[i]).data("map")===smap)
+			{	li = l[i];
+				break;
+			}
+		}
+		if (li)
+		{	$(".info .dalle", li).text(smap.length);
+			$(".info .date", li).text(smap.date);
+		}
+	};
+
+	/* Page de chargement
+	*	@param {CacheMap} smap carte a charger
+	*/
+	function loadCacheMap(smap)
+	{	currentMap = smap;
+		wapp.showPage(self.loadPage.attr('id'));
+	};
+
+	/* Chargement 
+	*/
+	function downloadMap(layercache, min, max, extent)
+	{	// Cache pour le chargement
+		var cache = new ol.cache.Tile (layercache);
+		var nb = 0;
+		var t=[];
+		var path = (wapp.param.options.cacheRoot||"")+"geoportail/";
+		var nberr = 0;
+
+		function differLoad()
+		{	var e = t.pop();
+			if (e)
+			{	wapp.wait("Chargement... "+t.length+"/"+nb);
+				CordovApp.File.dowloadFile (decodeURIComponent(e.url), path+e.id, 
+					function()
+					{	// Suivant
+						differLoad();
+					}, 
+					function(e)
+					{	// wapp.message("Impossible de charger le fichier ("+(t.length+1)+") "+e.code);
+						console.log(e);
+						// Fichier non charge
+						nb--;
+						nberr++;
+						// wapp.wait(false);
+						// Suivant
+						differLoad();
+					},
+					{ });
+			}
+			else
+			{	wapp.wait(false);
+				if (nberr)
+				{	wapp.message(nb+" fichiers chargés.\n"
+						+nberr+" fichier(s) en erreur ou hors zone...",
+						"Chargement", ["OK"]);
+				}
+				else 
+				{	wapp.notification(nb+" fichiers chargés.");
+				}
+				currentMap.minZoom = min;
+				currentMap.maxZoom = max;
+				if (currentMap.extents.length) 
+				{	currentMap.extent = ol.extent.extend (currentMap.extent, extent);
+				}
+				else currentMap.extent = extent;
+				currentMap.extents.push (extent);
+				currentMap.date = (new Date()).toISODateString();
+				setLayerCache (currentMap);
+				updateCacheMapInfo (currentMap);
+				getCacheFiles (currentMap, function(l,n)
+					{	currentMap.length = n; 
+						updateCacheMapInfo (currentMap);
+					});
+			}
+		};
+
+		cache.on("savestart", function(e)
+		{	wapp.wait("Chargement...");
+		});
+		cache.on("saveend", function(e)
+		{	nb = t.length;
+			differLoad();
+		});
+		cache.on("save", function(e)
+		{	t.push(e);
+		});
+
+		cache.save(min, max, extent);
+	}
+
+	/* Dialogue de chargement d'une carte
+	*/
+	function loadMapDlg()
+	{	var layercache = new ol.layer.Geoportail("GEOGRAPHICALGRIDSYSTEMS.MAPS", { hidpi: false, key: apiKey });
+
+		var cache = new ol.cache.Tile (layercache);
+
+		var extent = wapp.map.getView().calculateExtent(wapp.map.getSize());
+
+		// Dialogue
+		var content = CordovApp.template("dialog-loadmap");
+		var min = $(".min", content).on("change", estimate);
+		var max = $(".max", content).on("change", estimate);
+		// Si une emprise est deja chargee, on ne peux plus changer le zoom
+		if (currentMap.extents.length)
+		{	min.prop("disabled",true);
+			max.prop("disabled",true);
+		}
+		wapp.message (content, "Chargement...", 
+			{ charger:"Charger...",cancel:"Annuler" },
+			function(b)
+			{	if (b=='charger')
+				{	downloadMap (layercache, Number(min.val()), Number(max.val()), extent);
+				}
+			});
+
+		function setSize(s)
+		{	content.removeClass("loading");
+			$(".size", content).text(s.size);
+			$(".length", content).text(s.length);
+			$(".time", content).text(Math.round(s.time/60000)||"-");
+		}
+		function estimate()
+		{	//$(".minimg", content).attr("src", layercache);
+			content.addClass("loading");
+			var vmin = Number(min.val());
+			var vmax = Math.min (18, Number(max.val()));
+			if (vmax-vmin>5) vmax = vmin+5;
+			max.val(vmax);
+			setTimeout(function()
+			{	cache.estimateSize (setSize, vmin, vmax, extent);
+			}, 100);
+		}
+		content.addClass("loading");
+		setTimeout (estimate,500);
+	};
+
+	/* Annule le chargement de carte (ferme la page)
+	*/
+	function cancelLoadMap ()
+	{	wapp.showPage(self.page.attr("id"));
+	};
+
+	/* Procedure de chargement d'une carte
+	*	@param {CacheMap} smap carte a charger
+	*/
+	function setLayerCache (smap)
+	{	// Layer de la carte
+		var layercache = wapp.map.getLayersByName("cache_"+smap.id);
+
+		if (layercache.length)
+		{	// Lecture du cache
+			var cache = new ol.cache.Tile (layercache[0],
+			{	read: function(tile, callback)
+				{	callback ((wapp.param.options.cacheRoot||"")+"geoportail/"+tile.id);
+				}
+			});
+			cache.restore (smap.minZoom, smap.maxZoom, smap.extent);
+		}
+	}
+
+	/* Recuperation d'une carte par son nom
+	*	@param {string} name
+	*/
+	function getCacheMapByName(name)
+	{	for (var i=0, c; c=wapp.param.cacheMap[i]; i++)
+		{	if (c.nom == name) return c;
+		}
+		return null;
+	}
+
+	/* Ajoute une carte a l'application : layer / 
+	*	@param {CacheMap|undefined} smap carte a charger sinon en cree un nouvelle
+	*/
+	function addCacheMap(smap)
+	{	if (!smap)	
+		{	var c = wapp.param.cacheMap.length;
+			while (true)
+			{	c++;
+				if (!getCacheMapByName("Carte #"+c)) break;
+			}
+			smap = new CacheMap ( "Carte #"+c );
+			wapp.param.cacheMap.push(smap);
+		}
+
+		// Visible ?
+		var isVisible = (typeof(smap.id)!="undefined") ? $.inArray("cache_"+smap.id, wapp.param.layers)>=0 : true;
+		smap.id = currentId++;
+
+		// Ajouter un layer a la carte (juste avant les layers vecteur)
+		var layercache = new ol.layer.Geoportail("GEOGRAPHICALGRIDSYSTEMS.MAPS", {hidpi: false, visible: isVisible });
+		layercache.set('title', smap.nom);
+		layercache.set('name', "cache_"+smap.id);
+		wapp.map.getLayersByName("cache")[0].getLayers().push(layercache);
+		setLayerCache (smap);
+
+		// Page d'info
+		var li = $("<li>").html(self.liTemplate)
+					.data("map", smap)
+					.appendTo(self.listMap);
+		$("input",li).val(smap.nom)
+			.on('change', function()
+			{	smap.nom = $(this).val();
+				wapp.map.getLayersByName("cache_"+smap.id)[0].set("title", smap.nom);
+			});
+
+		// Suppression d'une carte
+		$(".fa-trash",li).on ("touchstart click", function(e)
+			{	e.preventDefault();
+				e.stopPropagation();
+				removeCacheMap(smap);
+			});
+		// Choix des tuilles de la carte
+		$(".fa-map-o",li).on ("touchstart click", function(e)
+			{	e.preventDefault();
+				e.stopPropagation();
+				loadCacheMap(smap);
+			});
+		// Zoom to extent
+		$(".tools-locate",li).on ("touchstart click", function(e)
+			{	e.preventDefault();
+				e.stopPropagation();
+				if (smap.extents.length)
+				{	wapp.map.getView().fit(smap.extent, wapp.map.getSize());
+					wapp.hidePage();
+				}
+			});
+	
+		// Gestion de l'aide
+		if (wapp.getPage()==self.page.attr('id')) wapp.help.show("cartes_load");
+	
+		updateCacheMapInfo (smap);
+
+	};
+
+
+	/** Choix du repertoire de travail 
+	*	Le repertoire est stocke dans la variable 'wapp.param.options.cacheRoot'
+	*/
+	this.getCacheDir = function()
+	{	wapp.fileDialog(wapp.param.options.cacheRoot||'SD', 
+			function(url)
+			{	CordovApp.File.testWriteDir(url,
+					function()
+					{	wapp.message(url,"Répertoire de travail");
+						wapp.param.options.cacheRoot = url;
+						showWroot();
+					},
+					function()
+					{	CordovApp.File.getApplicationDirectory(url,
+							function (dir)
+							{	wapp.message ("Répertoire non accesible en écriture.<br/>"
+									+"Voulez-vous utiliser le répertoire : "+dir.nativeURL,
+									"Répertoire de travail",
+									{ok:"Oui",cancel:"Annuler"},
+									function(button)
+									{	if (button='ok') wapp.param.options.cacheRoot = dir.nativeURL;
+										showWroot();
+									});
+							},
+							function()
+							{	wapp.message ("Impossible d'écrire sur ce répertoire...","Répertoire de travail");
+							});
+					});
+			}, 
+			{ dir:true }
+		);
+	};
+
+};
