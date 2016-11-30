@@ -46,18 +46,18 @@ CordovApp.template = function (tmp, async)
 		{	type: "GET",
 			dataType: 'text',
 			url: url,
-			async: async ? true : false
-		})
-		// OK
-		.success (function(resp) 
-		{	templates[tmp] = resp; 
-			if (async) async (getData());
-		})
-		// Ooops
-		.fail(function()
-		{	console.log ("ERROR Loading template "+tmp);
-			if (async) async (getData());
-		})
+			async: async ? true : false,
+			// OK
+			success: function(resp) 
+			{	templates[tmp] = resp; 
+				if (async) async (getData());
+			},
+			// Ooops
+			error: function()
+			{	console.log ("ERROR Loading template "+tmp);
+				if (async) async (getData());
+			}
+		});
 	}
 	else
 	{	if (async) async (getData());

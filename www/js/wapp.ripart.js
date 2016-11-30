@@ -8,7 +8,8 @@ options:
 - profilElement : Affichage du profil de contribution : .profil
 - georemPage : Page d'affichage de la remontee : #georem
 - onShow {function} afficher le formulaire
-- formatGeorem {function} formater une georem avant envoi
+- onLocate {function} callback lors d'une localisation
+- formatGeorem {function} formater une georem avant envoi, recoit un georem + formulaire, renvoi true si ok pour la sauvegarde
 - messagePhoto {String} Message pour la prise de photo (text/html)
 */
 RIPart.prototype.initialize = function(options)
@@ -28,7 +29,8 @@ RIPart.prototype.initialize = function(options)
 
 	// Champs preremplis
 	this.onShow = options.onShow || function(){};
-	this.formatGeorem = options.formatGeorem || function(){};
+	this.onLocate = options.onLocate || function(){};
+	this.formatGeorem = options.formatGeorem || function(){ return true; };
 
 	// Recuperation de l'utilisateur
 	if (this.param.user) this.setUser (this.param.user, this.param.pwd);
@@ -39,20 +41,40 @@ RIPart.prototype.initialize = function(options)
 			visible: false,
 			style: [
 				new ol.style.Style(
-				{	image: new ol.style.Circle(
-					{	stroke: new ol.style.Stroke({ color:[255,255,255, 0.5], width:6 }), 
-						radius:15 
-					})
+				{	image: new ol.style.Circle({ stroke: new ol.style.Stroke({ color:[255,255,255, 0.5], width:6 }), radius:15 }),
+					snapToPixel: true
 				}),
 				new ol.style.Style(
-				{	image: new ol.style.Circle(
-					{	stroke: new ol.style.Stroke({ color:[0, 153, 255, 1], width:3 }), 
-						radius:15 
-					}),
+				{	image: new ol.style.Circle({ stroke: new ol.style.Stroke({ color:[0, 153, 255, 1], width:3 }), radius:15 }),
 					snapToPixel: true
 				})]
 		});
 	this.overlay.setMap(wapp.map);
+
+	// Gestion du GPS
+	this.geolocation = new ol.Geolocation(/** @type {olx.GeolocationOptions} */ 
+	({	projection: "EPSG:4326", //wapp.map.getView().getProjection(),
+		trackingOptions: 
+		{	maximumAge: 10000,
+			enableHighAccuracy: true,
+			timeout: 600000
+		}
+	}));
+	this.geolocation.on('change', function(e) 
+		{	this.hasLocation = true; 
+			if (typeof (this.onLocate) =="function") 
+			{	this.onLocate.call (this,
+					{	position: this.geolocation.getPosition(),
+						accuracy: this.geolocation.getAccuracy(),
+						// accuracyGeometry: this.geolocation.getAccuracyGeometry(),
+						altitude: this.geolocation.getAltitude(),
+						altitudeAccuracy: this.geolocation.getAltitudeAccuracy(),
+						heading: this.geolocation.getHeading() || 0,
+						speed: this.geolocation.getSpeed() || 0
+					});
+			}
+		}, this);
+	this.hasLocation = false;
 
 	// Gestion du formulaire de signalement
 	var formulaire = this.formElement;
@@ -60,21 +82,21 @@ RIPart.prototype.initialize = function(options)
 	{	self.cancelFormulaire(false);
 	});
 
+	// Tracking du centre
 	this.target = new ol.control.Target({ visible: false });
 	wapp.map.addControl (this.target);
 	this.showFormulaire(false);
 
-	// Tracking du centre
 	$('.trackingInfo', formulaire.parent()).click(function()
 	{	self.target.setVisible(false);
 		$('body').removeClass("trackingGeorem");
 	});
-	$('.formulaire .trackPosition', formulaire).click(function()
+	$('.formulaire .movePosition', formulaire).click(function()
 	{	var track = !self.target.getVisible();
 		if (track) 
 		{	$('body').addClass("trackingGeorem");
-			var lon = Number($(".lon", formulaire).val());
-			var lat = Number($(".lat", formulaire).val());
+			var lon = Number($("input.lon", formulaire).val());
+			var lat = Number($("input.lat", formulaire).val());
 			wapp.map.getView().setCenterAtLonlat([ lon, lat ]);
 		}
 		else 
@@ -89,45 +111,13 @@ RIPart.prototype.initialize = function(options)
 			self.overlay.getSource().addFeature( new ol.Feature (new ol.geom.Point(pos)));
 			self.overlay.setVisible(true);
 			pos = ol.proj.transform(pos, wapp.map.getView().getProjection(),'EPSG:4326');
-			$(".lon", formulaire).val(pos[0]);
-			$(".lat", formulaire).val(pos[1]);
+			$("input.lon", formulaire).val(pos[0]);
+			$("input.lat", formulaire).val(pos[1]);
 		}
 	}, this);
 	
 	// Enregistement d'une remontee
-	$('.formulaire .save', formulaire).click(function()
-	{	var form = $(this).closest(".formulaire");
-		// Preformatage
-		var georem = 
-		{	lon: Number($(".lon", form).val()) || undefined, 
-			lat: Number($(".lat", form).val()) || undefined, 
-			sketch: undefined,
-			comment: $(".comment", form).val(),
-			photo: $('.photo img', form).data('photo') || false
-		}
-		var theme = wapp.selectInputVal($('[data-input="select"][data-param="theme"]', this.formElement));
-		if (theme)
-		{	georem.themes = '"'+theme+'"=>"1"';
-		}
-		georem.id_groupe = self.param.profil.id_groupe;
-		georem.groupe = self.param.profil.id_groupe;
-		self.formatGeorem.call (self, georem, form);
-		// Forcer la date au moment de la remontee
-		georem.date = (new Date()).toISOString().replace(/T|(\..*)/g,' ');
-
-		// Ajouter la remontee
-		wapp.wait("Enregistrement de la remontée");
-		self.saveLocalRem (georem, function(e)
-		{	wapp.wait(false);
-			wapp.notification (e.info);
-			// Reset photo
-			$(".photo img", formulaire).attr("src","")
-						.data("photo",false)
-						.hide();
-			$(".photo .fa-stack", formulaire).show();
-		})
-		self.cancelFormulaire();
-	});
+	$('.formulaire .save', formulaire).click(function(){ self.saveFormulaire ($(this).closest(".formulaire")); });
 	this.onUpdate();
 
 	// Affichage des remontees
@@ -175,6 +165,59 @@ RIPart.prototype.delLocalRem = function(i, options)
 	}
 
 }
+
+/** Sauvegarde de la remontee depuis le formulaire
+*/
+RIPart.prototype.saveFormulaire = function(form)
+{	var self = this;
+	
+	// Preformatage
+	var georem = 
+	{	lon: Number($("input.lon", form).val()), 
+		lat: Number($("input.lat", form).val()), 
+		sketch: undefined,
+		comment: $(".comment", form).val(),
+		photo: $('.photo img', form).data('photo') || false
+	}
+	if (this.hasLocation)
+	{	var pos = this.geolocation.getPosition();
+		georem.plon = pos[0];
+		georem.plat = pos[1];
+		georem.accuracy = this.geolocation.getAccuracy();
+	}
+	var theme = wapp.selectInputVal($('[data-input="select"][data-param="theme"]', this.formElement));
+	if (theme)
+	{	georem.themes = '"'+theme+'"=>"1"';
+	}
+	georem.id_groupe = this.param.profil.id_groupe;
+	georem.groupe = this.param.profil.id_groupe;
+
+	// Formatage utilisateur
+	var isok = this.formatGeorem.call (this, georem, form);
+
+	if (isNaN(georem.lon) || isNaN(georem.lat))
+	{	isok = false;
+		wapp.alert ("aucune coordonnée...");
+	}
+
+	if (isok)
+	{	// Forcer la date au moment de la remontee
+		georem.date = (new Date()).toISOString().replace(/T|(\..*)/g,' ');
+
+		// Ajouter la remontee
+		wapp.wait("Enregistrement de la remontée");
+		this.saveLocalRem (georem, function(e)
+		{	wapp.wait(false);
+			wapp.notification (e.info);
+			// Reset photo
+			$(".photo img", self.formElement).attr("src","")
+						.data("photo",false)
+						.hide();
+			$(".photo .fa-stack", self.formElement).show();
+		})
+		this.cancelFormulaire();
+	}
+};
 
 /** Save a new local rem
 * @param {Object} the rem to save
@@ -595,21 +638,22 @@ RIPart.prototype.showFormulaire = function(b)
 	}
 	else
 	{	this.formElement.addClass('formulaire');
-		$('.formulaire .trackPosition', this.formElement).removeClass("tracking");
+		$('.formulaire .movePosition', this.formElement).removeClass("tracking");
 		this.onShow(this.formElement);
 		
 		var theme = $('[data-input="select"][data-param="theme"]', this.formElement);
 		$('[data-input-role="option"]', theme).remove();
+		$("<div>").attr("data-input-role","option").attr("data-val", "").html("<i>choisissez un thème...</i>").appendTo(theme);
 		for (var i=0; i<this.param.themes.length; i++)
 		{	$("<div>").attr("data-input-role","option")
 					.attr("data-val", this.param.themes[i].id_groupe+"::"+this.param.themes[i].nom)
 					.text(this.param.themes[i].nom)
 			.appendTo(theme);
 		}
-		wapp.selectInput(theme);
+		wapp.selectInput(theme,"");
 
-		var lon = Number($(".lon", this.formElement).val());
-		var lat = Number($(".lat", this.formElement).val());
+		var lon = Number($("input.lon", this.formElement).val());
+		var lat = Number($("input.lat", this.formElement).val());
 		pos = ol.proj.transform([lon, lat], 'EPSG:4326', wapp.map.getView().getProjection());
 		this.overlay.getSource().clear();
 		this.overlay.getSource().addFeature( new ol.Feature (new ol.geom.Point(pos)));
@@ -617,8 +661,13 @@ RIPart.prototype.showFormulaire = function(b)
 		wapp.map.getView().setCenter(pos);
 	}
 	this.target.setVisible(false);
+	this.geolocation.setTracking (b!==false);
+	this.hasLocation = false;
 	$('body').removeClass("trackingGeorem");
 };
+
+/** Cancel formulaire: showFormulaire (false)
+*/
 RIPart.prototype.cancelFormulaire = function(b)
 {	this.showFormulaire (false);
 }

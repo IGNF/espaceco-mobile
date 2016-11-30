@@ -99,6 +99,17 @@ Utilisez la commande suivante pour lancer l'application :
 > cordova run
 ```
 
+### User-Agent / FileTransfert
+--------------
+FileTransfert.java ligne 867
+```
+// Add User-Agent
+connection.setRequestProperty("User-Agent", "useragent");
+
+connection.connect();
+```
+
+
 ### Debugging
 --------------
 

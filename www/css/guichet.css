@@ -68,6 +68,46 @@
 {	top:3em;
 }
 
+/** Loading */
+.loading
+{	opacity: 0.5;
+}
+.loading:before
+{	content:"\f110";
+	font-family: "FontAwesome";
+	font-size: 3em;
+	position: absolute;
+	right: 0.5em;
+	top: 0.5em;
+	animation: 1s steps(8) 0s normal none infinite running fa-spin;
+}
+
+/** A propos */
+#apropos p
+{	text-align:justify;
+}
+#apropos img.bandeau
+{	position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+	margin:-1em 0;
+	min-width: Calc(100% + 2em);
+    min-height: 200px;
+}
+
+/** warning */
+.warning-container
+{	background-image: repeating-linear-gradient(-45deg, rgb(255, 221, 0), rgb(255, 221, 0) 11px, rgb(136, 136, 136) 10px, rgb(136, 136, 136) 20px); 
+	background-size: 28px 28px; 
+	padding: 0.5em; 
+	margin: 1em 0.5em; 
+	display: block;
+}
+.warning-container > div
+{	padding:0.5em; 
+	background: #fff;
+}
+
 /** Boutton */
 .button
 {	background-color: #369;
@@ -217,7 +257,7 @@
 {	margin:10px 0;
 	width:100%;
 }
-#layerswitcher .layerExtent,
+
 #layerswitcher .layerup,
 #layerswitcher .layerdown
 {	display: none;
@@ -338,6 +378,30 @@
 	font-size: 1.5em;
 	color: #369;
 }
+
+#cartes ul li input
+{	background-color: transparent;
+	width: 80%;
+	width: calc(100% - 7em);
+	font-weight: bold;
+	margin-top:0.7em;
+}
+
+#cartes ul li .fa
+{	font-size: 1em;
+	margin: 0.2em 0 0;
+	padding: 0.5em 0;
+	text-align: center;
+	width: 2em;
+}
+#cartes ul li > .fa
+{	float: left;
+}
+#cartes .menu
+{	float:right;
+	z-index:1;
+}
+
 
 /* Template pour la creation*/
 [data-role="template"]
@@ -608,12 +672,12 @@
 {	padding:0 1em 0 0;
 }
 
-#fiche .signaler .trackPosition 
+#fiche .signaler .movePosition 
 {	background: #369;
 	color: #fff;
 	padding: 0.3em 0.5em;
 }
-body.trackingGeorem #fiche .signaler .trackPosition
+body.trackingGeorem #fiche .signaler .movePosition
 {	background: #396;
 }
 

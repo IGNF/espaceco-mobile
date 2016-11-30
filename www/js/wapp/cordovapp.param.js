@@ -6,10 +6,15 @@
 	@require: JQuery
 */
 
+// Transform date to ISODateString
+Date.prototype.toISODateString = function()
+{	return this.toISOString().replace(/T.*/,"")
+};
+
 /** Connect parameters to data-input div 
-* @param {object} a jQuery element that contains data-input
-* @param {object} a param objet with key corresponding to data-param
-* @param {onchage} a function that trigger change on params
+* @param {object} elt jQuery element that contains data-input
+* @param {object} param objet with key corresponding to data-param
+* @param {function} onchange a function that triggers change on params
 * @return {Object} to retrieve param and to reflect changes on values
 */
 CordovApp.prototype.setParamInput = function(elt, param, onchange)
@@ -167,7 +172,9 @@ CordovApp.prototype.selectInputVal = function(input)
 {	return $("[data-input-role].selected", input).data("val");
 }
 
-/** Set data-attr according to f
+/** Set data-attr according to a list of attribute value
+* @param {object} element a jQuery element that contains data-attr
+* @param {object} attr attributes to display in element
 */
 CordovApp.prototype.dataAttributes = function (element, attr)
 {	// console.log(attr);
@@ -175,8 +182,16 @@ CordovApp.prototype.dataAttributes = function (element, attr)
 	element = $(element);
 
 	function setAttr(obj, a)
-	{	if (!a && obj.data("default")) a = obj.data("default");
-		if (a)
+	{	// Default value
+		if (!a && obj.data("default")) 
+		{	if (obj.data("br")) 
+			{	obj.html(obj.data("default").replace(/\n/g,"<br/>"));
+			}
+			else 
+			{	obj.text(obj.data("default"));
+			}
+		}
+		else if (a)
 		{	// Conditionnal display
 			if (obj.data("nnull")) obj.show();
 			else if (obj.data("null")) obj.hide();
@@ -260,77 +275,3 @@ CordovApp.prototype.dataAttributes = function (element, attr)
 		$(this).attr("data-class",att+"="+attr[att]);
 	});
 };
-/*
-$.fn.dataAttributes = function(attr)
-{	// console.log(attr);
-
-	function setAttr(obj, a)
-	{	if (!a && obj.data("default")) a = obj.data("default");
-		if (a)
-		{	if (obj.data("nnull")) obj.show();
-			else if (obj.data("null")) obj.hide();
-			else if (obj.data("match"))
-			{	var rex = new RegExp(obj.data("match"));
-				if (rex.test(a)) obj.show();
-				else obj.hide();
-			}
-			else
-			{	if (obj.data("format"))
-				{	switch (obj.data("format"))
-					{	case "date:year":
-							var y = a.split('/')[2];
-							if (y) a = y;
-							break;
-						default: break;
-					}
-				}
-				var eq, neq;
-				if (obj.data("eq")) eq = attr[obj.data("eq")];
-				if (obj.data("neq")) neq = attr[obj.data("neq")];
-				if (neq || eq) 
-				{	if ((neq && a!=neq) || (eq && a==eq)) obj.show();
-					else obj.hide();
-				}
-				else 
-				{	if (obj.data("br")) 
-					{	obj.html((obj.data("prefix") || "") + a.replace(/\n/g,"<br/>") + (obj.data("suffix") || "") );
-					}
-					else 
-					{	obj.text((obj.data("prefix") || "") + a + (obj.data("suffix") || "") );
-					}
-				}
-			}
-		}
-		else 
-		{	if (obj.data("nnull") || obj.data("eq") || obj.data("neq")) obj.hide();
-			else if (obj.data("match")) obj.hide();
-			else if (obj.data("null")) obj.show();
-			else obj.text("");
-		}
-	}
-	
-	// Set url
-	$('a[data-href]', this).each(function()
-	{	var ref = $(this).data('href');
-		$(this).attr("href", attr[ref]);
-	});
-	// Set Attributes
-	$('[data-attr]', this).each(function()
-	{	var att = $(this).data("attr");
-		setAttr($(this), attr[att]);
-	});
-	// Set attributes / codes
-	$('[data-code]', this).each(function()
-	{	var att = $(this).data("code");
-		if (wapp.codes[att] && attr[att])
-			setAttr($(this), wapp.codes[att][attr[att]]);
-	});
-	// Set class / attributes 
-	$('[data-class]', this).each(function()
-	{	var att = $(this).data("class").split("=");
-		att = att[0];
-		$(this).attr("data-class",att+"="+attr[att]);
-	});
-	return this;
-}
-*/

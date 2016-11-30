@@ -1,12 +1,12 @@
 ﻿<div class="noconnect">
 	<p>
-		Merci de vous connecter afin de faire une remontée sur un point géodésique.
+		Merci de vous connecter afin de faire une remontée.
 		<br/>
 		<i>
 			Vous devez au préalable vous être inscrit sur
 			<a href="https://qlf-collaboratif.ign.fr/collaboratif-site/login" target="_system">
 				l'Espace Collaboratif</a>
-			pour pouvoir contribuer dans ce groupe.
+			pour pouvoir effectuer une contribution.
 		</i>
 	</p>
 	<input class="button big-button" type="button" value="Connexion" onclick="wapp.ripart.connectDialog()" />
@@ -21,16 +21,17 @@
 	<p>
 
 	</p>
-	<button class="button big-button" onclick="wapp.ripart.showFormulaire();">Faire une remontée</button>
+	<div class="buttons" style=" text-align: center;">
+		<button class="button big-button" onclick="wapp.ripart.showFormulaire();">Faire une remontée</button>
+	</div>
 </div>
 
 <div class="connect formulaire">
 	<ul class="default">
 		<li>
 			Position : 
-			<button class="trackPosition button">
-				<i class="fa fa-map-marker"></i>
-				déplacer
+			<button class="movePosition button">
+				<i class="fa fa-map-marker"></i>&nbsp; déplacer...
 			</button><br/>
 			<input type="text" class="lon" /> , <input type="text" class="lat" />
 		</li>

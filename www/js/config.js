@@ -6,7 +6,7 @@
 var apiKey = "mpzzllk4b1eykv4kuw253w02";
 
 // App version
-CordovApp.prototype.version = "0.03";
+CordovApp.prototype.version = "0.04";
 
 CordovApp.prototype.guichets = 
 {	haies: { feature: 'haies', database: "haies_gers" },
@@ -17,8 +17,4 @@ CordovApp.prototype.guichets =
 	sdis86: { feature: 'hydrants_sdis86', database: "sdis86" },
 };
 
-// Transform date to ISODateString
-Date.prototype.toISODateString = function()
-{	return this.toISOString().replace(/T.*/,"")
-};
 

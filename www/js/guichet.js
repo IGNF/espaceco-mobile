@@ -41,6 +41,7 @@ var wapp = new CordovApp(
 
 		// Layers (set hdpi:false to enable tile cache)
 		var layers = this.layers =  [
+				// Fonds de plan
 				new ol.layer.Group(
 				{	name:"Fond de plan",
 					layers:
@@ -49,6 +50,7 @@ var wapp = new CordovApp(
 						new	ol.layer.Geoportail("ORTHOIMAGERY.ORTHOPHOTOS", {baseLayer: true, hidpi: false, visible: false })
 					]
 				}),
+				// Layer pour l'affichage du cache
 				new ol.layer.Group({ title:"Mes cartes", name: "cache" }),
 				new ol.layer.Geoportail("CADASTRALPARCELS.PARCELS", { hidpi: false, visible: false }),
 				new ol.layer.Geoportail("TRANSPORTNETWORKS.ROADS", { hidpi: false, visible: false })
@@ -148,6 +150,9 @@ var wapp = new CordovApp(
 		this.map.addInteraction(this.select);
 		this.select.on("select", this.onSelect, this);
 
+		// Gestion du cache
+		this.cache = new CacheMap({ loadPage: "#loadMap", listMap: '#cartes [data-list="maps"] ul' });
+
 		// Brancher les remontees
 		this.ripart = new RIPart(
 			{	infoElement: '#options .connect [data-input-role="info"] span.connected',
@@ -158,14 +163,26 @@ var wapp = new CordovApp(
 				{	var f = wapp.select.getFeatures().item(0);
 					var p = f ? f.getGeometry().getCoordinates() : wapp.map.getView().getCenter();
 					p = ol.proj.transform(p, wapp.map.getView().getProjection(),'EPSG:4326');
-					$(".lon", form).val(p[0].toFixed(8));
-					$(".lat", form).val(p[1].toFixed(8));
+					$("input.lon", form).val(p[0].toFixed(8));
+					$("input.lat", form).val(p[1].toFixed(8));
 					wapp.select.setActive(false);
 				}, 
 				formatGeorem: function(georem, form)
 				{	var f = wapp.select.getFeatures().item(0);
 					if (f) georem.sketch = wapp.ripart.feature2sketch(f, wapp.map.getView().getProjection());
+					if (!georem.comment) 
+					{	wapp.alert ("Merci de laisser un commentaire...");
+						return false;
+					}
+					return true;
+				},
+				/*
+				onLocate : function(loc)
+				{	$("span.lon", this.formElement).text(loc.position[0].toFixed(7));
+					$("span.lat", this.formElement).text(loc.position[1].toFixed(7));
+					$("span.accuracy", this.formElement).text(loc.accuracy);
 				}
+				*/
 			});
 		this.ripart.setServiceUrl("https://qlf-collaboratif.ign.fr/collaboratif-develop/api/");
 
@@ -174,8 +191,24 @@ var wapp = new CordovApp(
 			if (!$(e.target).hasClass('signaler')) wapp.select.setActive(true);
 		});
 
+		// Affichage des layers
+		this.showLayers(this.param.layers);
+
 		// Fin
 		wapp.wait(false);
+	},
+
+	/** Affichage des layers
+	*/
+	showLayers: function(vislayers, layers)
+	{	if (vislayers && vislayers.length) 
+		{	if (!layers) layers = this.map.getLayers().getArray();
+			for (var i=0; i<layers.length; i++)
+			{	if ($.inArray(layers[i].get('name'), vislayers)>=0) layers[i].setVisible(true);
+				else layers[i].setVisible(false);
+				if (layers[i].getLayers) this.showLayers(vislayers, layers[i].getLayers().getArray());
+			}
+		}
 	},
 
 	/** Enable map rotation
@@ -273,9 +306,18 @@ var wapp = new CordovApp(
 /** Guichet en cours de modification
 */
 wapp.setGuichet = function(fullname)
-{
-	if (!this.ripart.isConnected())
-	{	wapp.alert ("Vous devez être identifié pour pouvoir contribuer...");
+{	if (!this.ripart.isConnected() || !this.ripart.param.pwd)
+	{	wapp.message ("Vous devez être identifié pour accéder à ce guichet...",
+				"Connexion", 
+				{	ok:"ok", connect: "Se connecter..."},
+				function(b)
+				{	if (b=="connect") 
+					{	wapp.ripart.connectDialog (null, function()
+						{	if (wapp.ripart.isConnected() && wapp.ripart.param.pwd)
+								wapp.setGuichet(fullname); 
+						});
+					}
+				});
 		return;
 	}
 

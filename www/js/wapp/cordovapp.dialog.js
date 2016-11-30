@@ -128,7 +128,7 @@ var _internalDialog = new Dialog();
 * @param {Object} options (dialog options
 *	- search {boolean} add a search input
 */
-CordovApp.prototype.selectDialog = function(choice, selected, cback, options)
+CordovApp.prototype.selectDialog = function(choice, valdef, cback, options)
 {	if (!options) options = {};
 	if (typeof(cback) != "function") cback = function(c){ console.log(c); };
 	var content = $("<div>");
@@ -139,7 +139,7 @@ CordovApp.prototype.selectDialog = function(choice, selected, cback, options)
 	{	nb++;
 		$("<li>").html(choice[i])
 			.data("item",i)
-			.addClass(i==selected ? "selected" : "")
+			.addClass(i==valdef ? "selected" : "")
 			.on("click", function(e)
 			{	e.stopPropagation();
 				e.preventDefault();

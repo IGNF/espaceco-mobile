@@ -475,20 +475,20 @@ ol.source.Vector.Webpart.prototype.getDocumentUrl = function (id)
 ol.source.Vector.Webpart.prototype.getDocument = function (id, cback)
 {   if (!id) { cback(); }
     
-    $.ajax({
-        url: this.featureType_.docURI+"get/"+id,
+    $.ajax(
+	{   url: this.featureType_.docURI+"get/"+id,
         type: "GET",
         async: false,
-        data: null
-	})
-    .success(function(results)
-	{   if (!cback) return;
-		if (results.status == 'OK') cback (JSON.parse(results.document));
-		else cback(results);
-    })
-	.fail (function (xhr, status, error)
-	{	if (cback) cback ({ status:status, error:error });
-    });
+        data: null,
+		success: function(results)
+		{   if (!cback) return;
+			if (results.status == 'OK') cback (JSON.parse(results.document));
+			else cback(results);
+		},
+		error: function (xhr, status, error)
+		{	if (cback) cback ({ status:status, error:error });
+		}
+	});
 }
 
 
@@ -505,14 +505,14 @@ ol.source.Vector.Webpart.prototype.addDocument = function (file, cback)
 		type: "POST",
 		data: data,
 		processData: false,  // jQuery don't process data
-		contentType: false   // don't send contentType
-	})
-	.success (function(results)
-	{	if (cback) cback (results);
-	})
-	.fail (function (xhr, status, error)
-	{	if (cback) cback ({ status:status, error:error });
-    });
+		contentType: false,   // don't send contentType
+		success: function(results)
+		{	if (cback) cback (results);
+		},
+		error: function (xhr, status, error)
+		{	if (cback) cback ({ status:status, error:error });
+		}
+	});
 }
 
 /** Gestion des documents
@@ -521,12 +521,12 @@ ol.source.Vector.Webpart.prototype.addDocument = function (file, cback)
 */
 ol.source.Vector.Webpart.prototype.deleteDocument = function (id, cback)
 {	$.ajax(
-	{	url: this.featureType_.docURI+"delete/"+id 
-	})
-    .success(function(results)
-	{   if (cback) cback (results);
-    })
-	.fail (function (xhr, status, error)
-	{	if (cback) cback ({ status:status, error:error });
-    });
+	{	url: this.featureType_.docURI+"delete/"+id,
+		success: function(results)
+		{   if (cback) cback (results);
+		},
+		error: function (xhr, status, error)
+		{	if (cback) cback ({ status:status, error:error });
+		}
+	});
 }
