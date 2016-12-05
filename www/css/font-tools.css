@@ -1,10 +1,7 @@
 @font-face {
   font-family: 'tools';
-  src: url('../fonts/tools.eot?69542399');
-  src: url('../fonts/tools.eot?69542399#iefix') format('embedded-opentype'),
-       url('../fonts/tools.woff?69542399') format('woff'),
-       url('../fonts/tools.ttf?69542399') format('truetype'),
-       url('../fonts/tools.svg?69542399#tools') format('svg');
+  src: url('../fonts/tools.woff2?48629930') format('woff2'),
+       url('../fonts/tools.woff?48629930') format('woff');
   font-weight: normal;
   font-style: normal;
 }
@@ -14,7 +11,7 @@
 @media screen and (-webkit-min-device-pixel-ratio:0) {
   @font-face {
     font-family: 'tools';
-    src: url('../font/tools.svg?69542399#tools') format('svg');
+    src: url('../font/tools.svg?48629930#tools') format('svg');
   }
 }
 */
@@ -54,23 +51,27 @@
   /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */
 }
  
-.tools-drawpoly:before { content: '\e800'; } /* '' */
-.tools-snap:before { content: '\e801'; } /* '' */
-.tools-layer:before { content: '\e802'; } /* '' */
-.tools-layer2:before { content: '\e803'; } /* '' */
-.tools-layers:before { content: '\e804'; } /* '' */
-.tools-copypony:before { content: '\e805'; } /* '' */
-.tools-color:before { content: '\e806'; } /* '' */
-.tools-measure:before { content: '\e807'; } /* '' */
-.tools-layerdown:before { content: '\e808'; } /* '' */
-.tools-layerup:before { content: '\e809'; } /* '' */
-.tools-locate:before { content: '\e80a'; } /* '' */
-.tools-arrow:before { content: '\e80b'; } /* '' */
-.tools-poi:before { content: '\e80c'; } /* '' */
-.tools-vectorlayer:before { content: '\e80d'; } /* '' */
-.tools-modifypoly:before { content: '\e80e'; } /* '' */
-.tools-drawline:before { content: '\e80f'; } /* '' */
-.tools-drawpolyo:before { content: '\e810'; } /* '' */
-.tools-modifyline:before { content: '\e811'; } /* '' */
-.tools-ol3:before { content: '\e812'; } /* '' */
-.tools-select:before { content: '\e813'; } /* '' */
+.tools-poi:before { content: '\e800'; } /* '' */
+.tools-select:before { content: '\e801'; } /* '' */
+.tools-snap:before { content: '\e802'; } /* '' */
+.tools-vectorlayer:before { content: '\e803'; } /* '' */
+.tools-arrow:before { content: '\e804'; } /* '' */
+.tools-color:before { content: '\e805'; } /* '' */
+.tools-copypoly:before { content: '\e806'; } /* '' */
+.tools-drawline:before { content: '\e807'; } /* '' */
+.tools-drawpoly:before { content: '\e808'; } /* '' */
+.tools-drawpoly-o:before { content: '\e809'; } /* '' */
+.tools-layer:before { content: '\e80a'; } /* '' */
+.tools-layer2:before { content: '\e80b'; } /* '' */
+.tools-layerdown:before { content: '\e80c'; } /* '' */
+.tools-layers:before { content: '\e80d'; } /* '' */
+.tools-layerup:before { content: '\e80e'; } /* '' */
+.tools-locate:before { content: '\e80f'; } /* '' */
+.tools-layerstack:before { content: '\e810'; } /* '' */
+.tools-measure:before { content: '\e811'; } /* '' */
+.tools-measure-line:before { content: '\e812'; } /* '' */
+.tools-measure-poly:before { content: '\e813'; } /* '' */
+.tools-measure-poly-o:before { content: '\e814'; } /* '' */
+.tools-modifyline:before { content: '\e815'; } /* '' */
+.tools-modifypoly:before { content: '\e816'; } /* '' */
+.tools-ol3:before { content: '\e817'; } /* '' */

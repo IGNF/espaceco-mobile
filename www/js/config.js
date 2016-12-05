@@ -16,5 +16,3 @@ CordovApp.prototype.guichets =
 	usages: { feature: 'usages', database: "demo_guichet" },
 	sdis86: { feature: 'hydrants_sdis86', database: "sdis86" },
 };
-
-

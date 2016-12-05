@@ -295,7 +295,7 @@ var RIPart = function(options)
 		else if (params.features)
 		{	post.sketch = this.feature2sketch(params.features, params.proj);
 		}
-		if (params.id_groupe) post.id_groupe = params.id_groupe;
+		if (params.id_groupe) post.group = params.id_groupe;
 		if (params.themes) post.attributes = params.themes;
 		if (params.insee) post.insee = params.insee;
 		if (params.protocol) post.protocol = params.protocol;

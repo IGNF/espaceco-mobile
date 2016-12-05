@@ -190,7 +190,6 @@ RIPart.prototype.saveFormulaire = function(form)
 	{	georem.themes = '"'+theme+'"=>"1"';
 	}
 	georem.id_groupe = this.param.profil.id_groupe;
-	georem.groupe = this.param.profil.id_groupe;
 
 	// Formatage utilisateur
 	var isok = this.formatGeorem.call (this, georem, form);
@@ -349,12 +348,7 @@ RIPart.prototype.updateLocalRems = function()
 	var nb = self.param.georems.length;
 
 	function next()
-	{	// Ended ?
-		if (n == self.param.georems.length) 
-		{	wapp.wait(false);
-			return;
-		}
-		// Send next
+	{	// Send next
 		for (var i=n; i<self.param.georems.length; i++)
 		{	var grem = self.param.georems[i];
 			n++;
@@ -362,6 +356,11 @@ RIPart.prototype.updateLocalRems = function()
 			{	self.updateLocalRem (i, { info: "Mise à jour ("+n+"/"+nb+")", cback: next });
 				break;
 			}
+		}
+		// Ended ?
+		if (n == self.param.georems.length) 
+		{	wapp.wait(false);
+			return;
 		}
 	}
 
