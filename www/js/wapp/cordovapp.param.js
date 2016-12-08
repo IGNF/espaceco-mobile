@@ -60,7 +60,8 @@ CordovApp.prototype.setParamInput = function(elt, param, onchange)
 		})
 		.unbind("click")
 		.on("click", function(e)
-		{	if ($(e.target).is("input") || $(e.target).hasClass("clear-input")) return;
+		{	if ($(this).data('disabled')) return;
+			if ($(e.target).is("input") || $(e.target).hasClass("clear-input")) return;
 			e.stopPropagation();
 			//e.preventDefault();
 			var $this = $(this);

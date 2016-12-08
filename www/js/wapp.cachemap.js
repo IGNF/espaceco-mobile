@@ -49,8 +49,8 @@ var CacheMap = function(options)
 	{	this.nom = title;
 		this.length = 0;
 		this.date = (new Date()).toISODateString();
-		this.minZoom = -1;
-		this.maxZoom = -1;
+		this.minZoom = 15;
+		this.maxZoom = 15;
 		this.extent = ol.extent.createEmpty();
 		this.extents = [];
 	};
@@ -117,7 +117,7 @@ var CacheMap = function(options)
 		// Supression des fichiers sur le disque
 		function deleteFiles()
 		{	for (var i in todel)
-			{	if (todel[i]) CordovApp.File.delFile ((wapp.param.options.cacheRoot||"")+"geoportail/"+i);
+			{	if (todel[i]) CordovApp.File.delFile ((wapp.param.options.cacheRoot||"")+"geoportail/"+smap.layer+"/"+i);
 			}
 			smap.length = 0;
 			updateCacheMapInfo (smap);
@@ -229,13 +229,15 @@ var CacheMap = function(options)
 		var cache = new ol.cache.Tile (layercache);
 		var nb = 0;
 		var t=[];
-		var path = (wapp.param.options.cacheRoot||"")+"geoportail/";
+		var path = (wapp.param.options.cacheRoot||"")+"geoportail/"+layercache.get("layer")+"/";
+		// Create dir if doesn't exist
+		CordovApp.File.getDirectory ((wapp.param.options.cacheRoot||"")+"geoportail/", null, null, true);
 		var nberr = 0;
 
 		function differLoad()
 		{	var e = t.pop();
 			if (e)
-			{	wapp.wait("Chargement... "+t.length+"/"+nb);
+			{	wapp.wait("Chargement... "+t.length+"/"+(nb+nberr));
 				CordovApp.File.dowloadFile (decodeURIComponent(e.url), path+e.id, 
 					function()
 					{	// Suivant
@@ -265,6 +267,7 @@ var CacheMap = function(options)
 				}
 				currentMap.minZoom = min;
 				currentMap.maxZoom = max;
+				currentMap.layer = layercache.get("layer");
 				if (currentMap.extents.length) 
 				{	currentMap.extent = ol.extent.extend (currentMap.extent, extent);
 				}
@@ -297,7 +300,9 @@ var CacheMap = function(options)
 	/* Dialogue de chargement d'une carte
 	*/
 	function loadMapDlg()
-	{	var layercache = new ol.layer.Geoportail("GEOGRAPHICALGRIDSYSTEMS.MAPS", { hidpi: false, key: apiKey });
+	{	
+		var layerName = currentMap.layer||"GEOGRAPHICALGRIDSYSTEMS.MAPS";
+		var layercache = new ol.layer.Geoportail(layerName, { hidpi: false, key: apiKey });
 
 		var cache = new ol.cache.Tile (layercache);
 
@@ -305,18 +310,30 @@ var CacheMap = function(options)
 
 		// Dialogue
 		var content = CordovApp.template("dialog-loadmap");
-		var min = $(".min", content).on("change", estimate);
-		var max = $(".max", content).on("change", estimate);
+		wapp.setParamInput( content, 
+			{ layer: layerName },
+			function(r) 
+			{	layercache = new ol.layer.Geoportail (r.val, { hidpi: false, key: apiKey });
+				cache = cache = new ol.cache.Tile (layercache);
+				if (min) estimate();
+			});
+		if (currentMap.extents.length) $("[data-input]", content).attr('data-disabled', true);
+
+		var min = $(".min", content).on("change", estimate).val(typeof(currentMap.minZoom)!="undefined" ? currentMap.minZoom : 15);
+		var max = $(".max", content).on("change", estimate).val(typeof(currentMap.maxZoom)!="undefined" ? currentMap.maxZoom : 15);
 		// Si une emprise est deja chargee, on ne peux plus changer le zoom
 		if (currentMap.extents.length)
 		{	min.prop("disabled",true);
 			max.prop("disabled",true);
 		}
-		wapp.message (content, "Chargement...", 
-			{ charger:"Charger...",cancel:"Annuler" },
-			function(b)
-			{	if (b=='charger')
-				{	downloadMap (layercache, Number(min.val()), Number(max.val()), extent);
+
+		wapp.dialog.show (content, 
+			{	title: "Chargement...", 
+				buttons: { charger:"Charger...", cancel:"Annuler" },
+				callback: function(b)
+				{	if (b=='charger')
+					{	downloadMap (layercache, Number(min.val()), Number(max.val()), extent);
+					}
 				}
 			});
 
@@ -358,7 +375,7 @@ var CacheMap = function(options)
 		{	// Lecture du cache
 			var cache = new ol.cache.Tile (layercache[0],
 			{	read: function(tile, callback)
-				{	callback ((wapp.param.options.cacheRoot||"")+"geoportail/"+tile.id);
+				{	callback ((wapp.param.options.cacheRoot||"")+"geoportail/"+smap.layer+"/"+tile.id);
 				}
 			});
 			cache.restore (smap.minZoom, smap.maxZoom, smap.extent);

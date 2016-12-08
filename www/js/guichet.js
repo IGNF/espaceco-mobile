@@ -51,7 +51,7 @@ var wapp = new CordovApp(
 					]
 				}),
 				// Layer pour l'affichage du cache
-				new ol.layer.Group({ title:"Mes cartes", name: "cache" }),
+				new ol.layer.Group({ title:"Mes cartes", name: "cache", displayInLayerSwitcher: false }),
 				new ol.layer.Geoportail("CADASTRALPARCELS.PARCELS", { hidpi: false, visible: false }),
 				new ol.layer.Geoportail("TRANSPORTNETWORKS.ROADS", { hidpi: false, visible: false })
 			];
@@ -149,6 +149,7 @@ var wapp = new CordovApp(
 			}});
 		this.map.addInteraction(this.select);
 		this.select.on("select", this.onSelect, this);
+		wapp.onSelect();
 
 		// Gestion du cache
 		this.cache = new CacheMap({ loadPage: "#loadMap", listMap: '#cartes [data-list="maps"] ul' });
@@ -177,7 +178,7 @@ var wapp = new CordovApp(
 						return false;
 					}
 					// Forcer le groupe
-					georem.id_groupe = this.param.groupes[0].id_groupe;
+					// georem.id_groupe = this.param.groupes[0].id_groupe;
 					return true;
 				},
 				/*

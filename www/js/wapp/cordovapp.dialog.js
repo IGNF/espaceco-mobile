@@ -279,7 +279,7 @@ CordovApp.prototype.notification = function(msg, duration)
 	if (typeof(duration)!="number") duration=0;
 	duration = duration ? Math.max(duration,500) : 3000;
 
-	_notification.html(msg).show();
+	_notification.html("<div>"+msg+"</div>").show();
 	setTimeout (function(){ _notification.addClass('visible'); }, 200);
 	if (_timeout) clearTimeout(_timeout);
 	_timeout = setTimeout (function()

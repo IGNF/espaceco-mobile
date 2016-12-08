@@ -7,6 +7,8 @@
 /** Gestion des guichets
 * 
 */
+(function()
+{
 
 /** Guichet en cours de modification
 */
@@ -71,9 +73,16 @@ wapp.setGuichet = function(fullname)
 /** Afficher la selection dans la barre et la fiche
 */
 wapp.onSelect = function(e)
-{	var f = e.selected[0];
+{	var f = e ? e.selected[0] : null;
 	// wapp.ripart.cancelFormulaire();
-	$("#selection").html ( f ? (f.get("nom")||"Afficher la sélection...") : "" );
+	if (f)
+	{	$("#selection").html (f.get("nom")||"Afficher la sélection...");
+		wapp.showOnglet("info");
+	}
+	else
+	{	$("#selection").html ( "<i>"+$("#selection").data("placeholder")+"</i>" );
+		wapp.showOnglet("signal");
+	}
 	if (wapp.isPage("fiche")) wapp.showSelect();
 };
 
@@ -175,3 +184,5 @@ $("#cartes").on("showpage", function(e)
 $("#fiche").on("showpage hidepage", function(e)
 {	wapp.map.updateSize();
 });
+
+})();

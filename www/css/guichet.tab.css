@@ -86,8 +86,22 @@ body.trackingGeorem #fiche .trackingInfo
 
 }
 
+@media screen and (max-width:800px) {
+	#loadMap div {
+		font-size: 0.8em;
+	}
+}
+
 @media screen and (max-width:600px) 
 {
+#loadMap span {
+	margin: -0.5em 0;
+	display: block;
+}
+
+#loadMap button {
+	margin-top: 0.8em;
+}
 
 #fiche
 {	font-size: 1.3em;
