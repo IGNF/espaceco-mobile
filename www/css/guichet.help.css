@@ -1,0 +1,115 @@
+#help
+{	background-color: rgba(0,0,0,.5);
+	pointer-events:all;
+}
+#help [data-role="block"]
+{	background: none;
+}
+#help [data-role="block"]:before
+{	content:none;
+}
+
+.help-arrow:before 
+{   font-size: 5em;
+	margin: 0;
+	display: block;
+}
+.help-arrow.rotate-90:before 
+{   transform: rotate(90deg);
+	-webkit-transform: rotate(90deg);
+}
+.help-arrow.rotate-130:before 
+{   transform: rotate(130deg);
+	-webkit-transform: rotate(130deg);
+	margin: 0.2em 0;
+}
+.help-arrow.rotate-180:before 
+{   transform: rotate(180deg);
+	-webkit-transform: rotate(180deg);
+}
+.help-arrow.rotate-200:before 
+{   transform: rotate(200deg);
+	-webkit-transform: rotate(200deg);
+	margin:0.2em 0;
+}
+.help-arrow.rotate-245:before 
+{   transform: rotate(245deg);
+	-webkit-transform: rotate(245deg);
+	margin:-0.2em 0;
+}
+.help-arrow.rotate-270:before 
+{   transform: rotate(270deg);
+	-webkit-transform: rotate(270deg);
+}
+.help-arrow.rotate-320:before 
+{   transform: rotate(320deg);
+	-webkit-transform: rotate(320deg);
+	margin:-0.2em 0;
+}
+
+@media screen and (max-width: 600px) 
+{	.help-arrow:before 
+	{	font-size: 4em;
+		margin: 0.1em 0;
+	}
+}
+
+#help .menu
+{	top:0;
+	left:2.5em;
+	text-align: center;
+}
+#help .locate
+{	bottom: 3.5em;
+	right: 2.5em;
+	text-align: center;
+}
+#help .signal
+{	bottom: 0em;
+	left: 0em;
+	text-align: left;
+}
+
+#help .signaler-placer
+{	top: 2em;
+	left: 0em;
+	text-align: center;
+}
+#help .signaler-photo
+{	top: 18em;
+	left: 0em;
+	text-align: left;
+}
+
+@media screen and (min-width: 1024px) and (orientation: landscape) {
+#help .signaler-placer
+{	top:0%;
+}
+#help .signaler-photo
+{	top: 20em;
+}
+}
+@media screen and (min-height: 1024px) and (orientation: portrait) {
+#help .signaler-placer
+{	top:35%;
+}
+#help .signaler-photo
+{	top: calc(35% + 20em);
+}
+}
+
+#help .placer-carte
+{	bottom: 50%;
+	right: 50%;
+	text-align: left;
+}
+@media screen and (min-width: 1024px) and (orientation: landscape) {
+#help .placer-carte
+{	right:25%;
+}
+}
+@media screen and (min-height: 1024px) and (orientation: portrait) {
+#help .placer-carte
+{	bottom:80%;
+}
+}
