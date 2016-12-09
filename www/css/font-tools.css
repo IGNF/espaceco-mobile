@@ -75,3 +75,5 @@
 .tools-modifyline:before { content: '\e815'; } /* '' */
 .tools-modifypoly:before { content: '\e816'; } /* '' */
 .tools-ol3:before { content: '\e817'; } /* '' */
+.tools-help-larrow:before { content: '\e818'; } /* '' */
+.tools-help-rarrow:before { content: '\e819'; } /* '' */

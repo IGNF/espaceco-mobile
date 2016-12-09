@@ -8,6 +8,8 @@
  * @type {CordovApp}
  * 
  */
+		$(document).on("ready", function (){console.log("ready")})
+
 var wapp = new CordovApp(
 {	/**
 	* Initilize the application map 
@@ -17,6 +19,9 @@ var wapp = new CordovApp(
 	{	var self = this; 
 		// Version => cordova-plugin-app-version ???
 		$(".version").text(this.version);
+
+		// Gestion de l'aide en ligne
+		$("#help").click(wapp.help.hide);
 
 		// Lancement
 		wapp.wait("Chargement...", false);
@@ -202,6 +207,7 @@ var wapp = new CordovApp(
 
 		// Fin
 		wapp.wait(false);
+
 	},
 
 	/** Affichage des layers
@@ -250,7 +256,6 @@ var wapp = new CordovApp(
 	* @api
 	*/
 	onMenuButton: function() { if (!this.isWaiting()) this.toggleMenu(); },
-
 
 	/** Save current position 
 	*/

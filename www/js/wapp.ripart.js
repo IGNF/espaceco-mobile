@@ -92,7 +92,8 @@ RIPart.prototype.initialize = function(options)
 		$('body').removeClass("trackingGeorem");
 	});
 	$('.formulaire .movePosition', formulaire).click(function()
-	{	var track = !self.target.getVisible();
+	{	wapp.help.show("signaler-carte");
+		var track = !self.target.getVisible();
 		if (track) 
 		{	$('body').addClass("trackingGeorem");
 			var lon = Number($("input.lon", formulaire).val());
@@ -636,20 +637,26 @@ RIPart.prototype.showFormulaire = function(b)
 		this.overlay.setVisible(false);
 	}
 	else
-	{	this.formElement.addClass('formulaire');
+	{	wapp.help.show("formulaire-signaler");
+		this.formElement.addClass('formulaire');
 		$('.formulaire .movePosition', this.formElement).removeClass("tracking");
 		this.onShow(this.formElement);
 		
 		var theme = $('[data-input="select"][data-param="theme"]', this.formElement);
 		$('[data-input-role="option"]', theme).remove();
 		$("<div>").attr("data-input-role","option").attr("data-val", "").html("<i>choisissez un thème...</i>").appendTo(theme);
+		var valdef = false;
 		for (var i=0; i<this.param.themes.length; i++)
-		{	$("<div>").attr("data-input-role","option")
+		{	if (wapp.param.options.igntheme || this.param.themes[i].id_groupe == this.param.profil.id_groupe)
+			{	$("<div>").attr("data-input-role","option")
 					.attr("data-val", this.param.themes[i].id_groupe+"::"+this.param.themes[i].nom)
 					.text(this.param.themes[i].nom)
-			.appendTo(theme);
+					.appendTo(theme);
+				if (valdef===false) valdef = this.param.themes[i].id_groupe+"::"+this.param.themes[i].nom;
+				else valdef = "";
+			}
 		}
-		wapp.selectInput(theme,"");
+		wapp.selectInput(theme, valdef);
 
 		var lon = Number($("input.lon", this.formElement).val());
 		var lat = Number($("input.lat", this.formElement).val());

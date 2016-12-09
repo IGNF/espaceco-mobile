@@ -3,7 +3,7 @@
 
 (function(){
 
-var helpDiv;
+var helpDiv = $("<div>").attr("id", "help").appendTo("body");
 var step = 0;
 var _timeout;
 var _current = "";
@@ -46,15 +46,11 @@ function showHelp(template)
 	// Nouvel aide
 	saveParam(template);
 	var t = CordovApp.template("help/"+template);
-	if (!t)
+	if (!t || !t.length)
 	{	hideHelp();
 		return;
 	}
 
-	if (!helpDiv)
-	{	helpDiv = $("<div>").attr("id", "help").appendTo("body");
-	}
-	
 	_current = template;
 	helpDiv.html("").removeClass().addClass("visible "+template).append(t).show();
 	$(".close", t).on("click touchstart", function(e)
@@ -92,7 +88,7 @@ $(document).on("menu", function(e)
 {	if (e.show) showHelp("menu");
 	else hideHelp();
 });
-$(document).on("ready", function(e)
+$( document ).ready(function() 
 {	showHelp("main");
 });
 

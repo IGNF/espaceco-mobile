@@ -20,6 +20,23 @@
 	bottom:0;
 	border:30px solid rgba(0,0,0,0.5);
 }
+#map .ol-disable:before,
+#map .ol-disable:after
+{	content: "";
+	background: #f00;
+	width: 20px;
+	height: 2px;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	-webkit-transform: translate(-50%, -50%);
+	transform: translate(-50%, -50%);
+	border: 1px solid #fff;
+}
+#map .ol-disable:after
+{	height: 20px;
+	width:2px;
+}
 
 #map .ol-zoom 
 {	top: 0.5em;
@@ -738,7 +755,8 @@ body.trackingGeorem #fiche .signaler .movePosition
 	margin: 0.5em 0 0 0.5em;
 }
 #signalements button i
-{	margin-right: 0.5em;
+{	margin: auto;
+	display: block;
 }
 
 #georem li,

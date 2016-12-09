@@ -686,7 +686,7 @@ ul[data-role="list"] li:first-child
 #help
 {	opacity:0;
 	display:none;
-	position: absolute;
+	position: fixed;
 	top:0; left:0; 
 	bottom:0; right:0;
 	pointer-events:none;
@@ -718,7 +718,8 @@ ul[data-role="list"] li:first-child
 	opacity:0;
 	border-radius: 5px;
 }
-@media screen and (max-width:600px)
+@media screen and (max-width:600px),
+screen and (max-height:600px)
 {	#help [data-role="block"] > *
 	{	font-size: 0.8em;
 	}
