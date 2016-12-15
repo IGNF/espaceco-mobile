@@ -73,10 +73,14 @@ ol.control.GeoportailLocate = function(options)
 							.appendTo(autocomp);
 					}
 				}
+				else
+				{	var li = $("<li>").html("Impossible de trouver &laquo; <i></i> &raquo;").appendTo(autocomp.html(""));
+					$("i", li).text(t);
+				}
 			}, goptions);
 		}
 		else 
-		{	t = $("<li>").text("Pas de réponse...").appendTo(autocomp.html(""));
+		{	autocomp.html("");
 			element.addClass('ol-collapse').removeClass('ol-loading');
 		}
 	}
@@ -124,7 +128,8 @@ ol.control.GeoportailLocate = function(options)
 				}
 			}
 			else 
-			{	t = $("<li>").text("Pas de réponse...").appendTo(autocomp.html(""));
+			{	var li = $("<li>").html("Impossible de trouver &laquo;&nbsp;<i></i>&nbsp;&raquo;").appendTo(autocomp.html(""));
+				$("i", li).text(t);
 				element.addClass('ol-collapse').removeClass('ol-loading');
 			}
 		}, goptions);

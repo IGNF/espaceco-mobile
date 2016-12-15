@@ -173,6 +173,14 @@ CordovApp.prototype.selectInputVal = function(input)
 {	return $("[data-input-role].selected", input).data("val");
 }
 
+/** Get the [data-input="select"] selected text
+*	@param {selector} input a data-input="select" with data-input-role="option"
+*	@return {String} the selected text
+*/
+CordovApp.prototype.selectInputText = function(input)
+{	return $("[data-input-role].selected", input).text();
+}
+
 /** Set data-attr according to a list of attribute value
 * @param {object} element a jQuery element that contains data-attr
 * @param {object} attr attributes to display in element
@@ -202,17 +210,19 @@ CordovApp.prototype.dataAttributes = function (element, attr)
 				else obj.hide();
 			}
 			// Serialize array of object
-			else if (obj.data("format-array") && a instanceof Array)
-			{	var f = obj.data("format-array");
-				var t = "";
-				for (var i=0; i<a.length; i++)
-				{	var ti=f;
-					for (var k in a[i])
-					{	ti = ti.replace("%"+k+"%", a[i][k]);
+			else if (obj.data("format-array"))
+			{	if (a instanceof Array)
+				{	var f = obj.data("format-array");
+					var t = "";
+					for (var i=0; i<a.length; i++)
+					{	var ti=f;
+						for (var k in a[i])
+						{	ti = ti.replace("%"+k+"%", a[i][k]);
+						}
+						t += (t.length ? (obj.data("sep")||"") :"") + ti;
 					}
-					t += (t.length ? (obj.data("sep")||"") :"") + ti;
+					obj.html(t);
 				}
-				obj.html(t);
 			}
 			// Size of an array
 			else if (obj.data("array-length"))

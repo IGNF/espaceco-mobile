@@ -11,7 +11,7 @@ ol.control.Geolocate = function(options)
 	var self = this;
 
 	ol.control.Toggle.call(this, 
-	{	"class": "ol-geolocate", 
+	{	"className": "ol-geolocate", 
 		"html": "<i class='tools-locate'></i>",
 		"toggleFn": function()
 		{	if (self.geolocation)

@@ -51,6 +51,35 @@ RIPart.prototype.initialize = function(options)
 		});
 	this.overlay.setMap(wapp.map);
 
+	// layer
+	if (options.layer) 
+	{	this.layer = options.layer;
+		wapp.map.addLayer(this.layer);
+		// Style
+		var stroke = new ol.style.Stroke( { color: "#000", width:1.5 } )
+		var style = 
+		{	"submit": new ol.style.Style(
+				{	image: new ol.style.RegularShape({ fill: new ol.style.Fill({ color:[255,255,255, 1] }), stroke:stroke, radius:10, points:4 })
+				}),
+			"pending": new ol.style.Style(
+				{	image: new ol.style.RegularShape({ fill: new ol.style.Fill({ color:[255, 165,0, 1] }), stroke:stroke, radius:10, points:4 })
+				}),
+			"valid": new ol.style.Style(
+				{	image: new ol.style.RegularShape({ fill: new ol.style.Fill({ color:[0,255,0, 1] }), stroke:stroke, radius:10, points:4 })
+				}),
+			"reject": new ol.style.Style(
+				{	image: new ol.style.RegularShape({ fill: new ol.style.Fill({ color:[255,0,0, 1] }), stroke:stroke, radius:10, points:4 })
+				}),
+		};
+		style.pending0 = style.pending;
+		style.pending1 = style.pending;
+		style.valid0 = style.valid;
+		style.reject0 = style.reject;
+		this.layer.setStyle (function(f,res)
+		{	return [ style[f.get("georem").statut] || style.submit ];
+		});
+	}
+
 	// Gestion du GPS
 	this.geolocation = new ol.Geolocation(/** @type {olx.GeolocationOptions} */ 
 	({	projection: "EPSG:4326", //wapp.map.getView().getProjection(),
@@ -112,8 +141,8 @@ RIPart.prototype.initialize = function(options)
 			self.overlay.getSource().addFeature( new ol.Feature (new ol.geom.Point(pos)));
 			self.overlay.setVisible(true);
 			pos = ol.proj.transform(pos, wapp.map.getView().getProjection(),'EPSG:4326');
-			$("input.lon", formulaire).val(pos[0]);
-			$("input.lat", formulaire).val(pos[1]);
+			$("input.lon", formulaire).val(pos[0].toFixed(8));
+			$("input.lat", formulaire).val(pos[1].toFixed(8));
 		}
 	}, this);
 	
@@ -189,6 +218,7 @@ RIPart.prototype.saveFormulaire = function(form)
 	var theme = wapp.selectInputVal($('[data-input="select"][data-param="theme"]', this.formElement));
 	if (theme)
 	{	georem.themes = '"'+theme+'"=>"1"';
+		georem.theme = wapp.selectInputText($('[data-input="select"][data-param="theme"]', this.formElement));
 	}
 	georem.id_groupe = this.param.profil.id_groupe;
 
@@ -214,6 +244,7 @@ RIPart.prototype.saveFormulaire = function(form)
 						.data("photo",false)
 						.hide();
 			$(".photo .fa-stack", self.formElement).show();
+			$(".comment", form).val("");
 		})
 		this.cancelFormulaire();
 	}
@@ -510,6 +541,16 @@ RIPart.prototype.onUpdate = function()
 			wapp.dataAttributes(li, grems[i]);
 		}
 	}
+	if (this.layer)
+	{	var source = this.layer.getSource();
+		source.clear();
+		for (var i=0; i<grems.length; i++)
+		{	source.addFeature( new ol.Feature (
+				{	geometry: new ol.geom.Point( ol.proj.transform([grems[i].lon, grems[i].lat],'EPSG:4326', wapp.map.getView().getProjection()) ),
+					georem: grems[i]
+				}));
+		}
+	}
 };
 
 /** Afficher les info de la remontee
@@ -646,6 +687,7 @@ RIPart.prototype.showFormulaire = function(b)
 		$('[data-input-role="option"]', theme).remove();
 		$("<div>").attr("data-input-role","option").attr("data-val", "").html("<i>choisissez un thème...</i>").appendTo(theme);
 		var valdef = false;
+		var nbth = 0;
 		for (var i=0; i<this.param.themes.length; i++)
 		{	if (wapp.param.options.igntheme || this.param.themes[i].id_groupe == this.param.profil.id_groupe)
 			{	$("<div>").attr("data-input-role","option")
@@ -654,9 +696,12 @@ RIPart.prototype.showFormulaire = function(b)
 					.appendTo(theme);
 				if (valdef===false) valdef = this.param.themes[i].id_groupe+"::"+this.param.themes[i].nom;
 				else valdef = "";
+				nbth++;
 			}
 		}
 		wapp.selectInput(theme, valdef);
+		if (nbth) theme.show();
+		else theme.hide();
 
 		var lon = Number($("input.lon", this.formElement).val());
 		var lat = Number($("input.lat", this.formElement).val());

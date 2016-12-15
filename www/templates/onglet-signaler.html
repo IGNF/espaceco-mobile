@@ -4,7 +4,7 @@
 		<br/>
 		<i>
 			Vous devez au préalable vous être inscrit sur
-			<a href="https://qlf-collaboratif.ign.fr/collaboratif-site/login" target="_system">
+			<a href="https://qlf-collaboratif.ign.fr/collaboratif-develop/login" target="_system">
 				l'Espace Collaboratif</a>
 			pour pouvoir effectuer une contribution.
 		</i>
@@ -28,12 +28,14 @@
 
 <div class="connect formulaire">
 	<ul class="default">
-		<li>
-			Position : 
+		<li class="position">
+			<label>Position :</label> 
 			<button class="movePosition button">
 				<i class="fa fa-map-marker"></i>&nbsp; déplacer...
-			</button><br/>
-			<input type="text" class="lon" /> , <input type="text" class="lat" />
+			</button>
+			<p>
+				<input type="text" class="lon" /> , <input type="text" class="lat" />
+			</p>
 		</li>
 
 		<li data-input="select" data-param="theme">
@@ -47,9 +49,8 @@
 		
 		<li class="photo">
 			<img onclick="wapp.ripart.photo();" />
-			<span class="fa-stack fa-lg" onclick="wapp.ripart.photo();">
+			<span class="fa-stack fa-lg" style="background:#ddd; border-radius:50%;" onclick="wapp.ripart.photo();">
 				<i class="fa fa-camera fa-stack-1x"></i>
-				<i class="fa fa-ban fa-stack-2x text-danger"></i>
 			</span>
 		</li>
 	</ul>

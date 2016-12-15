@@ -40,6 +40,10 @@ var wapp = new CordovApp(
 						if (e.val===false) $("#map .ol-zoom").hide();
 						else $("#map .ol-zoom").show();
 						break;
+					case "searchbt":
+						if (e.val===false) $("#map .searchCtrl").hide();
+						else $("#map .searchCtrl").show();
+						break;
 					default: break;
 				}
 			});
@@ -86,8 +90,12 @@ var wapp = new CordovApp(
 			return a.replace("<a href","<span data-href").replace("</a>","</span>");
 		};
 
-		// Set parameters
-		this.paramInput.change();
+		// Centrer la carte
+		function centerMap(pos)
+		{	map.getView().setCenter(pos);
+			if (map.getView().getZoom()<12) map.getView().setZoom(12);
+			map.pulse(pos);
+		};
 
 		// Geolocation Control
 		//this.addLocateControl(map);
@@ -95,11 +103,20 @@ var wapp = new CordovApp(
 			{	apiKey:apiKey, 
 				target: $('#search [data-role="content"]').get(0),
 				onGeocode: function(pos, r)
-				{	map.getView().setCenterAtLonlat(pos);
+				{	centerMap(ol.proj.transform(pos,'EPSG:4326', map.getView().getProjection()));
 					wapp.hidePage();
 				}
 			});
 		map.addControl (locCtrl);
+		// Search button
+		var searchCtrl = new ol.control.Button(
+			{	className: "searchCtrl",
+				html: "<i class='fa fa-search'></i>",
+				handleClick: function()
+				{	wapp.showPage('search');
+				}
+			});
+		map.addControl (searchCtrl);
 
 		// Scale line
 		map.addControl (new ol.control.CanvasScaleLine());
@@ -114,8 +131,8 @@ var wapp = new CordovApp(
 
 		// Menu
 		map.addControl (new ol.control.Toggle(
-		{	"class":"menuCtrl", 
-			"html":"<i class='fa fa-bars'></i>",
+		{	"className": "menuCtrl", 
+			"html": "<i class='fa fa-bars'></i>",
 			"toggleFn": function(b)
 			{	wapp.toggleMenu();
 			}
@@ -127,8 +144,7 @@ var wapp = new CordovApp(
 		// Layer switcher
 		var geoloc = window.geoloc = new ol.control.Geolocate();
 		geoloc.on("geolocate", function(e) 
-			{	wapp.map.getView().setCenter(e.position);
-				wapp.map.pulse(e.position);
+			{	centerMap(e.position);
 			});
 		map.addControl(geoloc);
 
@@ -140,7 +156,8 @@ var wapp = new CordovApp(
 				}),
 			});
 		var selStroke = new ol.style.Stroke({color: '#f00', width: 3 });
-		this.select = new ol.interaction.Select({ 
+		this.select = new ol.interaction.Select({
+			filter: function(f,l) { return (l===wapp.vector) },
 			style: function(f,res)
 			{	if (f.getGeometry().getType()=="Point")
 				{	return $.merge( [ selPoint ], wapp.vector.getStyleFunction()(f,res));
@@ -156,6 +173,16 @@ var wapp = new CordovApp(
 		this.select.on("select", this.onSelect, this);
 		wapp.onSelect();
 
+		// Longtouch
+		map.addInteraction(new ol.interaction.LongTouch(
+			{	handleLongTouchEvent: function(e)
+				{	map.getView().setCenter(e.coordinate);
+					wapp.showPage('fiche');
+					wapp.showOnglet('signal');
+					wapp.ripart.showFormulaire();
+				}
+			}));
+
 		// Gestion du cache
 		this.cache = new CacheMap({ loadPage: "#loadMap", listMap: '#cartes [data-list="maps"] ul' });
 
@@ -165,6 +192,10 @@ var wapp = new CordovApp(
 				countElement: '.georemsCount span',
 				listElement: '#signalements [data-role="content"]',
 				formElement: '#fiche .signaler',
+				layer: new ol.layer.Vector(
+				{	source: new ol.source.Vector(),
+					name: "Remontées"
+				}),
 				// Affichage du dialogue
 				onShow: function(form)
 				{	var f = wapp.select.getFeatures().item(0);
@@ -204,6 +235,9 @@ var wapp = new CordovApp(
 
 		// Affichage des layers
 		this.showLayers(this.param.layers);
+
+		// Set parameters
+		this.paramInput.change();
 
 		// Fin
 		wapp.wait(false);

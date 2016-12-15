@@ -42,7 +42,7 @@
 {	top: 0.5em;
 }
 #map .ol-rotate
-{	rigth: 3em;
+{	right: 3em;
 }
 
 #selection
@@ -83,6 +83,13 @@
 .menuCtrl
 {	top: 0.5em;
 	left: 0.5em;
+}
+.searchCtrl
+{	top: 2.5em;
+	left: 0.5em;
+}
+.ol-touch .searchCtrl
+{	top:3em;
 }
 .ol-zoom
 {	left: auto;
@@ -303,6 +310,9 @@
     bottom: 14px;
 }
 
+#layerswitcher ul ul .layerswitcher-opacity
+{	display: none;
+}
 #layerswitcher .layerswitcher-opacity-cursor
 {	width:30px;
 	height:30px;
@@ -311,6 +321,23 @@
 #layerswitcher .layerswitcher-opacity-cursor:before
 {	width:15px;
 	height:15px;
+}
+
+#layerswitcher [type="checkbox"] + label:before
+{	font-family: "FontAwesome";
+	content: "\f070";
+	background: none;
+	border: 0;
+	color: #369;
+	font-size: 1.2em;
+	top: 0;
+	left: 0;
+}
+#layerswitcher [type="checkbox"]:checked + label:before 
+{	content: "\f06e";
+}
+#layerswitcher [type="checkbox"]:checked + label:after 
+{	content:none;
 }
 
 /** Load canvas page */
@@ -356,7 +383,7 @@
 }
 #search .ol-locate input
 {	font-size:1.2em;
-	padding: 0.3em 1.2em;
+	padding: 0.3em 0 0.3em 1.2em;
 }
 #search i.wapp-search
 {	font-size:1.2em;
@@ -658,6 +685,10 @@
 {	font-stretch: normal;
 }
 
+[data-role="dialog"].connect .buttons > div:nth-child(2)
+{	display: none;
+}
+
 
 /** Profil */
 .profil 
@@ -684,6 +715,11 @@
 #fiche .signaler.connected .formulaire,
 #fiche .signaler.connected .noconnect,
 #fiche .signaler.connected.formulaire .info
+{	display: none;
+}
+
+#fiche .signaler .position label,
+#fiche .signaler .position p
 {	display: none;
 }
 
@@ -790,6 +826,12 @@ body.trackingGeorem #fiche .signaler .movePosition
 	text-align: center;
 	top: 50%;
 	width: 1.8em;
+}
+
+#signalement li [data-attr="comment"]
+{	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 #signalements li .small

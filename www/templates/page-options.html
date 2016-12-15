@@ -1,4 +1,4 @@
-﻿<div data-role="header" data-back-button="true">Options...</div>
+﻿<div data-role="header" data-back-button="true">Paramètres</div>
 <div data-role="content">
 	<ul>
 		<li class="title">
@@ -8,9 +8,13 @@
 			<label>Rotation de la carte </label>
 			<div data-input-role="info">Autoriser la rotation de la carte.</div>
 		</li>
-		<li data-input="check" data-param="zoombt" data-default=true>
+		<li data-input="check" data-param="zoombt" data-default=false>
 			<label>Boutons de zoom </label>
 			<div data-input-role="info">Afficher les boutons de zoom sur la carte.</div>
+		</li>
+		<li data-input="check" data-param="searchbt" data-default=true>
+			<label>Boutons de recherche</label>
+			<div data-input-role="info">Afficher un bouton pour rechercher une adresse sur la carte.</div>
 		</li>
 <!--
 		<li data-input="text" data-param="toto">
@@ -27,14 +31,14 @@
 		</li>
 		<li data-input="check" data-param="igntheme" data-default=false>
 			<label>Thématique étendue</label>
-			<div data-input-role="info">Afficher les thèmes IGN dans les signalements.</div>
+			<div data-input-role="info">Afficher les thèmes IGN dans les remontées.</div>
 		</li>
 
 		<li class="title">
 			Divers
 		</li>
 	  
-		<li data-input="button" onclick="wapp.help.reset();">
+		<li data-input="button" onclick="wapp.help.reset(); wapp.hidePage(); wapp.help.show('main')">
 			<label>Réinitialiser l'aide en ligne</label>
 			<div data-input-role="info">L'aide en ligne ne s'affiche qu'une seule fois. 
 			Vous pouvez la réactiver pour un nouveau parcours guidé.</div>

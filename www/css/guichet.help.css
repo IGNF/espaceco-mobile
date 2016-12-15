@@ -91,10 +91,10 @@
 }
 @media screen and (min-height: 1024px) and (orientation: portrait) {
 #help .signaler-placer
-{	top:35%;
+{	top:33%;
 }
 #help .signaler-photo
-{	top: calc(35% + 20em);
+{	top: calc(33% + 17em);
 }
 }
 
