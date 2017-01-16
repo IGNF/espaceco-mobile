@@ -80,29 +80,46 @@ wapp.onSelect = function(e)
 		wapp.showOnglet("info");
 	}
 	else
-	{	$("#selection").html ( "<i>"+$("#selection").data("placeholder")+"</i>" );
-		wapp.showOnglet("signal");
+	{	$("#selection").html ("");//("<i>"+$("#selection").data("placeholder")+"</i>");
+		//wapp.showOnglet("signal");
 	}
 	if (wapp.isPage("fiche")) wapp.showSelect();
 };
 
-/* Afficher la fiche
+/** Afficher la fiche
 */
 wapp.showSelect = function()
 {	var f = this.select.getFeatures().item(0);
-	var div = $('#fiche .fiche');
+	var div = $('#fiche .selection');
 	if (!f) 
-	{	div.addClass("nosel");
+	{	div.removeClass("georem fiche");
 		this.currentProperties = null;
 	}
 	else
-	{	div.removeClass("nosel");
-		this.currentProperties = wapp.setParamInput($("ul", div), f.getProperties());
+	{	var prop = f.getProperties();
+		// Georem
+		if (prop.georem)
+		{	div.addClass("georem");
+			this.currentProperties = null;
+			wapp.dataAttributes($(".georem", div), prop.georem);
+		}
+		// Objet du guichet
+		else 
+		{	div.addClass("fiche");
+			this.currentProperties = wapp.setParamInput($(".fiche ul", div), prop);
+		}
 	}
 	wapp.showPage("fiche");
 };
 
-/* Valider la fiche courante
+/** Afficher le formulaire de signalement
+*/
+wapp.showRipartForm = function()
+{	wapp.showOnglet("signal");
+	wapp.showPage("fiche");
+};
+
+/** Valider la fiche courante
 */
 wapp.validFiche = function()
 {	var f = this.select.getFeatures().item(0);

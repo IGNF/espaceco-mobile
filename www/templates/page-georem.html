@@ -14,10 +14,12 @@
 
 	<h3>Réponses :</h3>
 	<ul data-role="list" data-attr="rep" 
-		data-format-array="&lt;li class='%statut%' &gt; &lt;span&gt; %date% &lt;/span&gt; %titre% : %comment%  &lt;/li&gt;"></ul>
+		data-array="&lt;li class='%statut%' &gt; &lt;span&gt; %date% &lt;/span&gt; %titre% : %comment%  &lt;/li&gt;">
+		<li class='%statut%'><span>%date%</span> %titre% : %comment%  </li>
+	</ul>
 
 	<div style="text-align:center;">
-		<img class="photo" />
+		<img class="photo" data-src="photo" />
 	</div>
 
 	<div style="width:100%; margin-top:0.5em;">

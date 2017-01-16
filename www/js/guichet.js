@@ -54,13 +54,14 @@ var wapp = new CordovApp(
 				new ol.layer.Group(
 				{	name:"Fond de plan",
 					layers:
-					[	new ol.layer.Tile({ name:"OSM", source: new ol.source.OSM(), baseLayer: true, hidpi: false, visible: false }),
-						new ol.layer.Geoportail("GEOGRAPHICALGRIDSYSTEMS.MAPS", {baseLayer: true, hidpi: false, visible: true }),
+					[	new ol.layer.Geoportail("GEOGRAPHICALGRIDSYSTEMS.MAPS", {baseLayer: true, hidpi: false, visible: true }),
+						new	ol.layer.Geoportail("GEOGRAPHICALGRIDSYSTEMS.PLANIGN", {baseLayer: true, hidpi: false, visible: false }),
 						new	ol.layer.Geoportail("ORTHOIMAGERY.ORTHOPHOTOS", {baseLayer: true, hidpi: false, visible: false })
 					]
 				}),
 				// Layer pour l'affichage du cache
 				new ol.layer.Group({ title:"Mes cartes", name: "cache", displayInLayerSwitcher: false }),
+				new ol.layer.Geoportail("BUILDINGS.BUILDINGS", { hidpi: false, visible: false }),
 				new ol.layer.Geoportail("CADASTRALPARCELS.PARCELS", { hidpi: false, visible: false }),
 				new ol.layer.Geoportail("TRANSPORTNETWORKS.ROADS", { hidpi: false, visible: false })
 			];
@@ -93,7 +94,7 @@ var wapp = new CordovApp(
 		// Centrer la carte
 		function centerMap(pos)
 		{	map.getView().setCenter(pos);
-			if (map.getView().getZoom()<12) map.getView().setZoom(12);
+			if (map.getView().getZoom()<15) map.getView().setZoom(15);
 			map.pulse(pos);
 		};
 
@@ -156,17 +157,21 @@ var wapp = new CordovApp(
 				}),
 			});
 		var selStroke = new ol.style.Stroke({color: '#f00', width: 3 });
+		var selLayer;
 		this.select = new ol.interaction.Select({
-			filter: function(f,l) { return (l===wapp.vector) },
+			filter: function(f,l) 
+			{	selLayer = l;
+				return (l===wapp.vector || l===wapp.ripart.layer);
+			},
 			style: function(f,res)
 			{	if (f.getGeometry().getType()=="Point")
-				{	return $.merge( [ selPoint ], wapp.vector.getStyleFunction()(f,res));
+				{	return $.merge( [ selPoint ], selLayer.getStyleFunction()(f,res));
 				}
 				else
 				{	return $.merge( [ new ol.style.Style(
 						{	stroke: selStroke,
 							geometry: ol.geom.Polygon.fromExtent( f.getGeometry().getExtent() )
-						}) ], wapp.vector.getStyleFunction()(f,res));
+						}) ], selLayer.getStyleFunction()(f,res));
 				}
 			}});
 		this.map.addInteraction(this.select);

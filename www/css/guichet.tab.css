@@ -71,6 +71,7 @@ body.trackingGeorem #fiche.visible
 {	-webkit-transform: translate3d(0, 100%, 0)!important;
 	transform: translate3d(0, 100%, 0)!important;
 	margin-top: -3em;
+	font-size: 1.33em;
 }
 
 body.trackingGeorem #fiche [data-role="onglet-bt"],

@@ -37,7 +37,7 @@ RIPart.prototype.initialize = function(options)
 
 	// Overlay
 	this.overlay = new ol.layer.Vector(
-		{	source: new ol.source.Vector(), 
+		{	source: new ol.source.Vector({ features: new ol.Collection() }), 
 			visible: false,
 			style: [
 				new ol.style.Style(
@@ -56,27 +56,50 @@ RIPart.prototype.initialize = function(options)
 	{	this.layer = options.layer;
 		wapp.map.addLayer(this.layer);
 		// Style
-		var stroke = new ol.style.Stroke( { color: "#000", width:1.5 } )
+		var symb = {	glyph: "fa-circle", 
+						form: "poi", 
+						fill: new ol.style.Fill({ color:[255,255,255, 1] }), 
+						stroke: new ol.style.Stroke( { color: "#fff", width:1.5 } ), 
+						radius: 18,
+						offsetY: -18
+					};
 		var style = 
 		{	"submit": new ol.style.Style(
-				{	image: new ol.style.RegularShape({ fill: new ol.style.Fill({ color:[255,255,255, 1] }), stroke:stroke, radius:10, points:4 })
+				{	image: new ol.style.FontSymbol(
+						$.extend (symb, 
+						{	stroke: new ol.style.Stroke({ color:[80,80,80, 1], width:1.5  }) 
+						})
+					)
 				}),
 			"pending": new ol.style.Style(
-				{	image: new ol.style.RegularShape({ fill: new ol.style.Fill({ color:[255, 165,0, 1] }), stroke:stroke, radius:10, points:4 })
+				{	image: new ol.style.FontSymbol(
+						$.extend (symb, { stroke: new ol.style.Stroke({ color:[242, 157,0, 1], width:1.5  }) })
+					)
 				}),
 			"valid": new ol.style.Style(
-				{	image: new ol.style.RegularShape({ fill: new ol.style.Fill({ color:[0,255,0, 1] }), stroke:stroke, radius:10, points:4 })
+				{	image: new ol.style.FontSymbol(
+						$.extend (symb, { stroke: new ol.style.Stroke({ color:[0,128,0, 1], width:1.5  }) })
+					)
 				}),
 			"reject": new ol.style.Style(
-				{	image: new ol.style.RegularShape({ fill: new ol.style.Fill({ color:[255,0,0, 1] }), stroke:stroke, radius:10, points:4 })
+				{	image: new ol.style.FontSymbol(
+						$.extend (symb, { stroke: new ol.style.Stroke({ color:[192,0,0, 1], width:1.5  }) })
+					)
 				}),
 		};
+		for (var i in style) 
+		{	style[i]= [ 
+				new ol.style.Style( 
+				{	image: new ol.style.Shadow( { radius:12 } ) 
+				}),
+				style[i] ];
+		}
 		style.pending0 = style.pending;
 		style.pending1 = style.pending;
 		style.valid0 = style.valid;
 		style.reject0 = style.reject;
 		this.layer.setStyle (function(f,res)
-		{	return [ style[f.get("georem").statut] || style.submit ];
+		{	return style[f.get("georem").statut] || style.submit ;
 		});
 	}
 
@@ -128,9 +151,11 @@ RIPart.prototype.initialize = function(options)
 			var lon = Number($("input.lon", formulaire).val());
 			var lat = Number($("input.lat", formulaire).val());
 			wapp.map.getView().setCenterAtLonlat([ lon, lat ]);
+			self.modifyInteraction.setActive(true);
 		}
 		else 
 		{	$('body').removeClass("trackingGeorem");
+			self.modifyInteraction.setActive(false);
 		}
 		self.target.setVisible(track);
 	});
@@ -145,7 +170,18 @@ RIPart.prototype.initialize = function(options)
 			$("input.lat", formulaire).val(pos[1].toFixed(8));
 		}
 	}, this);
-	
+
+	// Outil de deplacement de la remontee
+	this.modifyInteraction = new ol.interaction.Modify(
+		{	features: this.overlay.getSource().getFeaturesCollection(),
+		});
+	this.modifyInteraction.on("modifyend", function(e)
+	{	var p = e.features.item(0).getGeometry().getFirstCoordinate()
+		wapp.map.getView().setCenter(p);
+	});
+	this.modifyInteraction.setActive(false);
+	wapp.map.addInteraction(this.modifyInteraction);
+
 	// Enregistement d'une remontee
 	$('.formulaire .save', formulaire).click(function(){ self.saveFormulaire ($(this).closest(".formulaire")); });
 	this.onUpdate();
@@ -560,9 +596,11 @@ RIPart.prototype.georemShow = function(grem)
 	wapp.showPage(this.georemPage.attr("id"));
 	// Affichage
 	wapp.dataAttributes(page, grem);
+	/*
 	// Gestion de la photo
 	if (grem.photo) $(".photo", page).attr('src', grem.photo).show();
 	else $(".photo", page).attr('src', "").hide();
+	*/
 	if (grem.id) 
 	{	$(".send", page).hide();
 	}

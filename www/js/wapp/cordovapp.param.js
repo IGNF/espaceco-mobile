@@ -76,7 +76,7 @@ CordovApp.prototype.setParamInput = function(elt, param, onchange)
 						var l = $("[data-input-role]", $this);
 						for (var i=0; i<l.length; i++)
 						{	var li = $(l[i]);
-							s[li.data('val')]=li.html();
+							s[li.data('val')] = li.html();
 							if (li.hasClass("selected")) s0 = li.data('val');
 						}
 						self.selectDialog(s, s0, function(c)
@@ -149,18 +149,24 @@ CordovApp.prototype.selectInput = function(input, value, onchange)
 	setValue(value);
 	input.unbind("click")
 		.click(function()
-		{	var s0, s = {};
+		{	var s0, s = {}, n=0;
 			for (var i=0; i<l.length; i++) 
 			{	var li = $(l[i]);
 				if (li.data('val'))
 				{	s[li.data('val')] = li.html();
 					if (li.hasClass("selected")) s0 = li.data('val');
+					n++;
 				}
 			}
-			self.selectDialog(s, s0, function(c)
-			{	setValue(c);
-				if(onchange) onchange(c);
-			});
+			if (n>1)
+			{	self.selectDialog(s, s0, function(c)
+				{	setValue(c);
+					if(onchange) onchange(c);
+				});
+			}
+			// Flash active input
+			input.addClass("active");
+			setTimeout (function(){ input.removeClass("active"); }, 200);
 		});
 	return input.data('val');
 }
@@ -210,6 +216,27 @@ CordovApp.prototype.dataAttributes = function (element, attr)
 				else obj.hide();
 			}
 			// Serialize array of object
+			else if (obj.data("array"))
+			{	if (a instanceof Array)
+				{	// Save content as template
+					if (!obj.data("array-template"))
+					{	obj.data("array-template", obj.html());
+					}
+					var template = obj.data("array-template");
+					obj.html("");
+					var t = "";
+					for (var i=0; i<a.length; i++)
+					{	var ti = ""+template;
+						for (var k in a[i])
+						{	ti = ti.replace("%"+k+"%", a[i][k]);
+						}
+						t += (t.length ? (obj.data("sep")||"") :"") + ti;
+					}
+					obj.html(t);
+				}
+				else obj.children().hide();
+			}
+			/*
 			else if (obj.data("format-array"))
 			{	if (a instanceof Array)
 				{	var f = obj.data("format-array");
@@ -224,6 +251,7 @@ CordovApp.prototype.dataAttributes = function (element, attr)
 					obj.html(t);
 				}
 			}
+			*/
 			// Size of an array
 			else if (obj.data("array-length"))
 			{	obj.html(a.length);
@@ -263,10 +291,18 @@ CordovApp.prototype.dataAttributes = function (element, attr)
 		}
 	}
 	
+
 	// Set url
 	$('a[data-href]', element).each(function()
 	{	var ref = $(this).data('href');
 		$(this).attr("href", attr[ref]);
+	});
+	// Set src
+	$('img[data-src]', element).each(function()
+	{	var src = $(this).data('src');
+		$(this).attr("src", attr[src]);
+		if (attr[src]) $(this).attr("src", attr[src]).show();
+		else $(this).hide();
 	});
 	// Set Attributes
 	$('[data-attr]', element).each(function()

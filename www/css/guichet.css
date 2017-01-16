@@ -45,6 +45,23 @@
 {	right: 3em;
 }
 
+#signaler
+{	position: fixed;
+	bottom: 0.3em;
+	right: 0.5em;
+	background: orange;
+	border-radius: 50%;
+	box-shadow: 1px -1px 5px 1px rgba(0,0,0,0.5);
+	font-size: 2.75em;
+	padding: 0.2em;
+	width: 1.5em;
+	height: 1.5em;
+	text-align: center;
+	line-height: 1.2em;
+	transform: rotate(90deg);
+	color: #fff;
+}
+
 #selection
 {	position:fixed;
 	left:0; right:0; 
@@ -202,34 +219,40 @@
 
 
 /** Fiche */
-#fiche .fiche > i
-{	display: none;
-}
-#fiche .fiche.nosel > i
+#fiche .selection > i
 {	display: block;
 }
-#fiche .fiche.nosel button, 
-#fiche .fiche.nosel ul 
+#fiche .selection.georem > i,
+#fiche .selection.fiche > i
 {	display: none;
 }
+#fiche .selection > div 
+{	display: none;
+}
+#fiche .selection.georem > div.georem 
+{	display: block;
+}
+#fiche .selection.fiche > div.fiche
+{	display: block;
+}
 
-#fiche .fiche button
+#fiche .selection > div button
 {	float:right;
 	margin: 0.5em 1em;
 }
-#fiche .fiche ul 
+#fiche .selection > div ul 
 {   margin: 0.5em 1em;
     padding: 0;
     list-style: none;
     border-bottom: 1px solid #ccc;
 	clear: both;
 }
-#fiche .fiche ul li 
+#fiche .selection > div ul li 
 {	background-color: #fff;
 	border: 0;
 	border-top: 1px solid #ccc;
 }
-#fiche .fiche label 
+#fiche .selection > div label 
 {	display: inline-block;
 	width:30%;
 	overflow: hidden;
@@ -252,7 +275,7 @@
 #fiche [data-role="onglet-bt"]
 {	background-color: #e0e0e0;
 }
-#fiche .fiche
+#fiche > div
 {	background-color:#eee;
 }
 
