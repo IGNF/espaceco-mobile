@@ -222,7 +222,7 @@ var CordovApp = function(obj)
 	// Clear input 
 	$("body").on("click touchstart","i.clear-input",function()
 		{	var i = $(this).prev();
-			if (i.is('input')) i.val("").focus();
+			if (i.is('input')) i.val("").focus().change();
 		});
 	$("body").on("focusin","input",function()
 	{	var clear = $(this).next();

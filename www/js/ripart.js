@@ -79,7 +79,7 @@ var RIPart = function(options)
 			}
 			r.rep.push(rep);
 		});
-		console.log(r);
+		//console.log(r);
 		return r;
 	}
 

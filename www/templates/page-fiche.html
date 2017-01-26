@@ -11,6 +11,7 @@
 		<div data-list="signal">
 			<i class="fa fa-wifi fa-rotate-90"></i>Remonter
 		</div>
+		<i class="fa fa-close" style="font-size:1.5em; padding:0.75em 0.5em; float:right; cursor:pointer" onclick="wapp.hidePage();"></i>
 	</div>
 
 	<!-- Fiche -->
@@ -20,32 +21,39 @@
 			<h3>Remontée :</h3>
 			<ul>
 				<li>
+					<label>Identifiant :</label>
 					<span data-attr="id" data-prefix="#"></span>
 				</li>
 				<li>
-					<label>Date</label>
+					<label>Date :</label>
 					<span data-attr="date" ></span>
 				</li>
 				<li>
-					<label>Commune</label>
+					<label>Commune :</label>
 					<span data-attr="commune"></span>
 				</li>
 				<li>
-					<label>Département</label>
+					<label>Département :</label>
 					<span data-attr="id_dep"></span>
 				</li>
 				<li>
-					<label>Commentaire</label>
+					<label>Commentaire :</label>
 					<span data-attr="comment"></span>
 				</li>
 				<li>
 					<img class="photo" data-src="photo" style="max-width:100%;" />
 				</li>
 			</ul>
-			<h3>Réponses :</h3>
-			<ul data-role="list" data-attr="rep" data-array="1">
-				<li class="%statut%"><span>%date%</span> %titre% : %comment%</li>
-			</ul>
+			<div style="width:100%; margin-top:0.5em;" >
+				<div data-role="dialogBt" class="del" onclick="wapp.delGeorem();">Supprimer</div>
+				<div data-attr="id" data-null="1" data-role="dialogBt" class="send" onclick="wapp.postGeorem();">Envoyer</div>
+			</div>
+			<div data-attr="rep" data-nnull="1">
+				<h3>Réponses :</h3>
+				<ul data-role="list" data-attr="rep" data-array="1">
+					<li class="%statut%"><span>%date%</span> %titre% : %comment%</li>
+				</ul>
+			</div>
 
 		</div>
 		<div class="fiche">

@@ -159,7 +159,7 @@ CordovApp.prototype.selectDialog = function(choice, valdef, cback, options)
 		$('<input type="text">')
 			.addClass("search")
 			.attr("placeholder","filtrer...")
-			.keyup(function(e)
+			.on("keyup change", function(e)
 			{	var filter = new RegExp($(this).val(), "i");
 				$("li", ul).each(function()
 				{	if (!filter) $(this).show();

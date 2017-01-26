@@ -63,6 +63,16 @@
 	font-size: 1.5em;
 }
 
+@media screen and (max-height:255px)
+{
+	[data-role="onglet-bt"]
+	{	display: none;
+	}
+	[data-role="onglet-li"]
+	{	top:0;
+	}
+}
+
 @media screen and (orientation:landscape) and (max-width:1023px), 
 screen and (orientation:portrait) and (max-height:1023px) 
 {	
@@ -104,16 +114,21 @@ body.trackingGeorem #fiche .trackingInfo
 	margin-top: 0.8em;
 }
 
-#fiche
-{	font-size: 1.3em;
-}
-#fiche .fiche label,
-#fiche .fiche input,
-#fiche .fiche [data-input-role].selected
+#fiche .selection > div label,
+#fiche .selection > div input,
+#fiche .selection > div [data-input-role].selected
 {	width:100%;
 }
-#fiche .fiche ul
-{	margin: 0;
+
+}
+
+/* Fiche */
+@media screen and (orientation:landscape) and (max-width:1030px), 
+screen and (max-width:600px) 
+{
+
+#fiche
+{	font-size: 1.3em;
 }
 
 }

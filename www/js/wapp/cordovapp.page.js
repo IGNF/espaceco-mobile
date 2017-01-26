@@ -123,7 +123,8 @@ CordovApp.prototype.isMenu = function()
 * @param {String|Array} id or array of ids of the page(s) to show
 */
 CordovApp.prototype.showPage = function(id_page)
-{	if (typeof(id_page) == "string") id_page=[id_page];
+{	if (!id_page) return;
+	if (typeof(id_page) == "string") id_page=[id_page];
 	if (!id_page.length) return;
 	
 	// New page is shown

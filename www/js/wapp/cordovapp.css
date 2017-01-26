@@ -482,7 +482,8 @@ i.backArrowBt:before
 	right: 0;
 	width: 0.5em;
 	border: 2px solid transparent;
-	margin: 0.25em;
+	/*margin: 0.25em;*/
+	transform: translate(-0.25em, 0.25em);
 }
 
 [data-role=dialog] ul[data-role=select] li *

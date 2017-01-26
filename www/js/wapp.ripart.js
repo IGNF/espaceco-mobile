@@ -7,6 +7,7 @@ options:
 - listElement : ul pour l'affichage de la liste des remontees (doit contenir un template) : #signalements [data-role="content"]
 - profilElement : Affichage du profil de contribution : .profil
 - georemPage : Page d'affichage de la remontee : #georem
+- onSelect {function} : selectionne une georem
 - onShow {function} afficher le formulaire
 - onLocate {function} callback lors d'une localisation
 - formatGeorem {function} formater une georem avant envoi, recoit un georem + formulaire, renvoi true si ok pour la sauvegarde
@@ -28,6 +29,7 @@ RIPart.prototype.initialize = function(options)
 	this.georemPage = $(options.georemPage || '#georem');
 
 	// Champs preremplis
+	this.onSelect = options.onSelect || function(){};
 	this.onShow = options.onShow || function(){};
 	this.onLocate = options.onLocate || function(){};
 	this.formatGeorem = options.formatGeorem || function(){ return true; };
@@ -96,6 +98,7 @@ RIPart.prototype.initialize = function(options)
 		}
 		style.pending0 = style.pending;
 		style.pending1 = style.pending;
+		style.pending2 = style.pending;
 		style.valid0 = style.valid;
 		style.reject0 = style.reject;
 		this.layer.setStyle (function(f,res)
@@ -226,6 +229,9 @@ RIPart.prototype.delLocalRem = function(i, options)
 		if (grem.photo)
 		{	CordovApp.File.delFile (grem.photo);
 		}
+		// remove feature from layer
+		var f = this.getFeature(grem);
+		if (f) this.layer.getSource().removeFeature(f);
 		this.saveParam();
 		this.onUpdate();
 	}
@@ -375,12 +381,21 @@ RIPart.prototype.postLocalRem = function(i, options)
 		self.postGeorem ( grem, function(resp,e)
 		{	if (e)
 			{	wapp.wait(false);
-				wapp.message ("Impossible d'envoyer la remontée<br/><i>Erreur : "+e.status+" - "+e.statusText+"</i>",
-						"Connexion", 
+				var msg = "Impossible d'envoyer la remontée.<br/>";
+				if (e.status===401) 
+				{	msg += "Vous devez être connecté...";
+				}
+				else
+				{	msg += "Vérifiez votre connexion.";
+						+"<i class='error'><br/>Erreur : "+e.status+" - "+e.statusText+"</i>";
+				}
+				wapp.message ( msg, "Connexion", 
 						{ ok:"ok", connect: (e.status===401) ? "Se connecter...":undefined },
 						function(b)
-						{	if (b=="connect") wapp.ripart.connectDialog();
+						{	if (b=="connect") self.connectDialog();
 						});
+				// Post Next
+				if (typeof(options.error)=='function') options.error();
 				self.saveParam();
 				self.onUpdate();
 			}
@@ -388,8 +403,9 @@ RIPart.prototype.postLocalRem = function(i, options)
 			{	wapp.notification ("Remontée envoyée au serveur ("+resp.id+").");
 				self.param.georems[i] = resp;
 				if (grem.photo) self.param.georems[i].photo = grem.photo;
+				self.updateLayer();
 				// Post Next
-				if (typeof(options.cback)=='function') options.cback();
+				if (typeof(options.cback)=='function') options.cback(resp);
 				else wapp.wait(false);
 				self.saveParam();
 				self.onUpdate();
@@ -428,6 +444,7 @@ RIPart.prototype.updateLocalRems = function()
 		// Ended ?
 		if (n == self.param.georems.length) 
 		{	wapp.wait(false);
+			wapp.notification("Opération terminée.");
 			return;
 		}
 	}
@@ -458,7 +475,8 @@ RIPart.prototype.updateLocalRem = function(i, options)
 		self.getGeorem (grem.id, function(resp, e)
 		{	if (e)
 			{	wapp.wait(false);
-				wapp.message ("Impossible d'accéder à la remontée<br/><i>Erreur : "+e.status+" - "+e.statusText+"</i>",
+				wapp.message ("Impossible d'accéder à la remontée"
+							+"<i class='error'><br/>Erreur : "+e.status+" - "+e.statusText+"</i>",
 						"Connexion", 
 						{ ok:"ok", connect: (e.status===401) ? "Se connecter...":undefined },
 						function(b)
@@ -471,8 +489,9 @@ RIPart.prototype.updateLocalRem = function(i, options)
 			{	// wapp.notification ("Remontée mise à jour ("+resp.id+").");
 				self.param.georems[i] = resp;
 				if (grem.photo) self.param.georems[i].photo = grem.photo;
+				self.updateLayer();
 				// Post Next
-				if (typeof(options.cback)=='function') options.cback();
+				if (typeof(options.cback)=='function') options.cback(resp);
 				else wapp.wait(false);
 				self.saveParam();
 				self.onUpdate();
@@ -577,9 +596,29 @@ RIPart.prototype.onUpdate = function()
 			wapp.dataAttributes(li, grems[i]);
 		}
 	}
+	this.updateLayer();
+};
+
+/** Get feature in the layer
+*/
+RIPart.prototype.getFeature = function(grem)
+{	var f;
 	if (this.layer)
+	{	var features = this.layer.getSource().getFeatures();
+		for (i=0; f=features[i]; i++)
+		{	if (f.get('georem')===grem) break;
+		}
+	}
+	return f;
+};
+
+/** Update layer according to grems
+*/
+RIPart.prototype.updateLayer = function()
+{	if (this.layer)
 	{	var source = this.layer.getSource();
 		source.clear();
+		var grems = this.param.georems;
 		for (var i=0; i<grems.length; i++)
 		{	source.addFeature( new ol.Feature (
 				{	geometry: new ol.geom.Point( ol.proj.transform([grems[i].lon, grems[i].lat],'EPSG:4326', wapp.map.getView().getProjection()) ),
@@ -609,6 +648,8 @@ RIPart.prototype.georemShow = function(grem)
 	}
 	// Centrer la carte
 	wapp.map.getView().setCenterAtLonlat ([ grem.lon, grem.lat ]);
+	// Select georem
+	this.onSelect (grem);
 };
 
 
@@ -627,11 +668,14 @@ RIPart.prototype.delCurrentRem = function()
 }
 
 /** Dialog de connexion a l'espace collaboratif
-* @param {function} onShow a function called when the dialog is shown
-* @param {function} onQuit a function called when the dialog is closed
+* @param {} options
+*	- onShow {function} a function called when the dialog is shown
+*	- onQuit {function} a function called when the dialog is closed
+*	- onError {function} a function called when an error occures
 */
-RIPart.prototype.connectDialog = function (onShow, onQuit)
+RIPart.prototype.connectDialog = function (options)
 {	var self = this;
+	options = options || {};
 	var tp = CordovApp.template('dialog-connectripart');
 	var nom = $(".nom",tp);
 	var pwd = $(".pwd",tp);
@@ -645,20 +689,20 @@ RIPart.prototype.connectDialog = function (onShow, onQuit)
 					self.param.pwd = pwd.val();
 					wapp.wait("Connection au serveur...");
 					self.setUser (self.param.user, self.param.pwd);
-					self.checkUserInfo();
+					self.checkUserInfo (null, (typeof (options.onError) == "function") ? options.onError : null);
 				}
 				else if (bt=="deconnect")
 				{	self.param.user = self.param.pwd = null;
 					self.param.profil = null;
 					self.saveParam();
 				}
-				if (typeof (onQuit) == "function") onQuit({ dialog:tp, target: this });
+				if (typeof (options.onQuit) == "function") options.onQuit({ dialog:tp, target: this });
 				self.onUpdate();
 			}
 		});
 	nom.focus().val(this.param.user);
 	pwd.val(this.param.pwd)
-	if (typeof (onShow) == "function") onShow({ dialog:tp, target: this });
+	if (typeof (options.onShow) == "function") options.onShow({ dialog:tp, target: this });
 	self.saveParam();
 };
 
@@ -689,7 +733,7 @@ RIPart.prototype.checkUserInfo = function(success, fail)
 	{	wapp.wait(false);
 		if (error)
 		{	rep = {};
-			self.param.profil = null;
+			// self.param.profil = null;
 			fail(error);
 		}
 		else 

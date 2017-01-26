@@ -61,11 +61,29 @@ var wapp = new CordovApp(
 				}),
 				// Layer pour l'affichage du cache
 				new ol.layer.Group({ title:"Mes cartes", name: "cache", displayInLayerSwitcher: false }),
+				// Overlays
 				new ol.layer.Geoportail("BUILDINGS.BUILDINGS", { hidpi: false, visible: false }),
 				new ol.layer.Geoportail("CADASTRALPARCELS.PARCELS", { hidpi: false, visible: false }),
-				new ol.layer.Geoportail("TRANSPORTNETWORKS.ROADS", { hidpi: false, visible: false })
+				new ol.layer.Geoportail("TRANSPORTNETWORKS.ROADS", { hidpi: false, visible: false }),
+				// Couche INSPIRE adresse
+				new ol.layer.Tile ({
+					"name": "Addresses",
+					"extent": [ -7030196.346030043, -2438399.008686918, 6215711.586687296, 6645292.597727471 ],
+					"minResolution": 0,
+					"maxResolution": 4,
+					"source": new ol.source.TileWMS(
+					{	"url": "http://wxs.ign.fr/"+apiKey+"/inspire/v/wms",
+						"projection": "EPSG:3857",
+						"crossOrigin": "anonymous",
+						"params": {
+							"LAYERS": "AD.Address",
+							"FORMAT": "image/png",
+							"VERSION": "1.3.0"
+						}
+					})
+				})
 			];
-		
+
 		// The map
 		var pos = this.param.position || {};
 		var map = this.map = new ol.Map.Geoportail
@@ -174,6 +192,12 @@ var wapp = new CordovApp(
 						}) ], selLayer.getStyleFunction()(f,res));
 				}
 			}});
+		this.select.selectFeature = function(f, l)
+		{	this.getFeatures().clear();
+			selLayer = l;
+			if (f) this.getFeatures().push(f);
+			wapp.showSelect();
+		};
 		this.map.addInteraction(this.select);
 		this.select.on("select", this.onSelect, this);
 		wapp.onSelect();
@@ -181,7 +205,8 @@ var wapp = new CordovApp(
 		// Longtouch
 		map.addInteraction(new ol.interaction.LongTouch(
 			{	handleLongTouchEvent: function(e)
-				{	map.getView().setCenter(e.coordinate);
+				{	wapp.select.getFeatures().clear();
+					map.getView().setCenter(e.coordinate);
 					wapp.showPage('fiche');
 					wapp.showOnglet('signal');
 					wapp.ripart.showFormulaire();
@@ -201,9 +226,25 @@ var wapp = new CordovApp(
 				{	source: new ol.source.Vector(),
 					name: "Remontées"
 				}),
+				// Selection d'une remontee
+				onSelect: function(grem)
+				{	var features = wapp.ripart.layer.getSource().getFeatures();
+					for (var i=0, f; f = features[i]; i++)
+					{	if (f.get('georem')===grem)
+						{	wapp.select.selectFeature(f, wapp.ripart.layer);
+							break;
+						}
+					}
+					wapp.showOnglet("info");
+					wapp.showSelect();
+				},
 				// Affichage du dialogue
 				onShow: function(form)
 				{	var f = wapp.select.getFeatures().item(0);
+					if (f && f.get('georem'))
+					{	f = false;
+						wapp.select.getFeatures().clear();
+					}
 					var p = f ? f.getGeometry().getCoordinates() : wapp.map.getView().getCenter();
 					p = ol.proj.transform(p, wapp.map.getView().getProjection(),'EPSG:4326');
 					$("input.lon", form).val(p[0].toFixed(8));
@@ -220,6 +261,9 @@ var wapp = new CordovApp(
 					}
 					// Forcer le groupe
 					// georem.id_groupe = this.param.groupes[0].id_groupe;
+					// Protocol
+					georem.protocol = "_MONGUICHET_65876";
+					georem.version = "0.1";
 					return true;
 				},
 				/*
@@ -232,6 +276,8 @@ var wapp = new CordovApp(
 				*/
 			});
 		this.ripart.setServiceUrl("https://qlf-collaboratif.ign.fr/collaboratif-develop/api/");
+		$("#signalements button").click(function(){ wapp.select.getFeatures().clear(); });
+
 
 		$("#fiche").on("showonglet hidepage", function(e)
 		{	self.ripart.cancelFormulaire();

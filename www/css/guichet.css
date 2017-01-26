@@ -1,5 +1,11 @@
 /** Fonts */
 
+/* Dialog */
+[data-role=dialog].alert i.error,
+[data-role=dialog].message i.error
+{	display: none;
+}
+
 /* The map */
 #map 
 {	position:fixed;
@@ -92,9 +98,14 @@
 {	background-color: rgba(255, 255, 255, 0.6);
 	height: auto;
 	line-height: 0.4em;
-	padding-bottom: 0;
-	padding-left: 0.25em;
-	padding-top: 0;
+	padding: 0 0.25em;
+	left: 0;
+	right: auto;
+	border-radius: 0 4px 0;
+}
+
+.ol-scale-line
+{	bottom: 2em;
 }
 
 .menuCtrl
@@ -241,7 +252,7 @@
 	margin: 0.5em 1em;
 }
 #fiche .selection > div ul 
-{   margin: 0.5em 1em;
+{   margin: 0;
     padding: 0;
     list-style: none;
     border-bottom: 1px solid #ccc;
@@ -257,7 +268,7 @@
 	width:30%;
 	overflow: hidden;
 	vertical-align: middle;
-	padding-right: 0.5em;
+	font-size: 0.9em;
 }
 #fiche .fiche label:after
 {	content: "\A0:";
@@ -712,13 +723,13 @@
 {	display: none;
 }
 
-
 /** Profil */
 .profil 
 {	text-align: right;
 }
 .profil img
-{	max-height: 3em;
+{	max-width: 4em;
+	max-height: 3em;
 	vertical-align: middle;
 }
 .profil .title

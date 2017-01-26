@@ -388,6 +388,7 @@ CordovApp.File =
 		}
 	},
 	
+	
 	/** Default succes function
 	*/
 	success: function()
@@ -401,3 +402,57 @@ CordovApp.File =
     }
 
 };
+
+(function(){
+	/**
+	 * Convert a base64 string in a Blob according to the data and contentType.
+	 * 
+	 * @param {String} b64Data Pure base64 string without contentType
+	 * @param {String} contentType the content type of the file i.e (image/jpeg - image/png - text/plain)
+	 * @param {Int} sliceSize to process the byteCharacters
+	 * @see http://stackoverflow.com/questions/16245767/creating-a-blob-from-a-base64-string-in-javascript
+	 * @return Blob
+	 */
+	function b64toBlob(b64Data, contentType, sliceSize) 
+	{	contentType = contentType || '';
+		sliceSize = sliceSize || 512;
+
+		var byteCharacters = atob(b64Data);
+		var byteArrays = [];
+
+		for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) 
+		{	var slice = byteCharacters.slice(offset, offset + sliceSize);
+			var byteNumbers = new Array(slice.length);
+			for (var i = 0; i < slice.length; i++) 
+			{	byteNumbers[i] = slice.charCodeAt(i);
+			}
+			var byteArray = new Uint8Array(byteNumbers);
+			byteArrays.push(byteArray);
+		}
+
+		var blob = new Blob(byteArrays, {type: contentType});
+		return blob;
+	};
+
+	/**
+	 * Create a Image file according to its database64 string.
+	 * 
+	 * @param {DOMString} name URI referring to a local file  
+	 * @param {String} name of the file that will be created
+	 * @param {String} content base64 string
+	 * @param {function} success callback that is passed a FileEntry objects
+	 * @param {function} fail callback invoked on error
+	 * @see http://ourcodeworld.com/articles/read/150/how-to-create-an-image-file-from-a-base64-string-on-the-device-with-cordova
+	 */
+	CordovApp.File.writeBase64 = function (name, content, success, fail)
+	{	// Get content type / data
+		var t = /^data\:([^\;]*);base64,(.*)/.exec(content);
+		var contentType = t[1]
+		var data = t[2];
+		// Convert the base64 string in a Blob
+		var blob = b64toBlob(data, contentType);
+		// Write
+		this.write (name, blob, success, fail);
+	};
+
+})();

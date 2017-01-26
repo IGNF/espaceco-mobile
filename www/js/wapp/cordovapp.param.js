@@ -162,7 +162,7 @@ CordovApp.prototype.selectInput = function(input, value, onchange)
 			{	self.selectDialog(s, s0, function(c)
 				{	setValue(c);
 					if(onchange) onchange(c);
-				});
+				}, { title:$('label', input).html(), closeBox:true });
 			}
 			// Flash active input
 			input.addClass("active");
@@ -208,8 +208,20 @@ CordovApp.prototype.dataAttributes = function (element, attr)
 		}
 		else if (a)
 		{	// Conditionnal display
-			if (obj.data("nnull")) obj.show();
-			else if (obj.data("null")) obj.hide();
+			if (obj.data("nnull")) 
+			{	if (obj instanceof Array)
+				{	if (obj.length) obj.show();
+					else obj.hide();
+				}
+				else obj.show();
+			}
+			else if (obj.data("null")) 
+			{	if (obj instanceof Array)
+				{	if (obj.length) obj.hide();
+					else obj.show();
+				}
+				else obj.hide();
+			}
 			else if (obj.data("match"))
 			{	var rex = new RegExp(obj.data("match"));
 				if (rex.test(a)) obj.show();

@@ -16,12 +16,14 @@ wapp.setGuichet = function(fullname)
 {	if (!this.ripart.isConnected() || !this.ripart.param.pwd)
 	{	wapp.message ("Vous devez être identifié pour accéder à ce guichet...",
 				"Connexion", 
-				{	ok:"ok", connect: "Se connecter..."},
+				{	ok: "ok", connect: "Se connecter..."},
 				function(b)
 				{	if (b=="connect") 
-					{	wapp.ripart.connectDialog (null, function()
-						{	if (wapp.ripart.isConnected() && wapp.ripart.param.pwd)
-								wapp.setGuichet(fullname); 
+					{	wapp.ripart.connectDialog (
+						{	onQuit: function()
+							{	if (wapp.ripart.isConnected() && wapp.ripart.param.pwd)
+									wapp.setGuichet(fullname); 
+							}
 						});
 					}
 				});
@@ -53,14 +55,16 @@ wapp.setGuichet = function(fullname)
 		});
 	this.vector.on("error", function(e)
 	{	if (e.status===401)
-		{	wapp.message ("Impossible de charger la couche.<br/>"+e.status+" - "+e.error,
+		{	wapp.message ("Impossible de charger la couche."
+						+"<i class='error'><br/>"+e.status+" - "+e.error+"</i>",
 				"Connexion", { ok:"ok", connect: "Se connecter..." },
 				function(b)
 				{	if (b=="connect") wapp.ripart.connectDialog();
 				});
 		}
 		else
-		{	wapp.alert ("Impossible de charger la couche.<br/>"+e.status+" - "+e.error);
+		{	wapp.alert ("Impossible de charger la couche."
+					+"<i class='error'><br/>"+e.status+" - "+e.error+"</i>");
 		}
 		return;
 	});
@@ -86,6 +90,36 @@ wapp.onSelect = function(e)
 	if (wapp.isPage("fiche")) wapp.showSelect();
 };
 
+/** Envoyer la remontee courante
+*/
+wapp.postGeorem = function()
+{	var f = wapp.select.getFeatures().item(0);
+	var grem = f.get('georem');
+	wapp.select.selectFeature();
+	if (grem) wapp.ripart.postLocalRem (grem, 
+		{	cback: function(prem) 
+				{	f = wapp.ripart.getFeature(prem);
+					wapp.select.selectFeature(f, wapp.ripart.layer);
+					wapp.wait(false)
+				},
+			error: function()
+				{	wapp.select.selectFeature(f, wapp.ripart.layer);
+				}
+		});
+};
+
+/** Supprimer la remontée courante
+*/
+wapp.delGeorem = function()
+{	var f = wapp.select.getFeatures().item(0);
+	var grem = f.get('georem');
+	if (grem)
+	{	wapp.select.getFeatures().clear();
+		wapp.ripart.delLocalRem (grem);
+		wapp.showSelect();
+	}
+}
+
 /** Afficher la fiche
 */
 wapp.showSelect = function()
@@ -110,6 +144,29 @@ wapp.showSelect = function()
 		}
 	}
 	wapp.showPage("fiche");
+};
+
+/** Connexion RIpart
+*/
+wapp.connect = function()
+{	wapp.ripart.connectDialog(
+	{	onError: function(error)
+		{	var msg = [];
+			switch (error.status)
+			{	case 401: 
+					msg = [ "Accès interdit" , "Utilisateur inconnu." ];
+					break;
+				default: 
+					msg = [ "Connexion", "Connexion impossible...<br/>Vérifiez votre connexion." ];
+					break;
+			};
+			wapp.message (msg[1], msg[0], 
+				{ ok:"ok" },
+				function()
+				{	wapp.connect();
+				});
+		}
+	});
 };
 
 /** Afficher le formulaire de signalement
