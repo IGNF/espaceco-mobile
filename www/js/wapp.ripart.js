@@ -685,7 +685,10 @@ RIPart.prototype.connectDialog = function (options)
 			buttons: { cancel:"Annuler", deconnect: "Déconnexion", connect:"Connexion"},
 			callback: function(bt)
 			{	if (bt == "connect")
-				{	self.param.user = nom.val();
+				{	if (self.param.user != nom.val())
+					{	self.param.profil = null;
+					}
+					self.param.user = nom.val();
 					self.param.pwd = pwd.val();
 					wapp.wait("Connection au serveur...");
 					self.setUser (self.param.user, self.param.pwd);

@@ -110,6 +110,20 @@ body.trackingGeorem #fiche .trackingInfo
 	display: block;
 }
 
+#signalements button
+{	font-size:0.9em;
+	margin: 0;
+	transform: scaleX(0.95);
+	padding: 0.5em 0.25em;
+}
+#signalements li
+{	font-size: 0.9em;
+}
+#signalements li .info
+{	clear: both;
+}
+
+
 #loadMap button {
 	margin-top: 0.8em;
 }
