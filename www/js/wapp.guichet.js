@@ -90,7 +90,7 @@ wapp.onSelect = function(e)
 	if (wapp.isPage("fiche")) wapp.showSelect();
 };
 
-/** Envoyer la remontee courante
+/** Envoyer le signalements courant
 */
 wapp.postGeorem = function()
 {	var f = wapp.select.getFeatures().item(0);
@@ -108,7 +108,7 @@ wapp.postGeorem = function()
 		});
 };
 
-/** Supprimer la remontée courante
+/** Supprimer le signalement courant
 */
 wapp.delGeorem = function()
 {	var f = wapp.select.getFeatures().item(0);

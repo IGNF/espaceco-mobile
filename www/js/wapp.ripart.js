@@ -2,11 +2,11 @@
 
 options:
 - infoElement : element pour l'info de connection : '#options .connect [data-input-role="info"] span.info'
-- formElement : formulaire de saisie d'une remontee : '#fiche2 [data-role="onglet-li"][data-list="signal"]'
-- countElement : compteur de remontees locale : '.georemsCount span'
-- listElement : ul pour l'affichage de la liste des remontees (doit contenir un template) : #signalements [data-role="content"]
+- formElement : formulaire de saisie d'un signalements : '#fiche2 [data-role="onglet-li"][data-list="signal"]'
+- countElement : compteur de signalements locaux : '.georemsCount span'
+- listElement : ul pour l'affichage de la liste des signalements (doit contenir un template) : #signalements [data-role="content"]
 - profilElement : Affichage du profil de contribution : .profil
-- georemPage : Page d'affichage de la remontee : #georem
+- georemPage : Page d'affichage du signalements : #georem
 - onSelect {function} : selectionne une georem
 - onShow {function} afficher le formulaire
 - onLocate {function} callback lors d'une localisation
@@ -277,7 +277,7 @@ RIPart.prototype.saveFormulaire = function(form)
 		georem.date = (new Date()).toISOString().replace(/T|(\..*)/g,' ');
 
 		// Ajouter la remontee
-		wapp.wait("Enregistrement de la remontée");
+		wapp.wait("Enregistrement du signalement.");
 		this.saveLocalRem (georem, function(e)
 		{	wapp.wait(false);
 			wapp.notification (e.info);
@@ -306,7 +306,7 @@ RIPart.prototype.saveLocalRem = function(georem, cback)
 			function(file)
 			{	georem.photo = file.toURL();
 				self.saveParam();
-				if (cback) cback ({ error:false, info:"La remontée a été enregistrée." });
+				if (cback) cback ({ error:false, info:"Le signalement a été enregistré." });
 			},
 			function()
 			{	georem.photo = false;
@@ -317,7 +317,7 @@ RIPart.prototype.saveLocalRem = function(georem, cback)
 	}
 	else 
 	{	this.saveParam();
-		if (cback) cback ({ error:false, info:"La remontée a été enregistrée." });
+		if (cback) cback ({ error:false, info:"Le signalement a été enregistré." });
 	}
 	this.onUpdate();
 }
@@ -347,7 +347,7 @@ RIPart.prototype.postLocalRems = function()
 		{	var grem = self.param.georems[i];
 			if (!grem.id)
 			{	n++;
-				self.postLocalRem (i, { info: "Envoi des remontées ("+n+"/"+nb+")", cback: postNext });
+				self.postLocalRem (i, { info: "Envoi des signalements ("+n+"/"+nb+")", cback: postNext });
 				break;
 			}
 		}
@@ -365,7 +365,7 @@ RIPart.prototype.postLocalRem = function(i, options)
 {	var self = this;
 	if (!options) options = {};
 
-	// Si i n'est pas un indice, c'est une remontee => chercher son indice
+	// Si i n'est pas un indice, c'est un signalement => chercher son indice
 	if (typeof(i) != 'number')
 	{	for (var k=0; k<self.param.georems.length; k++)
 		{	if (self.param.georems[k] === i)
@@ -381,7 +381,7 @@ RIPart.prototype.postLocalRem = function(i, options)
 		self.postGeorem ( grem, function(resp,e)
 		{	if (e)
 			{	wapp.wait(false);
-				var msg = "Impossible d'envoyer la remontée.<br/>";
+				var msg = "Impossible d'envoyer le signalement.<br/>";
 				if (e.status===401) 
 				{	msg += "Vous devez être connecté...";
 				}
@@ -400,7 +400,7 @@ RIPart.prototype.postLocalRem = function(i, options)
 				self.onUpdate();
 			}
 			else
-			{	wapp.notification ("Remontée envoyée au serveur ("+resp.id+").");
+			{	wapp.notification ("signalement envoyé au serveur ("+resp.id+").");
 				self.param.georems[i] = resp;
 				if (grem.photo) self.param.georems[i].photo = grem.photo;
 				self.updateLayer();
@@ -424,7 +424,7 @@ RIPart.prototype.countLocalRems = function()
 	return c;
 };
 
-/** Mettre a jour les remontees
+/** Mettre a jour les signalements
 */
 RIPart.prototype.updateLocalRems = function()
 {	var self = this;
@@ -453,7 +453,7 @@ RIPart.prototype.updateLocalRems = function()
 	next();
 };
 
-/** Mettre a jour une remontee
+/** Mettre a jour une signalements
 */
 RIPart.prototype.updateLocalRem = function(i, options)
 {	var self = this;
@@ -475,7 +475,7 @@ RIPart.prototype.updateLocalRem = function(i, options)
 		self.getGeorem (grem.id, function(resp, e)
 		{	if (e)
 			{	wapp.wait(false);
-				wapp.message ("Impossible d'accéder à la remontée"
+				wapp.message ("Impossible d'accéder au signalement."
 							+"<i class='error'><br/>Erreur : "+e.status+" - "+e.statusText+"</i>",
 						"Connexion", 
 						{ ok:"ok", connect: (e.status===401) ? "Se connecter...":undefined },
@@ -486,7 +486,7 @@ RIPart.prototype.updateLocalRem = function(i, options)
 				self.onUpdate();
 			}
 			else
-			{	// wapp.notification ("Remontée mise à jour ("+resp.id+").");
+			{	// wapp.notification ("Signalement mise à jour ("+resp.id+").");
 				self.param.georems[i] = resp;
 				if (grem.photo) self.param.georems[i].photo = grem.photo;
 				self.updateLayer();
@@ -505,19 +505,19 @@ RIPart.prototype.updateLocalRem = function(i, options)
 RIPart.prototype.delLocalRems = function()
 {	var self = this;
 	wapp.selectDialog (
-			{	all: "Toutes les remontées envoyées", 
-				rep: "Les remontées ayant eu une réponse",
-				close: "Seulement les remontées closes"
+			{	all: "Tous les signalements envoyée", 
+				rep: "Les signalements ayant eu une réponse",
+				close: "Seulement les signalements clos"
 			}, 
 			"", 
 			function(v)
 			{	var mess;
 				switch (v)
-				{	case "all": mess = "Vous allez supprimer toutes les remontées envoyées.";
+				{	case "all": mess = "Vous allez supprimer toutes les signalements envoyés.";
 						break;
-					case "rep": mess = "Vous allez supprimer toutes les remontées ayant eu au moins une réponse.";
+					case "rep": mess = "Vous allez supprimer toutes les signalements ayant eu au moins une réponse.";
 						break;
-					case "close": mess = "Vous allez supprimer toutes les remontées closes.";
+					case "close": mess = "Vous allez supprimer toutes les signalements clos.";
 						break;
 				}
 				wapp.message ( mess, "Suppression",

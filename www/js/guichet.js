@@ -216,7 +216,7 @@ var wapp = new CordovApp(
 		// Gestion du cache
 		this.cache = new CacheMap({ loadPage: "#loadMap", listMap: '#cartes [data-list="maps"] ul' });
 
-		// Brancher les remontees
+		// Brancher les signalements
 		this.ripart = new RIPart(
 			{	infoElement: '#options .connect [data-input-role="info"] span.connected',
 				countElement: '.georemsCount span',
@@ -224,9 +224,9 @@ var wapp = new CordovApp(
 				formElement: '#fiche .signaler',
 				layer: new ol.layer.Vector(
 				{	source: new ol.source.Vector(),
-					name: "Remontées"
+					name: "Signalements"
 				}),
-				// Selection d'une remontee
+				// Selection d'un signalement
 				onSelect: function(grem)
 				{	var features = wapp.ripart.layer.getSource().getFeatures();
 					for (var i=0, f; f = features[i]; i++)
@@ -251,7 +251,7 @@ var wapp = new CordovApp(
 					$("input.lat", form).val(p[1].toFixed(8));
 					wapp.select.setActive(false);
 				}, 
-				// Formatage de la remontée / verification avant envoie
+				// Formatage du signalement / verification avant envoie
 				formatGeorem: function(georem, form)
 				{	var f = wapp.select.getFeatures().item(0);
 					if (f) georem.sketch = wapp.ripart.feature2sketch(f, wapp.map.getView().getProjection());

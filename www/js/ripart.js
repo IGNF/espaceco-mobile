@@ -1,4 +1,4 @@
-﻿/** Recuperation des remontees de l'espace collaboratif.
+﻿/** Recuperation des signalements de l'espace collaboratif.
 
 
 Documentation : https://qlf-collaboratif.ign.fr/collaboratif-site/api-doc/georem
