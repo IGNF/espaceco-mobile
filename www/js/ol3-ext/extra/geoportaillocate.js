@@ -16,8 +16,9 @@ ol.control.GeoportailLocate = function(options)
 	var element = $("<form>").addClass("ol-locate");
 	if (!options.target) element.addClass('ol-unselectable ol-control ol-collapsed');
 	var autocomp = $("<ul>").addClass('autocomplete').appendTo(element);
-	var input = $("<input>").attr('placeholder', "rechercher...").prependTo(element)
-		.attr("type", "search");
+	var input = $("<input>").attr('placeholder', "rechercher...")
+		.attr("type", "search")
+		.prependTo(element);
 
 	// Service de geocodage
 	var service = new GeoportailService(options.apiKey);
