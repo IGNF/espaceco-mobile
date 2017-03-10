@@ -94,7 +94,6 @@ var RIPart = function(options)
 		{	if (cback) cback(null, { error:true, status: 401, statusText: "Unauthorized" });
 			return false;
 		}
-
 		// Transfert OK
 		function win (resp)
 		{	var r={};
@@ -176,6 +175,9 @@ var RIPart = function(options)
 				url: url+"georem/"+action+".xml",
 				dataType: 'xml',
 				cache: false,
+				// Bug with user/pwd in Android 4.1
+				beforeSend: function(xhr){ xhr.setRequestHeader("Authorization", "Basic " + btoa(user + ":" + pwd)); },
+				/*
 				username: user,
 				password: pwd,
 				statusCode: 
@@ -183,6 +185,7 @@ var RIPart = function(options)
 					{	// alert('401: Unauthenticated');
 					}
 				},
+				*/
 				data: options,
 				success: win,
 				error: fail

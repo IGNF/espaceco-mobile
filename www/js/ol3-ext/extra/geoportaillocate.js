@@ -60,7 +60,7 @@ ol.control.GeoportailLocate = function(options)
 				if (r && r.length)
 				{	for (var i=0; i<r.length; i++)
 					{	$("<li>").text(r[i].fulltext)
-							.on("click touchstart", function(e)
+							.on("click", function(e)
 							{	var resp = $(this).data("resp");
 								if (resp.y) 
 								{	isok = false;

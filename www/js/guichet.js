@@ -23,6 +23,11 @@ var wapp = new CordovApp(
 		// Gestion de l'aide en ligne
 		$("#help").click(wapp.help.hide);
 
+		// Polyfill bug webkitCancelRequestAnimationFrame an android < 4.2
+		if (!window.cancelAnimationFrame && window.webkitCancelRequestAnimationFrame)
+		{	window.cancelAnimationFrame = window.webkitCancelRequestAnimationFrame;
+		}
+
 		// Lancement
 		wapp.wait("Chargement...", false);
 
@@ -67,7 +72,7 @@ var wapp = new CordovApp(
 				new ol.layer.Geoportail("TRANSPORTNETWORKS.ROADS", { hidpi: false, visible: false }),
 				// Couche INSPIRE adresse
 				new ol.layer.Tile ({
-					"name": "Addresses",
+					"name": "Adresses",
 					"extent": [ -7030196.346030043, -2438399.008686918, 6215711.586687296, 6645292.597727471 ],
 					"minResolution": 0,
 					"maxResolution": 4,

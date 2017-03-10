@@ -9,7 +9,7 @@
     </author>
     <content src="index.html" />
     <icon src="www/img/logo.png" />
-    <preference name="AppendUserAgent" value=" c@nex8069" />
+    <preference name="AppendUserAgent" value="/Esp@ceC08069" />
     <allow-navigation href="*://*.ign.fr/*" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
