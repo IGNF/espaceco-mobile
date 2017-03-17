@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 
  */
 
@@ -15,13 +15,13 @@ CordovApp.prototype.getPicture = function (win, fail, param, source)
 {	if (typeof(param) != "object") param = {};
 	var self = this;
 	// Default buttons
-	var bouttons = { photo:"Prendre une photo", album:"Album" };
+	var bouttons = { photo:"Caméra", album:"Album" };
 	if (param.buttons) bouttons = $.extend (bouttons, param.buttons);
 	else bouttons.cancel = "annuler";
 	// Ask for the source (if none)
 	if (!source)
 	{	this.message(param.message || "Chercher un image dans un de vos album ou prendre une nouvelle photo.",
-			(param.prompt || "Prendre une photo"), 
+			(param.prompt || "Caméra"), 
 			bouttons,
 			function(button)
 			{	switch (button)

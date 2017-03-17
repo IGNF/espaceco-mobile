@@ -21,7 +21,7 @@ function Dialog()
 	var _cbox = $("<i>").addClass("fa fa-close")
 			.attr("data-role","closebox")
 			.appendTo(_dlg)
-			.on ("click touchstart",function(e)
+			.on ("click",function(e)
 			{	e.stopPropagation();
 				e.preventDefault();
 				self.close();
@@ -72,7 +72,7 @@ function Dialog()
 		{	$("<div>").text(text)
 					.attr("data-role","dialogBt")
 					.prependTo(_buttons)
-					.on ("click touchstart",function(e)
+					.on ("click",function(e)
 					{	e.stopPropagation();
 						e.preventDefault();
 						self.close();

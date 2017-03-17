@@ -1,0 +1,9 @@
+﻿{
+    "android": {
+        "release": {
+            "keystore": "android-keystore.jks",
+            "alias": "guichet",
+            "keystoreType": ""
+        }
+    }
+}

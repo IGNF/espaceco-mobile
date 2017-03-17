@@ -92,12 +92,16 @@
 }
 
 #help .signaler-placer
-{	bottom: calc(100% - 9.5em);
+{	top: 9.5em;
+	transform: translateY(-100%);
+	-webkit-transform: translateY(-100%);
 	left: 3em;
 	max-width: 14em;
 }
 #help .signaler-photo
-{	bottom: calc(100% - 21em);
+{	top: 21em;
+	transform: translateY(-100%);
+	-webkit-transform: translateY(-100%);
 	left: 0em;
 	text-align: left;
 }
@@ -112,10 +116,10 @@
 }
 @media screen and (min-height: 1024px) and (orientation: portrait) {
 #help .signaler-placer
-{	bottom: calc(65% - 11em);
+{	top: Calc(35% + 11em);
 }
 #help .signaler-photo
-{	bottom: calc(65% - 23em);
+{	top: Calc(35% + 23em);
 }
 }
 

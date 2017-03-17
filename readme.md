@@ -116,3 +116,12 @@ connection.connect();
 Pour déboguer une webview dans chrome : chrome://inspect/#devices
 
 NB: ne visualise pas pour les canvas (donc OL3)
+
+
+## Publication
+--------------
+
+Compiler l'APK en mode release en utilisant le keystore :
+> cordova build android --buildConfig=build.json --release
+
+> https://play.google.com/apps/publish
