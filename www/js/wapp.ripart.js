@@ -281,13 +281,14 @@ RIPart.prototype.saveFormulaire = function(form)
 		this.saveLocalRem (georem, function(e)
 		{	wapp.wait(false);
 			wapp.notification (e.info);
+			self.onSelect(georem);
 			// Reset photo
 			$(".photo img", self.formElement).attr("src","")
 						.data("photo",false)
 						.hide();
 			$(".photo .fa-stack", self.formElement).show();
 			$(".comment", form).val("");
-		})
+		});
 		this.cancelFormulaire();
 	}
 };
@@ -355,7 +356,7 @@ RIPart.prototype.postLocalRems = function()
 
 	// Start sending...
 	if (nb) postNext();
-	else wapp.message ("Toutes les remarques ont déjà été envoyées..."," ");
+	else wapp.message ("Tous les signalements ont déjà été envoyées..."," ");
 };
 
 
@@ -505,7 +506,7 @@ RIPart.prototype.updateLocalRem = function(i, options)
 RIPart.prototype.delLocalRems = function()
 {	var self = this;
 	wapp.selectDialog (
-			{	all: "Tous les signalements envoyée", 
+			{	all: "Tous les signalements envoyé", 
 				rep: "Les signalements ayant eu une réponse",
 				close: "Seulement les signalements clos"
 			}, 
@@ -708,6 +709,15 @@ RIPart.prototype.connectDialog = function (options)
 	if (typeof (options.onShow) == "function") options.onShow({ dialog:tp, target: this });
 	self.saveParam();
 };
+
+/** Deconnect current user
+*/
+RIPart.prototype.deconnect = function()
+{	this.param.profil = null;
+	this.saveParam();
+	this.onUpdate();
+}
+
 
 /** Check user info : getUserInfo + save informations
 */

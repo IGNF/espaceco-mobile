@@ -230,7 +230,8 @@ CordovApp.prototype.dataAttributes = function (element, attr)
 			// Serialize array of object
 			else if (obj.data("array"))
 			{	if (a instanceof Array)
-				{	// Save content as template
+				{	obj.children().show();
+					// Save content as template
 					if (!obj.data("array-template"))
 					{	obj.data("array-template", obj.html());
 					}
@@ -312,8 +313,10 @@ CordovApp.prototype.dataAttributes = function (element, attr)
 	// Set src
 	$('img[data-src]', element).each(function()
 	{	var src = $(this).data('src');
-		$(this).attr("src", attr[src]);
-		if (attr[src]) $(this).attr("src", attr[src]).show();
+		if (attr[src]) 
+		{	$(this).attr("src", attr[src]);
+			$(this).attr("src", attr[src]).show();
+		}
 		else $(this).hide();
 	});
 	// Set Attributes

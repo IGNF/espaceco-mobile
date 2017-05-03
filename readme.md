@@ -121,6 +121,8 @@ NB: ne visualise pas pour les canvas (donc OL3)
 ## Publication
 --------------
 
+### Playstore Android
+
 Compiler l'APK en mode release en utilisant le keystore :
 > cordova build android --buildConfig=build.json --release
 

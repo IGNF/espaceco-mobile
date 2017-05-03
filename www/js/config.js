@@ -3,11 +3,10 @@
 * Get a developper key on http://api.ign.fr/geoportail/
 * Get a full key on http://professionnels.ign.fr/api-web
 */
-var apiKey = "mpzzllk4b1eykv4kuw253w02";
-apiKey = "woxaf4dkmx31elou2xvlt1mm";
+var apiKey = "woxaf4dkmx31elou2xvlt1mm";
 
 // App version
-CordovApp.prototype.version = "0.0.12";
+CordovApp.prototype.version = "1.0.03";
 
 CordovApp.prototype.guichets = 
 {	haies: { feature: 'haies', database: "haies_gers" },

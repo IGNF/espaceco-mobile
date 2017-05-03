@@ -1,4 +1,4 @@
-/*  __  __                      _    _        _   
+﻿/*  __  __                      _    _        _   
    |  \/  |___ _ _    __ _ _  _(_)__| |_  ___| |_ 
    | |\/| / _ \ ' \  / _` | || | / _| ' \/ -_)  _|
    |_|  |_\___/_||_| \__, |\_,_|_\__|_||_\___|\__|
@@ -8,8 +8,6 @@
  * @type {CordovApp}
  * 
  */
-		$(document).on("ready", function (){console.log("ready")})
-
 var wapp = new CordovApp(
 {	/**
 	* Initilize the application map 
@@ -49,9 +47,37 @@ var wapp = new CordovApp(
 						if (e.val===false) $("#map .searchCtrl").hide();
 						else $("#map .searchCtrl").show();
 						break;
+					case "qlf":
+						if (wapp.ripart)
+						{	var qlf = /qlf/.test(wapp.ripart.getServiceUrl());
+							if (e.val!=qlf) 
+							{	if (e.val)wapp.ripart.setServiceUrl("https://qlf-collaboratif.ign.fr/collaboratif-develop/api/");
+								else wapp.ripart.setServiceUrl("https://espacecollaboratif.ign.fr/api/");
+								wapp.ripart.deconnect();
+							}
+						}
+						break;
 					default: break;
 				}
 			});
+
+		// Gestion des parametres caches
+		var cheat = 0;
+		var tcheat = new Date();
+		$('#options [data-role="header"]').on("click touchstart", function(e)
+		{	e.stopPropagation();
+			e.preventDefault();
+			var t = new Date();
+			if (t-tcheat > 250) cheat = 0;
+			else cheat++;
+			tcheat = t;
+			if (cheat>10 || wapp.param.options.qlf)
+			{	wapp.notification ("Mode debug activé...",500);
+				cheat=0;
+				$(".debug").show();
+			}
+		});
+		if (this.param.options.qlf) $(".debug").show();
 
 		// Layers (set hdpi:false to enable tile cache)
 		var layers = this.layers =  [
@@ -165,7 +191,7 @@ var wapp = new CordovApp(
 		// Layer switcher
 		map.addControl (new ol.control.LayerSwitcher({ target:$("#layerswitcher").get(0), extent:true, reordering: false }));
 
-		// Layer switcher
+		// Geolocation Control
 		var geoloc = window.geoloc = new ol.control.Geolocate();
 		geoloc.on("geolocate", function(e) 
 			{	centerMap(e.position);
@@ -223,7 +249,8 @@ var wapp = new CordovApp(
 
 		// Brancher les signalements
 		this.ripart = new RIPart(
-			{	infoElement: '#options .connect [data-input-role="info"] span.connected',
+			{	url: this.param.options.qlf ?  "https://qlf-collaboratif.ign.fr/collaboratif-develop/api/":null,
+				infoElement: '#options .connect [data-input-role="info"] span.connected',
 				countElement: '.georemsCount span',
 				listElement: '#signalements [data-role="content"]',
 				formElement: '#fiche .signaler',
@@ -232,16 +259,12 @@ var wapp = new CordovApp(
 					name: "Signalements"
 				}),
 				// Selection d'un signalement
-				onSelect: function(grem)
-				{	var features = wapp.ripart.layer.getSource().getFeatures();
-					for (var i=0, f; f = features[i]; i++)
-					{	if (f.get('georem')===grem)
-						{	wapp.select.selectFeature(f, wapp.ripart.layer);
-							break;
-						}
-					}
+				onSelect: function(georem)
+				{	var f = wapp.ripart.getFeature(georem);
+					wapp.select.getFeatures().clear();
+					wapp.select.selectFeature(f, wapp.ripart.layer);
 					wapp.showOnglet("info");
-					wapp.showSelect();
+					wapp.showSelect(true);
 				},
 				// Affichage du dialogue
 				onShow: function(form)
@@ -280,7 +303,6 @@ var wapp = new CordovApp(
 				}
 				*/
 			});
-		this.ripart.setServiceUrl("https://qlf-collaboratif.ign.fr/collaboratif-develop/api/");
 		$("#signalements button").click(function(){ wapp.select.getFeatures().clear(); });
 
 

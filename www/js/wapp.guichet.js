@@ -122,8 +122,12 @@ wapp.delGeorem = function()
 
 /** Afficher la fiche
 */
-wapp.showSelect = function()
+wapp.showSelect = function(ripart)
 {	var f = this.select.getFeatures().item(0);
+
+	if (ripart) $("#fiche").addClass("fromRipart");
+	else $("#fiche").removeClass("fromRipart");
+
 	var div = $('#fiche .selection');
 	if (!f) 
 	{	div.removeClass("georem fiche");
@@ -144,6 +148,13 @@ wapp.showSelect = function()
 		}
 	}
 	wapp.showPage("fiche");
+	// Afficher le point si hors de l'ecran
+	if (f)
+	{	var e = this.map.getView().calculateExtent(this.map.getSize());
+		if (!ol.extent.containsCoordinate(e, f.getGeometry().getCoordinates()))
+		{	this.map.getView().setCenter(f.getGeometry().getCoordinates());
+		}
+	}
 };
 
 /** Connexion RIpart
@@ -156,8 +167,13 @@ wapp.connect = function()
 			{	case 401: 
 					msg = [ "Accès interdit" , "Utilisateur inconnu." ];
 					break;
+				case "no_profile":
+
+					msg = [ "Connexion", error.statusText ]
+					break;
 				default: 
 					msg = [ "Connexion", "Connexion impossible...<br/>Vérifiez votre connexion." ];
+					console.log(error)
 					break;
 			};
 			wapp.message (msg[1], msg[0], 

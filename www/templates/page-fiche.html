@@ -1,4 +1,4 @@
-﻿<div data-role="header" data-back-button="true">Fiche</div>
+﻿<div data-role="header" data-back-button="true"><span class="fromRipart" onclick="wapp.showPage('signalements')">&#x2770;</span>Fiche</div>
 <div data-role="onglet">
 	<div class="trackingInfo">
 		<i class="backArrowBt"></i> retour à la fiche
@@ -12,6 +12,7 @@
 			<i class="fa fa-wifi fa-rotate-90"></i>Signaler
 		</div>
 		<i class="fa fa-close" style="font-size:1.5em; padding:0.75em 0.5em; float:right; cursor:pointer" onclick="wapp.hidePage();"></i>
+		<i class="fa fa-close fromRipart" style="font-size:1.5em; padding:0.75em 0.5em; float:right; cursor:pointer" onclick="wapp.showPage('signalements')"></i>
 	</div>
 
 	<!-- Fiche -->
@@ -42,6 +43,11 @@
 				</li>
 				<li>
 					<img class="photo" data-src="photo" style="max-width:100%;" />
+				</li>
+				<li>
+					<label>Thèmes :</label>
+					<span data-attr="themes" data-array="1" data-sep=", "><span>%nom% (%groupe%)</span></span>
+					<span data-attr="theme"></span>
 				</li>
 			</ul>
 			<div style="width:100%; margin-top:0.5em;" >

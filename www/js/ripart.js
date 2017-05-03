@@ -15,8 +15,7 @@ https://forum.ionicframework.com/t/how-to-set-authorization-header-in-ng-cordova
 var RIPart = function(options)
 {	options = options || {};
 	// Url du service
-	var url = "https://espacecollaboratif.ign.fr/api/";
-	//var url = "https://qlf-collaboratif.ign.fr/collaboratif-develop/api/";
+	var url = options.url || "https://espacecollaboratif.ign.fr/api/";
 	var user = options.user;
 	var pwd = options.pwd;
 	
@@ -25,6 +24,13 @@ var RIPart = function(options)
 	*/
 	this.setServiceUrl = function(u)
 	{	url = u;
+	};
+
+	/** Recupere l'url du service
+	* @return {String} url du service
+	*/
+	this.getServiceUrl = function()
+	{	return url;
 	};
 
 	/** Changement d'utilisateur
@@ -298,7 +304,7 @@ var RIPart = function(options)
 		else if (params.features)
 		{	post.sketch = this.feature2sketch(params.features, params.proj);
 		}
-		if (params.id_groupe) post.group = params.id_groupe;
+		if (params.id_groupe>0) post.group = params.id_groupe;
 		if (params.themes) post.attributes = params.themes;
 		if (params.insee) post.insee = params.insee;
 		if (params.protocol) post.protocol = params.protocol;

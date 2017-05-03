@@ -51,6 +51,11 @@
 {	right: 3em;
 }
 
+
+.debug
+{	display: none;
+}
+
 #signaler
 {	position: fixed;
 	bottom: 0.3em;
@@ -288,6 +293,28 @@
 }
 #fiche > div
 {	background-color:#eee;
+}
+
+#fiche i.fromRipart
+{	display: none;
+}
+#fiche span.fromRipart
+{	display: none;
+	font-style: normal;
+	font-size: 1.7em;
+	height: 1em;
+	line-height: 0.7em;
+	vertical-align: middle;
+	margin: 0 0.3em 0 0;
+	cursor: pointer;
+}
+#fiche.fromRipart i.fa-close,
+#fiche.fromRipart i.backArrowBt
+{	display:none;
+}
+#fiche.fromRipart i.fromRipart,
+#fiche.fromRipart .fromRipart 
+{	display: initial
 }
 
 /** LayerSwitcher */

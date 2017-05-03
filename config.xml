@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="fr.ign.guichet" version="0.0.12" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>Mon Guichet</name>
+<widget id="fr.ign.guichet" version="1.0.3" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Espace collaboratif IGN</name>
     <description>
-      Accédez aux bases de données hébergées sur l'espace collaboratif depuis votre mobile.
+      La solution IGN pour saisir et partager des signalements issus du terrain.
     </description>
-    <author email="dev@cordova.apache.org" href="http://cordova.io">
-        Jean-Marc Viglino (c) IGN.fr - 2016
+    <author email="sai-mobile@ign.fr" href="http://www.ign.fr">
+        Jean-Marc Viglino (c) IGN.fr - 2016-2017
     </author>
     <content src="index.html" />
     <icon src="www/img/logo.png" />
