@@ -102,6 +102,7 @@ var wapp = new CordovApp(
 					"extent": [ -7030196.346030043, -2438399.008686918, 6215711.586687296, 6645292.597727471 ],
 					"minResolution": 0,
 					"maxResolution": 4,
+					"visible": false,
 					"source": new ol.source.TileWMS(
 					{	"url": "http://wxs.ign.fr/"+apiKey+"/inspire/v/wms",
 						"projection": "EPSG:3857",
@@ -309,6 +310,10 @@ var wapp = new CordovApp(
 		$("#fiche").on("showonglet hidepage", function(e)
 		{	self.ripart.cancelFormulaire();
 			if (!$(e.target).hasClass('signaler')) wapp.select.setActive(true);
+		});
+
+		$("#search").on("showpage", function(e)
+		{	setTimeout(function(){ $("#search input").focus(); });
 		});
 
 		// Affichage des layers
