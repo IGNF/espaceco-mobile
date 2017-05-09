@@ -976,3 +976,13 @@ body.trackingGeorem #fiche .signaler .movePosition
 {	border: 2px solid #999;
 	padding: 0.5em;
 }
+
+/** Dialog attributs*/
+[data-role="dialog"].attributes ul
+{	margin:0;
+	padding:0;
+	list-style: none;
+}
+[data-role="dialog"].attributes li[data-input] 
+{	padding:0.5em 0;
+}

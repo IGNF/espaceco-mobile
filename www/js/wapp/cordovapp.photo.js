@@ -12,7 +12,11 @@
 	@param {enum} source Camera.PictureSourceType.SAVEDPHOTOALBUM ou Camera.PictureSourceType.CAMERA
 */
 CordovApp.prototype.getPicture = function (win, fail, param, source)
-{	if (typeof(param) != "object") param = {};
+{	if (!window.Camera) 
+	{	wapp.alert ("Impossible d'accéder aux photos...")
+		return;
+	}
+	if (typeof(param) != "object") param = {};
 	var self = this;
 	// Default buttons
 	var bouttons = { photo:"Caméra", album:"Album" };
@@ -30,7 +34,7 @@ CordovApp.prototype.getPicture = function (win, fail, param, source)
 					default: win("", button); break;
 				}
 			},
-			"photo");
+			options.className||"photo");
 		return;
 	}
 

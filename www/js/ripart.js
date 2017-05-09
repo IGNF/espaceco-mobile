@@ -61,6 +61,18 @@ var RIPart = function(options)
 	var georepAttr = { id:"ID_GEOREP", auteur:"AUTEUR", id_auteur:"ID_AUTEUR", 
 		titre:"TITRE", date:"DATE", statut:"STATUT", comment:"REPONSE" };
 
+	/* Formater les attributs en texte (pour affichage)
+	* @param {Object} vals a list of key/values
+	* @return {string} formated attributes
+	*/
+	var formatAttributString = this.formatAttributString = function(vals)
+	{	var v = "";
+		if (vals) for (var i in vals)
+		{	if (vals[i] || vals[i]===false) v += i+": "+(vals[i]===false ? "0" : (vals[i]===true ? "1":vals[i]))+"; "
+		}
+		return v;
+	};
+
 	function getGeorem (rem)
 	{	var r = {};
 		for (var i in georemAttr)
@@ -70,11 +82,20 @@ var RIPart = function(options)
 		r.lat = Number(r.lat);
 		r.croquis = (rem.find('CROQUIS').length>0);
 		r.themes = [];
+		r.attText="";
 		rem.find("THEME").each(function()
 		{	var th = {};
 			th.nom = $(this).find("NOM").text();
 			th.id_groupe = $(this).find("ID_GEOGROUPE").text();
 			th.groupe = $(this).attr("groupe");
+			var attribut = {};
+			var nb = 0;
+			$(this).find("ATTRIBUT").each(function()
+			{	attribut[$(this).attr('nom')] = $(this).text();
+				nb++;
+			});
+			if (nb) th.attribut = attribut;
+			r.attText += formatAttributString(attribut);
 			r.themes.push(th);
 		});
 		r.rep = [];
@@ -87,7 +108,7 @@ var RIPart = function(options)
 		});
 		//console.log(r);
 		return r;
-	}
+	};
 
 	/* Requete sur l'espace collaboratif
 	* @param {String} action a realiser
@@ -241,10 +262,12 @@ var RIPart = function(options)
 			});
 			resp.find("THEMES ATTRIBUT").each(function()
 			{	var att = $(this);
+				var vals = att.find("VAL");
+				for (var i=0; i<vals.length; i++) vals[i] = $(vals[i]).text();
 				th[att.find("ID_GEOGROUPE").text()+":"+att.find("NOM").text()].attributs.push(
 					{	att: att.find("ATT").text(),
 						type: att.find("TYPE").text(),
-						val: att.find("VALEURS").text().replace(/^[^\<]*\<VAL\>|\<\/VAL\>[^\>]*$/g,"").split("<VAL></VAL>")
+						val: vals
 					});
 			});
 			return r;
@@ -299,13 +322,14 @@ var RIPart = function(options)
 			territory: params.territory || "FXX",
 		};
 		// Optional attributes
-		if (params.attributes) post.attributes = params.attributes;
 		if (params.sketch) post.sketch = params.sketch;
 		else if (params.features)
 		{	post.sketch = this.feature2sketch(params.features, params.proj);
 		}
 		if (params.id_groupe>0) post.group = params.id_groupe;
+		post.attributes = "";
 		if (params.themes) post.attributes = params.themes;
+		if (params.attributes) post.attributes += params.attributes;
 		if (params.insee) post.insee = params.insee;
 		if (params.protocol) post.protocol = params.protocol;
 		if (params.version) post.version = params.version;
@@ -403,3 +427,16 @@ RIPart.prototype.initialize = function(options) {};
 * @api
 */
 RIPart.prototype.onUpdate = function() {};
+
+
+/** Transform date to ISODateString YYYY-MM-DD HH:MM:SS
+*/
+Date.prototype.toISODateString = function()
+{	var d = new Date();
+	return d.getFullYear() + "-" + 
+		("00" + d.getDate()).slice(-2) + "-" + 
+		("00" + (d.getMonth() + 1)).slice(-2) + " " + 
+		("00" + d.getHours()).slice(-2) + ":" + 
+		("00" + d.getMinutes()).slice(-2) + ":" + 
+		("00" + d.getSeconds()).slice(-2);
+};

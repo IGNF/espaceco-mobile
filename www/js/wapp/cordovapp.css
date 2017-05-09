@@ -443,12 +443,12 @@ i.backArrowBt:before
 
 /*	font-stretch: condensed; */	
 	font-size: 0.8em;
-	margin-bottom: 0.5em;
+	margin: 0.8em 0;
 	height:1em;
 	transform: scale(1,1.5);
 	transform-origin: 0 0;
 	-webkit-transform: scale(1,1.5);
-	-webkit-transform-origin: 0 0;
+	-webkit-transform-origin: 0 100%;
 }
 [data-role=dialog] ul[data-role=select]
 {	list-style: none;

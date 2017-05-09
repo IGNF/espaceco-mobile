@@ -134,6 +134,10 @@ body.trackingGeorem #fiche .trackingInfo
 {	width:100%;
 }
 
+.photodel[data-role=dialog] [data-role=dialogBt]:nth-child(3)
+{	clear: right;
+}
+
 }
 
 /* Fiche */

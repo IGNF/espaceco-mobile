@@ -50,7 +50,7 @@ var wapp = new CordovApp(
 					case "qlf":
 						if (wapp.ripart)
 						{	var qlf = /qlf/.test(wapp.ripart.getServiceUrl());
-							if (e.val!=qlf) 
+							if (e.val != qlf) 
 							{	if (e.val)wapp.ripart.setServiceUrl("https://qlf-collaboratif.ign.fr/collaboratif-develop/api/");
 								else wapp.ripart.setServiceUrl("https://espacecollaboratif.ign.fr/api/");
 								wapp.ripart.deconnect();
@@ -239,8 +239,6 @@ var wapp = new CordovApp(
 			{	handleLongTouchEvent: function(e)
 				{	wapp.select.getFeatures().clear();
 					map.getView().setCenter(e.coordinate);
-					wapp.showPage('fiche');
-					wapp.showOnglet('signal');
 					wapp.ripart.showFormulaire();
 				}
 			}));
@@ -260,16 +258,18 @@ var wapp = new CordovApp(
 					name: "Signalements"
 				}),
 				// Selection d'un signalement
-				onSelect: function(georem)
+				onSelect: function(georem, add)
 				{	var f = wapp.ripart.getFeature(georem);
 					wapp.select.getFeatures().clear();
 					wapp.select.selectFeature(f, wapp.ripart.layer);
 					wapp.showOnglet("info");
-					wapp.showSelect(true);
+					wapp.showSelect(!add);
 				},
 				// Affichage du dialogue
 				onShow: function(form)
-				{	var f = wapp.select.getFeatures().item(0);
+				{	wapp.showPage('fiche');
+					wapp.showOnglet('signal');
+					var f = wapp.select.getFeatures().item(0);
 					if (f && f.get('georem'))
 					{	f = false;
 						wapp.select.getFeatures().clear();
@@ -306,7 +306,6 @@ var wapp = new CordovApp(
 			});
 		$("#signalements button").click(function(){ wapp.select.getFeatures().clear(); });
 
-
 		$("#fiche").on("showonglet hidepage", function(e)
 		{	self.ripart.cancelFormulaire();
 			if (!$(e.target).hasClass('signaler')) wapp.select.setActive(true);
@@ -322,9 +321,16 @@ var wapp = new CordovApp(
 		// Set parameters
 		this.paramInput.change();
 
+		// Actualiser le compte
+		wapp.wait("Connexion...")
+		this.ripart.checkUserInfo(
+			function ()
+			{ wapp.wait(false); wapp.notification("Connecté au service",1200); }, 
+			function()
+			{ wapp.wait(false); }
+		);
 		// Fin
-		wapp.wait(false);
-
+//		wapp.wait(false);
 	},
 
 	/** Affichage des layers

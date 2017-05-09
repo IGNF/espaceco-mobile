@@ -108,6 +108,15 @@ wapp.postGeorem = function()
 		});
 };
 
+/** Modifier le signalements courant
+*/
+wapp.modifyGeorem = function()
+{	var f = wapp.select.getFeatures().item(0);
+	var grem = f.get('georem');
+	wapp.select.selectFeature();
+	if (grem) wapp.ripart.showFormulaire (grem);
+};
+
 /** Supprimer le signalement courant
 */
 wapp.delGeorem = function()
@@ -121,6 +130,7 @@ wapp.delGeorem = function()
 }
 
 /** Afficher la fiche
+* @param {bool} ripart true si vient de la page de remontees 
 */
 wapp.showSelect = function(ripart)
 {	var f = this.select.getFeatures().item(0);

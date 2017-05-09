@@ -1,23 +1,59 @@
-﻿/** Creation du compte > enregistrer les actions
+﻿/** @class RIPart
+* Gestion de connexion avec l'espace collaboratif pour la remontee d'informations
+* Gestion des dialogues dans l'application (connexion, formulaire de saisie d'une remontee)
+* Connexion avec la carte et les elements de l'applicaiton
+*/
+/**
+@function RIPart.showFormulaire
+@desc Gestion d'un formulaire de saisie 
+                           +---------------------------+
+                           |  RIPart:showFormulaire()  |
+                           +-------------+-------------+
+                                +--------v--------+
+                                |  cback:onShow() |
+                                +--------+--------+
+             ============================v======================================
+       +-------+                    +------+                                 +--------+
+      |  photo  |                  |  save  |                               |  cancel  |
+       +---+---+                    +--+---+                                 +---+----+
+           |                           |                                         |
++----------+-----+  +------------------+-------------------------+  +------------+---------------+
+| RIPart:photo() |  | RIPart:saveFormulaire()                    |  |  RIPart:cancelFormulaire() |
++----------------+  +--------------------------------------------+  +----------------------------+
+                    | cback:formatGeorem()                       |
+                    +-----------------------+--------------------+
+                    | RIPart:saveLocalRem() |                    |
+                    +-----------------------+                    |
+                    | RIPart:saveParam()    |                    |
+                    |                       |                    |
+                    | RIPart:onUpdate()     |  RIPart.onSelect() |
+                    +-----------------------+--------------------+
+                    | RIPart:cancelFormulaire()                  |
+                    +--------------------------------------------+
 
-options:
-- infoElement : element pour l'info de connection : '#options .connect [data-input-role="info"] span.info'
-- formElement : formulaire de saisie d'un signalements : '#fiche2 [data-role="onglet-li"][data-list="signal"]'
-- countElement : compteur de signalements locaux : '.georemsCount span'
-- listElement : ul pour l'affichage de la liste des signalements (doit contenir un template) : #signalements [data-role="content"]
-- profilElement : Affichage du profil de contribution : .profil
-- georemPage : Page d'affichage du signalements : #georem
-- onSelect {function} : selectionne une georem
-- onShow {function} afficher le formulaire
-- onLocate {function} callback lors d'une localisation
-- formatGeorem {function} formater une georem avant envoi, recoit un georem + formulaire, renvoi true si ok pour la sauvegarde
-- messagePhoto {String} Message pour la prise de photo (text/html)
+
+*/
+/** 
+	Creation du compte > enregistrer les actions
+
+	@param {} options
+	- infoElement : element pour l'info de connection : '#options .connect [data-input-role="info"] span.info'
+	- formElement : formulaire de saisie d'un signalements : '#fiche2 [data-role="onglet-li"][data-list="signal"]'
+	- countElement : compteur de signalements locaux : '.georemsCount span'
+	- listElement : ul pour l'affichage de la liste des signalements (doit contenir un template) : #signalements [data-role="content"]
+	- profilElement : Affichage du profil de contribution : .profil
+	- georemPage : Page d'affichage du signalements : #georem
+	- onSelect {function(georem,add)} selectionne une georem, add=true si nouvelle, false si selection via la liste
+	- onShow {function(form)} affichage du formulaire (form)
+	- onLocate {function(loc)} callback lors d'une localisation
+	- formatGeorem {function(georem, form)} formater une georem avant envoi, recoit un georem + formulaire, renvoi true si ok pour la sauvegarde, false pour annuler
+	- messagePhoto {String} Message pour la prise de photo (text/html)
 */
 RIPart.prototype.initialize = function(options)
 {	var self = this;
 
 	// Parametres
-	this.messagePhoto = $(options.messagePhoto);
+	this.messagePhoto = options.messagePhoto;
 
 	// List
 	this.infoElement = $(options.infoElement);
@@ -140,7 +176,7 @@ RIPart.prototype.initialize = function(options)
 	// Tracking du centre
 	this.target = new ol.control.Target({ visible: false });
 	wapp.map.addControl (this.target);
-	this.showFormulaire(false);
+	this.cancelFormulaire();
 
 	$('.trackingInfo', formulaire.parent()).click(function()
 	{	self.target.setVisible(false);
@@ -205,6 +241,20 @@ RIPart.prototype.initialize = function(options)
 				
 };
 
+/** Get indice for a local rem
+* @param {Object} the rem to save
+* @param {function} a callback function
+*/
+RIPart.prototype.getIndice = function(grem)
+{	if (typeof(grem) != 'number')
+	{	for (var k=0; k<this.param.georems.length; k++)
+		{	if (this.param.georems[k] === grem)
+			{	return k;
+			}
+		}
+	}
+	else return grem;
+};
 
 /** delete a local rem
 * @param {Object} the rem to save
@@ -212,6 +262,7 @@ RIPart.prototype.initialize = function(options)
 */
 RIPart.prototype.delLocalRem = function(i, options)
 {	// Chercher l'indice correspondant a une remontee
+	/*
 	if (typeof(i) != 'number')
 	{	for (var k=0; k<this.param.georems.length; k++)
 		{	if (this.param.georems[k] === i)
@@ -220,6 +271,8 @@ RIPart.prototype.delLocalRem = function(i, options)
 			}
 		}
 	}
+	*/
+	i = this.getIndice(i);
 
 	var grem = this.param.georems[i];
 	if (grem)
@@ -257,12 +310,23 @@ RIPart.prototype.saveFormulaire = function(form)
 		georem.plat = pos[1];
 		georem.accuracy = this.geolocation.getAccuracy();
 	}
+
+	// Theme
 	var theme = wapp.selectInputVal($('[data-input="select"][data-param="theme"]', this.formElement));
 	if (theme)
 	{	georem.themes = '"'+theme+'"=>"1"';
 		georem.theme = wapp.selectInputText($('[data-input="select"][data-param="theme"]', this.formElement));
 	}
 	georem.id_groupe = this.param.profil.id_groupe;
+	// Attributs
+	var attr = $('.attributes', this.formElement).data("vals");
+	georem.attributes = "";
+	for (var i in attr)
+	{	a = attr[i];
+		a = (typeof(attr[i])=="boolean") ?  (a?"1":"0") : a.replace(/"/g,"''")
+		georem.attributes += ',"'+theme+"::"+i+'"=>"'+a+'"';
+	}
+	georem.attText =  $('.attributes [data-input-role="info"]', this.formElement).text();
 
 	// Formatage utilisateur
 	var isok = this.formatGeorem.call (this, georem, form);
@@ -274,14 +338,14 @@ RIPart.prototype.saveFormulaire = function(form)
 
 	if (isok)
 	{	// Forcer la date au moment de la remontee
-		georem.date = (new Date()).toISOString().replace(/T|(\..*)/g,' ');
+		georem.date = (new Date()).toISODateString();
 
 		// Ajouter la remontee
 		wapp.wait("Enregistrement du signalement.");
-		this.saveLocalRem (georem, function(e)
+		this.saveLocalRem (georem, this.formElement.data("grem"), function(e)
 		{	wapp.wait(false);
 			wapp.notification (e.info);
-			self.onSelect(georem);
+			self.onSelect(georem, true);
 			// Reset photo
 			$(".photo img", self.formElement).attr("src","")
 						.data("photo",false)
@@ -297,13 +361,23 @@ RIPart.prototype.saveFormulaire = function(form)
 * @param {Object} the rem to save
 * @param {function} a callback function
 */
-RIPart.prototype.saveLocalRem = function(georem, cback)
+RIPart.prototype.saveLocalRem = function(georem, current, cback)
 {	var self = this;
-	this.param.nbrem++;
-	this.param.georems.push(georem);
-	// Sauvegarde de la photo
-	if (georem.photo)
-	{	CordovApp.File.moveFile (georem.photo, "TMP/georem-"+this.param.nbrem+".jpg", 
+	var indice, oldphoto;
+	// Get current georem saved in the form (modification)
+	if (current)
+	{	indice = this.getIndice(current);
+		oldphoto = this.param.georems[indice].photo
+		this.param.georems[indice] = georem;
+	}
+	// No current > creat new one
+	else
+	{	indice = (this.param.nbrem++);
+		this.param.georems.push(georem);
+	}
+	// save photo
+	if (georem.photo && georem.photo!=oldphoto)
+	{	CordovApp.File.moveFile (georem.photo, "TMP/georem-"+indice+".jpg", 
 			function(file)
 			{	georem.photo = file.toURL();
 				self.saveParam();
@@ -317,7 +391,8 @@ RIPart.prototype.saveLocalRem = function(georem, cback)
 			})
 	}
 	else 
-	{	this.saveParam();
+	{	if (oldphoto && georem.photo!=oldphoto) CordovApp.File.delFile(oldphoto);
+		this.saveParam();
 		if (cback) cback ({ error:false, info:"Le signalement a été enregistré." });
 	}
 	this.onUpdate();
@@ -461,6 +536,7 @@ RIPart.prototype.updateLocalRem = function(i, options)
 	if (!options) options = {};
 	
 	// Chercher l'indice correspondant a une remontee
+	/*
 	if (typeof(i) != 'number')
 	{	for (var k=0; k<this.param.georems.length; k++)
 		{	if (this.param.georems[k] === i)
@@ -469,6 +545,8 @@ RIPart.prototype.updateLocalRem = function(i, options)
 			}
 		}
 	}
+	*/
+	i = this.getIndice(i);
 
 	var grem = this.param.georems[i];
 	if (grem && grem.id)
@@ -766,56 +844,185 @@ RIPart.prototype.isConnected = function()
 };
 
 /** Gestion de la page de signalement
+* @param {georem|} b une remontee non deja envoyee
 */
-RIPart.prototype.showFormulaire = function(b)
-{	if (b===false)
-	{	this.formElement.removeClass('formulaire');
-		this.overlay.setVisible(false);
-	}
-	else
-	{	wapp.help.show("formulaire-signaler");
-		this.formElement.addClass('formulaire');
-		$('.formulaire .movePosition', this.formElement).removeClass("tracking");
-		this.onShow(this.formElement);
+RIPart.prototype.showFormulaire = function(grem)
+{	var self = this;
+	// Callback 
+	this.onShow(this.formElement);
 		
-		var theme = $('[data-input="select"][data-param="theme"]', this.formElement);
-		$('[data-input-role="option"]', theme).remove();
-		$("<div>").attr("data-input-role","option").attr("data-val", "").html("<i>choisissez un thème...</i>").appendTo(theme);
-		var valdef = false;
-		var nbth = 0;
-		for (var i=0; i<this.param.themes.length; i++)
-		{	if (wapp.param.options.igntheme || this.param.themes[i].id_groupe == this.param.profil.id_groupe)
-			{	$("<div>").attr("data-input-role","option")
-					.attr("data-val", this.param.themes[i].id_groupe+"::"+this.param.themes[i].nom)
-					.text(this.param.themes[i].nom)
-					.appendTo(theme);
-				if (valdef===false) valdef = this.param.themes[i].id_groupe+"::"+this.param.themes[i].nom;
-				else valdef = "";
-				nbth++;
-			}
+	// Georem en cours de modification
+	var georem = (grem && grem.date && !grem.id) ? grem : false;
+	this.formElement.data("grem", georem);
+	if (georem)
+	{	$("input.lon", this.formElement).val(georem.lon);
+		$("input.lat", this.formElement).val(georem.lat);
+		$(".comment", this.formElement).val(georem.comment);
+		// Photo
+		var url = georem.photo;
+		if (url) 
+		{	var photoElt = $(".photo", this.formElement);
+			$("img", photoElt).attr("src",url+"?"+new Date().getTime())
+					.data("photo",url)
+					.show();
+			$(".fa-stack", photoElt).hide();
 		}
-		wapp.selectInput(theme, valdef);
-		if (nbth) theme.show();
-		else theme.hide();
-
-		var lon = Number($("input.lon", this.formElement).val());
-		var lat = Number($("input.lat", this.formElement).val());
-		pos = ol.proj.transform([lon, lat], 'EPSG:4326', wapp.map.getView().getProjection());
-		this.overlay.getSource().clear();
-		this.overlay.getSource().addFeature( new ol.Feature (new ol.geom.Point(pos)));
-		this.overlay.setVisible(true);
-		wapp.map.getView().setCenter(pos);
 	}
+	//
+	wapp.help.show("formulaire-signaler");
+	this.formElement.addClass('formulaire');
+	$('.formulaire .movePosition', this.formElement).removeClass("tracking");
+		
+	// Gestion des themes
+	var theme = $('[data-input="select"][data-param="theme"]', this.formElement);
+	$('[data-input-role="option"]', theme).remove();
+	$("<div>").attr("data-input-role","option").attr("data-val", "").html("<i>choisissez un thème...</i>").appendTo(theme);
+	var valdef = false;
+	var nbth = 0;
+	for (var i=0; i<this.param.themes.length; i++)
+	{	if (wapp.param.options.igntheme || this.param.themes[i].id_groupe == this.param.profil.id_groupe)
+		{	$("<div>").attr("data-input-role","option")
+				.attr("data-val", this.param.themes[i].id_groupe+"::"+this.param.themes[i].nom)
+				.text(this.param.themes[i].nom)
+				.appendTo(theme);
+			if (valdef===false) valdef = this.param.themes[i].id_groupe+"::"+this.param.themes[i].nom;
+			else valdef = "";
+			nbth++;
+		}
+	}
+	if (georem && georem.themes) valdef = georem.themes.split("=>")[0].replace(/^\"|\"$/g,"");
+	wapp.selectInput(theme, valdef, function(c)
+	{	self.selectTheme(c);
+	});
+	this.selectTheme(valdef, georem ? georem.attributes:false);
+	if (nbth) theme.show();
+	else theme.hide();
+
+	// Lon / lat
+	var lon = Number($("input.lon", this.formElement).val());
+	var lat = Number($("input.lat", this.formElement).val());
+	pos = ol.proj.transform([lon, lat], 'EPSG:4326', wapp.map.getView().getProjection());
+	this.overlay.getSource().clear();
+	this.overlay.getSource().addFeature( new ol.Feature (new ol.geom.Point(pos)));
+	this.overlay.setVisible(true);
+	wapp.map.getView().setCenter(pos);
+
+	// reset
 	this.target.setVisible(false);
-	this.geolocation.setTracking (b!==false);
+	this.geolocation.setTracking (true);
 	this.hasLocation = false;
 	$('body').removeClass("trackingGeorem");
 };
 
+
+/** Selectionne un theme dans le formulaire
+* @param {string} th theme par defaut
+* @param {string} atts attributs par defaut
+*/
+RIPart.prototype.selectTheme = function(th, atts)
+{	th = th.split("::");
+	var group = parseInt(th[0]);
+	th = th[1];
+	var themes = this.param.themes;
+	var theme = null;
+	for (var i=0; i<themes.length; i++)
+	{	if (themes[i].id_groupe == group && themes[i].nom == th)
+		{	theme = themes[i];
+			break;
+		}
+	}
+	var self = this;
+	if (theme && theme.attributs.length)
+	{	$(".attributes", this.formElement).show()
+			.data('attributes', theme.attributs)
+			.unbind("click")
+			.click(function(){ self.formulaireAttribut(); });
+		this.formulaireAttribut(atts);
+	}
+	else
+	{	$(".attributes", this.formElement).hide();
+		this.formulaireAttribut();
+	}
+};
+
+/** Affichage du formulaire attribut
+*/
+RIPart.prototype.formulaireAttribut = function(valdef)
+{	var self = this;
+	var input = $(".attributes", this.formElement);
+	var att = input.data('attributes');
+	if (input.is(":visible"))
+	{	var content = $("<ul>");
+		var li;
+		var vals={};
+		if (valdef)
+		{	var v = valdef.replace(/^,/, "").split(',"');
+			valdef = {};
+			for (var i=0; i<v.length; i++)
+			{	var l = v[i].split('"=>"');
+				var k = l[0].split("::")[2];
+				valdef[k] = l[1].replace(/"$/,"");
+			}
+		}
+		for (var i=0, a; a = att[i]; i++)
+		{	var v = (valdef ? valdef[a.att] : a.val[0]);
+			switch (a.type)
+			{	case 'list':
+					li = $("<li data-input='select' data-param='"+a.att+"'>").appendTo(content);
+					$("<label>").text(a.att).appendTo(li);
+					for (var k=0; k<a.val.length; k++)
+					{	$("<div data-input-role='option' data-val='"+a.val[k]+"'>").html(a.val[k]||"<i>sans</i>").appendTo(li);
+					}
+					vals[a.att] = v;
+					break;
+				case 'checkbox':
+					li = $("<li data-input='check' data-param='"+a.att+"'>").appendTo(content);
+					$("<label>").text(a.att).appendTo(li);
+					vals[a.att] = (v!="0");
+					break;
+				default:
+					li = $("<li data-input='text' data-param='"+a.att+"'>").appendTo(content);
+					$("<label>").text(a.att).appendTo(li);
+					$("<input>").attr("type","text").appendTo(li);
+					vals[a.att] = v;
+					break;
+			}
+		};
+		if (input.data("vals")) vals = input.data("vals");
+		wapp.setParamInput(content, vals);
+		function showInfo()
+		{	input.data("vals", vals);
+			$('[data-input-role="info"]', input).text( self.formatAttributString(vals) );
+		}
+		showInfo();
+		if (!valdef) wapp.dialog.show(content, 
+		{	buttons: { ok:"ok",cancel:"Annuler" },
+			className: "attributes",
+			callback: function(b) 
+			{	if (b=='ok')
+				{	showInfo();
+				}
+			}
+		});
+	}
+	else
+	{	input.data("vals", false);
+		$('[data-input-role="info"]', input).text("");
+	}
+};
+
+
 /** Cancel formulaire: showFormulaire (false)
 */
 RIPart.prototype.cancelFormulaire = function(b)
-{	this.showFormulaire (false);
+{	this.formElement.removeClass('formulaire');
+	this.overlay.setVisible(false);
+	this.formElement.data("grem", false);
+	// Remove tracking
+	this.target.setVisible(false);
+	this.geolocation.setTracking (false);
+	this.hasLocation = false;
+	$('body').removeClass("trackingGeorem");
 }
 
 /** Take a photo using the camera
@@ -841,9 +1048,10 @@ RIPart.prototype.photo = function()
 	},
 	null,
 	{	prompt: "Ajouter une photo",
-		message: this.mesagePhoto,
+		message: this.messagePhoto,
 		name: "TMP/photo.jpg",
 		buttons: $("img", photoElt).attr("src") ? { del:"supprimer", cancel:"annuler" } : false,
+		className: $("img", photoElt).attr("src") ? "photodel":"",
 		targetWidth: self.param.width || 1200,
 		targetHeight: self.param.heigth || 1200,
 		correctOrientation: (self.param.imgOrient!==false)

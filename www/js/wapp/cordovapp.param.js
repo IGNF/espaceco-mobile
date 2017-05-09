@@ -314,7 +314,9 @@ CordovApp.prototype.dataAttributes = function (element, attr)
 	$('img[data-src]', element).each(function()
 	{	var src = $(this).data('src');
 		if (attr[src]) 
-		{	$(this).attr("src", attr[src]);
+		{	var src = attr[src];
+			if (!/\?/.test(src)) src += "?"+(new Date());
+			$(this).attr("src", src);
 			$(this).attr("src", attr[src]).show();
 		}
 		else $(this).hide();

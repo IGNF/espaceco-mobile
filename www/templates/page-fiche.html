@@ -30,6 +30,15 @@
 					<span data-attr="date" ></span>
 				</li>
 				<li>
+					<label>Thèmes :</label>
+					<span data-attr="themes" data-array="1" data-sep=", "><span>%nom% (%groupe%)</span></span>
+					<span data-attr="theme"></span>
+				</li>
+				<li>
+					<label>Attributs :</label>
+					<span data-attr="attText" style="white-space: nowrap;text-overflow: ellipsis;overflow: hidden;width: 100%;display: block;"></span>
+				</li>
+				<li>
 					<label>Commune :</label>
 					<span data-attr="commune"></span>
 				</li>
@@ -44,15 +53,11 @@
 				<li>
 					<img class="photo" data-src="photo" style="max-width:100%;" />
 				</li>
-				<li>
-					<label>Thèmes :</label>
-					<span data-attr="themes" data-array="1" data-sep=", "><span>%nom% (%groupe%)</span></span>
-					<span data-attr="theme"></span>
-				</li>
 			</ul>
 			<div style="width:100%; margin-top:0.5em;" >
 				<div data-role="dialogBt" class="del" onclick="wapp.delGeorem();">Supprimer</div>
 				<div data-attr="id" data-null="1" data-role="dialogBt" class="send" onclick="wapp.postGeorem();">Envoyer</div>
+				<div data-attr="id" data-null="1" data-role="dialogBt" class="modify" onclick="wapp.modifyGeorem();">Modifier</div>
 			</div>
 			<div data-attr="rep" data-nnull="1">
 				<h3>Réponses :</h3>
