@@ -6,9 +6,16 @@
 	@require: JQuery
 */
 
-// Transform date to ISODateString
+/** Transform date to ISODateString YYYY-MM-DD HH:MM:SS
+*/
 Date.prototype.toISODateString = function()
-{	return this.toISOString().replace(/T.*/,"")
+{	var d = new Date();
+	return d.getFullYear() + "-" + 
+		("00" + d.getDate()).slice(-2) + "-" + 
+		("00" + (d.getMonth() + 1)).slice(-2) + " " + 
+		("00" + d.getHours()).slice(-2) + ":" + 
+		("00" + d.getMinutes()).slice(-2) + ":" + 
+		("00" + d.getSeconds()).slice(-2);
 };
 
 /** Connect parameters to data-input div 

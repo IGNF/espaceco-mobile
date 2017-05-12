@@ -8,29 +8,28 @@
 @desc Gestion d'un formulaire de saisie 
                            +---------------------------+
                            |  RIPart:showFormulaire()  |
-                           +-------------+-------------+
+                           +---------------------------+
                                 +--------v--------+
                                 |  cback:onShow() |
-                                +--------+--------+
+                                +-----------------+
              ============================v======================================
-       +-------+                    +------+                                 +--------+
-      |  photo  |                  |  save  |                               |  cancel  |
-       +---+---+                    +--+---+                                 +---+----+
-           |                           |                                         |
-+----------+-----+  +------------------+-------------------------+  +------------+---------------+
-| RIPart:photo() |  | RIPart:saveFormulaire()                    |  |  RIPart:cancelFormulaire() |
-+----------------+  +--------------------------------------------+  +----------------------------+
-                    | cback:formatGeorem()                       |
-                    +-----------------------+--------------------+
-                    | RIPart:saveLocalRem() |                    |
-                    +-----------------------+                    |
-                    | RIPart:saveParam()    |                    |
-                    |                       |                    |
-                    | RIPart:onUpdate()     |  RIPart.onSelect() |
-                    +-----------------------+--------------------+
-                    | RIPart:cancelFormulaire()                  |
-                    +--------------------------------------------+
-
+       +-------+   +-------+             +------+                                 +--------+
+      +  photo  + +  theme  +           +  sa^e  +                               +  cancel  +
+       +---+---+   +-+-----+             +--+---+                                 +---+----+
+           |         |                      |                                         |
++----------+-----+   |   +------------------+-------------------------+  +------------+---------------+
+| RIPart:photo() |   |   | RIPart:saveFormulaire()                    |  |  RIPart:cancelFormulaire() |
++----------------+   |   +--------------------------------------------+  +----------------------------+
+                     |   | cback:formatGeorem()                       |
+           +---------+   +-----------------------+--------------------+
+           |             | RIPart:saveLocalRem() |                    |
+ +---------+--------+    +-----------------------+                    |
+ |RIPart:selectTheme|    | RIPart:saveParam()    |                    |
+ +---------+--------+    |                       |                    |
+           |             | RIPart:onUpdate()     |  RIPart.onSelect() |
++----------+----------+  +-----------------------+--------------------+
+|RIPart:formulaireAttr|  | RIPart:cancelFormulaire()                  |
++---------------------+  +--------------------------------------------+
 
 */
 /** 
@@ -708,6 +707,7 @@ RIPart.prototype.updateLayer = function()
 };
 
 /** Afficher les info de la remontee
+* @param {} georem la remontee a afficher
 */
 RIPart.prototype.georemShow = function(grem)
 {	var page = this.georemPage.data('grem', grem);
@@ -894,7 +894,7 @@ RIPart.prototype.showFormulaire = function(grem)
 	wapp.selectInput(theme, valdef, function(c)
 	{	self.selectTheme(c);
 	});
-	this.selectTheme(valdef, georem ? georem.attributes:false);
+	this.selectTheme(valdef, georem ? georem.attributes:false, nbth!=1);
 	if (nbth) theme.show();
 	else theme.hide();
 
@@ -919,7 +919,7 @@ RIPart.prototype.showFormulaire = function(grem)
 * @param {string} th theme par defaut
 * @param {string} atts attributs par defaut
 */
-RIPart.prototype.selectTheme = function(th, atts)
+RIPart.prototype.selectTheme = function(th, atts, prompt)
 {	th = th.split("::");
 	var group = parseInt(th[0]);
 	th = th[1];
@@ -937,7 +937,7 @@ RIPart.prototype.selectTheme = function(th, atts)
 			.data('attributes', theme.attributs)
 			.unbind("click")
 			.click(function(){ self.formulaireAttribut(); });
-		this.formulaireAttribut(atts);
+		this.formulaireAttribut(atts, prompt);
 	}
 	else
 	{	$(".attributes", this.formElement).hide();
@@ -946,8 +946,10 @@ RIPart.prototype.selectTheme = function(th, atts)
 };
 
 /** Affichage du formulaire attribut
+* @param {Object} valdef liste de valeurs par defaut
+* @param {bool} prompt afficher le dialogue d'attributs, defaut: true
 */
-RIPart.prototype.formulaireAttribut = function(valdef)
+RIPart.prototype.formulaireAttribut = function(valdef, prompt)
 {	var self = this;
 	var input = $(".attributes", this.formElement);
 	var att = input.data('attributes');
@@ -984,19 +986,22 @@ RIPart.prototype.formulaireAttribut = function(valdef)
 					li = $("<li data-input='text' data-param='"+a.att+"'>").appendTo(content);
 					$("<label>").text(a.att).appendTo(li);
 					$("<input>").attr("type","text").appendTo(li);
+					$('<i class="clear-input">').appendTo(li);
 					vals[a.att] = v;
 					break;
 			}
 		};
-		if (input.data("vals")) vals = input.data("vals");
+		if (!valdef && input.data("vals")) vals = $.extend({}, input.data("vals"));
 		wapp.setParamInput(content, vals);
 		function showInfo()
-		{	input.data("vals", vals);
+		{	input.data("vals", $.extend({}, vals));
 			$('[data-input-role="info"]', input).text( self.formatAttributString(vals) );
 		}
 		showInfo();
-		if (!valdef) wapp.dialog.show(content, 
+		// First time ask for attributes
+		if (!valdef && prompt!==false) wapp.dialog.show(content, 
 		{	buttons: { ok:"ok",cancel:"Annuler" },
+			title: "Attributs",
 			className: "attributes",
 			callback: function(b) 
 			{	if (b=='ok')
@@ -1005,6 +1010,7 @@ RIPart.prototype.formulaireAttribut = function(valdef)
 			}
 		});
 	}
+	// Reset form values
 	else
 	{	input.data("vals", false);
 		$('[data-input-role="info"]', input).text("");

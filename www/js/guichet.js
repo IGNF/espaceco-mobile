@@ -325,7 +325,9 @@ var wapp = new CordovApp(
 		wapp.wait("Connexion...")
 		this.ripart.checkUserInfo(
 			function ()
-			{ wapp.wait(false); wapp.notification("Connecté au service",1200); }, 
+			{	wapp.wait(false); 
+				wapp.notification("Connecté au service",1200); 
+			}, 
 			function()
 			{ wapp.wait(false); }
 		);

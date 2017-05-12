@@ -6,7 +6,7 @@
 var apiKey = "woxaf4dkmx31elou2xvlt1mm";
 
 // App version
-CordovApp.prototype.version = "1.0.03";
+CordovApp.prototype.version = "1.0.03c";
 
 CordovApp.prototype.guichets = 
 {	haies: { feature: 'haies', database: "haies_gers" },
