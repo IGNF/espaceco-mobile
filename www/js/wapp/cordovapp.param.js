@@ -272,6 +272,22 @@ CordovApp.prototype.dataAttributes = function (element, attr)
 				}
 			}
 			*/
+			// Liste de valeurs (separees par des \n)
+			else if (obj.data("list"))
+			{	var l = a.split("\n");
+				if (l.length>1) 
+				{	obj.html(l.join("; "))
+						.addClass("list")
+						.unbind('click')
+						.click(function()
+						{	wapp.message(l.join("<br/>"), " ");
+						});
+				}
+				else 
+				{	obj.html(a).removeClass("list")
+						.unbind('click');
+				}
+			}
 			// Size of an array
 			else if (obj.data("array-length"))
 			{	obj.html(a.length);

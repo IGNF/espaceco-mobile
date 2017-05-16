@@ -986,10 +986,28 @@ body.trackingGeorem #fiche .signaler .movePosition
 [data-role="dialog"].attributes li[data-input] 
 {	padding:0.5em 0;
 }
+
 #fiche .signaler .attributes div
 {	white-space: nowrap;
 	text-overflow: ellipsis;
 	overflow: hidden;
 	width: 100%;
 	display: block;
+}
+
+#fiche [data-list="1"]
+{	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	width: 100%;
+	display: block;
+	cursor: pointer;
+	padding-right: 1em;
+}
+#fiche [data-list="1"].list:after
+{	content: "\2771";
+    position: absolute;
+    right: 0.5em;
+    transform: translateY(-0.3em);
+    font-size: 1.5em;
 }

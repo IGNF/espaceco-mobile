@@ -68,7 +68,7 @@ var RIPart = function(options)
 	var formatAttributString = this.formatAttributString = function(vals)
 	{	var v = "";
 		if (vals) for (var i in vals)
-		{	if (vals[i] || vals[i]===false) v += i+": "+(vals[i]===false ? "0" : (vals[i]===true ? "1":vals[i]))+"; "
+		{	if (vals[i] || vals[i]===false) v += i+": "+(vals[i]===false ? "0" : (vals[i]===true ? "1":vals[i]))+"\n"
 		}
 		return v;
 	};
