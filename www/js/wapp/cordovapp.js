@@ -9,6 +9,11 @@
 /* i18n */
 if (!window._T) window._T = function(s) { return s; }
 
+// Polyfill OL3 bug webkitCancelRequestAnimationFrame on android < 4.2
+if (!window.cancelAnimationFrame && window.webkitCancelRequestAnimationFrame)
+{	window.cancelAnimationFrame = window.webkitCancelRequestAnimationFrame;
+}
+
 /** @namespace CordovApp
 */
 /** 
