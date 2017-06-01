@@ -148,6 +148,9 @@
 }
 
 /** A propos */
+#apropos [data-role='content']
+{	overflow-x: hidden;
+}
 #apropos p
 {	text-align:justify;
 }
@@ -199,6 +202,40 @@
 	cursor:pointer;
 	font-weight: normal;
 }
+
+/** */
+#splash
+{	-webkit-transform: none;
+	transform: none;
+	text-align: center;
+}
+#splash img
+{	position: absolute;
+	top: 30%;
+	min-height: 100px;
+	-webkit-transform: translate(-50%,-50%);
+	transform: translate(-50%,-50%);
+}
+#wait.splash > i
+{	position:absolute;
+}
+#wait.splash > div
+{	margin:0;
+	text-align: center;
+	min-height: 3em;
+}
+#wait.splash img
+{	min-height: 3em;
+	max-height: 4em;
+}
+#wait.splash img.error
+{	visibility: hidden;
+	min-height: 0.5em;
+}
+#wait.splash p
+{	margin:0;
+}
+
 
 /** info */
 #info
@@ -780,6 +817,11 @@
 #fiche .signaler.connected .connect,
 #fiche .signaler.connected.formulaire .formulaire
 {	display: block;
+}
+
+#fiche .signaler .noconnect .button
+{	margin: 1em 0;
+	width:100%;
 }
 
 #fiche .signaler .connect,

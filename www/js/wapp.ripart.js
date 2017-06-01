@@ -14,7 +14,7 @@
                                 +-----------------+
              ============================v======================================
        +-------+   +-------+             +------+                                 +--------+
-      +  photo  + +  theme  +           +  sa^e  +                               +  cancel  +
+      +  photo  + +  theme  +           +  save  +                               +  cancel  +
        +---+---+   +-+-----+             +--+---+                                 +---+----+
            |         |                      |                                         |
 +----------+-----+   |   +------------------+-------------------------+  +------------+---------------+
@@ -767,10 +767,8 @@ RIPart.prototype.connectDialog = function (options)
 				{	if (self.param.user != nom.val())
 					{	self.param.profil = null;
 					}
-					self.param.user = nom.val();
-					self.param.pwd = pwd.val();
 					wapp.wait("Connection au serveur...");
-					self.setUser (self.param.user, self.param.pwd);
+					self.setUser (nom.val(), pwd.val(), true);
 					self.checkUserInfo (null, (typeof (options.onError) == "function") ? options.onError : null);
 				}
 				else if (bt=="deconnect")
@@ -782,8 +780,8 @@ RIPart.prototype.connectDialog = function (options)
 				self.onUpdate();
 			}
 		});
-	nom.focus().val(this.param.user);
-	pwd.val(this.param.pwd)
+	nom.focus().val(this.getUser());
+	pwd.val(this.getUser(1))
 	if (typeof (options.onShow) == "function") options.onShow({ dialog:tp, target: this });
 	self.saveParam();
 };
@@ -970,7 +968,7 @@ RIPart.prototype.formulaireAttribut = function(valdef, prompt)
 		{	var v = (valdef ? valdef[a.att] : a.val[0]);
 			switch (a.type)
 			{	case 'list':
-					li = $("<li data-input='select' data-param='"+a.att+"'>").appendTo(content);
+					li = $("<li data-input='select'>").attr('data-param',a.att).appendTo(content);
 					$("<label>").text(a.att).appendTo(li);
 					for (var k=0; k<a.val.length; k++)
 					{	$("<div data-input-role='option' data-val='"+a.val[k]+"'>").html(a.val[k]||"<i>sans</i>").appendTo(li);
@@ -978,12 +976,12 @@ RIPart.prototype.formulaireAttribut = function(valdef, prompt)
 					vals[a.att] = v;
 					break;
 				case 'checkbox':
-					li = $("<li data-input='check' data-param='"+a.att+"'>").appendTo(content);
+					li = $("<li data-input='check'>").attr('data-param',a.att).appendTo(content);
 					$("<label>").text(a.att).appendTo(li);
 					vals[a.att] = (v!="0");
 					break;
 				default:
-					li = $("<li data-input='text' data-param='"+a.att+"'>").appendTo(content);
+					li = $("<li data-input='text'>").attr('data-param',a.att).appendTo(content);
 					$("<label>").text(a.att).appendTo(li);
 					$("<input>").attr("type","text").appendTo(li);
 					$('<i class="clear-input">').appendTo(li);
@@ -1024,6 +1022,7 @@ RIPart.prototype.cancelFormulaire = function(b)
 {	this.formElement.removeClass('formulaire');
 	this.overlay.setVisible(false);
 	this.formElement.data("grem", false);
+	$(".attributes", this.formElement).data('vals', false);
 	// Remove tracking
 	this.target.setVisible(false);
 	this.geolocation.setTracking (false);

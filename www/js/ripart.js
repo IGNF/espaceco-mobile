@@ -14,10 +14,11 @@ https://forum.ionicframework.com/t/how-to-set-authorization-header-in-ng-cordova
 */
 var RIPart = function(options)
 {	options = options || {};
+	// 
+	var secret = "Espace Collaboratif IGN";
 	// Url du service
 	var url = options.url || "https://espacecollaboratif.ign.fr/api/";
-	var user = options.user;
-	var pwd = options.pwd;
+	var user, pwd;
 	
 	/** Changement de l'url du service
 	* @param {String} url du service
@@ -32,14 +33,29 @@ var RIPart = function(options)
 	this.getServiceUrl = function()
 	{	return url;
 	};
-
+	
 	/** Changement d'utilisateur
 	* @param {String} user
 	* @param {String} password
 	*/
-	this.setUser = function(u, p)
+	this.setUser = function(u, p, cryp)
 	{	user = u;
-		pwd = p;
+		if (!p) return;
+		// Pass
+		if (cryp)
+		{	this.param.user = u;
+			pwd = p;
+			this.param.pwd = CryptoJS.AES.encrypt(p, secret).toString();
+		}
+		else 
+		{	pwd = CryptoJS.AES.decrypt(p, secret).toString(CryptoJS.enc.Utf8);
+		}
+	};
+	this.setUser (options.user, options.pwd, true);
+
+	this.getUser = function(b)
+	{	if (b) return pwd;
+		else return user;
 	};
 
 	/* Decode l'erreur */
@@ -215,7 +231,8 @@ var RIPart = function(options)
 				*/
 				data: options,
 				success: win,
-				error: fail
+				error: fail,
+				timeout: 30000
 			});
 		}
 		return true;

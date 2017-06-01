@@ -105,6 +105,9 @@ body.trackingGeorem #fiche .trackingInfo
 
 @media screen and (max-width:600px) 
 {
+#apropos p
+{	text-align:left;
+}
 #loadMap span {
 	margin: -0.5em 0;
 	display: block;

@@ -157,7 +157,8 @@ CordovApp.prototype.showPage = function(id_page)
 * @param {String|null} id of the page to hide, if null hide all pages
 */
 CordovApp.prototype.hidePage = function(id_page)
-{	$("body").attr("data-page","");
+{	if (id_page && !this.isPage(id_page)) return;
+	$("body").attr("data-page","");
 	// hide all pages
 	if (!id_page) 
 	{	$("[data-role='page'].visible").each(function()

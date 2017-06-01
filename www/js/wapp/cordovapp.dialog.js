@@ -297,8 +297,10 @@ var _wtimeout = null;
 * @param {String|false} message to show or false to hide the dialog
 * @param {boolean} false to prevent animation (to chain dialogs)
 */
-CordovApp.prototype.wait = function(msg, anim)
-{	if (!_wait)
+CordovApp.prototype.wait = function(msg, options)
+{	if (options===false) options = { anim:false };
+	if (!options) options = {};
+	if (!_wait)
 	{	_wback = $("<div>").attr("data-role","backDialog").appendTo("body");
 		_wait = $("<div>").attr("id","wait").attr("data-role","dialog").appendTo("body");
 		var spin = $("<i>").addClass("fa fa-spinner fa-pulse")
@@ -311,14 +313,17 @@ CordovApp.prototype.wait = function(msg, anim)
 		_wait.show();
 		_message.html(msg);
 		if (!_wait.hasClass('visible')) 
-		{	if (anim===false) _wait.addClass('visible noanim');
+		{	_wait.removeClass();
+			if (options.anim===false) _wait.addClass('visible noanim');
 			else _wtimeout = setTimeout (function() { _wait.addClass('visible'); }, 200);
 		}
+		else _wait.removeClass().addClass('visible');
+		if (options.className) _wait.addClass(options.className);
 	}
 	else 
 	{	_wback.hide();
-		_wait.removeClass('visible noanim');
-		if (anim===false) _wait.hide();
+		_wait.removeClass();
+		if (options.anim===false) _wait.hide();
 		else _wtimeout = setTimeout (function(){ _wait.hide(); }, 200);
 	}
 }

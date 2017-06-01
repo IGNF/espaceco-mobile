@@ -14,7 +14,14 @@ var wapp = new CordovApp(
 	* @method
 	*/
 	initialize: function() 
-	{	var self = this; 
+	{	
+		/*
+		// Splashscreen
+		wapp.showPage('splash');
+		setTimeout(function(){ wapp.hidePage('splash'); }, 2000);
+		*/
+
+		var self = this; 
 		// Version => cordova-plugin-app-version ???
 		$(".version").text(this.version);
 
@@ -240,7 +247,7 @@ var wapp = new CordovApp(
 			}));
 
 		// Gestion du cache
-		this.cache = new CacheMap({ loadPage: "#loadMap", listMap: '#cartes [data-list="maps"] ul' });
+		// this.cache = new CacheMap({ loadPage: "#loadMap", listMap: '#cartes [data-list="maps"] ul' });
 
 		// Brancher les signalements
 		this.ripart = new RIPart(
@@ -301,6 +308,9 @@ var wapp = new CordovApp(
 				*/
 			});
 		$("#signalements button").click(function(){ wapp.select.getFeatures().clear(); });
+		if (wapp.ripart.param.profil) 
+		{	$("#splash img").attr('src', wapp.ripart.param.profil.logo);
+		}
 
 		$("#fiche").on("showonglet hidepage", function(e)
 		{	self.ripart.cancelFormulaire();
@@ -318,14 +328,21 @@ var wapp = new CordovApp(
 		this.paramInput.change();
 
 		// Actualiser le compte
-		wapp.wait("Connexion...")
+		wapp.wait("Connexion...");
+		if (wapp.ripart.param.profil)
+		{	var img = $("<img>").attr('src', wapp.ripart.param.profil.logo)
+							.on('error', function(){ $(this).addClass('error'); });
+			var div = $("<div>").append(img).append($("<p>").text("Connexion..."));
+			wapp.wait(div, { className:'splash' });
+		}
 		this.ripart.checkUserInfo(
 			function ()
 			{	wapp.wait(false); 
 				wapp.notification("Connecté au service",1200); 
 			}, 
 			function()
-			{ wapp.wait(false); }
+			{	wapp.wait(false); 
+			}
 		);
 		// Fin
 //		wapp.wait(false);
