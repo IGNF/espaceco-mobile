@@ -44,14 +44,6 @@
 	width:2px;
 }
 
-#map .ol-zoom 
-{	top: 0.5em;
-}
-#map .ol-rotate
-{	right: 3em;
-}
-
-
 .debug
 {	display: none;
 }
@@ -124,13 +116,12 @@
 .ol-touch .searchCtrl
 {	top:3.5em;
 }
-.ol-zoom
+.ol-zoom 
 {	left: auto;
 	right: 0.5em;
-	top: 2.5em;
 }
-.ol-touch .ol-zoom
-{	top:3em;
+.ol-rotate
+{	right: 3em;
 }
 
 /** Loading */

@@ -47,6 +47,7 @@ function Dialog()
 	{	var self = this;
 		if (!this.isOpen()) return false;
 		_dlg.removeClass('visible');
+		$(":focus", _dlg).blur();
 		_back.hide();
 		if (_timeout) clearTimeout(_timeout);
 		_timeout = setTimeout (function(){ _dlg.hide(); }, 200);

@@ -165,6 +165,7 @@ CordovApp.prototype.hidePage = function(id_page)
 		{	var self = $(this)
 				.trigger( { type:"hidepage", page:$(this).attr('id') } )
 				.removeClass("visible");
+			$(":focus", this).blur();
 			setTimeout (function(){ self.hide(); }, 500);
 		});
 	}
@@ -173,6 +174,7 @@ CordovApp.prototype.hidePage = function(id_page)
 	{	var self = $("#"+id_page)
 			.trigger( { type:"hidepage", page:id_page } )
 			.removeClass("visible");
+		$(":focus", self).blur();
 		setTimeout (function(){ self.hide(); }, 500);
 	}
 };

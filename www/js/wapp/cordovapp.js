@@ -29,6 +29,8 @@ var CordovApp = function(obj)
 
 	/**  Cordova app (or browser) */
 	this.isCordova = window.cordova ? true:false;
+	if (this.isCordova) $("body").attr("data-platform",cordova.platformId);
+	else $("body").attr("data-platform","www");
 
 	/** Webapp parameters: localStorage['WebApp@param'] */
 	this.param = {};

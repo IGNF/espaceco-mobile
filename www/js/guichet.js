@@ -14,8 +14,7 @@ var wapp = new CordovApp(
 	* @method
 	*/
 	initialize: function() 
-	{	
-		/*
+	{	/*
 		// Splashscreen
 		wapp.showPage('splash');
 		setTimeout(function(){ wapp.hidePage('splash'); }, 2000);
@@ -168,6 +167,7 @@ var wapp = new CordovApp(
 				html: "<i class='fa fa-search'></i>",
 				handleClick: function()
 				{	wapp.showPage('search');
+					$("#search input").focus();
 				}
 			});
 		map.addControl (searchCtrl);
@@ -316,12 +316,8 @@ var wapp = new CordovApp(
 		{	self.ripart.cancelFormulaire();
 			if (!$(e.target).hasClass('signaler')) wapp.select.setActive(true);
 		});
-
-		$("#search").on("showpage", function(e)
-		{	setTimeout(function(){ $("#search input").focus(); });
-		});
-
-		// Affichage des layers
+						 
+        // Affichage des layers
 		this.showLayers(this.param.layers);
 
 		// Set parameters
