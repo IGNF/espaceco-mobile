@@ -321,6 +321,7 @@ CordovApp.prototype.dataAttributes = function (element, attr)
 		}
 		else 
 		{	if (obj.data("list")) obj.html("").removeClass("list").unbind('click');
+			else if (obj.data("array")) obj.children().hide();
 			else if (obj.data("nnull") || obj.data("eq") || obj.data("neq")) obj.hide();
 			else if (obj.data("match")) obj.hide();
 			else if (obj.data("null")) obj.show();
