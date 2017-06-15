@@ -46,7 +46,10 @@
     </platform>
     <engine name="android" spec="~5.2.2" />
     <engine name="ios" spec="^4.4.0" />
-    <plugin name="cordova-plugin-camera" spec="~2.3.0" />
+    <plugin name="cordova-plugin-camera" spec="^2.4.1">
+        <variable name="CAMERA_USAGE_DESCRIPTION" value="pour illustrer vos contributions" />
+        <variable name="PHOTOLIBRARY_USAGE_DESCRIPTION" value="pour illustrer vos contributions" />
+    </plugin>
     <plugin name="cordova-plugin-file" spec="~4.3.0" />
     <plugin name="cordova-plugin-file-transfer" spec="~1.6.0" />
     <plugin name="cordova-plugin-geolocation" spec="~2.4.0" />

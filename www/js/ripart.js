@@ -344,9 +344,10 @@ var RIPart = function(options)
 		{	post.sketch = this.feature2sketch(params.features, params.proj);
 		}
 		if (params.id_groupe>0) post.group = params.id_groupe;
-		post.attributes = "";
-		if (params.themes) post.attributes = params.themes;
-		if (params.attributes) post.attributes += params.attributes;
+		if (params.themes)
+		{	post.attributes = params.themes;
+			if (params.attributes) post.attributes += params.attributes;
+		}
 		if (params.insee) post.insee = params.insee;
 		if (params.protocol) post.protocol = params.protocol;
 		if (params.version) post.version = params.version;

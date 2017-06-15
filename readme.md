@@ -127,3 +127,13 @@ Compiler l'APK en mode release en utilisant le keystore :
 > cordova build android --buildConfig=build.json --release
 
 > https://play.google.com/apps/publish
+
+### App Store
+
+NB: fr.ign.guichet ayant été refusé par Apple l'ID de l'application iOS est : fr.ign.collaboratif
+
+https://developer.apple.com/account/
+https://itunesconnect.apple.com/
+
+Installation du plugin camera : ajouter les variables
+> cordova plugin add cordova-plugin-camera --variable CAMERA_USAGE_DESCRIPTION="pour illustrez vos contributions" --variable PHOTOLIBRARY_USAGE_DESCRIPTION="pour illustrez vos contributions"

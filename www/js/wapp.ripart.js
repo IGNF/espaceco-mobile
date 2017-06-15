@@ -36,7 +36,7 @@
 	Creation du compte > enregistrer les actions
 
 	@param {} options
-	- infoElement : element pour l'info de connection : '#options .connect [data-input-role="info"] span.info'
+	- infoElement : element pour l'info de connexion : '#options .connect [data-input-role="info"] span.info'
 	- formElement : formulaire de saisie d'un signalements : '#fiche2 [data-role="onglet-li"][data-list="signal"]'
 	- countElement : compteur de signalements locaux : '.georemsCount span'
 	- listElement : ul pour l'affichage de la liste des signalements (doit contenir un template) : #signalements [data-role="content"]
@@ -461,8 +461,20 @@ RIPart.prototype.postLocalRem = function(i, options)
 				{	msg += "Vous devez être connecté...";
 				}
 				else
-				{	msg += "Vérifiez votre connexion.";
-						+"<i class='error'><br/>Erreur : "+e.status+" - "+e.statusText+"</i>";
+				{	msg = $('<div>').html(msg+"Vérifiez votre connexion.");
+					$('<i>').addClass('fa fa-info-circle')
+						.css({	position: "absolute",
+								top: 0,
+								right: 0,
+								margin: "0.4em",
+								color:"#ccc",
+								'font-size': "1.5em"
+							})
+						.click(function(){ $(this).next().toggle(); })
+						.appendTo(msg);
+					$("<i>").addClass('error')
+							.html("<br/>Erreur : "+e.status+" - "+e.statusText+"</i>")
+							.appendTo(msg);
 				}
 				wapp.message ( msg, "Connexion", 
 						{ ok:"ok", connect: (e.status===401) ? "Se connecter...":undefined },
@@ -591,11 +603,11 @@ RIPart.prototype.delLocalRems = function()
 			function(v)
 			{	var mess;
 				switch (v)
-				{	case "all": mess = "Vous allez supprimer toutes les signalements envoyés.";
+				{	case "all": mess = "Vous allez supprimer tous les signalements envoyés.";
 						break;
-					case "rep": mess = "Vous allez supprimer toutes les signalements ayant eu au moins une réponse.";
+					case "rep": mess = "Vous allez supprimer tous les signalements ayant eu au moins une réponse.";
 						break;
-					case "close": mess = "Vous allez supprimer toutes les signalements clos.";
+					case "close": mess = "Vous allez supprimer tous les signalements clos.";
 						break;
 				}
 				wapp.message ( mess, "Suppression",
@@ -767,7 +779,7 @@ RIPart.prototype.connectDialog = function (options)
 				{	if (self.param.user != nom.val())
 					{	self.param.profil = null;
 					}
-					wapp.wait("Connection au serveur...");
+					wapp.wait("Connexion au serveur...");
 					self.setUser (nom.val(), pwd.val(), true);
 					self.checkUserInfo (null, (typeof (options.onError) == "function") ? options.onError : null);
 				}
@@ -918,7 +930,8 @@ RIPart.prototype.showFormulaire = function(grem)
 * @param {string} atts attributs par defaut
 */
 RIPart.prototype.selectTheme = function(th, atts, prompt)
-{	th = th.split("::");
+{	if (!th) th = "";
+	th = th.split("::");
 	var group = parseInt(th[0]);
 	th = th[1];
 	var themes = this.param.themes;
