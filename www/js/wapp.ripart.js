@@ -430,7 +430,7 @@ RIPart.prototype.postLocalRems = function()
 
 	// Start sending...
 	if (nb) postNext();
-	else wapp.message ("Tous les signalements ont déjà été envoyées..."," ");
+	else wapp.message ("Tous les signalements ont déjà été envoyés..."," ");
 };
 
 

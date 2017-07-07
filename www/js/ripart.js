@@ -19,7 +19,8 @@ var RIPart = function(options)
 	// Url du service
 	var url = options.url || "https://espacecollaboratif.ign.fr/api/";
 	var user, pwd;
-	
+	this.param = {};
+
 	/** Changement de l'url du service
 	* @param {String} url du service
 	*/
