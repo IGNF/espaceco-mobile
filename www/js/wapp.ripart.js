@@ -890,7 +890,9 @@ RIPart.prototype.showFormulaire = function(grem)
 	var valdef = false;
 	var nbth = 0;
 	for (var i=0; i<this.param.themes.length; i++)
-	{	if (wapp.param.options.igntheme || this.param.themes[i].id_groupe == this.param.profil.id_groupe)
+	{	if (	wapp.param.options.igntheme 
+			|| this.param.themes[i].id_groupe == this.param.profil.id_groupe
+			|| this.param.themes[i].id_groupe == 140)
 		{	$("<div>").attr("data-input-role","option")
 				.attr("data-val", this.param.themes[i].id_groupe+"::"+this.param.themes[i].nom)
 				.text(this.param.themes[i].nom)

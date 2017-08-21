@@ -562,6 +562,58 @@ i.backArrowBt:before
 }
 
 
+/** Notinfo */
+[data-role=notinfo]
+{	position: fixed;
+	top: 0;
+	left: 0;
+	right:0;
+	height: 0;
+	overflow: visible;
+	padding: 0.5em;
+}
+[data-role=notinfo] > div
+{	background: rgba(255,255,255,0.95);
+	border-radius: 0.25em;
+	font-size: 1.4em;
+	color: #888;
+	margin: 0 auto 0.5em;
+	padding: 0.5em;
+	max-width: 30em;
+	-webkit-transform: scale(0);
+	transform: scale(0);
+	transition: all 0.5s;
+}
+[data-role=notinfo] > div.visible
+{	-webkit-transform: scale(1);
+	transform: scale(1);
+}
+[data-role=notinfo] > div .icon
+{	float:left;
+	font-size: 2.5em;
+	margin-right: 0.2em;
+	color: #369;
+}
+[data-role=notinfo] > div .title
+{	font-size: 1.1em;
+}
+[data-role=notinfo] > div .closebox
+{   float: right;
+	position: relative;
+	top: 0;
+	right: 0;
+	width: 1em;
+	height: 1em;
+}
+[data-role=notinfo] > div .closebox:after
+{	content:"\f00d";
+	font-family: "FontAwesome";
+	position: absolute;
+	right:0;
+	top:0;
+	padding:0;
+}
+
 /** Input data */
 [data-input]
 {	cursor: pointer;

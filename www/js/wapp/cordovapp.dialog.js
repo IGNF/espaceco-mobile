@@ -280,13 +280,47 @@ CordovApp.prototype.notification = function(msg, duration)
 	if (typeof(duration)!="number") duration=0;
 	duration = duration ? Math.max(duration,500) : 3000;
 
-	_notification.html("<div>"+msg+"</div>").show();
+	_notification.html($("<div>").html(msg)).show();
 	setTimeout (function(){ _notification.addClass('visible'); }, 200);
 	if (_timeout) clearTimeout(_timeout);
 	_timeout = setTimeout (function()
 	{	_notification.removeClass('visible'); 
 		setTimeout (function(){ _notification.hide(); }, 200);
 	}, duration);
+}
+
+/** Information notification
+*/
+var _notinfo=null;
+
+/** Show notification information on top of the screen
+* @param {String} title notification title
+* @param {String} msg notification
+* @param {} options
+*	- className {string} CSS class name for the notification
+*	- icon {html|undefined}
+*	- onclose {function|undefined} callback function when notification is closed
+*/
+CordovApp.prototype.notinfo = function(title, msg, options)
+{	options = options||{};
+	if (!_notinfo)
+	{	_notinfo = $("<div>").attr("data-role","notinfo").appendTo("body");
+	}
+
+	var info = $("<div>").appendTo(_notinfo);
+	if (options.className) info.addClass(options.className);
+	$("<div>").addClass('closebox')
+			.click(function()
+			{	info.removeClass('visible');
+				setTimeout (function(){ info.remove(); }, 200);
+				if (options.onclose) options.onclose();
+			})
+			.appendTo(info);
+	options.icon = options.icon || "<i class='fa fa-comments-o'></i>";
+	$("<div>").addClass('icon').html(options.icon).appendTo(info);
+	$("<div>").addClass('title').html(title).appendTo(info);
+	$("<div>").html(msg).appendTo(info);
+	setTimeout (function(){ info.addClass('visible'); }, 200);
 }
 
 /** Wait dialog

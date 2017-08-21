@@ -1044,3 +1044,9 @@ body.trackingGeorem #fiche .signaler .movePosition
     transform: translateY(-0.3em);
     font-size: 1.5em;
 }
+
+/* Operation 2017 */
+[data-role=notinfo] > div.tourisme .icon
+{	color: #f0f;
+	opacity: 0.5;
+}

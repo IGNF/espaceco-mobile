@@ -20,6 +20,16 @@ var wapp = new CordovApp(
 		setTimeout(function(){ wapp.hidePage('splash'); }, 2000);
 		*/
 
+		/* Operation 2017 */
+		if (false && (new Date()) < (new Date("2017-09-25")))
+		{	if (!wapp.param.ope2017 || Math.random()>0.85)
+			{	wapp.notinfo ($(".ope2017 .title").html(), $(".ope2017 .msg").html(),
+					{ icon: "<i class='fa fa-star-o'></i>", className:"tourisme" });
+				wapp.param.ope2017 = true;
+			}
+		}
+		else $(".ope2017").hide();
+
 		var self = this; 
 		// Version => cordova-plugin-app-version ???
 		$(".version").text(this.version);
