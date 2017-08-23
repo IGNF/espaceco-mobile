@@ -261,10 +261,28 @@ var RIPart = function(options)
 			r.groupes = [];
 			resp.find("GEOGROUPE").each(function()
 			{	var att = $(this);
-				r.groupes.push(
-				{	nom: att.find("NOM").text(),
-					id_groupe: Number(att.find("ID_GEOGROUPE").text())
+				var filter = [];
+				try
+				{	filter = JSON.parse(att.find("FILTER").first().text());
+				} catch(e){};
+				var g = 
+				{	nom: att.find("NOM").first().text(),
+					id_groupe: Number(att.find("ID_GEOGROUPE").text()),
+					//filter: filter,
+					logo: att.find("LOGO").text(),
+					lonlat: [ Number(att.find("LON").text()), Number(att.find("LAT").text()) ],
+					filter: att.find("FILTER").last().text(),
+					layers:[]
+				};
+				att.find("LAYER").each(function()
+				{	g.layers.push(
+					{	nom: $(this).find("NOM").text(),
+						type: $(this).find("TYPE").text(),
+						description: $(this).find("DESCRIPTION").text(),
+						url: $(this).find("URL").text()
+					});
 				});
+				r.groupes.push(g);
 			});
 			r.themes = [];
 			var t, th = {};
@@ -376,12 +394,13 @@ var RIPart = function(options)
 		{	pt = ol.proj.transform(pt, proj, 'EPSG:4326')
 		}
 		croquis += "<contexte><lon>"+pt[0].toFixed(7)+"</lon><lat>"+pt[1].toFixed(7)+"</lat><zoom>15</zoom><layers><layer>GEOGRAPHICALGRIDSYSTEMS.MAPS</layer></layers></contexte>";
-		var format = new ol.format.GML({ featureNS:'', featurePrefix: 'gml', extractAttributes: false });
+		//var format = new ol.format.GML({ featureNS:'', featurePrefix: 'gml', extractAttributes: false });
 		for (var i=0; i<f.length; i++)
 		{	var t=""; 
-			var geo="", g = f[i].getGeometry().getCoordinates();
+			var geo="", g = f[i].getGeometry().clone();
 			if (proj)
-			{	g = ol.proj.transform(g, proj, 'EPSG:4326')
+			{	g.transform(proj, 'EPSG:4326');
+				g = g.getCoordinates();
 			}
 			// Geometry
 			switch (f[i].getGeometry().getType())
@@ -394,6 +413,8 @@ var RIPart = function(options)
 					t = 'Ligne'; 
 					geo = "<geometrie><gml:LineString><gml:coordinates>COORDS</gml:coordinates></gml:LineString></geometrie>";
 					break;
+				case 'MultiPolygon': 
+					g = g[0];
 				case 'Polygon': 
 					t = 'Polygone'; 
 					g = g[0];

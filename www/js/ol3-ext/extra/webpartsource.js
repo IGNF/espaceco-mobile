@@ -12,15 +12,15 @@ if (!proj4.defs["IGNF:LAMB93"]) proj4.defs("IGNF:LAMB93","+proj=lcc +lat_1=49 +l
  * @extends {ol.source.Vector}
  * @trigger savestart, saveend, loadstart, loadend
  * @param {olx.source.WebpartOptions}
- *		- proxy {string} proxy path
- *		- username {string}
- *		- password {string}
- *		- maxFeatures {integer} max number of feature to load before overload
- *		- maxReload {integer} max number of feature before reload (for tiled layers)
+ *		- proxy {string} proxy path, default none
+ *		- username {string} authentification
+ *		- password {string} authentification
+ *		- maxFeatures {integer} max number of feature to load before overload, default 50000
+ *		- maxReload {integer} max number of feature before reload (for tiled layers), default +Infinity
  *		- featureType {featureType} 
- *		- filter {Object} Webpart filter, ie: {detruit:false}
+ *		- filter {Object} Webpart filter, ie: {detruit:false}, default {}
  *		- tileZoom {integer} tile zoom for tiled layers (tile size are requested at tileZoom)
- *		- tileSize {integer|undefined} size for tiles (default 256)
+ *		- tileSize {integer|undefined} size for tiles, default 256
  *		- preserved {ol.Collection} collection of objects to preserve when reload
  *		- attribution {ol.Attribution} source attribution
  *		- wrapX {bool}
@@ -52,7 +52,7 @@ ol.source.Vector.Webpart = function(opt_options)
 	this.maxFeatures_	= options.maxFeatures || 5000;
 	
 	var crs = this.featureType_.attributes[this.featureType_.geometryName].crs;
-	this.srsName_  = ( crs !== null ) ? crs : 'EPSG:4326';
+	this.srsName_  = crs || 'IGNF:LAMB93'; // 'EPSG:4326';
 				
 	this.featureFilter_ = options.filter || {};
 	

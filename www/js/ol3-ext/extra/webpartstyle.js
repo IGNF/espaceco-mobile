@@ -9,7 +9,7 @@ ol.layer.Vector.Webpart.Style = {};
 */
 ol.layer.Vector.Webpart.Style.formatProperties = function (format, feature)
 {	if (!format || !format.replace || !feature) return format;
-	var i = format.replace(/\$\{([^\}]*)\}.*/, "$1");
+	var i = format.replace(/.*\$\{([^\}]*)\}.*/, "$1");
 	if (i === format) return format;
 	else 
 	{	return ol.layer.Vector.Webpart.Style.formatProperties(format.replace("${"+i+"}", feature.get(i)), feature);
@@ -36,7 +36,8 @@ ol.layer.Vector.Webpart.Style.formatFeatureStyle = function (fstyle, feature)
 ol.layer.Vector.Webpart.Style.Stroke = function (fstyle)
 {	var stroke = new ol.style.Stroke(
 					{	color: fstyle.strokeColor || "#00f",
-						width: Number(fstyle.strokeWidth) || 1
+						width: Number(fstyle.strokeWidth) || 1,
+						lineDash: fstyle.dash ? [5,5] : undefined
 					});
 	if (fstyle.strokeOpacity)
 	{	var a = ol.color.asArray(stroke.getColor());
@@ -126,8 +127,10 @@ ol.layer.Vector.Webpart.Style.Text = function (fstyle)
 				+ (fstyle.fontFamily || 'Sans-serif'),
 			text: fstyle.label,
 			rotation: (fstyle.labelRotation || 0),
-			textAlign: "center",
+			textAlign: "left",
 			textBaseline: "middle",
+			offsetX: fstyle.labelXOffset||0,
+			offsetY: -fstyle.labelYOffset||0,
 			stroke: new ol.style.Stroke(
 					{	color: fstyle.labelOutlineColor || "#fff",
 						width: Number(fstyle.labelOutlineWidth) || 2
@@ -144,8 +147,11 @@ ol.layer.Vector.Webpart.Style.Text = function (fstyle)
 */
 ol.layer.Vector.Webpart.Style.getFeatureStyleFn = function(featureType)
 {	if (!featureType) featureType = {};
-
-	return function(feature, res)
+	
+	if (featureType.name && ol.layer.Vector.Webpart.Style[featureType.name])
+	{	return ol.layer.Vector.Webpart.Style[featureType.name](featureType);
+	}
+	else return function(feature, res)
 	{	var fstyle = ol.layer.Vector.Webpart.Style.formatFeatureStyle (featureType.style, feature);
 		return [	
 			new ol.style.Style (
@@ -415,9 +421,14 @@ ol.layer.Vector.Webpart.Style.batiment = function(options)
 	};
 	
 	return function (feature, res)
-	{	var fstyle = 
+	{	if (feature.get('detruit')) return [];
+		var fstyle = 
 		{	strokeColor: getColor(feature, 1),
 			fillColor: getColor(feature, 0.5)
+		}
+		if (feature.get('etat_de_l_objet')) 
+		{	fstyle.dash = true;
+			fstyle.fillColor = [0,0,0,0];
 		}
 		if (options.symbol)
 		{	fstyle.label = getSymbol (feature);

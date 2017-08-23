@@ -424,6 +424,13 @@ i.backArrowBt:before
 	transform: scale(1)  translate3d(-50%,-50%, 0);
 	opacity:1;
 }
+[data-role=dialog] .icon
+{	float: left;
+	color: #369;
+	margin: 0 0.8em 0em 0;
+	top: -0.5em;
+	position: relative;
+}
 [data-role=dialog] .title
 {	font-weight: bold;
 	color: #369;
@@ -494,6 +501,26 @@ i.backArrowBt:before
 {	padding-right:1em;
 }
 
+/* Error on dialog */
+[data-role=dialog] i.showerror:before
+{	content: "?";
+	cursor: help;
+	color: #fff;
+	background: orange;
+	border-radius: 100%;
+	display: inline-block;
+	height: 1em;
+	width: 1.1em;
+	vertical-align: middle;
+	text-align: center;
+	margin: 0 0.5em;
+	font-weight: bold;
+	padding: 0em 0 0.1em;
+}
+[data-role=dialog] i.error,
+[data-role=dialog] i.error
+{	display: none;
+}
 
 /* Wait
 */

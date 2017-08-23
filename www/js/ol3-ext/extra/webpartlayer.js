@@ -16,7 +16,7 @@ ol.layer.Vector.Webpart  = function(options, source_options)
 	if (!options) options = {};
 	if (!source_options) source_options = {};
 	
-	this.url_ = options.url || "https://espacecollaboratif.ign.fr/gcms/database/"; // Ancien wpart "http://webpart.ign.fr/gcms/database/";
+	this.url_ = options.url.replace("/wfs","/database/") || "https://espacecollaboratif.ign.fr/gcms/database/"; // Ancien wpart "http://webpart.ign.fr/gcms/database/";
 	this.proxy_ = options.proxy;
 	this.database_ = options.database;
 	this.name_ = options.name;
@@ -37,13 +37,29 @@ ol.layer.Vector.Webpart  = function(options, source_options)
 		{	source_options.proxy = self.proxy_;
 			source_options.featureType = featureType;
 			// Webpart source
-			vectorSource = new ol.source.Vector.Webpart(source_options);
-
+			var vectorSource = new ol.source.Vector.Webpart(source_options);
 			self.setSource(vectorSource);
-			self.dispatchEvent({ type:"ready", source: vectorSource });
+
+			// Webpart Layer
+			self.set("title", featureType.title);
+
+			// Set zoom level / resolution for the layer
+			var v = new ol.View();
+			if (featureType.maxZoomLevel)
+			{	v.setZoom(featureType.maxZoomLevel);
+				self.setMinResolution(v.getResolution());
+			}
+			if (featureType.minZoomLevel)
+			{	v.setZoom(featureType.minZoomLevel);
+				self.setMaxResolution(v.getResolution());
+			}
 
 			// Style of the feature style
-			if (!options.style && ol.layer.Vector.Webpart.Style) self.setStyle (ol.layer.Vector.Webpart.Style.getFeatureStyleFn(featureType));
+			if (!options.style && ol.layer.Vector.Webpart.Style) 
+			{	self.setStyle (ol.layer.Vector.Webpart.Style.getFeatureStyleFn(featureType));
+			}
+
+			self.dispatchEvent({ type:"ready", source: vectorSource });
 		},
 		error: function(jqXHR, status, error) 
 		{	//console.log(jqXHR)

@@ -19,7 +19,7 @@ ol.control.Button = function(options)
 
 	$("<button>").html(options.html || "")
 				.attr('title', options.title)
-				.on("touchstart click", function(e)
+				.on("click", function(e)
 				{	if (e && e.preventDefault) 
 					{	e.preventDefault();
 						e.stopPropagation();

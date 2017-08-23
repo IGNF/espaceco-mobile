@@ -94,33 +94,37 @@ RIPart.prototype.initialize = function(options)
 		wapp.map.addLayer(this.layer);
 		// Style
 		var symb = {	glyph: "fa-circle", 
-						form: "poi", 
+						form: "marker", 
+						fontSize: 0.6,
 						fill: new ol.style.Fill({ color:[255,255,255, 1] }), 
-						stroke: new ol.style.Stroke( { color: "#fff", width:1.5 } ), 
+						stroke: new ol.style.Stroke( { color: "#fff", width:2 } ), 
 						radius: 18,
 						offsetY: -18
 					};
 		var style = 
-		{	"submit": new ol.style.Style(
+		{	"local": new ol.style.Style(
 				{	image: new ol.style.FontSymbol(
-						$.extend (symb, 
-						{	stroke: new ol.style.Stroke({ color:[80,80,80, 1], width:1.5  }) 
-						})
+						$.extend (symb, { fill: new ol.style.Fill({ color:[80,80,80, 1], width:1.5  }) })
+					)
+				}),
+			"submit": new ol.style.Style(
+				{	image: new ol.style.FontSymbol(
+						$.extend (symb, { fill: new ol.style.Fill({ color:[51,102,153, 1], width:1.5  }) })
 					)
 				}),
 			"pending": new ol.style.Style(
 				{	image: new ol.style.FontSymbol(
-						$.extend (symb, { stroke: new ol.style.Stroke({ color:[242, 157,0, 1], width:1.5  }) })
+						$.extend (symb, { fill: new ol.style.Fill({ color:[255, 102,0, 1], width:1.5  }) })
 					)
 				}),
 			"valid": new ol.style.Style(
 				{	image: new ol.style.FontSymbol(
-						$.extend (symb, { stroke: new ol.style.Stroke({ color:[0,128,0, 1], width:1.5  }) })
+						$.extend (symb, { fill: new ol.style.Fill({ color:[0,128,0, 1], width:1.5  }) })
 					)
 				}),
 			"reject": new ol.style.Style(
 				{	image: new ol.style.FontSymbol(
-						$.extend (symb, { stroke: new ol.style.Stroke({ color:[192,0,0, 1], width:1.5  }) })
+						$.extend (symb, { fill: new ol.style.Fill({ color:[192,0,0, 1], width:1.5  }) })
 					)
 				}),
 		};
@@ -137,7 +141,7 @@ RIPart.prototype.initialize = function(options)
 		style.valid0 = style.valid;
 		style.reject0 = style.reject;
 		this.layer.setStyle (function(f,res)
-		{	return style[f.get("georem").statut] || style.submit ;
+		{	return style[f.get("georem").statut] || style.local ;
 		});
 	}
 
@@ -781,12 +785,13 @@ RIPart.prototype.connectDialog = function (options)
 					}
 					wapp.wait("Connexion au serveur...");
 					self.setUser (nom.val(), pwd.val(), true);
-					self.checkUserInfo (null, (typeof (options.onError) == "function") ? options.onError : null);
+					self.checkUserInfo (options.onConnect, (typeof (options.onError) == "function") ? options.onError : null);
 				}
 				else if (bt=="deconnect")
 				{	self.param.user = self.param.pwd = null;
 					self.param.profil = null;
 					self.saveParam();
+					if (typeof (options.onConnect) == "function") options.onConnect({connected:false});
 				}
 				if (typeof (options.onQuit) == "function") options.onQuit({ dialog:tp, target: this });
 				self.onUpdate();
@@ -864,6 +869,7 @@ RIPart.prototype.showFormulaire = function(grem)
 	// Georem en cours de modification
 	var georem = (grem && grem.date && !grem.id) ? grem : false;
 	this.formElement.data("grem", georem);
+	console.log(this.formElement)
 	if (georem)
 	{	$("input.lon", this.formElement).val(georem.lon);
 		$("input.lat", this.formElement).val(georem.lat);
@@ -892,7 +898,9 @@ RIPart.prototype.showFormulaire = function(grem)
 	for (var i=0; i<this.param.themes.length; i++)
 	{	if (	wapp.param.options.igntheme 
 			|| this.param.themes[i].id_groupe == this.param.profil.id_groupe
-			|| this.param.themes[i].id_groupe == 140)
+			// Operation tourisme 2017
+			// || this.param.themes[i].id_groupe == 140
+		)
 		{	$("<div>").attr("data-input-role","option")
 				.attr("data-val", this.param.themes[i].id_groupe+"::"+this.param.themes[i].nom)
 				.text(this.param.themes[i].nom)

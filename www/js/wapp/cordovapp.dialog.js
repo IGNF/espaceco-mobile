@@ -26,6 +26,7 @@ function Dialog()
 				e.preventDefault();
 				self.close();
 			});
+	var _icon = $("<div>").addClass("icon").appendTo(_dlg);
 	var _title = $("<div>").addClass("title").appendTo(_dlg);
 	var _content = $("<div>").addClass("content").appendTo(_dlg);
 	var _buttons = $("<div>").addClass("buttons").appendTo(_dlg);
@@ -83,6 +84,8 @@ function Dialog()
 
 		if (options.closeBox) _cbox.show();
 		else _cbox.hide();
+		if (options.icon) _icon.html(options.icon).show();
+		else _icon.hide();
 		if (options.title) _title.html(options.title).show();
 		else _title.hide();
 		if (options.noClose && _dlg.hasClass('visible'))
@@ -109,7 +112,10 @@ function Dialog()
 		else addButton(1, _T("annuler"));
 
 		_back.show();
-		_content.html(content)
+		_content.html(content);
+		$("<i>").addClass("showerror")
+			.click(function(){ $(".error", _content).toggle(); })
+			.insertBefore($('.error', _content));
 		_dlg.show();
 		_timeout = setTimeout (function(){ _dlg.addClass('visible'); }, 200);
 	}
@@ -357,7 +363,7 @@ CordovApp.prototype.wait = function(msg, options)
 	}
 	else 
 	{	_wback.hide();
-		_wait.removeClass();
+		_wait.removeClass('visible');
 		if (options.anim===false) _wait.hide();
 		else _wtimeout = setTimeout (function(){ _wait.hide(); }, 200);
 	}

@@ -20,7 +20,7 @@ var wapp = new CordovApp(
 		setTimeout(function(){ wapp.hidePage('splash'); }, 2000);
 		*/
 
-		/* Operation 2017 */
+		/* Operation 2017 FINI */
 		if (false && (new Date()) < (new Date("2017-09-25")))
 		{	if (!wapp.param.ope2017 || Math.random()>0.85)
 			{	wapp.notinfo ($(".ope2017 .title").html(), $(".ope2017 .msg").html(),
@@ -71,24 +71,6 @@ var wapp = new CordovApp(
 					default: break;
 				}
 			});
-
-		// Gestion des parametres caches
-		var cheat = 0;
-		var tcheat = new Date();
-		$('#options [data-role="header"]').on("click touchstart", function(e)
-		{	e.stopPropagation();
-			e.preventDefault();
-			var t = new Date();
-			if (t-tcheat > 250) cheat = 0;
-			else cheat++;
-			tcheat = t;
-			if (cheat>10 || wapp.param.options.qlf)
-			{	wapp.notification ("Mode debug activé...",500);
-				cheat=0;
-				$(".debug").show();
-			}
-		});
-		if (this.param.options.qlf) $(".debug").show();
 
 		// Layers (set hdpi:false to enable tile cache)
 		var layers = this.layers =  [
@@ -222,9 +204,10 @@ var wapp = new CordovApp(
 		var selStroke = new ol.style.Stroke({color: '#f00', width: 3 });
 		var selLayer;
 		this.select = new ol.interaction.Select({
+			hitTolerance: 5,
 			filter: function(f,l) 
 			{	selLayer = l;
-				return (l===wapp.vector || l===wapp.ripart.layer);
+				return (true);
 			},
 			style: function(f,res)
 			{	if (f.getGeometry().getType()=="Point")
@@ -255,6 +238,39 @@ var wapp = new CordovApp(
 					wapp.ripart.showFormulaire();
 				}
 			}));
+
+		// Geolocation draw
+		var geodrawlayer = new ol.layer.Vector(
+		{	name: 'Trace',
+			displayInLayerSwitcher: false,
+			source: new ol.source.Vector()
+		});
+		geodrawlayer.getSource().on('addfeature', function(e) { e.feature.layer = geodrawlayer; });
+		map.addLayer(geodrawlayer);
+		// Draw interaction
+		var geodraw = new ol.interaction.GeolocationDraw(
+			{	source: geodrawlayer.getSource(),
+				type: 'LineString',
+				zoom: 18,
+			});
+		geodraw.setActive(false);
+		map.addInteraction(geodraw);
+		// Control d'activation
+		map.addControl (new ol.control.Toggle(
+		{	"className": "geodrawCtrl debug", 
+			"html": "<i class='fa fa-location-arrow'></i>",
+			"toggleFn": function(b)
+			{	if (geodraw.getActive())
+				{	geodraw.stop();
+					geodraw.setActive(false);
+				}
+				else
+				{	geodraw.setActive(true);
+					geodraw.start();
+				}
+			}
+		}));
+
 
 		// Gestion du cache
 		// this.cache = new CacheMap({ loadPage: "#loadMap", listMap: '#cartes [data-list="maps"] ul' });
@@ -287,7 +303,7 @@ var wapp = new CordovApp(
 					{	f = false;
 						wapp.select.getFeatures().clear();
 					}
-					var p = f ? f.getGeometry().getCoordinates() : wapp.map.getView().getCenter();
+					var p = f ? ol.extent.getCenter(f.getGeometry().getExtent()) : wapp.map.getView().getCenter();
 					p = ol.proj.transform(p, wapp.map.getView().getProjection(),'EPSG:4326');
 					$("input.lon", form).val(p[0].toFixed(8));
 					$("input.lat", form).val(p[1].toFixed(8));
@@ -295,8 +311,12 @@ var wapp = new CordovApp(
 				}, 
 				// Formatage du signalement / verification avant envoie
 				formatGeorem: function(georem, form)
-				{	var f = wapp.select.getFeatures().item(0);
-					if (f) georem.sketch = wapp.ripart.feature2sketch(f, wapp.map.getView().getProjection());
+				{	var f = wapp.select.getFeatures().getArray();
+					var current = form.parent().data('grem');
+					if (current && current.sketch)
+					{	georem.sketch = current.sketch;
+					}
+					else if (f.length) georem.sketch = wapp.ripart.feature2sketch(f, wapp.map.getView().getProjection());
 					if (!georem.comment) 
 					{	wapp.alert ("Merci de laisser un commentaire...");
 						return false;
@@ -344,12 +364,33 @@ var wapp = new CordovApp(
 		this.ripart.checkUserInfo(
 			function ()
 			{	wapp.wait(false); 
-				wapp.notification("Connecté au service",1200); 
+				wapp.notification("Connecté au service",1200);
+				wapp.initGuichets();
 			}, 
 			function()
 			{	wapp.wait(false); 
+				wapp.initGuichets();
 			}
 		);
+
+		// Gestion des parametres caches
+		var cheat = 0;
+		var tcheat = new Date();
+		$('#options [data-role="header"]').on("click touchstart", function(e)
+		{	e.stopPropagation();
+			e.preventDefault();
+			var t = new Date();
+			if (t-tcheat > 250) cheat = 0;
+			else cheat++;
+			tcheat = t;
+			if (cheat>10 || wapp.param.options.qlf)
+			{	wapp.notification ("Mode debug activé...",500);
+				cheat=0;
+				$(".debug").show();
+			}
+		});
+		if (this.param.options.qlf) $(".debug").show();
+
 		// Fin
 //		wapp.wait(false);
 	},
@@ -407,15 +448,17 @@ var wapp = new CordovApp(
 	{	var pos = this.map.getView().getCenter();
 		var zoom = this.map.getView().getZoom();
 		this.param['position'] = { lon:Math.round(pos[0]*100)/100, lat:Math.round(pos[1]*100)/100, zoom:zoom };
-		var layers=[]; 
+		var layers=[], hidden=[]; 
 		function saveVisibility(lays)
 		{	lays.forEach(function(l)
 			{	if (l.getVisible() && l.get('name')) layers.push(l.get('name'));
+				else if (l.get('name')) hidden.push(l.get('name'));
 				if (l.getLayers) saveVisibility(l.getLayers());
 			});
 		};
 		saveVisibility(wapp.map.getLayers());
 		this.param['layers'] = layers;
+		this.param['hidden'] = hidden;
 		this.saveParam();
 	},
 
@@ -434,3 +477,20 @@ var wapp = new CordovApp(
 	
 });
 
+/** Verifier qu'on a bien au moins un layer affiche
+*/
+$("#layers").on("hidepage", function()
+{	var hasVisibleLayers = false; 
+	wapp.map.getLayers().forEach(function(l)
+	{	if (!(l instanceof ol.layer.Vector) && l.getVisible()) hasVisibleLayers = true;
+	});
+	if (!hasVisibleLayers)
+	{	wapp.dialog.show ("Toutes les couches sont masquées.<br/>"
+			+"Il se peut que vous ayez des problèmes à vous repérer&nbsp;!", 
+			{	title: "ATTENTION",
+				icon: "<i class='fa fa-eye-slash fa-3x'></i>",
+				className: "alert"
+			});
+	}
+
+});

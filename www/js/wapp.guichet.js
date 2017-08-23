@@ -10,68 +10,113 @@
 (function()
 {
 
+/** Recherche des guichets de l'utilisateur
+*/
+wapp.initGuichets = function()
+{	// Reset list
+	var ul = $('#cartes [data-list="guichets"] ul');
+	ul.html("");
+	if (!this.ripart.isConnected()) return;
+	// Recherche des groupes
+	var groupes = wapp.ripart.param.groupes;
+	var current = {};
+	for (var i=0, g; g = groupes[i]; i++)
+	{	// Guichet courant
+		if (this.ripart.param.guichet == g.id_groupe) current = g;
+		// Affichage si WFS
+		var nb = 0;
+		for (var j=0; j<g.layers.length; j++) 
+		{	if (g.layers[j].type=="WFS") nb++;
+		}
+		if (nb)
+		{	var li = $("<li>")
+				.data('groupe', g)
+				.text(g.nom+" ("+nb+" couches)")
+				.click(function()
+				{	wapp.setGuichet($(this).data('groupe'));
+					wapp.hidePage();
+				})
+				.appendTo(ul);
+			$("<img>").attr("src",g.logo)
+				.prependTo(li);
+		}
+	}
+	wapp.setGuichet(current);
+};
+
 /** Guichet en cours de modification
 */
-wapp.setGuichet = function(fullname)
-{	if (!this.ripart.isConnected() || !this.ripart.param.pwd)
-	{	wapp.message ("Vous devez être identifié pour accéder à ce guichet...",
-				"Connexion", 
-				{	ok: "ok", connect: "Se connecter..."},
-				function(b)
-				{	if (b=="connect") 
-					{	wapp.ripart.connectDialog (
-						{	onQuit: function()
-							{	if (wapp.ripart.isConnected() && wapp.ripart.param.pwd)
-									wapp.setGuichet(fullname); 
-							}
-						});
-					}
-				});
-		return;
+wapp.setGuichet = function(groupe)
+{	// Nouveau guichet
+	this.ripart.param.guichet = groupe.id_groupe;
+	wapp.ripart.saveParam();
+	// Layers du guichet
+	if (this.vector) 
+	{	for (var i=0, l; l=this.vector[i]; i++) 
+			this.map.removeLayer(l);
 	}
-
-	this.select.getFeatures().clear()
-
-	if (this.vector) this.map.removeLayer(this.vector);
-
-	var guichet = fullname.split(":");
-
-	// Create layer
-	this.vector = new ol.layer.Vector.Webpart(
-		{	url: "https://espacecollaboratif.ign.fr/gcms/database/",
-			name: guichet[1],
-			database: guichet[0],
-			username: wapp.ripart.param.user,
-			password: wapp.ripart.param.pwd,
-			style: guichet.style,
-			// Limit resolution to avoid large area request
-			maxResolution: 40 // zoom 13
-		},
-		{	// preserved: select.getFeatures(),
-			filter: ( guichet.filter ),
-			// Tile zoom to calculate tiles
-			tileZoom: guichet.tileZoom||13,
-			maxFeatures: 5000
-		});
-	this.vector.on("error", function(e)
-	{	if (e.status===401)
-		{	wapp.message ("Impossible de charger la couche."
-						+"<i class='error'><br/>"+e.status+" - "+e.error+"</i>",
-				"Connexion", { ok:"ok", connect: "Se connecter..." },
-				function(b)
-				{	if (b=="connect") wapp.ripart.connectDialog();
-				});
+	this.vector = [];
+	if (!groupe.layers) return;
+	var nb=0, nbLoad=0;
+	for (var i=0, l; l=groupe.layers[i]; i++)
+	{	if (l.type=="WFS")
+		{	nb++;
+			var url = l.url.replace(/(.*)\?(.*)/,"$1");
+			var base = l.url.replace(/.*databasename=(.*)/,"$1");
+			var vector = new ol.layer.Vector.Webpart(
+			{	url: url,
+				name: l.nom,
+				database: base,
+				username: wapp.ripart.getUser(),
+				password: wapp.ripart.getUser(true),
+				// style: guichet.style,
+				// Limit resolution to avoid large area request
+				maxResolution: 40 // zoom 13
+			},
+			{	// preserved: select.getFeatures(),
+				filter: (base=="bduni_metropole" ? {detruit:false} : {}),
+				// Tile zoom to calculate tiles
+				tileZoom: 15,
+				maxFeatures: 5000,
+				maxReload: wapp.param.options.maxReload || 10000
+			});
+			this.vector.push(vector);
+			vector.on("error", function(e)
+			{	if (e.status===401)
+				{	wapp.message ("Impossible de charger la couche."
+							+"<i class='error'><br/>"+e.status+" - "+e.error+"</i>",
+							"Connexion", { ok:"ok" });
+				}
+				else
+				{	wapp.alert ("Impossible de charger la couche."
+							+"<i class='error'><br/>"+e.status+" - "+e.error+"</i>");
+				}
+				return;
+			});
+			vector.on("ready", function()
+			{	// Garder le layer
+				this.getSource().on('addfeature', function (e) 
+				{	e.feature.layer = this; 
+				}, this);
+				// Decompte
+				nbLoad++;
+				if (nb==nbLoad) wapp.notification(nb+" couches ajoutées à la carte...");
+			});
+			if (this.param.hidden) for (var k=0; k<this.param.hidden.length; k++)
+			{	if (l.nom == this.param.hidden[k]) 
+				{	vector.setVisible(false);
+					break;
+				}
+			}
+			this.map.addLayer(vector);
 		}
-		else
-		{	wapp.alert ("Impossible de charger la couche."
-					+"<i class='error'><br/>"+e.status+" - "+e.error+"</i>");
-		}
-		return;
-	});
-	this.vector.on("ready", function()
-	{	wapp.setFiche();
-	});
-	this.map.addLayer(this.vector);
+	}
+	if (nb) 
+	{	// Mettre les remontées au dessus
+		wapp.map.removeLayer(wapp.ripart.layer);
+		wapp.map.addLayer(wapp.ripart.layer);
+		wapp.notification("Chargement des guichets...");
+	}
 };
 
 /** Afficher la selection dans la barre et la fiche
@@ -139,30 +184,51 @@ wapp.showSelect = function(ripart)
 	else $("#fiche").removeClass("fromRipart");
 
 	var div = $('#fiche .selection');
+	// Pas de selection
 	if (!f) 
 	{	div.removeClass("georem fiche");
-		this.currentProperties = null;
 	}
 	else
 	{	var prop = f.getProperties();
 		// Georem
 		if (prop.georem)
-		{	div.addClass("georem");
-			this.currentProperties = null;
+		{	div.addClass("georem").removeClass("fiche");
 			wapp.dataAttributes($(".georem", div), prop.georem);
 		}
 		// Objet du guichet
 		else 
-		{	div.addClass("fiche");
-			this.currentProperties = wapp.setParamInput($(".fiche ul", div), prop);
+		{	div.addClass("fiche").removeClass("georem");
+			var prop = f.getProperties();
+			$(".fiche h3 span", div).text(f.layer.get("title")||f.layer.get("name"));
+			var ul = $(".fiche ul", div).html("");
+			var ftype = f.layer.getSource().featureType_;
+			if (ftype)
+			{	for (i in ftype.attributes) if (ftype.attributes.hasOwnProperty(i) && i!=ftype.geometryName)
+				{	var att = ftype.attributes[i];
+					switch (att.type)
+					{	case "Point":
+						case "LineString":
+						case "Polygon":
+						case "MultiPolygon":
+							break;
+						default:
+						{	var li = $("<li>").appendTo(ul);
+							$("<label>").text(att.title)
+								.appendTo(li);
+							$("<span>").text(f.get(i))
+								.appendTo(li);
+						}
+					}
+				}
+			}
 		}
 	}
 	wapp.showPage("fiche");
 	// Afficher le point si hors de l'ecran
 	if (f)
 	{	var e = this.map.getView().calculateExtent(this.map.getSize());
-		if (!ol.extent.containsCoordinate(e, f.getGeometry().getCoordinates()))
-		{	this.map.getView().setCenter(f.getGeometry().getCoordinates());
+		if (!ol.extent.containsCoordinate(e, f.getGeometry().getFirstCoordinate()))
+		{	this.map.getView().setCenter(f.getGeometry().getFirstCoordinate());
 		}
 	}
 };
@@ -171,7 +237,10 @@ wapp.showSelect = function(ripart)
 */
 wapp.connect = function()
 {	wapp.ripart.connectDialog(
-	{	onError: function(error)
+	{	onConnect: function()
+		{	wapp.initGuichets();
+		},
+		onError: function(error)
 		{	var msg = [];
 			switch (error.status)
 			{	case 401: 
@@ -202,22 +271,8 @@ wapp.showRipartForm = function()
 	wapp.showPage("fiche");
 };
 
-/** Valider la fiche courante
-*/
-wapp.validFiche = function()
-{	var f = this.select.getFeatures().item(0);
-	if (f && this.currentProperties)
-	{	var p = this.currentProperties.getParams();
-		var ftype = wapp.vector.getFeatureType();
-		for (var i in ftype.attributes) if (ftype.attributes.hasOwnProperty(i) && i!=ftype.geometryName)
-		{	f.set (i, p[i]);
-		}
-		wapp.notification("Les données ont été mises à jours...",1000);
-	}
-}
-
 /** Preparer les champs de la fiche au chargement du layer
-*/
+* /
 wapp.setFiche = function()
 {	var ftype = wapp.vector.getFeatureType();
 	var div = $('#fiche .fiche');
@@ -254,6 +309,10 @@ wapp.setFiche = function()
 */
 $("#cartes").on("showpage", function(e)
 {	if (!wapp.vector) return;
+
+	console.log("TODO : cartes info");
+	return;
+/*
 	var ftype = wapp.vector.getFeatureType();
 	var d = $("li[title=\""+ftype.fullName+"\"]", this);
 
@@ -277,6 +336,7 @@ $("#cartes").on("showpage", function(e)
 			+ (t.Update||0) + " objet(s) modifié(s)";
 		$('[data-input-role="info"]', d).html(info);
 	}
+*/
 });
 
 /** Mettre a jour la carte

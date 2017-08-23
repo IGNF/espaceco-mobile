@@ -114,7 +114,7 @@ body.trackingGeorem #fiche .trackingInfo
 }
 
 #signalements button
-{	font-size:0.9em;
+{	font-size:0.85em;
 	margin: 0;
 	transform: scaleX(0.95);
 	padding: 0.5em 0.25em;
