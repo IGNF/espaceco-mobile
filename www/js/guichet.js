@@ -14,398 +14,47 @@ var wapp = new CordovApp(
 	* @method
 	*/
 	initialize: function() 
-	{	/*
+	{	var self = this; 
+		// url du service => chercher sur internet
+		geoportailConfig.url = "http://wxs.ign.fr/";
+
+		/*
 		// Splashscreen
 		wapp.showPage('splash');
 		setTimeout(function(){ wapp.hidePage('splash'); }, 2000);
 		*/
 
-		/* Operation 2017 FINI */
-		if (false && (new Date()) < (new Date("2017-09-25")))
-		{	if (!wapp.param.ope2017 || Math.random()>0.85)
-			{	wapp.notinfo ($(".ope2017 .title").html(), $(".ope2017 .msg").html(),
-					{ icon: "<i class='fa fa-star-o'></i>", className:"tourisme" });
-				wapp.param.ope2017 = true;
-			}
-		}
-		else $(".ope2017").hide();
-
-		var self = this; 
 		// Version => cordova-plugin-app-version ???
 		$(".version").text(this.version);
-
 		// Gestion de l'aide en ligne
 		$("#help").click(wapp.help.hide);
-
 		// Lancement
 		wapp.wait("Chargement...", false);
 
-		// url du service => chercher sur internet
-		geoportailConfig.url = "http://wxs.ign.fr/";
+		// Afficher les operations ponctuelles
+		wapp.setOperations();
 
 		// Gestion des parametres
-		if (!this.param.options) this.param.options={};
-		this.paramInput = this.setParamInput("#options", this.param.options, function(e)
-			{	switch (e.name)
-				{	case "rotmap":
-						wapp.rotateMap(e.val);
-						break;
-					case "zoombt":
-						if (e.val===false) $("#map .ol-zoom").hide();
-						else $("#map .ol-zoom").show();
-						break;
-					case "searchbt":
-						if (e.val===false) $("#map .searchCtrl").hide();
-						else $("#map .searchCtrl").show();
-						break;
-					case "qlf":
-						if (wapp.ripart)
-						{	var qlf = /qlf/.test(wapp.ripart.getServiceUrl());
-							if (e.val != qlf) 
-							{	if (e.val)wapp.ripart.setServiceUrl("https://qlf-collaboratif.ign.fr/collaboratif-develop/api/");
-								else wapp.ripart.setServiceUrl("https://espacecollaboratif.ign.fr/api/");
-								wapp.ripart.deconnect();
-							}
-						}
-						break;
-					default: break;
-				}
-			});
+		wapp.initParams();
 
-		// Layers (set hdpi:false to enable tile cache)
-		var layers = this.layers =  [
-				// Fonds de plan
-				new ol.layer.Group(
-				{	name:"Fond de plan",
-					layers:
-					[	new ol.layer.Geoportail("GEOGRAPHICALGRIDSYSTEMS.MAPS", {baseLayer: true, hidpi: false, visible: true }),
-						new	ol.layer.Geoportail("GEOGRAPHICALGRIDSYSTEMS.PLANIGN", {baseLayer: true, hidpi: false, visible: false }),
-						new	ol.layer.Geoportail("ORTHOIMAGERY.ORTHOPHOTOS", {baseLayer: true, hidpi: false, visible: false })
-					]
-				}),
-				// Layer pour l'affichage du cache
-				new ol.layer.Group({ title:"Mes cartes", name: "cache", displayInLayerSwitcher: false }),
-				// Overlays
-				new ol.layer.Geoportail("BUILDINGS.BUILDINGS", { hidpi: false, visible: false }),
-				new ol.layer.Geoportail("CADASTRALPARCELS.PARCELS", { hidpi: false, visible: false }),
-				new ol.layer.Geoportail("TRANSPORTNETWORKS.ROADS", { hidpi: false, visible: false }),
-				new ol.layer.Geoportail("GEOGRAPHICALGRIDSYSTEMS.MAPS.BDUNI.J1", { hidpi: false, visible: false }),
-				// Couche INSPIRE adresse
-				new ol.layer.Tile ({
-					"name": "Adresses",
-					"extent": [ -7030196.346030043, -2438399.008686918, 6215711.586687296, 6645292.597727471 ],
-					"minResolution": 0,
-					"maxResolution": 4,
-					"visible": false,
-					"source": new ol.source.TileWMS(
-					{	"url": "http://wxs.ign.fr/"+apiKey+"/inspire/v/wms",
-						"projection": "EPSG:3857",
-						"crossOrigin": "anonymous",
-						"params": {
-							"LAYERS": "AD.Address",
-							"FORMAT": "image/png",
-							"VERSION": "1.3.0"
-						}
-					})
-				})
-			];
-
-		// The map
-		var pos = this.param.position || {};
-		var map = this.map = new ol.Map.Geoportail
-			({	target: 'map',
-				key: apiKey,
-				// Improve user experience by loading tiles while animating. Will make
-				// animations stutter on mobile or slow devices.
-				//loadTilesWhileAnimating: true,
-				view: new ol.View
-				({	zoom: pos.zoom || 5,
-					center: [pos.lon || 166326, pos.lat || 5992663]
-				}),
-				controls: ol.control.defaults({ attribution:false }),
-				interactions: ol.interaction.defaults(),
-				layers: layers
-			});
-		if (map.getView().getZoom()>18) map.getView().setZoom(18);
-
-		// Prevent link to open 
-		ol.Attribution.uniqueAttributionKey = {};
-		map.formatAttribution = function()
-		{	var a = ol.Map.Geoportail.prototype.formatAttribution.apply (map, arguments);
-			return a.replace("<a href","<span data-href").replace("</a>","</span>");
-		};
-
-		// Centrer la carte
-		function centerMap(pos)
-		{	map.getView().setCenter(pos);
-			if (map.getView().getZoom()<15) map.getView().setZoom(15);
-			map.pulse(pos);
-		};
-
-		// Geolocation Control
-		//this.addLocateControl(map);
-		var locCtrl = new ol.control.GeoportailLocate(
-			{	apiKey:apiKey, 
-				target: $('#search [data-role="content"]').get(0),
-				onGeocode: function(pos, r)
-				{	centerMap(ol.proj.transform(pos,'EPSG:4326', map.getView().getProjection()));
-					wapp.hidePage();
-				}
-			});
-		map.addControl (locCtrl);
-		// Search button
-		var searchCtrl = new ol.control.Button(
-			{	className: "searchCtrl",
-				html: "<i class='fa fa-search'></i>",
-				handleClick: function()
-				{	wapp.showPage('search');
-					$("#search input").focus();
-				}
-			});
-		map.addControl (searchCtrl);
-
-		// Scale line
-		map.addControl (new ol.control.CanvasScaleLine());
-
-		// Disable control
-		this.disableCtrl = new ol.control.Disable();
-		map.addControl (this.disableCtrl);
-
-		// Attribution
-		// map.setAttributionsMode("logo")
-		map.addControl (new ol.control.Attribution({ collapsible:false }));
-
-		// Menu
-		map.addControl (new ol.control.Toggle(
-		{	"className": "menuCtrl", 
-			"html": "<i class='fa fa-bars'></i>",
-			"toggleFn": function(b)
-			{	wapp.toggleMenu();
-			}
-		}));
-
-		// Layer switcher
-		map.addControl (new ol.control.LayerSwitcher({ target:$("#layerswitcher").get(0), extent:true, reordering: false }));
-
-		// Geolocation Control
-		var geoloc = window.geoloc = new ol.control.Geolocate();
-		geoloc.on("geolocate", function(e) 
-			{	centerMap(e.position);
-			});
-		map.addControl(geoloc);
-
-		// Selection
-		var selPoint = new ol.style.Style (
-			{	image: new ol.style.Circle(
-				{	stroke: new ol.style.Stroke({color: '#f00', width: 4}),
-					radius: 20
-				}),
-			});
-		var selStroke = new ol.style.Stroke({color: '#f00', width: 3 });
-		var selLayer;
-		this.select = new ol.interaction.Select({
-			hitTolerance: 5,
-			filter: function(f,l) 
-			{	selLayer = l;
-				return (true);
-			},
-			style: function(f,res)
-			{	if (f.getGeometry().getType()=="Point")
-				{	return $.merge( [ selPoint ], selLayer.getStyleFunction()(f,res));
-				}
-				else
-				{	return $.merge( [ new ol.style.Style(
-						{	stroke: selStroke,
-							geometry: ol.geom.Polygon.fromExtent( f.getGeometry().getExtent() )
-						}) ], selLayer.getStyleFunction()(f,res));
-				}
-			}});
-		this.select.selectFeature = function(f, l)
-		{	this.getFeatures().clear();
-			selLayer = l;
-			if (f) this.getFeatures().push(f);
-			wapp.showSelect();
-		};
-		this.map.addInteraction(this.select);
-		this.select.on("select", this.onSelect, this);
-		wapp.onSelect();
-
-		// Longtouch
-		map.addInteraction(new ol.interaction.LongTouch(
-			{	handleLongTouchEvent: function(e)
-				{	wapp.select.getFeatures().clear();
-					map.getView().setCenter(e.coordinate);
-					wapp.ripart.showFormulaire();
-				}
-			}));
-
-		// Geolocation draw
-		var geodrawlayer = new ol.layer.Vector(
-		{	name: 'Trace',
-			displayInLayerSwitcher: false,
-			source: new ol.source.Vector()
-		});
-		geodrawlayer.getSource().on('addfeature', function(e) { e.feature.layer = geodrawlayer; });
-		map.addLayer(geodrawlayer);
-		// Draw interaction
-		var geodraw = new ol.interaction.GeolocationDraw(
-			{	source: geodrawlayer.getSource(),
-				type: 'LineString',
-				zoom: 18,
-			});
-		geodraw.setActive(false);
-		map.addInteraction(geodraw);
-		// Control d'activation
-		map.addControl (new ol.control.Toggle(
-		{	"className": "geodrawCtrl debug", 
-			"html": "<i class='fa fa-location-arrow'></i>",
-			"toggleFn": function(b)
-			{	if (geodraw.getActive())
-				{	geodraw.stop();
-					geodraw.setActive(false);
-				}
-				else
-				{	geodraw.setActive(true);
-					geodraw.start();
-				}
-			}
-		}));
-
+		// Layers de l'application
+		wapp.initMap();
+		wapp.initControls();
+		wapp.initInteractions();
 
 		// Gestion du cache
 		// this.cache = new CacheMap({ loadPage: "#loadMap", listMap: '#cartes [data-list="maps"] ul' });
 
 		// Brancher les signalements
-		this.ripart = new RIPart(
-			{	url: this.param.options.qlf ?  "https://qlf-collaboratif.ign.fr/collaboratif-develop/api/":null,
-				infoElement: '#options .connect [data-input-role="info"] span.connected',
-				countElement: '.georemsCount span',
-				listElement: '#signalements [data-role="content"]',
-				formElement: '#fiche .signaler',
-				layer: new ol.layer.Vector(
-				{	source: new ol.source.Vector(),
-					name: "Signalements"
-				}),
-				// Selection d'un signalement
-				onSelect: function(georem, add)
-				{	var f = wapp.ripart.getFeature(georem);
-					wapp.select.getFeatures().clear();
-					wapp.select.selectFeature(f, wapp.ripart.layer);
-					wapp.showOnglet("info");
-					wapp.showSelect(!add);
-				},
-				// Affichage du dialogue
-				onShow: function(form)
-				{	wapp.showPage('fiche');
-					wapp.showOnglet('signal');
-					var f = wapp.select.getFeatures().item(0);
-					if (f && f.get('georem'))
-					{	f = false;
-						wapp.select.getFeatures().clear();
-					}
-					var p = f ? ol.extent.getCenter(f.getGeometry().getExtent()) : wapp.map.getView().getCenter();
-					p = ol.proj.transform(p, wapp.map.getView().getProjection(),'EPSG:4326');
-					$("input.lon", form).val(p[0].toFixed(8));
-					$("input.lat", form).val(p[1].toFixed(8));
-					wapp.select.setActive(false);
-				}, 
-				// Formatage du signalement / verification avant envoie
-				formatGeorem: function(georem, form)
-				{	var f = wapp.select.getFeatures().getArray();
-					var current = form.parent().data('grem');
-					if (current && current.sketch)
-					{	georem.sketch = current.sketch;
-					}
-					else if (f.length) georem.sketch = wapp.ripart.feature2sketch(f, wapp.map.getView().getProjection());
-					if (!georem.comment) 
-					{	wapp.alert ("Merci de laisser un commentaire...");
-						return false;
-					}
-					// Forcer le groupe
-					// georem.id_groupe = this.param.groupes[0].id_groupe;
-					// Protocol
-					georem.protocol = "_MONGUICHET_65876";
-					georem.version = "0.1";
-					return true;
-				},
-				/*
-				// Localisation via GPS
-				onLocate : function(loc)
-				{	$("span.lon", this.formElement).text(loc.position[0].toFixed(7));
-					$("span.lat", this.formElement).text(loc.position[1].toFixed(7));
-					$("span.accuracy", this.formElement).text(loc.accuracy);
-				}
-				*/
-			});
-		$("#signalements button").click(function(){ wapp.select.getFeatures().clear(); });
-		if (wapp.ripart.param.profil) 
-		{	$("#splash img").attr('src', wapp.ripart.param.profil.logo);
-		}
+		wapp.initRipart();
 
-		$("#fiche").on("showonglet hidepage", function(e)
-		{	self.ripart.cancelFormulaire();
-			if (!$(e.target).hasClass('signaler')) wapp.select.setActive(true);
-		});
-						 
-        // Affichage des layers
-		this.showLayers(this.param.layers);
+		// Affichage des layers
+		wapp.showLayers(this.param.layers);
 
-		// Set parameters
-		this.paramInput.change();
-
-		// Actualiser le compte
-		wapp.wait("Connexion...");
-		if (wapp.ripart.param.profil)
-		{	var img = $("<img>").attr('src', wapp.ripart.param.profil.logo)
-							.on('error', function(){ $(this).addClass('error'); });
-			var div = $("<div>").append(img).append($("<p>").text("Connexion..."));
-			wapp.wait(div, { className:'splash' });
-		}
-		this.ripart.checkUserInfo(
-			function ()
-			{	wapp.wait(false); 
-				wapp.notification("Connecté au service",1200);
-				wapp.initGuichets();
-			}, 
-			function()
-			{	wapp.wait(false); 
-				wapp.initGuichets();
-			}
-		);
-
-		// Gestion des parametres caches
-		var cheat = 0;
-		var tcheat = new Date();
-		$('#options [data-role="header"]').on("click touchstart", function(e)
-		{	e.stopPropagation();
-			e.preventDefault();
-			var t = new Date();
-			if (t-tcheat > 250) cheat = 0;
-			else cheat++;
-			tcheat = t;
-			if (cheat>10 || wapp.param.options.qlf)
-			{	wapp.notification ("Mode debug activé...",500);
-				cheat=0;
-				$(".debug").show();
-			}
-		});
-		if (this.param.options.qlf) $(".debug").show();
+		wapp.setDebugMode();
 
 		// Fin
 //		wapp.wait(false);
-	},
-
-	/** Affichage des layers
-	*/
-	showLayers: function(vislayers, layers)
-	{	if (vislayers && vislayers.length) 
-		{	if (!layers) layers = this.map.getLayers().getArray();
-			for (var i=0; i<layers.length; i++)
-			{	if ($.inArray(layers[i].get('name'), vislayers)>=0) layers[i].setVisible(true);
-				else layers[i].setVisible(false);
-				if (layers[i].getLayers) this.showLayers(vislayers, layers[i].getLayers().getArray());
-			}
-		}
 	},
 
 	/** Enable map rotation
@@ -477,20 +126,439 @@ var wapp = new CordovApp(
 	
 });
 
-/** Verifier qu'on a bien au moins un layer affiche
+/** Afficher une operation ponctuelle
 */
-$("#layers").on("hidepage", function()
-{	var hasVisibleLayers = false; 
-	wapp.map.getLayers().forEach(function(l)
-	{	if (!(l instanceof ol.layer.Vector) && l.getVisible()) hasVisibleLayers = true;
+wapp.setOperations = function()
+{	var currentOperations = {};
+	if (!wapp.param.operations) wapp.param.operations = {};
+	$(".operation[data-date]").each(function()
+	{	var ope = $(this);
+		if ((new Date()) < new Date(ope.data('date')))
+		{	ope.show();
+			var name = ope.data('name') || "none";
+			var icon = ope.data('icon') || 'star-o';
+			var className = ope.data('class')||"";
+			var freq = Number(ope.data('frequence')||0.15);
+			if (!wapp.param.operations[name] || Math.random()<freq)
+			{	wapp.notinfo ($(".title",ope).html(), $(".msg", ope).html(),
+					{ icon: "<i class='fa fa-"+icon+"'></i>", className: className });
+			}
+			currentOperations[name] = true;
+		}
+		else 
+		{	ope.hide();
+		}
 	});
-	if (!hasVisibleLayers)
-	{	wapp.dialog.show ("Toutes les couches sont masquées.<br/>"
-			+"Il se peut que vous ayez des problèmes à vous repérer&nbsp;!", 
-			{	title: "ATTENTION",
-				icon: "<i class='fa fa-eye-slash fa-3x'></i>",
-				className: "alert"
-			});
+	wapp.param.operations = currentOperations;
+};
+
+/** Initialisation des parametres de l'application
+*/
+wapp.initParams = function()
+{	if (!this.param.options) this.param.options={};
+	this.paramInput = this.setParamInput("#options", this.param.options, function(e)
+		{	switch (e.name)
+			{	case "rotmap":
+					wapp.rotateMap(e.val);
+					break;
+				case "zoombt":
+					if (e.val===false) $("#map .ol-zoom").hide();
+					else $("#map .ol-zoom").show();
+					break;
+				case "searchbt":
+					if (e.val===false) $("#map .searchCtrl").hide();
+					else $("#map .searchCtrl").show();
+					break;
+				case "qlf":
+					if (wapp.ripart)
+					{	var qlf = /qlf/.test(wapp.ripart.getServiceUrl());
+						if (e.val != qlf) 
+						{	if (e.val) wapp.ripart.setServiceUrl("https://qlf-collaboratif.ign.fr/collaboratif-develop/api/");
+							else wapp.ripart.setServiceUrl("https://espacecollaboratif.ign.fr/api/");
+							wapp.ripart.deconnect();
+						}
+					}
+					break;
+				default: break;
+			}
+		});
+};
+
+/** Initialise la carte
+*/
+wapp.initMap = function()
+{	// Layers (set hdpi:false to enable tile cache)
+	var layers = this.layers =  [
+		// Fonds de plan
+		new ol.layer.Group(
+		{	name:"Fond de plan",
+			layers:
+			[	new ol.layer.Geoportail("GEOGRAPHICALGRIDSYSTEMS.MAPS", {baseLayer: true, hidpi: false, visible: true }),
+				new	ol.layer.Geoportail("GEOGRAPHICALGRIDSYSTEMS.PLANIGN", {baseLayer: true, hidpi: false, visible: false }),
+				new	ol.layer.Geoportail("ORTHOIMAGERY.ORTHOPHOTOS", {baseLayer: true, hidpi: false, visible: false })
+			]
+		}),
+		// Layer pour l'affichage du cache
+		new ol.layer.Group({ title:"Mes cartes", name: "cache", displayInLayerSwitcher: false }),
+		// Overlays
+		new ol.layer.Geoportail("ELEVATION.ELEVATIONGRIDCOVERAGE.SHADOW", { hidpi: false, visible: false }),
+//		new ol.layer.Geoportail("BUILDINGS.BUILDINGS", { hidpi: false, visible: false }),
+		new ol.layer.Geoportail("CADASTRALPARCELS.PARCELS", { hidpi: false, visible: false }),
+//		new ol.layer.Geoportail("TRANSPORTNETWORKS.ROADS", { hidpi: false, visible: false }),
+		new ol.layer.Geoportail("GEOGRAPHICALGRIDSYSTEMS.MAPS.BDUNI.J1", { hidpi: false, visible: false }),
+		// Couche INSPIRE adresse
+		new ol.layer.Tile ({
+			"name": "Adresses",
+			"extent": [ -7030196.346030043, -2438399.008686918, 6215711.586687296, 6645292.597727471 ],
+			"minResolution": 0,
+			"maxResolution": 4,
+			"visible": false,
+			"source": new ol.source.TileWMS(
+			{	"url": "http://wxs.ign.fr/"+apiKey+"/inspire/v/wms",
+				"projection": "EPSG:3857",
+				"crossOrigin": "anonymous",
+				"params": {
+					"LAYERS": "AD.Address",
+					"FORMAT": "image/png",
+					"VERSION": "1.3.0"
+				}
+			})
+		})
+	];
+
+	// The map
+	var pos = this.param.position || {};
+	var map = this.map = new ol.Map.Geoportail
+		({	target: 'map',
+			key: apiKey,
+			// Improve user experience by loading tiles while animating. Will make
+			// animations stutter on mobile or slow devices.
+			//loadTilesWhileAnimating: true,
+			view: new ol.View
+			({	zoom: pos.zoom || 5,
+				center: [pos.lon || 166326, pos.lat || 5992663]
+			}),
+			controls: ol.control.defaults({ attribution:false }),
+			interactions: ol.interaction.defaults(),
+			layers: layers
+		});
+	if (map.getView().getZoom()>18) map.getView().setZoom(18);
+
+	// Prevent link to open 
+	ol.Attribution.uniqueAttributionKey = {};
+	map.formatAttribution = function()
+	{	var a = ol.Map.Geoportail.prototype.formatAttribution.apply (map, arguments);
+		return a.replace("<a href","<span data-href").replace("</a>","</span>");
+	};
+
+
+	// Verifier qu'on a bien au moins un layer affiche
+	function checkVisible(layers)
+	{	var visible = false;
+		if (!layers) layers = wapp.map.getLayers();
+		layers.forEach(function(l)
+		{	if (!(l instanceof ol.layer.Vector) && l.getVisible()) 
+			{	if (l instanceof ol.layer.Group)
+				{	if (checkVisible(l.getLayers())) visible=true;
+				}
+				else visible=true;
+			}
+		});
+		return visible;
+	};
+	$("#layers").on("hidepage", function()
+	{	if (!checkVisible())
+		{	wapp.dialog.show ("Toutes les couches sont masquées.<br/>"
+				+"Il se peut que vous ayez des problèmes à vous repérer&nbsp;!", 
+				{	title: "ATTENTION",
+					icon: "<i class='fa fa-eye-slash fa-3x'></i>",
+					className: "alert"
+				});
+		}
+
+	});
+};
+
+/** Initialise les controls de la carte
+*/
+wapp.initControls = function()
+{	var map = this.map;
+	
+	// Centrer la carte
+	function centerMap(pos)
+	{	map.getView().setCenter(pos);
+		if (map.getView().getZoom()<15) map.getView().setZoom(15);
+		map.pulse(pos);
+	};
+
+	// Geolocation Control
+	//this.addLocateControl(map);
+	var locCtrl = new ol.control.GeoportailLocate(
+		{	apiKey:apiKey, 
+			target: $('#search [data-role="content"]').get(0),
+			onGeocode: function(pos, r)
+			{	centerMap(ol.proj.transform(pos,'EPSG:4326', map.getView().getProjection()));
+				wapp.hidePage();
+			}
+		});
+	map.addControl (locCtrl);
+	// Search button
+	var searchCtrl = new ol.control.Button(
+		{	className: "searchCtrl",
+			html: "<i class='fa fa-search'></i>",
+			handleClick: function()
+			{	wapp.showPage('search');
+				$("#search input").focus();
+			}
+		});
+	map.addControl (searchCtrl);
+
+	// Scale line
+	map.addControl (new ol.control.CanvasScaleLine());
+
+	// Disable control
+	this.disableCtrl = new ol.control.Disable();
+	map.addControl (this.disableCtrl);
+
+	// Attribution
+	// map.setAttributionsMode("logo")
+	map.addControl (new ol.control.Attribution({ collapsible:false }));
+
+	// Menu
+	map.addControl (new ol.control.Toggle(
+	{	"className": "menuCtrl", 
+		"html": "<i class='fa fa-bars'></i>",
+		"toggleFn": function(b)
+		{	wapp.toggleMenu();
+		}
+	}));
+
+	// Layer switcher
+	map.addControl (new ol.control.LayerSwitcher({ target:$("#layerswitcher").get(0), extent:true, reordering: true }));
+
+	// Geolocation Control
+	var geoloc = window.geoloc = new ol.control.Geolocate();
+	geoloc.on("geolocate", function(e) 
+		{	centerMap(e.position);
+		});
+	map.addControl(geoloc);
+};
+
+
+/** Ajout des interactions sur la carte
+*/
+wapp.initInteractions = function()
+{	var map = this.map;
+	//	Selection
+	var selPoint = new ol.style.Style (
+	{	image: new ol.style.Circle(
+		{	stroke: new ol.style.Stroke({color: '#f00', width: 4}),
+			radius: 20
+		}),
+	});
+	var selStroke = new ol.style.Stroke({color: '#f00', width: 3 });
+	var selLayer;
+	this.select = new ol.interaction.Select({
+		hitTolerance: 5,
+		filter: function(f,l) 
+		{	selLayer = l;
+			return (true);
+		},
+		style: function(f,res)
+		{	if (f.getGeometry().getType()=="Point")
+			{	return $.merge( [ selPoint ], selLayer.getStyleFunction()(f,res));
+			}
+			else
+			{	return $.merge( [ new ol.style.Style(
+					{	stroke: selStroke,
+						geometry: ol.geom.Polygon.fromExtent( f.getGeometry().getExtent() )
+					}) ], selLayer.getStyleFunction()(f,res));
+			}
+		}});
+	this.select.selectFeature = function(f, l)
+	{	this.getFeatures().clear();
+		selLayer = l;
+		if (f) this.getFeatures().push(f);
+		wapp.showSelect();
+	};
+	this.map.addInteraction(this.select);
+	this.select.on("select", this.onSelect, this);
+	wapp.onSelect();
+
+	// Longtouch
+	map.addInteraction(new ol.interaction.LongTouch(
+		{	handleLongTouchEvent: function(e)
+			{	wapp.select.getFeatures().clear();
+				map.getView().setCenter(e.coordinate);
+				wapp.ripart.showFormulaire();
+			}
+		}));
+
+	// Geolocation draw
+	var geodrawlayer = new ol.layer.Vector(
+	{	name: 'Trace',
+		displayInLayerSwitcher: false,
+		source: new ol.source.Vector()
+	});
+	geodrawlayer.getSource().on('addfeature', function(e) { e.feature.layer = geodrawlayer; });
+	map.addLayer(geodrawlayer);
+	// Draw interaction
+	var geodraw = new ol.interaction.GeolocationDraw(
+		{	source: geodrawlayer.getSource(),
+			type: 'LineString',
+			zoom: 18,
+		});
+	geodraw.setActive(false);
+	map.addInteraction(geodraw);
+	// Control d'activation
+	map.addControl (new ol.control.Toggle(
+	{	"className": "geodrawCtrl debug", 
+		"html": "<i class='fa fa-location-arrow'></i>",
+		"toggleFn": function(b)
+		{	if (geodraw.getActive())
+			{	geodraw.stop();
+				geodraw.setActive(false);
+			}
+			else
+			{	geodraw.setActive(true);
+				geodraw.start();
+			}
+		}
+	}));
+
+};
+
+/** Initialisation des signalements
+*/
+wapp.initRipart = function()
+{	var self = this;
+	
+	this.ripart = new RIPart(
+		{	url: this.param.options.qlf ?  "https://qlf-collaboratif.ign.fr/collaboratif-develop/api/":null,
+			infoElement: '#options .connect [data-input-role="info"] span.connected',
+			countElement: '.georemsCount span',
+			listElement: '#signalements [data-role="content"]',
+			formElement: '#fiche .signaler',
+			layer: new ol.layer.Vector(
+			{	source: new ol.source.Vector(),
+				name: "Signalements"
+			}),
+			// Selection d'un signalement
+			onSelect: function(georem, add)
+			{	var f = wapp.ripart.getFeature(georem);
+				wapp.select.getFeatures().clear();
+				wapp.select.selectFeature(f, wapp.ripart.layer);
+				wapp.showOnglet("info");
+				wapp.showSelect(!add);
+			},
+			// Affichage du dialogue
+			onShow: function(form)
+			{	wapp.showPage('fiche');
+				wapp.showOnglet('signal');
+				var f = wapp.select.getFeatures().item(0);
+				if (f && f.get('georem'))
+				{	f = false;
+					wapp.select.getFeatures().clear();
+				}
+				var p = f ? ol.extent.getCenter(f.getGeometry().getExtent()) : wapp.map.getView().getCenter();
+				p = ol.proj.transform(p, wapp.map.getView().getProjection(),'EPSG:4326');
+				$("input.lon", form).val(p[0].toFixed(8));
+				$("input.lat", form).val(p[1].toFixed(8));
+				wapp.select.setActive(false);
+			}, 
+			// Formatage du signalement / verification avant envoie
+			formatGeorem: function(georem, form)
+			{	var f = wapp.select.getFeatures().getArray();
+				var current = form.parent().data('grem');
+				if (current && current.sketch)
+				{	georem.sketch = current.sketch;
+				}
+				else if (f.length) georem.sketch = wapp.ripart.feature2sketch(f, wapp.map.getView().getProjection());
+				if (!georem.comment) 
+				{	wapp.alert ("Merci de laisser un commentaire...");
+					return false;
+				}
+				// Forcer le groupe
+				// georem.id_groupe = this.param.groupes[0].id_groupe;
+				// Protocol
+				georem.protocol = "_MONGUICHET_65876";
+				georem.version = "0.1";
+				return true;
+			},
+			/*
+			// Localisation via GPS
+			onLocate : function(loc)
+			{	$("span.lon", this.formElement).text(loc.position[0].toFixed(7));
+				$("span.lat", this.formElement).text(loc.position[1].toFixed(7));
+				$("span.accuracy", this.formElement).text(loc.accuracy);
+			}
+			*/
+		});
+	$("#signalements button").click(function(){ wapp.select.getFeatures().clear(); });
+	if (wapp.ripart.param.profil) 
+	{	$("#splash img").attr('src', wapp.ripart.param.profil.logo);
 	}
 
-});
+	$("#fiche").on("showonglet hidepage", function(e)
+	{	self.ripart.cancelFormulaire();
+		if (!$(e.target).hasClass('signaler')) wapp.select.setActive(true);
+	});
+						 
+	// Set parameters
+	this.paramInput.change();
+
+	// Actualiser le compte
+	wapp.wait("Connexion...");
+	if (wapp.ripart.param.profil)
+	{	var img = $("<img>").attr('src', wapp.ripart.param.profil.logo)
+						.on('error', function(){ $(this).addClass('error'); });
+		var div = $("<div>").append(img).append($("<p>").text("Connexion..."));
+		wapp.wait(div, { className:'splash' });
+	}
+	this.ripart.checkUserInfo(
+		function ()
+		{	wapp.wait(false); 
+			wapp.notification("Connecté au service",1200);
+			wapp.initGuichets();
+		}, 
+		function()
+		{	wapp.wait(false); 
+			wapp.initGuichets();
+		}
+	);
+};
+
+/** Gestion des parametres caches et du mode debug
+*/
+wapp.setDebugMode = function()
+{	var cheat = 0;
+	var tcheat = new Date();
+	$('#options [data-role="header"]').on("click touchstart", function(e)
+	{	e.stopPropagation();
+		e.preventDefault();
+		var t = new Date();
+		if (t-tcheat > 250) cheat = 0;
+		else cheat++;
+		tcheat = t;
+		if (cheat>10 || wapp.param.options.qlf)
+		{	wapp.notification ("Mode debug activé...",500);
+			cheat=0;
+			$(".debug").show();
+		}
+	});
+	if (this.param.options.qlf) $(".debug").show();
+};
+
+/** Affichage des layers
+*/
+wapp.showLayers = function(vislayers, layers)
+{	if (vislayers && vislayers.length) 
+	{	if (!layers) layers = this.map.getLayers().getArray();
+		for (var i=0; i<layers.length; i++)
+		{	if ($.inArray(layers[i].get('name'), vislayers)>=0) layers[i].setVisible(true);
+			else layers[i].setVisible(false);
+			if (layers[i].getLayers) this.showLayers(vislayers, layers[i].getLayers().getArray());
+		}
+	}
+};
+

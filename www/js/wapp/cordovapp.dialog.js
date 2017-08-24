@@ -266,11 +266,14 @@ var _timeout = null;
 /** Show a notification on the bottom of the screen
 * @param {String} notification
 * @param {Number|String} duration (number in ms or a string "1s"/"1000ms") before the notification vanish (0 close the notificatoin), default 3s
+* @param {boolean} noreplace true to avaoid replacing existing notification, default false
 */
-CordovApp.prototype.notification = function(msg, duration)
+CordovApp.prototype.notification = function(msg, duration, noreplace)
 {	if (!_notification)
 	{	_notification = $("<div>").attr("data-role","notification").appendTo("body");
 	}
+
+	if (noreplace && _notification.hasClass('visible')) return;
 
 	if (!msg && !duration) 
 	{	if (_timeout) clearTimeout(_timeout);
@@ -293,7 +296,14 @@ CordovApp.prototype.notification = function(msg, duration)
 	{	_notification.removeClass('visible'); 
 		setTimeout (function(){ _notification.hide(); }, 200);
 	}, duration);
-}
+};
+
+/** Check if a notification is visible
+* @return {boolean}
+*/
+CordovApp.prototype.isNotification = function()
+{	return _notification.hasClass('visible');
+};
 
 /** Information notification
 */

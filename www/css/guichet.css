@@ -97,10 +97,10 @@
   	background-color: rgba(0,60,136,.5);
   }
   71% {
-    background-color: rgba(0,60,136,0.8);;
+    background-color: rgba(0,60,136,0.8);
   }
   100% {
-    background-color: rgba(0,60,136,0.8);;
+    background-color: rgba(0,60,136,0.8);
   }
 }
 @-webkit-keyframes blink-animation {
@@ -113,10 +113,10 @@
   	background-color: rgba(0,60,136,.5);
   }
   71% {
-    background-color: rgba(0,60,136,0.8);;
+    background-color: rgba(0,60,136,0.8);
   }
   100% {
-    background-color: rgba(0,60,136,0.8);;
+    background-color: rgba(0,60,136,0.8);
   }
 }
 
@@ -433,8 +433,9 @@
 }
 
 /** LayerSwitcher */
+#layerswitcher .li-content,
 #layerswitcher label
-{	max-width:100%;
+{	width:100%;
 }
 #layerswitcher ul.panel 
 {	bottom: 0;
@@ -448,7 +449,8 @@
 	font-size: 1.1em;
 }
 #layerswitcher ul li
-{	background-image: -webkit-linear-gradient(#fff, #eee); /* For Safari 5.1 to 6.0 */
+{	position: relative;
+	background-image: -webkit-linear-gradient(#fff, #eee); /* For Safari 5.1 to 6.0 */
 	background-image: linear-gradient(#fff, #eee);
 	padding:0.5em;
 	padding-right: 1em;
@@ -464,6 +466,15 @@
 #layerswitcher .layerswitcher-opacity 
 {	margin:10px 0;
 	width:100%;
+	height:10px;
+}
+#layerswitcher .ol-layerswitcher-buttons
+{	position: absolute;
+	right: 0.5em;
+	top: 0.5em;
+}
+#layerswitcher .ol-layerswitcher .panel li.dropover
+{	transform:scale(0.95);
 }
 
 #layerswitcher .layerup,
@@ -493,10 +504,6 @@
 {	width:30px;
 	height:30px;
 	z-index:1;
-}
-#layerswitcher .layerswitcher-opacity-cursor:before
-{	width:15px;
-	height:15px;
 }
 
 #layerswitcher [type="checkbox"] + label:before
@@ -600,7 +607,7 @@
     border-color: #ccc;
     border-style: solid;
     border-width: 1px 0;
-    padding: 0.5em;
+    padding: 0.5em 2em 0.5em 0.5em;
     width: 100%;
 	position:relative;
 }
@@ -610,7 +617,15 @@
 	margin-right:0.5em;
 	vertical-align: middle;
 }
-
+#cartes ul li.selected:before
+{	content: "\f00c";
+	font-family: Fontawesome;
+	position: absolute;
+	right: 0.5em;
+	top: 50%;
+	-webkit-transform: translateY(-50%);
+	transform: translateY(-50%);
+}
 
 /* Template pour la creation*/
 [data-role="template"]
@@ -1105,8 +1120,22 @@ body.trackingGeorem #fiche .signaler .movePosition
     font-size: 1.5em;
 }
 
-/* Operation 2017 */
-[data-role=notinfo] > div.tourisme .icon
+/* Operation */
+.operation[data-date] 
+{	display:none;
+}
+[data-role=notinfo] .magenta .icon
 {	color: #f0f;
 	opacity: 0.5;
+}
+
+.blinking {
+  animation: blinking 1s linear infinite;
+}
+
+@keyframes blinking {
+  from { visibility: visible; }
+  49.9% { visibility: visible; }
+  50%{ visibility: hidden; }
+  to { visibility: hidden; }
 }

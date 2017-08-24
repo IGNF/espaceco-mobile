@@ -10,7 +10,7 @@ if (!proj4.defs["IGNF:LAMB93"]) proj4.defs("IGNF:LAMB93","+proj=lcc +lat_1=49 +l
 /** ol.source.Vector.Webpart
  * @constructor
  * @extends {ol.source.Vector}
- * @trigger savestart, saveend, loadstart, loadend
+ * @trigger savestart, saveend, loadstart, loadend, overload
  * @param {olx.source.WebpartOptions}
  *		- proxy {string} proxy path, default none
  *		- username {string} authentification
@@ -439,10 +439,10 @@ ol.source.Vector.Webpart.prototype.loaderFn_ = function (extent, resolution, pro
 
             // Start replacing features
             self.isloading_ = true;
-				if (!self.tiled_) self.getFeaturesCollection().clear();
-				self.addFeatures(features);
+			if (!self.tiled_) self.getFeaturesCollection().clear();
+			if (features.length) self.addFeatures(features);
             self.isloading_ = false;
-            self.dispatchEvent({ type:"loadend", remains:--self.tileloading_ });
+			self.dispatchEvent({ type:"loadend", remains: --self.tileloading_ });
 			if (data.length == self.maxFeatures_) self.dispatchEvent({ type:"overload" });
         },
 		// Error
@@ -450,7 +450,6 @@ ol.source.Vector.Webpart.prototype.loaderFn_ = function (extent, resolution, pro
 		{   if (status !== 'abort') 
 			{	// console.log(jqXHR);
 				self.dispatchEvent({ type:"loadend", error:error, status:status, remains:--self.tileloading_ });
-				
 			}
 			else 
 			{	self.dispatchEvent({ type:"loadend", remains:--self.tileloading_ });

@@ -32,9 +32,15 @@ wapp.initGuichets = function()
 		{	var li = $("<li>")
 				.data('groupe', g)
 				.text(g.nom+" ("+nb+" couches)")
+				.attr("data-input","")
 				.click(function()
-				{	wapp.setGuichet($(this).data('groupe'));
-					wapp.hidePage();
+				{	var self = $(this);
+					if (!self.hasClass('selected'))
+					{	wapp.setGuichet($(this).data('groupe'));
+						wapp.hidePage();
+					}
+					self.addClass('active');
+					setTimeout(function(){ self.removeClass('active'); }, 200);
 				})
 				.appendTo(ul);
 			$("<img>").attr("src",g.logo)
@@ -50,6 +56,11 @@ wapp.setGuichet = function(groupe)
 {	// Nouveau guichet
 	this.ripart.param.guichet = groupe.id_groupe;
 	wapp.ripart.saveParam();
+	// Mettre a jour la liste
+	$('#cartes [data-list="guichets"] ul li').each(function()
+	{	if ($(this).data('groupe')===groupe) $(this).addClass('selected');
+		else $(this).removeClass('selected');
+	});
 	// Layers du guichet
 	if (this.vector) 
 	{	for (var i=0, l; l=this.vector[i]; i++) 
@@ -58,6 +69,8 @@ wapp.setGuichet = function(groupe)
 	this.vector = [];
 	if (!groupe.layers) return;
 	var nb=0, nbLoad=0;
+	var loading={};
+	// Ajouter les layers Webpart
 	for (var i=0, l; l=groupe.layers[i]; i++)
 	{	if (l.type=="WFS")
 		{	nb++;
@@ -70,17 +83,23 @@ wapp.setGuichet = function(groupe)
 				username: wapp.ripart.getUser(),
 				password: wapp.ripart.getUser(true),
 				// style: guichet.style,
-				// Limit resolution to avoid large area request
-				maxResolution: 40 // zoom 13
+				maxResolution: 40, // zoom 13
+				checkSourceOptions: function (options, featureType)
+				{	// Limiter la taille des tuilles en fonction du minZoom
+					if (featureType.minZoomLevel) options.tileZoom = Math.max(featureType.minZoomLevel-2, 13);
+					// Eviter un affichage en zoom 0
+					else featureType.minZoomLevel = 12;
+				}
 			},
 			{	// preserved: select.getFeatures(),
 				filter: (base=="bduni_metropole" ? {detruit:false} : {}),
 				// Tile zoom to calculate tiles
-				tileZoom: 15,
+				tileZoom: 13,
 				maxFeatures: 5000,
 				maxReload: wapp.param.options.maxReload || 10000
 			});
 			this.vector.push(vector);
+			// Probleme au chargement
 			vector.on("error", function(e)
 			{	if (e.status===401)
 				{	wapp.message ("Impossible de charger la couche."
@@ -94,10 +113,24 @@ wapp.setGuichet = function(groupe)
 				return;
 			});
 			vector.on("ready", function()
-			{	// Garder le layer
+			{	// Marquer le layer sur l'objet
 				this.getSource().on('addfeature', function (e) 
 				{	e.feature.layer = this; 
 				}, this);
+				// Ooops probleme d'overload
+				this.getSource().on('overload', function (e) 
+				{	wapp.notification("loading overload...");
+				});
+				// Notification de chargement
+				this.getSource().on(['loadstart', 'loadend'], function (e) 
+				{	loading[e.target.getFeatureType().fullName] = e.remains;
+					var remains=0;
+					for (var i in loading) remains += loading[i];
+					if (remains)
+					{	wapp.notification("<i class='blinking'>chargement...</i>", 5000, true);
+					}
+					else wapp.notification();
+				});
 				// Decompte
 				nbLoad++;
 				if (nb==nbLoad) wapp.notification(nb+" couches ajoutées à la carte...");
@@ -111,9 +144,9 @@ wapp.setGuichet = function(groupe)
 			this.map.addLayer(vector);
 		}
 	}
+	// Mettre les remontées en haut de la pile de calque
 	if (nb) 
-	{	// Mettre les remontées au dessus
-		wapp.map.removeLayer(wapp.ripart.layer);
+	{	wapp.map.removeLayer(wapp.ripart.layer);
 		wapp.map.addLayer(wapp.ripart.layer);
 		wapp.notification("Chargement des guichets...");
 	}

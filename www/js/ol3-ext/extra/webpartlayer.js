@@ -36,6 +36,9 @@ ol.layer.Vector.Webpart  = function(options, source_options)
 		success: function (featureType) 
 		{	source_options.proxy = self.proxy_;
 			source_options.featureType = featureType;
+			// Check for source option
+			if (options.checkSourceOptions) options.checkSourceOptions.call(self, source_options, featureType);
+
 			// Webpart source
 			var vectorSource = new ol.source.Vector.Webpart(source_options);
 			self.setSource(vectorSource);
@@ -68,6 +71,7 @@ ol.layer.Vector.Webpart  = function(options, source_options)
 	});
 
 	ol.layer.Vector.call(this, options);
+	this.set("name", options.database+":"+options.name);
 };
 ol.inherits(ol.layer.Vector.Webpart, ol.layer.Vector);
 

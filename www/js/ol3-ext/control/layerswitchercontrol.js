@@ -41,6 +41,7 @@ ol.control.LayerSwitcher = function(opt_options)
 	{	element = $("<div>").addClass((options.switcherClass || 'ol-layerswitcher') +' ol-unselectable ol-control ol-collapsed');
 	
 		this.button = $("<button>")
+					.attr('type','button')
 					.on("touchstart", function(e)
 					{	element.toggleClass("ol-collapsed"); 
 						e.preventDefault(); 
@@ -147,8 +148,8 @@ ol.control.LayerSwitcher.prototype.overflow = function(dir)
 		{	// Bug IE: need to have an height defined
 			$(this.element).css("height", "100%");
 			switch (dir)
-			{	case 1: top += 2*$("li",this.panel_).height(); break;
-				case -1: top -= 2*$("li",this.panel_).height(); break;
+			{	case 1: top += 2*$("li.visible .li-content",this.panel_).height(); break;
+				case -1: top -= 2*$("li.visible .li-content",this.panel_).height(); break;
 				case "+50%": top += Math.round(h/2); break;
 				case "-50%": top -= Math.round(h/2); break;
 				default: break;
@@ -280,14 +281,17 @@ ol.control.LayerSwitcher.prototype.dragOrdering_ = function(e)
 		case 'mousedown': 
 		case 'touchstart':
 		{	e.stopPropagation();
-			//e.preventDefault();
+			e.preventDefault();
+			var pageY = e.pageY 
+					|| (e.originalEvent.touches && e.originalEvent.touches.length && e.originalEvent.touches[0].pageY) 
+					|| (e.originalEvent.changedTouches && e.originalEvent.changedTouches.length && e.originalEvent.changedTouches[0].pageY);
 			drag = 
 				{	self: drag.self,
 					elt: $(e.currentTarget).closest("li"), 
 					start: true, 
 					element: drag.self.element, 
 					panel: drag.self.panel_, 
-					pageY: e.pageY || e.originalEvent.touches[0].pageY 
+					pageY: pageY
 				};
 			drag.elt.parent().addClass('drag');
 			$(document).on("mouseup mousemove touchend touchcancel touchmove", drag, drag.self.dragOrdering_);
@@ -333,9 +337,13 @@ ol.control.LayerSwitcher.prototype.dragOrdering_ = function(e)
 			break;
 		}
 		// Ordering
-		default: 
+		case 'mousemove':
+		case 'touchmove':
 		{	// First drag (more than 2 px) => show drag element (ghost)
-			if (drag.start && Math.abs(drag.pageY - (e.pageY || e.originalEvent.touches[0].pageY)) > 2)
+			var pageY = e.pageY 
+					|| (e.originalEvent.touches && e.originalEvent.touches.length && e.originalEvent.touches[0].pageY) 
+					|| (e.originalEvent.changedTouches && e.originalEvent.changedTouches.length && e.originalEvent.changedTouches[0].pageY);
+			if (drag.start && Math.abs(drag.pageY - pageY) > 2)
 			{	drag.start = false;
 				drag.elt.addClass("drag");
 				drag.layer = drag.elt.data('layer');
@@ -355,13 +363,14 @@ ol.control.LayerSwitcher.prototype.dragOrdering_ = function(e)
 				e.stopPropagation();
 
 				// Ghost div
-				drag.div.css ({ top:(e.pageY || e.originalEvent.touches[0].pageY)-drag.panel.offset().top+5 });
+				drag.div.css ({ top:pageY - drag.panel.offset().top + drag.panel.scrollTop() +5 });
 				
 				var li;
 				if (e.pageX) li = $(e.target);
-				else li = $(document.elementFromPoint(e.originalEvent.touches[0].clientX, e.originalEvent.touches[0].clientY)); 
+				else li = $(document.elementFromPoint(e.originalEvent.touches[0].clientX, e.originalEvent.touches[0].clientY));
 				if (li.hasClass("ol-switcherbottomdiv")) 
 				{	drag.self.overflow(-1);
+					console.log('bottom')
 				}
 				else if (li.hasClass("ol-switchertopdiv")) 
 				{	drag.self.overflow(1);
@@ -391,6 +400,8 @@ ol.control.LayerSwitcher.prototype.dragOrdering_ = function(e)
 			}
 			break;
 		}
+		default: break;
+
 	}
 };
 
@@ -407,7 +418,9 @@ ol.control.LayerSwitcher.prototype.dragOpacity_ = function(e)
 		case 'touchstart':
 		{	e.stopPropagation();
 			e.preventDefault();
-			drag.start = e.pageX || e.originalEvent.touches[0].pageX;
+			drag.start = e.pageX 
+					|| (e.originalEvent.touches && e.originalEvent.touches.length && e.originalEvent.touches[0].pageX) 
+					|| (e.originalEvent.changedTouches && e.originalEvent.changedTouches.length && e.originalEvent.changedTouches[0].pageX);
 			drag.elt = $(e.target);
 			drag.layer = drag.elt.closest("li").data('layer')
 			drag.self.dragging_ = true;
@@ -426,7 +439,9 @@ ol.control.LayerSwitcher.prototype.dragOpacity_ = function(e)
 		}
 		// Move opcaity
 		default: 
-		{	var x = e.pageX || e.originalEvent.touches[0].pageX;
+		{	var x = e.pageX 
+				|| (e.originalEvent.touches && e.originalEvent.touches.length && e.originalEvent.touches[0].pageX) 
+				|| (e.originalEvent.changedTouches && e.originalEvent.changedTouches.length && e.originalEvent.changedTouches[0].pageX);
 			var dx = Math.max ( 0, Math.min( 1, (x - drag.elt.parent().offset().left) / drag.elt.parent().width() ));
 			drag.elt.css("left", (dx*100)+"%");
 			drag.opacity = dx;
@@ -502,7 +517,7 @@ ol.control.LayerSwitcher.prototype.drawList = function(ul, collection)
 
 		var li = $("<li>").addClass((layer.getVisible()?"visible ":" ")+(layer.get('baseLayer')?"baselayer":""))
 						.data("layer",layer).appendTo(ul);
-		
+
 		var layer_buttons = $("<div>").addClass("ol-layerswitcher-buttons").appendTo(li);
 
 		var d = $("<div>").addClass('li-content').appendTo(li);
@@ -536,13 +551,19 @@ ol.control.LayerSwitcher.prototype.drawList = function(ul, collection)
 
 		// Show/hide sub layers
 		if (layer.getLayers) 
-		{	$("<div>").addClass(layer.get("openInLayerSwitcher") ? "collapse-layers" : "expend-layers" )
+		{	var nb = 0;
+			layer.getLayers().forEach(function(l)
+			{	if (l.get('displayInLayerSwitcher')!==false) nb++;
+			});
+			if (nb) 
+			{	$("<div>").addClass(layer.get("openInLayerSwitcher") ? "collapse-layers" : "expend-layers" )
 					.click(function()
 					{	var l = $(this).closest('li').data("layer");
 						l.set("openInLayerSwitcher", !l.get("openInLayerSwitcher") )
 					})
 					.attr("title", this.tip.plus)
 					.appendTo(layer_buttons);
+			}
 		}
 
 		// $("<div>").addClass("ol-separator").appendTo(layer_buttons);
@@ -586,7 +607,9 @@ ol.control.LayerSwitcher.prototype.drawList = function(ul, collection)
 				.on("click", function(e)
 				{	e.stopPropagation();
 					e.preventDefault();
-					var x = e.pageX || e.originalEvent.touches[0].pageX;
+					var x = e.pageX 
+						|| (e.originalEvent.touches && e.originalEvent.touches.length && e.originalEvent.touches[0].pageX) 
+						|| (e.originalEvent.changedTouches && e.originalEvent.changedTouches.length && e.originalEvent.changedTouches[0].pageX);
 					var dx = Math.max ( 0, Math.min( 1, (x - $(this).offset().left) / $(this).width() ));
 					$(this).closest("li").data('layer').setOpacity(dx);
 				})
@@ -598,10 +621,16 @@ ol.control.LayerSwitcher.prototype.drawList = function(ul, collection)
 
 		// Layer group
 		if (layer.getLayers)
-		{	if (layer.get("openInLayerSwitcher")===true) 
+		{	li.addClass('ol-layer-group');
+			if (layer.get("openInLayerSwitcher")===true) 
 			{	this.drawList ($("<ul>").appendTo(li), layer.getLayers());
 			}
 		}
+		else if (layer instanceof ol.layer.Vector) li.addClass('ol-layer-vector');
+		else if (layer instanceof ol.layer.VectorTile) li.addClass('ol-layer-vector');
+		else if (layer instanceof ol.layer.Tile) li.addClass('ol-layer-tile');
+		else if (layer instanceof ol.layer.Image) li.addClass('ol-layer-image');
+		else if (layer instanceof ol.layer.Heatmap) li.addClass('ol-layer-heatmap');
 	}
 
 	if (ul==this.panel_) this.overflow();
