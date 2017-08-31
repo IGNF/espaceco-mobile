@@ -45,7 +45,7 @@ CordovApp.template = function (tmp, async)
 		$.ajax(
 		{	type: "GET",
 			dataType: 'text',
-			url: url,
+			url: url+"?_t="+(new Date).getTime(),
 			async: async ? true : false,
 			// OK
 			success: function(resp) 

@@ -286,7 +286,8 @@ var RIPart = function(options)
 			});
 			r.themes = [];
 			var t, th = {};
-			resp.find("THEMES THEME").each(function()
+			var themes = resp.find("THEMES").first();
+			themes.find("THEME").each(function()
 			{	var att = $(this);
 				t = 
 				{	nom: att.find("NOM").text(),
@@ -296,11 +297,12 @@ var RIPart = function(options)
 				r.themes.push(t);
 				th[t.id_groupe+":"+t.nom] = t;
 			});
-			resp.find("THEMES ATTRIBUT").each(function()
+			themes.find("ATTRIBUT").each(function()
 			{	var att = $(this);
 				var vals = att.find("VAL");
 				for (var i=0; i<vals.length; i++) vals[i] = $(vals[i]).text();
-				th[att.find("ID_GEOGROUPE").text()+":"+att.find("NOM").text()].attributs.push(
+				var id = att.find("ID_GEOGROUPE").text()+":"+att.find("NOM").text();
+				if (th[i]) th[id].attributs.push(
 					{	att: att.find("ATT").text(),
 						type: att.find("TYPE").text(),
 						val: vals

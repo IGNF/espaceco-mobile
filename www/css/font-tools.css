@@ -50,7 +50,34 @@
   /* Uncomment for 3D effect */
   /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */
 }
- 
+
+/* Logo IGN 2 couleurs */
+.logo-ign-complet,
+.logo-ign-couleur
+{	position: relative;
+    font-family: tools;
+    color: #72797F;
+    font-style: normal;
+    font-weight: normal;
+    display: inline-block;
+}
+.logo-ign-couleur 
+{	height: 0.5em;
+	line-height: 0.5em;
+    vertical-align: bottom;
+}
+.logo-ign-complet:after,
+.logo-ign-couleur:after
+{	position: absolute;
+	color:#97BE0D;
+	left:0;
+} 
+.logo-ign-complet:before { content: '\e82d';  }
+.logo-ign-complet:after { content: '\e82b'; }
+.logo-ign-couleur:before { content: '\e82a'; }
+.logo-ign-couleur:after { content: '\e82c'; }
+
+
 .tools-poi:before { content: '\e800'; } /* '' */
 .tools-select:before { content: '\e801'; } /* '' */
 .tools-snap:before { content: '\e802'; } /* '' */
@@ -77,3 +104,24 @@
 .tools-ol3:before { content: '\e817'; } /* '' */
 .tools-help-larrow:before { content: '\e818'; } /* '' */
 .tools-help-rarrow:before { content: '\e819'; } /* '' */
+.tools-recherche-idee:before { content: '\e81a'; } /* '' */
+.tools-recherche-poi:before { content: '\e81b'; } /* '' */
+.tools-environnement-abeille:before { content: '\e81c'; } /* '' */
+.tools-environnement-arbres:before { content: '\e81d'; } /* '' */
+.tools-environnement-feuille:before { content: '\e81e'; } /* '' */
+.tools-environnement-terre:before { content: '\e81f'; } /* '' */
+.tools-ign-map:before { content: '\e820'; } /* '' */
+.tools-ign-ville:before { content: '\e822'; } /* '' */
+.tools-ign-voiture:before { content: '\e823'; } /* '' */
+.tools-loisir-chateau:before { content: '\e824'; } /* '' */
+.tools-loisir-marche:before { content: '\e825'; } /* '' */
+.tools-loisir-oeil:before { content: '\e826'; } /* '' */
+.tools-loisir-triomphe:before { content: '\e827'; } /* '' */
+.tools-recherche-carte:before { content: '\e828'; } /* '' */
+.tools-recherche-ecran:before { content: '\e829'; } /* '' */
+.tools-logo-ign-seul:before { content: '\e82a'; } /* '' */
+.tools-logo-ign-vert:before { content: '\e82b'; } /* '' */
+.tools-logo-ign-vert-seul:before { content: '\e82c'; } /* '' */
+.tools-logo-ign:before { content: '\e82d'; } /* '' */
+.tools-ign-poi:before { content: '\e82e'; } /* '' */
+.tools-ign-poi-o:before { content: '\e82f'; } /* '' */
