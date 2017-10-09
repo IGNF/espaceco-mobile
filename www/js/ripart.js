@@ -36,8 +36,9 @@ var RIPart = function(options)
 	};
 	
 	/** Changement d'utilisateur
-	* @param {String} user
-	* @param {String} password
+	* @param {String} user user name
+	* @param {String} password user pwd
+	* @param {boolean} crypt encrypt password or not
 	*/
 	this.setUser = function(u, p, cryp)
 	{	user = u;
@@ -54,6 +55,9 @@ var RIPart = function(options)
 	};
 	this.setUser (options.user, options.pwd, true);
 
+	/** Get the user name or pass
+	 * @param {boolean} b tru to get the pass
+	 */
 	this.getUser = function(b)
 	{	if (b) return pwd;
 		else return user;
@@ -67,7 +71,7 @@ var RIPart = function(options)
 		return ( status=="OK" ? false : { error:true, status: status, statusText: error.text() } );
 	}
 
-	/* Decode une georem */
+	/* Attributs a decoder */
 	var georemAttr = { id:"ID_GEOREM", autorisation:"AUTORISATION", url:"LIEN", source:"SOURCE", version:"VERSION",
 		date:"DATE", valid:"DATE_VALID", maj:"MAJ", 
 		lon:"LON", lat:"LAT", statut:"STATUT",
@@ -90,6 +94,10 @@ var RIPart = function(options)
 		return v;
 	};
 
+	/** Get a georem 
+	 * @param {XMLNode} rem signalement (XML) a decoder
+	 * @return {} le signalement en json
+	 */
 	function getGeorem (rem)
 	{	var r = {};
 		for (var i in georemAttr)
@@ -302,7 +310,7 @@ var RIPart = function(options)
 				var vals = att.find("VAL");
 				for (var i=0; i<vals.length; i++) vals[i] = $(vals[i]).text();
 				var id = att.find("ID_GEOGROUPE").text()+":"+att.find("NOM").text();
-				if (th[i]) th[id].attributs.push(
+				if (th[id]) th[id].attributs.push(
 					{	att: att.find("ATT").text(),
 						type: att.find("TYPE").text(),
 						val: vals

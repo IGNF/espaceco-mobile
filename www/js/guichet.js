@@ -406,10 +406,28 @@ wapp.initInteractions = function()
 	var geodraw = new ol.interaction.GeolocationDraw(
 		{	source: geodrawlayer.getSource(),
 			type: 'LineString',
-			zoom: 18,
+			followTrack: 'auto',
+			zoom: 17
 		});
 	geodraw.setActive(false);
 	map.addInteraction(geodraw);
+	
+	var centerButton = new ol.control.TextButton(
+		{	"className": "geodrawCtrl", 
+			"html": "<i class='fa fa-location-arrow'></i> Recentrer",
+			"handleClick": function()
+			{	$(centerButton.element).hide();
+				geodraw.setFollowTrack('auto');
+			}
+		});
+	map.addControl (centerButton);
+	geodraw.on('drawend', function()
+	{	$(centerButton.element).hide();
+	});
+	geodraw.on('stopfollow', function()
+	{	$(centerButton.element).show();
+	});
+
 	// Control d'activation
 	map.addControl (new ol.control.Toggle(
 	{	"className": "geodrawCtrl debug", 
@@ -417,7 +435,9 @@ wapp.initInteractions = function()
 		"toggleFn": function(b)
 		{	if (geodraw.getActive())
 			{	geodraw.stop();
+				$(centerButton.element).hide();
 				geodraw.setActive(false);
+				geodraw.setFollowTrack('auto');
 			}
 			else
 			{	geodraw.setActive(true);

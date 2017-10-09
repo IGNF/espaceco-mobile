@@ -136,7 +136,7 @@ wapp.setGuichet = function(groupe)
 				if (nb==nbLoad) wapp.notification(nb+" couches ajoutées à la carte...");
 			});
 			if (this.param.hidden) for (var k=0; k<this.param.hidden.length; k++)
-			{	if (l.nom == this.param.hidden[k]) 
+			{	if (vector.get("name") == this.param.hidden[k]) 
 				{	vector.setVisible(false);
 					break;
 				}

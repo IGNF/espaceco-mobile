@@ -90,35 +90,54 @@
 @keyframes blink-animation {
   0%
   {
-  	background-color: rgba(0,60,136,.5);
+  	background-color: rgba(0,60,136,.3);
   }
   70%
   {
-  	background-color: rgba(0,60,136,.5);
+  	background-color: rgba(0,60,136,.3);
   }
   71% {
-    background-color: rgba(0,60,136,0.8);
+    background-color: rgba(0,60,136,0.9);
   }
   100% {
-    background-color: rgba(0,60,136,0.8);
+    background-color: rgba(0,60,136,0.9);
   }
 }
 @-webkit-keyframes blink-animation {
   0%
   {
-  	background-color: rgba(0,60,136,.5);
+  	background-color: rgba(0,60,136,.3);
   }
   70%
   {
-  	background-color: rgba(0,60,136,.5);
+  	background-color: rgba(0,60,136,.3);
   }
   71% {
-    background-color: rgba(0,60,136,0.8);
+    background-color: rgba(0,60,136,0.9);
   }
   100% {
-    background-color: rgba(0,60,136,0.8);
+    background-color: rgba(0,60,136,0.9);
   }
 }
+
+.geodrawCtrl.ol-text-button
+{	bottom: 1em;
+	left: 50%;
+	right: auto;
+	-webkit-transform: translateX(-50%);
+	transform: translateX(-50%);
+	display: none;
+}
+.geodrawCtrl.ol-text-button button
+{	width: auto;
+	padding: 0.2em;
+	font-size: 1em;
+}
+.geodrawCtrl.ol-text-button i
+{	-webkit-transform: rotate(-44deg);
+	transform: rotate(-44deg);
+}
+
 
 .ol-control.ol-attribution
 {	background-color: rgba(255, 255, 255, 0.6);

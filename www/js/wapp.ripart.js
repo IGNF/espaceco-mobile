@@ -36,17 +36,17 @@
 	Creation du compte > enregistrer les actions
 
 	@param {} options
-	- infoElement : element pour l'info de connexion : '#options .connect [data-input-role="info"] span.info'
-	- formElement : formulaire de saisie d'un signalements : '#fiche2 [data-role="onglet-li"][data-list="signal"]'
-	- countElement : compteur de signalements locaux : '.georemsCount span'
-	- listElement : ul pour l'affichage de la liste des signalements (doit contenir un template) : #signalements [data-role="content"]
-	- profilElement : Affichage du profil de contribution : .profil
-	- georemPage : Page d'affichage du signalements : #georem
-	- onSelect {function(georem,add)} selectionne une georem, add=true si nouvelle, false si selection via la liste
-	- onShow {function(form)} affichage du formulaire (form)
-	- onLocate {function(loc)} callback lors d'une localisation
-	- formatGeorem {function(georem, form)} formater une georem avant envoi, recoit un georem + formulaire, renvoi true si ok pour la sauvegarde, false pour annuler
-	- messagePhoto {String} Message pour la prise de photo (text/html)
+		@param {} options.infoElement : element pour l'info de connexion, default '#options .connect [data-input-role="info"] span.info'
+		@param {} options.formElement : formulaire de saisie d'un signalements, default '#fiche2 [data-role="onglet-li"][data-list="signal"]'
+		@param {} options.countElement : compteur de signalements locaux, default '.georemsCount span'
+		@param {} options.listElement : ul pour l'affichage de la liste des signalements (doit contenir un template), default '#signalements [data-role="content"]'
+		@param {} options.profilElement : Affichage du profil de contribution, default '.profil'
+		@param {} options.georemPage : Page d'affichage du signalements, default '#georem'
+		@param {function(georem,add)} options.onSelect  selectionne une georem, add=true si nouvelle, false si selection via la liste
+		@param {function(form)} options.onShow  affichage du formulaire (form)
+		@param {function(loc)} options.onLocate callback lors d'une localisation
+		@param {function(georem, form)} options.formatGeorem formater une georem avant envoi, recoit un georem + formulaire, renvoi true si ok pour la sauvegarde, false pour annuler
+		@param {String} options.messagePhoto Message pour la prise de photo (text/html)
 */
 RIPart.prototype.initialize = function(options)
 {	var self = this;
