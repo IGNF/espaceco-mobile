@@ -2,18 +2,18 @@
  *	It combines a draw with a ol.Geolocation
  * @constructor
  * @extends {ol.interaction.Interaction}
- * @fires drawstart, drawend, drawing, tracking, stopfollow
+ * @fires drawstart, drawend, drawing, tracking, follow
  * @param {olx.interaction.GeolocationDrawOption} options
  *	@param { ol.Collection.<ol.Feature> | undefined } option.features Destination collection for the drawn features.
  *	@param { ol.source.Vector | undefined } options.source Destination source for the drawn features.
  *	@param {ol.geom.GeometryType} options.type Drawing type ('Point', 'LineString', 'Polygon'). Required.
+ *	@param {Number | undefined} options.minAccuracy minimum accuracy underneath a new point will be register (if no condition), default 20
+ *	@param {function | undefined} options.condition a function that take a ol.Geolocation object and return a boolean to indicate whether location should be handled or not, default return true if accuraty < minAccuraty
  *	@param {Object} options.attributes a list of attributes to register as Point properties: {accuracy:true,accuracyGeometry:true,heading:true,speed:true}, default none.
  *	@param {Number} options.tolerance tolerance to add a new point (in projection unit), use ol.geom.LineString.simplify() method, default 5
  *	@param {Number} options.zoom zoom for tracking, default 16
  *	@param {boolean|auto|position|visible} options.followTrack true if you want the interaction to follow the track on the map, default true
  *	@param { ol.style.Style | Array.<ol.style.Style> | ol.StyleFunction | undefined } options.style Style for sketch features.
- *	@param {Number | undefined} options.minAccuracy minimum accuracy underneath a new point will be register (if no condition), default 20
- *	@param {function | undefined} options.condition a function that take a ol.Geolocation object and return a boolean to indicate whether location should be handled or not, default return true if accuraty < minAccuraty
  */
 ol.interaction.GeolocationDraw = function(options) 
 {	if (!options) options={};
@@ -116,6 +116,7 @@ ol.interaction.GeolocationDraw = function(options)
 	this.set("zoom", options.zoom);
 	this.setFollowTrack (options.followTrack===undefined ? true : options.followTrack);
 
+	this.setActive(false);
 };
 ol.inherits(ol.interaction.GeolocationDraw, ol.interaction.Interaction);
 
@@ -138,10 +139,23 @@ ol.interaction.GeolocationDraw.prototype.setMap = function(map)
 ol.interaction.GeolocationDraw.prototype.setActive = function(active)
 {	ol.interaction.Interaction.prototype.setActive.call(this, active);
 	this.overlayLayer_.setVisible(active);
-	this.reset();
 	if (this.getMap())
 	{	this.geolocation.setTracking(active);
 		this.getMap().renderSync();
+	}
+	this.pause(!active);
+	if (active)
+	{	// Start drawing
+		this.reset();
+		this.dispatchEvent({ type:'drawstart', feature: this.sketch_[1]});
+	}
+	else
+	{	var f = this.sketch_[1].clone();
+		if (f.getGeometry())
+		{	if (this.features_) this.features_.push(f);
+			if (this.source_) this.source_.addFeature(f);
+			this.dispatchEvent({ type:'drawend', feature: f});
+		}
 	}
 };
 
@@ -153,34 +167,23 @@ ol.interaction.GeolocationDraw.prototype.reset = function()
 	this.lastPosition_ = false;
 };
 
-/** Force drawing
+/** Start tracking = setActive(true)
 */
 ol.interaction.GeolocationDraw.prototype.start = function()
-{	this.pause(false);
-	// Start drawing
-	this.dispatchEvent({ type:'drawstart', feature: this.sketch_[1]});
-	// Get a point if got one
-	//if (this.get("type")=="Point") this.stop(); 
+{	this.setActive(true);
 };
 
-/** Stop drawing
+/** Stop tracking = setActive(false)
 */
 ol.interaction.GeolocationDraw.prototype.stop = function()
-{	var f = this.sketch_[1].clone();
-	if (f.getGeometry())
-	{	if (this.features_) this.features_.push(f);
-		if (this.source_) this.source_.addFeature(f);
-		this.dispatchEvent({ type:'drawend', feature: this.sketch_[1]});
-	}
-	this.reset();
-	this.pause(true);
+{	this.setActive(false);
 };
 
 /** Pause drawing
 * @param {boolean} b 
 */
 ol.interaction.GeolocationDraw.prototype.pause = function(b)
-{	this.pause_ = b;
+{	this.pause_ = b!==false;
 };
 
 /** Enable following the track on the map
@@ -193,7 +196,19 @@ ol.interaction.GeolocationDraw.prototype.pause = function(b)
 */
 ol.interaction.GeolocationDraw.prototype.setFollowTrack = function(follow)
 {	this.set('followTrack', follow);
-	this.lastPosition_ = false;
+	var map = this.getMap();
+	// Center if wanted
+	if (follow !== false && !this.lastPosition_ && map) 
+	{	var pos = this.path_[this.path_.length-1];
+		if (pos)
+		{	map.getView().animate({
+				center: pos,
+				zoom: (follow!="position" ? this.get("zoom") : undefined)
+			})
+		}
+	}
+	this.lastPosition_ = false;				
+	this.dispatchEvent({ type:'follow', following: follow!==false });
 };
 
 /** Add a new point to the current path
@@ -207,10 +222,12 @@ ol.interaction.GeolocationDraw.prototype.draw_ = function(active)
 	var loc = this.geolocation;
 	var accu = loc.getAccuracy();
 	var pos = loc.getPosition();
-	pos.push(loc.getAltitude());
+	pos.push (Math.round((loc.getAltitude()||0)*100)/100);
+	pos.push (Math.round((new Date()).getTime()/1000));
 	var p = loc.getAccuracyGeometry();
 
 	// Center on point
+	// console.log(this.get('followTrack'))
 	switch (this.get('followTrack'))
 	{	// Follow center + zoom
 		case true:
@@ -225,15 +242,15 @@ ol.interaction.GeolocationDraw.prototype.draw_ = function(active)
 		case 'position':
 			// modify center
 			map.getView().setCenter( pos );
-			break;
+		break;
 		// Keep on following 
 		case 'auto':
 			if (this.lastPosition_)
 			{	var center = map.getView().getCenter();
+				// console.log(center,this.lastPosition_)
 				if (center[0]!=this.lastPosition_[0] || center[1]!=this.lastPosition_[1])
-				{	this.dispatchEvent({ type:'stopfollow', feature: this.sketch_[1], geolocation: loc });
+				{	//this.dispatchEvent({ type:'follow', following: false });
 					this.setFollowTrack (false);
-					console.log("ok")
 				}
 				else 
 				{	map.getView().setCenter( pos );	
@@ -245,12 +262,13 @@ ol.interaction.GeolocationDraw.prototype.draw_ = function(active)
 				if (this.get("zoom")) map.getView().setZoom( this.get("zoom") );
 				this.lastPosition_ = pos;
 			}
-			break;
+		break;
 		// Force to stay on the map
 		case 'visible':
 			if (!ol.extent.containsCoordinate(map.getView().calculateExtent(map.getSize()), pos))
 			{	map.getView().setCenter (pos);
 			}
+		break;
 		// Don't follow
 		default: break;
 	}
@@ -269,7 +287,7 @@ ol.interaction.GeolocationDraw.prototype.draw_ = function(active)
 		switch (this.get("type"))
 		{	case "Point":
 				this.path_ = [pos];
-				f.setGeometry(new ol.geom.Point(pos));
+				f.setGeometry(new ol.geom.Point(pos, 'XYZM'));
 				var attr = this.get('attributes');
 				if (attr.heading) f.set("heading",loc.getHeading());
 				if (attr.accuracy) f.set("accuracy",loc.getAccuracy());
@@ -278,7 +296,7 @@ ol.interaction.GeolocationDraw.prototype.draw_ = function(active)
 				break;
 			case "LineString":
 				if (this.path_.length>1)
-				{	geo = new ol.geom.LineString(this.path_);
+				{	geo = new ol.geom.LineString(this.path_, 'XYZM');
 					geo.simplify (this.get("tolerance"));
 					f.setGeometry(geo);
 				}
@@ -286,7 +304,7 @@ ol.interaction.GeolocationDraw.prototype.draw_ = function(active)
 				break;
 			case "Polygon":
 				if (this.path_.length>2)
-				{	geo = new ol.geom.Polygon([this.path_]);
+				{	geo = new ol.geom.Polygon([this.path_], 'XYZM');
 					geo.simplify (this.get("tolerance"));
 					f.setGeometry(geo);
 				}

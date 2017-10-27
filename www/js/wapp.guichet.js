@@ -14,7 +14,7 @@
 */
 wapp.initGuichets = function()
 {	// Reset list
-	var ul = $('#cartes [data-list="guichets"] ul');
+	var ul = $('#cartes [data-list="guichets"] ul.guichet');
 	ul.html("");
 	if (!this.ripart.isConnected()) return;
 	// Recherche des groupes
@@ -24,14 +24,16 @@ wapp.initGuichets = function()
 	{	// Guichet courant
 		if (this.ripart.param.guichet == g.id_groupe) current = g;
 		// Affichage si WFS
-		var nb = 0;
+		var couches = "";
 		for (var j=0; j<g.layers.length; j++) 
-		{	if (g.layers[j].type=="WFS") nb++;
+		{	if (g.layers[j].type=="WFS") couches += (couches?", ":"")+g.layers[j].nom;
 		}
-		if (nb)
-		{	var li = $("<li>")
+		if (couches)
+		{	$('#cartes [data-list="guichets"] ul.nomap').hide();
+			var li = $("<li>")
 				.data('groupe', g)
-				.text(g.nom+" ("+nb+" couches)")
+				.text(g.nom)
+				.append($("<i>").text(couches))
 				.attr("data-input","")
 				.click(function()
 				{	var self = $(this);
@@ -39,12 +41,19 @@ wapp.initGuichets = function()
 					{	wapp.setGuichet($(this).data('groupe'));
 						wapp.hidePage();
 					}
-					self.addClass('active');
-					setTimeout(function(){ self.removeClass('active'); }, 200);
+					else
+					{	wapp.setGuichet();
+						// Faire clignoter
+						self.addClass('active');
+						setTimeout(function(){ self.removeClass('active'); }, 200);
+					}
 				})
 				.appendTo(ul);
 			$("<img>").attr("src",g.logo)
 				.prependTo(li);
+		}
+		else
+		{	$('#cartes [data-list="guichets"] ul.nomap').show();
 		}
 	}
 	wapp.setGuichet(current);
@@ -53,11 +62,12 @@ wapp.initGuichets = function()
 /** Guichet en cours de modification
 */
 wapp.setGuichet = function(groupe)
-{	// Nouveau guichet
+{	if (!groupe) groupe = {};
+	// Nouveau guichet
 	this.ripart.param.guichet = groupe.id_groupe;
 	wapp.ripart.saveParam();
 	// Mettre a jour la liste
-	$('#cartes [data-list="guichets"] ul li').each(function()
+	$('#cartes [data-list="guichets"] ul.guichet li').each(function()
 	{	if ($(this).data('groupe')===groupe) $(this).addClass('selected');
 		else $(this).removeClass('selected');
 	});
@@ -216,12 +226,9 @@ wapp.showSelect = function(ripart)
 	if (ripart) $("#fiche").addClass("fromRipart");
 	else $("#fiche").removeClass("fromRipart");
 
-	var div = $('#fiche .selection');
+	var div = $('#fiche .selection').removeClass("georem fiche trace");
 	// Pas de selection
-	if (!f) 
-	{	div.removeClass("georem fiche");
-	}
-	else
+	if (f) 
 	{	var prop = f.getProperties();
 		// Georem
 		if (prop.georem)
@@ -230,7 +237,8 @@ wapp.showSelect = function(ripart)
 		}
 		// Objet du guichet
 		else 
-		{	div.addClass("fiche").removeClass("georem");
+		{	div.addClass("fiche");
+			if (f.layer.get('geolocation')) div.addClass("trace");
 			var prop = f.getProperties();
 			$(".fiche h3 span", div).text(f.layer.get("title")||f.layer.get("name"));
 			var ul = $(".fiche ul", div).html("");

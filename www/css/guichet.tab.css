@@ -77,21 +77,21 @@
 screen and (orientation:portrait) and (max-height:1023px) 
 {	
 
-body.trackingGeorem #fiche.visible
+body.fullscreenMap #fiche.visible
 {	-webkit-transform: translate3d(0, 100%, 0)!important;
 	transform: translate3d(0, 100%, 0)!important;
 	margin-top: -3em;
 	font-size: 1.33em;
 }
 
-body.trackingGeorem #fiche [data-role="onglet-bt"],
-body.trackingGeorem #fiche [data-role="header"]
+body.fullscreenMap #fiche [data-role="onglet-bt"],
+body.fullscreenMap #fiche [data-role="header"]
 {	display: none;
 }
-body.trackingGeorem #fiche [data-role="onglet"]
+body.fullscreenMap #fiche [data-role="onglet"]
 {	top:0;
 }
-body.trackingGeorem #fiche .trackingInfo
+body.fullscreenMap #fiche .trackingInfo
 {	display: block;
 }
 

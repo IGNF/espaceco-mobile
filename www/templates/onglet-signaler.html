@@ -17,11 +17,23 @@
 </div>
 
 <div class="connect info">
-	<p>
-
-	</p>
+	<p></p>
+	<div class="buttons changeGroupe" style=" text-align: right;">
+		<button class="button" onclick="wapp.ripart.choixProfil()">
+			Changer de groupe&nbsp;
+			<i class="fa fa-users"></i> 
+		</button>
+	</div>
 	<div class="buttons" style=" text-align: center;">
-		<button class="button big-button" onclick="wapp.ripart.showFormulaire();">Faire un signalement</button>
+		<button class="button big-button" onclick="wapp.ripart.showFormulaire();">
+			Faire un signalement
+		</button>
+	</div>
+	<div class="warning_public">
+		<i>Nota bene</i> : Pensez que lorsque vous faites un signalement celui-ci est public et 
+		peut être vu par d'autres utilisateur. 
+		Veillez donc à la qualité des échanges et gardez à l’esprit que vous restez
+		responsable de vos propos.
 	</div>
 </div>
 
@@ -51,6 +63,13 @@
 			<textarea class="comment"></textarea>
 		</li>
 		
+		<li class="addfeatures" style="text-align:right; padding:0.5em 0;" >
+			<button class="button" style="padding-right: 0;">
+				<i class="fa tools-copypoly"></i>&nbsp;
+				ajouter un objet...
+				<span class="nb" style="position:relative; background:#f60; width:1.5em; line-height:1.5em; border-radius:1em; display: inline-block; top:-0.5em; left:0.5em;">0</span>
+			</button>
+		</li>
 		<li class="photo">
 			<img onclick="wapp.ripart.photo();" />
 			<span class="fa-stack fa-lg" style="background:#ddd; border-radius:50%;" onclick="wapp.ripart.photo();">

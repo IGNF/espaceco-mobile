@@ -386,10 +386,6 @@
 {	display: block;
 }
 
-#fiche .selection > div button
-{	float:right;
-	margin: 0.5em 1em;
-}
 #fiche .selection > div ul 
 {   margin: 0;
     padding: 0;
@@ -449,6 +445,22 @@
 #fiche.fromRipart i.fromRipart,
 #fiche.fromRipart .fromRipart 
 {	display: initial
+}
+
+#fiche .trace
+{	display: none;
+}
+#fiche .trace .trace
+{	display: block;
+}
+
+#fiche .warning_public
+{	text-align: center;
+	border: 5px solid #ccc;
+    padding: 0.5em;
+    margin: 1em;
+	font-size: 0.8em;
+	line-height: 1.5em;
 }
 
 /** LayerSwitcher */
@@ -631,10 +643,12 @@
 	position:relative;
 }
 #cartes ul li img
-{	max-width: 2em;
-	max-height: 2em;
-	margin-right:0.5em;
-	vertical-align: middle;
+{	max-width: 3em;
+    max-height: 3em;
+    position: absolute;
+    top: 50%;
+	left: 0.5em;
+    transform: translateY(-50%);
 }
 #cartes ul li.selected:before
 {	content: "\f00c";
@@ -645,6 +659,15 @@
 	-webkit-transform: translateY(-50%);
 	transform: translateY(-50%);
 }
+#cartes ul.guichet li 
+{	padding: 0.6em 1.5em 0.6em 4em;
+	line-height: 1em;
+}
+#cartes ul.guichet i 
+{	display: block;
+	color: #369;
+	font-size: 0.8em;
+} 
 
 /* Template pour la creation*/
 [data-role="template"]

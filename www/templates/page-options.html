@@ -34,8 +34,20 @@
 			<div data-input-role="info">Afficher les thèmes IGN dans les signalements.</div>
 		</li>
 
+  
 		<li class="title">
 			Divers
+		</li>
+
+		<li data-input="text" data-param="minGPSAccuracy" data-default=20>
+			<label style="display: block; width: Calc(100% + 1em);">
+				Précison GPS (m)&nbsp;: 
+				<input type="number" min="0" style="width:4em; padding-left:0.5em;"/><i class="clear-input"></i>
+			</label>
+			<div data-input-role="info">
+				Précision minimum du GPS pour faire une trace&nbsp;:
+				en dessous les points ne seront pas enregistrés (en m).
+			</div>
 		</li>
 	  
 		<li data-input="button" onclick="wapp.help.reset(); wapp.hidePage(); wapp.help.show('main')">

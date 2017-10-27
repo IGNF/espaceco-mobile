@@ -146,11 +146,20 @@ var RIPart = function(options)
 		{	if (cback) cback(null, { error:true, status: 401, statusText: "Unauthorized" });
 			return false;
 		}
+		var format = options.format || 'xml';
+		delete options.format;
+
 		// Transfert OK
 		function win (resp)
 		{	var r={};
-			var error = responseError($(resp));
-			if (!error) r = decode($(resp));
+			var error;
+			if (format === "xml")
+			{	error = responseError($(resp));
+				if (!error) r = decode($(resp));
+			}
+			else
+			{	r = resp;
+			}
 			// Callback
 			if (cback) cback(r,error);
 			else console.log(r);
@@ -224,8 +233,8 @@ var RIPart = function(options)
 		else
 		{	$.ajax
 			({	type: /post/.test(action) ? "POST" : "GET",
-				url: url+"georem/"+action+".xml",
-				dataType: 'xml',
+				url: url+"georem/"+action+"."+(format || "xml"),
+				dataType: (format || "xml"),
 				cache: false,
 				// Bug with user/pwd in Android 4.1
 				beforeSend: function(xhr){ xhr.setRequestHeader("Authorization", "Basic " + btoa(user + ":" + pwd)); },
@@ -276,6 +285,8 @@ var RIPart = function(options)
 				var g = 
 				{	nom: att.find("NOM").first().text(),
 					id_groupe: Number(att.find("ID_GEOGROUPE").text()),
+					global: (att.find("STATUS").first().text() == "global"),
+					status: att.find("STATUS").first().text(),
 					//filter: filter,
 					logo: att.find("LOGO").text(),
 					lonlat: [ Number(att.find("LON").text()), Number(att.find("LAT").text()) ],
@@ -290,6 +301,46 @@ var RIPart = function(options)
 						url: $(this).find("URL").text()
 					});
 				});
+				var th={attributs: []}
+				var att, themes = [];
+				$(this).find("THEMES >").each(function()
+				{	switch ($(this).prop("tagName"))
+					{	case "THEME":
+							th = {
+								nom: $(this).find('NOM').text(),
+								id_groupe: g.id_groupe,
+								global: ($(this).find('GLOBAL') == 1),
+								aide: $(this).find('AIDE').text(),
+								attributs: []
+							};
+							themes.push(th);
+							break;
+						case "ATTRIBUT":
+							att = {
+								nom: $(this).find('NOM').text(),
+								att: $(this).find('ATT').text(),
+								type: $(this).find('TYPE').text(),
+								val: []
+							};
+							$(this).find('VAL').each(function()
+							{	att.val.push($(this).text());
+							});
+							switch(att.type)
+							{	case 'list': 
+								break;
+								case 'checkbox':
+									att.val = (att.val[0] == 1);
+								break;
+								default:
+									att.val = att.val[0];
+								break;
+							}
+							th.attributs.push(att);
+							break;
+						default: break;
+					}
+				});
+				g.themes = themes;
 				r.groupes.push(g);
 			});
 			r.themes = [];
@@ -318,8 +369,20 @@ var RIPart = function(options)
 			});
 			return r;
 		}
+
 		// Demander au serveur
 		return sendRequest ("geoaut_get", {}, decode, cback);
+		/*
+		return sendRequest ("geoaut_get", {}, decode, function(auth, error)
+		{	if (error) cback(auth, error); 
+			else
+			{	sendRequest ("geoaut_get", { format:'json' }, null, function(resp) 
+				{	console.log(auth, resp);
+					cback(auth);
+				});
+			}
+		});
+		*/
 	};
 
 	/** Recuperer les info d'une remontee
@@ -389,6 +452,48 @@ var RIPart = function(options)
 		return sendRequest ("georem_post", post, decode, cback);
 	};
 
+	/** Write feature(s) to sketch
+	* @param {String} the sketch
+	* @param {ol.proj.ProjectionLike} projection of the features, default EPSG:3857
+	* @return {Array<ol.feature>} the feature(s)
+	*/
+	this.sketch2feature = function(sketch , proj)
+	{	features = [];
+		var xml = $.parseXML(sketch.replace(/gml:/g,""));
+		var objects = $(xml).find("objet");
+		for (var i=0, f; f=objects[i]; i++)
+		{	var atts = $(f).find("attribut");
+			var prop = {};
+			for (var j=0, a; a=atts[j]; j++)
+			{	prop[$(a).attr("name")] = $(a).text();
+			}
+			var g = $(f).find("coordinates").text().split(" ");
+			for (var k=0; k<g.length; k++)
+			{	g[k] = g[k].split(',');
+				g[k][0] = Number(g[k][0]);
+				g[k][1] = Number(g[k][1]);
+			}
+			switch ($(f).attr('type'))
+			{	case "Point":
+				case "Texte":
+					prop.geometry = new ol.geom.Point(g[0]);
+				break;
+				case "LineString":
+				case "Ligne":
+					prop.geometry = new ol.geom.LineString(g);
+				break;
+				case "Polygon":
+				case "Polygone":
+					prop.geometry = new ol.geom.Polygon([g]);
+				break;
+				default: continue;
+			}
+			prop.geometry.transform("EPSG:4326", proj||"EPSG:3857")
+			features.push (new ol.Feature(prop));
+		}
+		return features;
+	};
+	
 	/** Write feature(s) to sketch
 	* @param {ol.feature|Array<ol.feature>} the feature(s) to write
 	* @param {ol.proj.ProjectionLike} projection of the features

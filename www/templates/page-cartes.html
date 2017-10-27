@@ -13,7 +13,20 @@
 
 	<!-- Liste des guichets-->
 	<div data-role="onglet-li" data-list="guichets">
-		<ul></ul>
+		<h3 style="margin:0.5em 0;">Mes guichets</h3>
+		<p>
+			Vous trouverez ci-dessous la liste des guichet et des couches 
+			auxquels vous êtes abonnés sur l'espace collaboratif.
+		</p>
+		<ul class="nomap">
+			<li [data-input] onclick="wapp.setGuichet()">
+				<label>Désolé, vous n'avez pas de carte sur votre compte...</label>
+				<div data-input-role="info">
+					Vous devez être inscrit à un guichet pour accéder à ses cartes...
+				<div>
+			</li>
+		</ul>
+		<ul class="guichet"></ul>
 	</div>
 
 	<!-- Liste des cartes-->

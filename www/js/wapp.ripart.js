@@ -179,24 +179,24 @@ RIPart.prototype.initialize = function(options)
 	// Tracking du centre
 	this.target = new ol.control.Target({ visible: false });
 	wapp.map.addControl (this.target);
-	this.cancelFormulaire();
 
 	$('.trackingInfo', formulaire.parent()).click(function()
 	{	self.target.setVisible(false);
-		$('body').removeClass("trackingGeorem");
+		$('body').removeClass("trackingGeorem fullscreenMap");
 	});
+	// Move point
 	$('.formulaire .movePosition', formulaire).click(function()
 	{	wapp.help.show("signaler-carte");
 		var track = !self.target.getVisible();
 		if (track) 
-		{	$('body').addClass("trackingGeorem");
+		{	$('body').addClass("trackingGeorem fullscreenMap");
 			var lon = Number($("input.lon", formulaire).val());
 			var lat = Number($("input.lat", formulaire).val());
 			wapp.map.getView().setCenterAtLonlat([ lon, lat ]);
 			self.modifyInteraction.setActive(true);
 		}
 		else 
-		{	$('body').removeClass("trackingGeorem");
+		{	$('body').removeClass("trackingGeorem fullscreenMap");
 			self.modifyInteraction.setActive(false);
 		}
 		self.target.setVisible(track);
@@ -213,10 +213,15 @@ RIPart.prototype.initialize = function(options)
 		}
 	}, this);
 
+	// Add feature to the georem
+	$('.formulaire .addfeatures button', formulaire).click(function()
+	{	wapp.help.show("signaler-addfeatures");
+		$('body').addClass("fullscreenMap");
+	});
 	// Outil de deplacement de la remontee
 	this.modifyInteraction = new ol.interaction.Modify(
-		{	features: this.overlay.getSource().getFeaturesCollection(),
-		});
+	{	features: this.overlay.getSource().getFeaturesCollection(),
+	});
 	this.modifyInteraction.on("modifyend", function(e)
 	{	var p = e.features.item(0).getGeometry().getFirstCoordinate()
 		wapp.map.getView().setCenter(p);
@@ -224,6 +229,39 @@ RIPart.prototype.initialize = function(options)
 	this.modifyInteraction.setActive(false);
 	wapp.map.addInteraction(this.modifyInteraction);
 
+	// Outils de selection de features a ajouter a la remontee
+	var redStroke = new ol.style.Stroke({ color: "#f00", width: 2 });
+	var whiteStroke = new ol.style.Stroke({ color: [255,255,255,0.8], width: 5 });
+	var redFill = new ol.style.Fill({ color: [255,0,0,0.5] });
+	this.selectOverlay = new ol.layer.Vector(
+	{ 	source: new ol.source.Vector(),
+		style:
+		[	new ol.style.Style ({
+				image: new ol.style.Circle ({ stroke: whiteStroke, fill: redFill, radius: 5 }),
+				stroke: whiteStroke,
+				fill: redFill
+			}),
+			new ol.style.Style ({
+				image: new ol.style.Circle ({ stroke: redStroke, radius: 5 }),
+				stroke: redStroke
+			})
+		]
+	});
+	this.selectOverlay.setMap(wapp.map);
+	this.selectInteraction = new ol.interaction.Select(
+	{	filter: function(f, l) 
+		{ 	if (f.get('georem') || (!f.layer && !l)) return false;
+			return true; 
+		}
+	});
+	this.selectOverlay.getSource().on("addfeature", function(e)
+	{	e.feature.layer = this.selectOverlay;
+	}, this);
+	wapp.map.addInteraction(this.selectInteraction);
+	this.selectInteraction.on('select', function (e)
+	{	this.addFeature (e.selected[0]);
+	}, this);
+	
 	// Enregistement d'une remontee
 	$('.formulaire .save', formulaire).click(function(){ self.saveFormulaire ($(this).closest(".formulaire")); });
 	this.onUpdate();
@@ -241,7 +279,9 @@ RIPart.prototype.initialize = function(options)
 			wapp.disableCtrl.disableMap(false);
 		}, 100);
 	});
-				
+
+	// Re-init
+	this.cancelFormulaire();
 };
 
 /** Get indice for a local rem
@@ -333,6 +373,12 @@ RIPart.prototype.saveFormulaire = function(form)
 
 	// Formatage utilisateur
 	var isok = this.formatGeorem.call (this, georem, form);
+
+	// Ajout des features
+	var features = this.selectOverlay.getSource().getFeatures();
+	if (features.length) 
+	{	georem.sketch = this.feature2sketch(features, wapp.map.getView().getProjection());
+	}
 
 	if (isNaN(georem.lon) || isNaN(georem.lat))
 	{	isok = false;
@@ -662,9 +708,11 @@ RIPart.prototype.onUpdate = function()
 	}
 
 	// Affichage des groupes
+	/*
 	var profil = this.param.profil || {};
 	$("img", this.profilElement).attr("src", profil.logo || "");
-	$(".title", this.profilElement).text(profil.titre || "");
+	$(".title", this.profilElement).text(profil.name || "");
+	*/
 
 	// Gestion de la liste des remontees
 	var c = this.countLocalRems();
@@ -840,17 +888,75 @@ RIPart.prototype.checkUserInfo = function(success, fail)
 		if (error)
 		{	rep = {};
 			// self.param.profil = null;
+			if (self.param.profil) self.setProfil(self.param.profil.id_groupe);
 			fail(error);
 		}
 		else 
-		{	self.param.profil = rep.profil;
-			self.param.groupes = rep.groupes;
-			self.param.themes = rep.themes;
+		{	self.param.groupes = rep.groupes;
+			// self.param.themes = rep.themes;
+			// self.param.profil = rep.profil;
+			if (self.param.profil) self.setProfil(self.param.profil.id_groupe);
+			else self.setProfil(rep.profil.id_groupe);
 			success(rep);
 		}
 		self.saveParam();
 	});
 };
+
+/** Mettre a jour le profil 
+ * @param {} id_goupe identifiant du groupe
+ */
+RIPart.prototype.setProfil = function(id_groupe)
+{	// recherche du groupe
+	var groupes = this.param.groupes;
+	for (var i=0, g; g=groupes[i]; i++) 
+	{	if (g.id_groupe == id_groupe) break;
+	}
+	if (g)
+	{	this.param.profil = {
+			filtre: g.filter,
+			groupe: g.nom,
+			status: g.status,
+			id_groupe: id_groupe,
+			logo: g.logo
+		}
+		// Themes
+		this.param.themes = [];
+		// Themes globaux
+		for (var i=0; i<groupes.length; i++) 
+		{	if (groupes[i].id_groupe != id_groupe)
+			{	for (var j=0, th; th = groupes[i].themes[j]; j++)
+				{	if (th.global || groupes[i].global) this.param.themes.push(th);
+				}
+			}
+		}
+		// Themes du groupe
+		for (var j=0, th; th = g.themes[j]; j++)
+		{	this.param.themes.push(th);
+		}
+	}
+	else
+	{	this.param.profil = {};
+	}
+	$("img", this.profilElement).attr("src", this.param.profil.logo || "");
+	$(".title", this.profilElement).text(this.param.profil.groupe || "");
+
+	// Sauvegarder
+	this.saveParam();
+}
+
+RIPart.prototype.choixProfil = function()
+{	var q = {};
+	for (var i=0, g; g=this.param.groupes[i]; i++)
+	{	q[g.id_groupe] = g.nom;
+	}
+	var self = this;
+	wapp.selectDialog(q, this.param.profil.id_groupe, function(n)
+	{ 	self.setProfil(Number(n));
+	}, { search: (this.param.groupes.length>8) });
+	//this.saveParam();
+}
+
 
 /** On a deja une connexion
 */
@@ -863,13 +969,15 @@ RIPart.prototype.isConnected = function()
 */
 RIPart.prototype.showFormulaire = function(grem)
 {	var self = this;
+	this.selectOverlay.getSource().clear();
+
 	// Callback 
 	this.onShow(this.formElement);
-		
+
 	// Georem en cours de modification
 	var georem = (grem && grem.date && !grem.id) ? grem : false;
 	this.formElement.data("grem", georem);
-	console.log(this.formElement)
+//	console.log(this.formElement)
 	if (georem)
 	{	$("input.lon", this.formElement).val(georem.lon);
 		$("input.lat", this.formElement).val(georem.lat);
@@ -882,6 +990,11 @@ RIPart.prototype.showFormulaire = function(grem)
 					.data("photo",url)
 					.show();
 			$(".fa-stack", photoElt).hide();
+		}
+		// Croquis
+		if (georem.sketch)
+		{	var f = this.sketch2feature(georem.sketch);
+			this.addFeature(f);
 		}
 	}
 	//
@@ -925,13 +1038,16 @@ RIPart.prototype.showFormulaire = function(grem)
 	this.overlay.getSource().clear();
 	this.overlay.getSource().addFeature( new ol.Feature (new ol.geom.Point(pos)));
 	this.overlay.setVisible(true);
+	this.selectOverlay.setVisible(true);
+	this.selectInteraction.setActive(true);
+
 	wapp.map.getView().setCenter(pos);
 
 	// reset
 	this.target.setVisible(false);
 	this.geolocation.setTracking (true);
 	this.hasLocation = false;
-	$('body').removeClass("trackingGeorem");
+	$('body').removeClass("trackingGeorem fullscreenMap");
 };
 
 
@@ -953,6 +1069,10 @@ RIPart.prototype.selectTheme = function(th, atts, prompt)
 		}
 	}
 	var self = this;
+
+	// Remise a jour des attributs
+	this.resetFormulaireAttribut();
+
 	if (theme && theme.attributs.length)
 	{	$(".attributes", this.formElement).show()
 			.data('attributes', theme.attributs)
@@ -962,8 +1082,12 @@ RIPart.prototype.selectTheme = function(th, atts, prompt)
 	}
 	else
 	{	$(".attributes", this.formElement).hide();
-		this.formulaireAttribut();
 	}
+};
+
+RIPart.prototype.resetFormulaireAttribut = function()
+{	var input = $(".attributes", this.formElement).data("vals", false);
+	$('[data-input-role="info"]', input).text("");
 };
 
 /** Affichage du formulaire attribut
@@ -1033,8 +1157,7 @@ RIPart.prototype.formulaireAttribut = function(valdef, prompt)
 	}
 	// Reset form values
 	else
-	{	input.data("vals", false);
-		$('[data-input-role="info"]', input).text("");
+	{	this.resetFormulaireAttribut();
 	}
 };
 
@@ -1044,13 +1167,15 @@ RIPart.prototype.formulaireAttribut = function(valdef, prompt)
 RIPart.prototype.cancelFormulaire = function(b)
 {	this.formElement.removeClass('formulaire');
 	this.overlay.setVisible(false);
+	this.selectOverlay.setVisible(false);
+	this.selectInteraction.setActive(false);
 	this.formElement.data("grem", false);
 	$(".attributes", this.formElement).data('vals', false);
 	// Remove tracking
 	this.target.setVisible(false);
 	this.geolocation.setTracking (false);
 	this.hasLocation = false;
-	$('body').removeClass("trackingGeorem");
+	$('body').removeClass("trackingGeorem fullscreenMap");
 }
 
 /** Take a photo using the camera
@@ -1084,4 +1209,19 @@ RIPart.prototype.photo = function()
 		targetHeight: self.param.heigth || 1200,
 		correctOrientation: (self.param.imgOrient!==false)
 	});
+};
+
+/** Add (or remove) a feature to the signalement
+ * @param {ol.Feature | Array<ol.Feature> } features les features a ajouter
+ */
+RIPart.prototype.addFeature = function(features)
+{	if (features)
+	{	if (!(features instanceof Array)) features = [features];
+		for (var i=0, f; f=features[i]; i++) 
+		{	if (f.layer == this.selectOverlay) this.selectOverlay.getSource().removeFeature(f);
+			else this.selectOverlay.getSource().addFeature(f.clone());
+		}
+	}
+	this.selectInteraction.getFeatures().clear();
+	$(".addfeatures .nb", this.formElement).text(this.selectOverlay.getSource().getFeatures().length);
 };

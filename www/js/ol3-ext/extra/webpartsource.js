@@ -51,7 +51,8 @@ ol.source.Vector.Webpart = function(opt_options)
 
 	this.maxFeatures_	= options.maxFeatures || 5000;
 	
-	var crs = this.featureType_.attributes[this.featureType_.geometryName].crs;
+	var crs = this.featureType_.attributes[this.featureType_.geometryName];
+	crs = crs ? crs.crs : 'IGNF:LAMB93';
 	this.srsName_  = crs || 'IGNF:LAMB93'; // 'EPSG:4326';
 				
 	this.featureFilter_ = options.filter || {};

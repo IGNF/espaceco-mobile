@@ -39,6 +39,9 @@ var wapp = new CordovApp(
 
 		// Layers de l'application
 		wapp.initMap();
+		// Affichage des layers
+		wapp.showLayers(this.param.layers);
+
 		wapp.initControls();
 		wapp.initInteractions();
 
@@ -47,9 +50,6 @@ var wapp = new CordovApp(
 
 		// Brancher les signalements
 		wapp.initRipart();
-
-		// Affichage des layers
-		wapp.showLayers(this.param.layers);
 
 		wapp.setDebugMode();
 
@@ -156,7 +156,8 @@ wapp.setOperations = function()
 */
 wapp.initParams = function()
 {	if (!this.param.options) this.param.options={};
-	this.paramInput = this.setParamInput("#options", this.param.options, function(e)
+	var options = this.param.options;
+	var inputs = this.paramInput = this.setParamInput("#options", options, function(e)
 		{	switch (e.name)
 			{	case "rotmap":
 					wapp.rotateMap(e.val);
@@ -168,6 +169,17 @@ wapp.initParams = function()
 				case "searchbt":
 					if (e.val===false) $("#map .searchCtrl").hide();
 					else $("#map .searchCtrl").show();
+					break;
+				case "minGPSAccuracy":
+					var val = Number(e.val) || 20;
+					if (val<0) val = -val;
+					if (inputs && val != options.minGPSAccuracy)
+					{	options.minGPSAccuracy = val;
+						inputs.change();
+					}
+					if (wapp.interactions)
+					{	wapp.interactions.geolocation.set('minAccuracy', e.val);
+					}
 					break;
 				case "qlf":
 					if (wapp.ripart)
@@ -192,6 +204,7 @@ wapp.initMap = function()
 		// Fonds de plan
 		new ol.layer.Group(
 		{	name:"Fond de plan",
+			openInLayerSwitcher: true,
 			layers:
 			[	new ol.layer.Geoportail("GEOGRAPHICALGRIDSYSTEMS.MAPS", {baseLayer: true, hidpi: false, visible: true }),
 				new	ol.layer.Geoportail("GEOGRAPHICALGRIDSYSTEMS.PLANIGN", {baseLayer: true, hidpi: false, visible: false }),
@@ -272,7 +285,8 @@ wapp.initMap = function()
 				+"Il se peut que vous ayez des problèmes à vous repérer&nbsp;!", 
 				{	title: "ATTENTION",
 					icon: "<i class='fa fa-eye-slash fa-3x'></i>",
-					className: "alert"
+					className: "alert",
+					buttons:{ cancel:"ok" }
 				});
 		}
 
@@ -349,6 +363,8 @@ wapp.initControls = function()
 */
 wapp.initInteractions = function()
 {	var map = this.map;
+	this.interactions = {};
+	this.overlays = {};
 	//	Selection
 	var selPoint = new ol.style.Style (
 	{	image: new ol.style.Circle(
@@ -364,7 +380,9 @@ wapp.initInteractions = function()
 		{	selLayer = l;
 			return (true);
 		},
-		style: function(f,res)
+		style: this.redStyle()
+/*		
+		function(f,res)
 		{	if (f.getGeometry().getType()=="Point")
 			{	return $.merge( [ selPoint ], selLayer.getStyleFunction()(f,res));
 			}
@@ -374,7 +392,9 @@ wapp.initInteractions = function()
 						geometry: ol.geom.Polygon.fromExtent( f.getGeometry().getExtent() )
 					}) ], selLayer.getStyleFunction()(f,res));
 			}
-		}});
+		}
+*/
+	});
 	this.select.selectFeature = function(f, l)
 	{	this.getFeatures().clear();
 		selLayer = l;
@@ -397,17 +417,29 @@ wapp.initInteractions = function()
 	// Geolocation draw
 	var geodrawlayer = new ol.layer.Vector(
 	{	name: 'Trace',
+		geolocation: true,
+		vivible: true,
 		displayInLayerSwitcher: false,
-		source: new ol.source.Vector()
+		source: new ol.source.Vector(),
+		style: 
+		[	new ol.style.Style({
+				stroke: new ol.style.Stroke ({ color: [255, 255, 255, 0.8], width: 5 })
+			}),
+			new ol.style.Style({
+				stroke: new ol.style.Stroke ({ color: [0, 153, 255, 1], width: 3 })
+			})
+		]
 	});
+	this.overlays.gps = geodrawlayer;
 	geodrawlayer.getSource().on('addfeature', function(e) { e.feature.layer = geodrawlayer; });
 	map.addLayer(geodrawlayer);
 	// Draw interaction
-	var geodraw = new ol.interaction.GeolocationDraw(
+	var geodraw = this.interactions.geolocation = new ol.interaction.GeolocationDraw(
 		{	source: geodrawlayer.getSource(),
 			type: 'LineString',
 			followTrack: 'auto',
-			zoom: 17
+			zoom: 17,
+			minAccuracy:wapp.param.minGPSAccuracy||20
 		});
 	geodraw.setActive(false);
 	map.addInteraction(geodraw);
@@ -424,13 +456,13 @@ wapp.initInteractions = function()
 	geodraw.on('drawend', function()
 	{	$(centerButton.element).hide();
 	});
-	geodraw.on('stopfollow', function()
-	{	$(centerButton.element).show();
+	geodraw.on('follow', function(e)
+	{	if (!e.following) $(centerButton.element).show();
 	});
 
 	// Control d'activation
 	map.addControl (new ol.control.Toggle(
-	{	"className": "geodrawCtrl debug", 
+	{	"className": "geodrawCtrl", 
 		"html": "<i class='fa fa-location-arrow'></i>",
 		"toggleFn": function(b)
 		{	if (geodraw.getActive())
@@ -461,7 +493,7 @@ wapp.initRipart = function()
 			formElement: '#fiche .signaler',
 			layer: new ol.layer.Vector(
 			{	source: new ol.source.Vector(),
-				name: "Signalements"
+				name: "Mes signalements"
 			}),
 			// Selection d'un signalement
 			onSelect: function(georem, add)
@@ -478,22 +510,33 @@ wapp.initRipart = function()
 				var f = wapp.select.getFeatures().item(0);
 				if (f && f.get('georem'))
 				{	f = false;
-					wapp.select.getFeatures().clear();
 				}
+				wapp.select.getFeatures().clear();
+				wapp.ripart.addFeature(f);
 				var p = f ? ol.extent.getCenter(f.getGeometry().getExtent()) : wapp.map.getView().getCenter();
 				p = ol.proj.transform(p, wapp.map.getView().getProjection(),'EPSG:4326');
 				$("input.lon", form).val(p[0].toFixed(8));
 				$("input.lat", form).val(p[1].toFixed(8));
+				// Pas d'objets a ajouter ?
+				if (f || wapp.vector.length || wapp.overlays.gps.getSource().getFeatures().length)
+				{	$(".addfeatures", wapp.ripart.formElement).show();
+				}
+				else
+				{	$(".addfeatures", wapp.ripart.formElement).hide();
+				}
+				// Ne plus selectionner
 				wapp.select.setActive(false);
 			}, 
 			// Formatage du signalement / verification avant envoie
 			formatGeorem: function(georem, form)
-			{	var f = wapp.select.getFeatures().getArray();
+			{	/*
+				var f = wapp.select.getFeatures().getArray();
 				var current = form.parent().data('grem');
 				if (current && current.sketch)
 				{	georem.sketch = current.sketch;
 				}
 				else if (f.length) georem.sketch = wapp.ripart.feature2sketch(f, wapp.map.getView().getProjection());
+				*/
 				if (!georem.comment) 
 				{	wapp.alert ("Merci de laisser un commentaire...");
 					return false;
@@ -546,6 +589,24 @@ wapp.initRipart = function()
 			wapp.initGuichets();
 		}
 	);
+
+	// Gerer la coherence
+	$("#fiche").on('showpage', function(e)
+	{	var signalDiv = $(".signaler", this);
+		if (wapp.ripart.param.groupes.length > 1)
+		{	$(".changeGroupe", signalDiv).show();
+		}
+		else 
+		{	$(".changeGroupe", signalDiv).hide();
+		}
+		// Groupe public
+		if (wapp.ripart.param.profil && wapp.ripart.param.profil.status!="prive")
+		{	$(".warning_public", signalDiv).show();
+		}
+		else
+		{	$(".warning_public", signalDiv).hide();
+		}
+	});
 };
 
 /** Gestion des parametres caches et du mode debug
@@ -582,3 +643,58 @@ wapp.showLayers = function(vislayers, layers)
 	}
 };
 
+/** Sauvegarder une trace GPS */
+wapp.saveGPS = function() 
+{	var f = wapp.select.getFeatures().item(0);
+	if (f.getGeometry().getType()=="LineString")
+	{	var format = new ol.format.GPX();
+		var gpx = '<?xml version="1.0"?>'+format.writeFeatures([f], 
+		{	featureProjection:wapp.map.getView().getProjection()
+		});
+		
+		console.log(gpx)
+		function fail()
+		{	wapp.alert ("Impossible de créer le fichier");
+		}
+		CordovApp.File.listDirectory("SD/GPX",
+			function(files)
+			{	var nb = 0;
+				var d = new Date();
+				d = d.getFullYear()
+					+"-"+ ("00" + (d.getMonth() + 1)).slice(-2)
+					+"-"+ ("00" + d.getDate()).slice(-2);
+				var filename = d+".gpx";
+				while (true)
+				{	for (var i=0; i<files.length; i++)
+					{	if (files[i].name===filename) 
+						{	nb++;
+							break;
+						}
+					}
+					if (i==files.length) break;
+					else filename = d+"-"+nb+".gpx";
+				}
+				CordovApp.File.write ("SD/GPX/"+filename, gpx, function()
+				{	wapp.message("La fichier GPX/"+filename+" a bien été enregistré","GPX")
+				}, fail);
+			}, fail);
+	}
+}
+
+/** Sauvegarder une trace GPS */
+wapp.redStyle = function() 
+{	var redStroke = new ol.style.Stroke({ color: "#f00", width: 2 });
+	var whiteStroke = new ol.style.Stroke({ color: [255,255,255,0.8], width: 5 });
+	var redFill = new ol.style.Fill({ color: [255,0,0,0.5] });
+	return [
+		new ol.style.Style ({
+			image: new ol.style.Circle ({ stroke: whiteStroke, fill: redFill, radius: 5 }),
+			stroke: whiteStroke,
+			fill: redFill
+		}),
+		new ol.style.Style ({
+			image: new ol.style.Circle ({ stroke: redStroke, radius: 5 }),
+			stroke: redStroke
+		})
+	];
+};
