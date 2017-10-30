@@ -154,7 +154,7 @@ wapp.setGuichet = function(groupe)
 			this.map.addLayer(vector);
 		}
 	}
-	// Mettre les remontées en haut de la pile de calque
+	// Mettre les signalements en haut de la pile de calque
 	if (nb) 
 	{	wapp.map.removeLayer(wapp.ripart.layer);
 		wapp.map.addLayer(wapp.ripart.layer);

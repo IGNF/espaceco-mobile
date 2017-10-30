@@ -803,7 +803,7 @@ RIPart.prototype.postCurrentRem = function()
 {	this.postLocalRem (this.georemPage.data('grem'));
 };
 
-/** Supprimer la remontée courante
+/** Supprimer le signalement courant
 */
 RIPart.prototype.delCurrentRem = function()
 {	wapp.hidePage();
