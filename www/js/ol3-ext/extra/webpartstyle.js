@@ -73,43 +73,50 @@ ol.layer.Vector.Webpart.Style.Fill = function (fstyle)
 */
 ol.layer.Vector.Webpart.Style.Image = function (fstyle)
 {	var image;
-	var radius = Number(fstyle.pointRadius) || 5;
-	var graphic = 
-		{	cross: [ 4, radius, 0, 0 ],
-			square: [ 4, radius, undefined, Math.PI/4 ],
-			triangle: [ 3, radius, undefined, 0 ],
-			star: [ 5, radius, radius/2, 0 ],
-			x: [ 4, radius, 0, Math.PI/4 ]
-		}
-	switch (fstyle.graphicName)
-	{	case "cross": 
-		case "star":
-		case "square":
-		case "triangle":
-			var graphic = 
-				{	cross: [ 4, radius, 0, 0 ],
-					square: [ 4, radius, undefined, Math.PI/4 ],
-					triangle: [ 3, radius, undefined, 0 ],
-					star: [ 5, radius, radius/2, 0 ],
-					x: [ 4, radius, 0, Math.PI/4 ]
-				}
-			var g = graphic[fstyle.graphicName] || graphic.square;
-			image = new ol.style.RegularShape(
-				{	points: g[0],
-					radius: g[1],
-					radius2: g[2],
-					rotation: g[3],
-					stroke: ol.layer.Vector.Webpart.Style.Stroke(fstyle),
-					fill: ol.layer.Vector.Webpart.Style.Fill(fstyle)
-				})
-			break;
-		default:
-			image = new ol.style.Circle(
-					{	radius: radius,
+	if (fstyle.img)
+	{	image = new ol.style.Icon ({
+			src: fstyle.img
+		});
+	}
+	else
+	{	var radius = Number(fstyle.pointRadius) || 5;
+		var graphic = 
+			{	cross: [ 4, radius, 0, 0 ],
+				square: [ 4, radius, undefined, Math.PI/4 ],
+				triangle: [ 3, radius, undefined, 0 ],
+				star: [ 5, radius, radius/2, 0 ],
+				x: [ 4, radius, 0, Math.PI/4 ]
+			}
+		switch (fstyle.graphicName)
+		{	case "cross": 
+			case "star":
+			case "square":
+			case "triangle":
+				var graphic = 
+					{	cross: [ 4, radius, 0, 0 ],
+						square: [ 4, radius, undefined, Math.PI/4 ],
+						triangle: [ 3, radius, undefined, 0 ],
+						star: [ 5, radius, radius/2, 0 ],
+						x: [ 4, radius, 0, Math.PI/4 ]
+					}
+				var g = graphic[fstyle.graphicName] || graphic.square;
+				image = new ol.style.RegularShape(
+					{	points: g[0],
+						radius: g[1],
+						radius2: g[2],
+						rotation: g[3],
 						stroke: ol.layer.Vector.Webpart.Style.Stroke(fstyle),
 						fill: ol.layer.Vector.Webpart.Style.Fill(fstyle)
-					});
-			break;
+					})
+				break;
+			default:
+				image = new ol.style.Circle(
+						{	radius: radius,
+							stroke: ol.layer.Vector.Webpart.Style.Stroke(fstyle),
+							fill: ol.layer.Vector.Webpart.Style.Fill(fstyle)
+						});
+				break;
+		}
 	}
 	return image;
 };
@@ -147,12 +154,20 @@ ol.layer.Vector.Webpart.Style.Text = function (fstyle)
 */
 ol.layer.Vector.Webpart.Style.getFeatureStyleFn = function(featureType)
 {	if (!featureType) featureType = {};
-	
 	if (featureType.name && ol.layer.Vector.Webpart.Style[featureType.name])
 	{	return ol.layer.Vector.Webpart.Style[featureType.name](featureType);
 	}
 	else return function(feature, res)
 	{	var fstyle = ol.layer.Vector.Webpart.Style.formatFeatureStyle (featureType.style, feature);
+		// Gestion d'une bibliotheque de symboles
+		if (featureType.style && featureType.style.name && featureType.symbo_attribute)
+		{	fstyle.img = featureType.uri.replace(/gcms\/.*/,"")
+				+ "gcms/style/image/"
+				+ featureType.style.name
+				+ "/" + feature.get(featureType.symbo_attribute.name)
+				+"?width="+featureType.style.graphicWidth
+				+"&height="+featureType.style.graphicHeight;
+		}
 		return [	
 			new ol.style.Style (
 			{	text: ol.layer.Vector.Webpart.Style.Text (fstyle),

@@ -96,16 +96,20 @@ var RIPart = function(options)
 
 	/** Get a georem 
 	 * @param {XMLNode} rem signalement (XML) a decoder
+	 * @param {any} options 
+	 * 	@param {boolean} options.croquis extraire les croquis
 	 * @return {} le signalement en json
 	 */
-	function getGeorem (rem)
+	function getGeorem (rem, options)
 	{	var r = {};
 		for (var i in georemAttr)
 		{	r[i] = rem.find("> "+georemAttr[i]).first().text();
 		}
 		r.lon = Number(r.lon);
 		r.lat = Number(r.lat);
-		r.croquis = (rem.find('CROQUIS').length>0);
+		r.croquis = rem.find('CROQUIS');
+		if (options && options.croquis) r.croquis = r.croquis.html();
+		else r.croquis = (r.croquis.length>0);
 		r.themes = [];
 		r.attText="";
 		rem.find("THEME").each(function()
@@ -388,27 +392,32 @@ var RIPart = function(options)
 	/** Recuperer les info d'une remontee
 	* @param {String} id de la remontee
 	* @param {function} callback function (response, error)
+	* @param {any} options 
+	* 	@param {boolean} options.croquis extraire les croquis
 	*/
-	this.getGeorem = function (id, cback)
+	this.getGeorem = function (id, cback, options)
 	{	// Decodage de la reponse
 		function decode(resp)
-		{	return getGeorem (resp.find("GEOREM"));
+		{	return getGeorem (resp.find("GEOREM"), options);
 		}
 		// Demander au serveur
 		return sendRequest ("georem_get/"+id, {}, decode, cback);
 	};
 
 	/** Recuperer un ensemble de remontees
-	* @param {Object} options de la requete { offset, limit, territory, departement, group, status, box, ... }
+	* @param {Object} params de la requete { offset, limit, territory, departement, group, status, box, ... }
+	* 	@param {boolean} params.croquis extraire les croquis
 	* @param {function} callback function (response, error)
 	*/
 	this.getGeorems = function (params, cback)
-	{	if (!params) params={};
+	{	if (!params) params = {};
+		var croquis = params.croquis;
+		delete params.croquis;
 		// Decodage de la reponse
 		function decode(resp)
 		{	var r = [];
 			resp.find("GEOREM").each(function()
-			{	r.push (getGeorem($(this)));
+			{	r.push (getGeorem($(this), { croquis: croquis }));
 			});
 			return r;
 		}

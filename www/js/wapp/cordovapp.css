@@ -449,6 +449,8 @@ i.backArrowBt:before
 	cursor: pointer;
 	padding: 0 0.5em;
 	text-transform: uppercase;
+	background: none;
+	border: 0;
 
 /*	font-stretch: condensed; */	
 	font-size: 0.8em;

@@ -39,23 +39,38 @@
 			Divers
 		</li>
 
-		<li data-input="text" data-param="minGPSAccuracy" data-default=20>
-			<label style="display: block; width: Calc(100% + 1em);">
-				Précison GPS (m)&nbsp;: 
-				<input type="number" min="0" style="width:4em; padding-left:0.5em;"/><i class="clear-input"></i>
-			</label>
-			<div data-input-role="info">
-				Précision minimum du GPS pour faire une trace&nbsp;:
-				en dessous les points ne seront pas enregistrés (en m).
-			</div>
-		</li>
-	  
 		<li data-input="button" onclick="wapp.help.reset(); wapp.hidePage(); wapp.help.show('main')">
 			<label>Réinitialiser l'aide en ligne</label>
 			<div data-input-role="info">L'aide en ligne ne s'affiche qu'une seule fois. 
 			Vous pouvez la réactiver pour un nouveau parcours guidé.</div>
 		</li>
 
+		<li class="title">
+			Paramètres avancés
+		</li>
+
+		<li data-input="text" data-param="minGPSAccuracy" data-default=100>
+			<label style="display: block; width: Calc(100% + 1em);">
+				Précison GPS (m)&nbsp;: 
+				<input type="number" min="0" style="width:4em; padding-left:0.5em;"/>
+				<i class="clear-input"></i>
+			</label>
+			<div data-input-role="info">
+				Marge d'erreur au dessus de laquelle les points GPS ne seront 
+				pas enregistrés dans la trace (en m).
+			</div>
+		</li>
+		<li data-input="text" data-param="toleranceGPS" data-default=5>
+			<label style="display: block; width: Calc(100% + 1em);">
+				Distance GPS (m)&nbsp;: 
+				<input type="number" min="0" style="width:4em; padding-left:0.5em;"/>
+				<i class="clear-input"></i>
+			</label>
+			<div data-input-role="info">
+				Distance minimal entre deux points GPS sur la trace (en m).
+			</div>
+		</li>
+	  
 		<li data-input="check" data-param="qlf" class="debug" data-default=false>
 			<label>Serveur de qualif</label>
 			<div data-input-role="info">Utiliser le serveur de qualif plutôt que le serveur de prod (mode debug uniquement)</div>

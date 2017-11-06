@@ -14,6 +14,12 @@ var wapp = new CordovApp(
 	* @method
 	*/
 	initialize: function() 
+	{	// Affichage d'une patience avant lancement
+		wapp.waitLogo ("Chargement...", false);
+		setTimeout(function(){ wapp.initWapp(); }, 200);
+	},
+	
+	initWapp: function()
 	{	var self = this; 
 		// url du service => chercher sur internet
 		geoportailConfig.url = "http://wxs.ign.fr/";
@@ -28,8 +34,6 @@ var wapp = new CordovApp(
 		$(".version").text(this.version);
 		// Gestion de l'aide en ligne
 		$("#help").click(wapp.help.hide);
-		// Lancement
-		wapp.wait("Chargement...", false);
 
 		// Afficher les operations ponctuelles
 		wapp.setOperations();
@@ -126,6 +130,25 @@ var wapp = new CordovApp(
 	
 });
 
+/** Message d'attente avec affichage du logo du groupe
+ */
+wapp.waitLogo = function(info, anim)
+{	if (this.isWaiting() && $("#wait").hasClass('splash'))
+	{	$("#wait p").text(info);
+	}
+	else
+	{	var div = $("<div>").append($("<p>").text(info));
+		try {
+			var profil = JSON.parse(localStorage["WebApp@ripart"]).profil
+			this.getLogo(profil, function(logo)
+			{	$("<img>").attr('src', logo || "")
+					.prependTo(div);
+			});
+		} catch(e) {};
+		this.wait (div, { className:'splash', anim: anim });
+	}
+};
+
 /** Afficher une operation ponctuelle
 */
 wapp.setOperations = function()
@@ -170,15 +193,26 @@ wapp.initParams = function()
 					if (e.val===false) $("#map .searchCtrl").hide();
 					else $("#map .searchCtrl").show();
 					break;
+				case "toleranceGPS":
+					var val = Number(e.val) || 100;
+					if (val<0) val = -val;
+					if (inputs && val != options.toleranceGPS)
+					{	options.toleranceGPS = val;
+						inputs.change();
+					}
+					if (wapp.interactions)
+					{	wapp.interactions.geolocation.set('tolerance', val);
+					}
+					break;
 				case "minGPSAccuracy":
-					var val = Number(e.val) || 20;
+					var val = Number(e.val) || 100;
 					if (val<0) val = -val;
 					if (inputs && val != options.minGPSAccuracy)
 					{	options.minGPSAccuracy = val;
 						inputs.change();
 					}
 					if (wapp.interactions)
-					{	wapp.interactions.geolocation.set('minAccuracy', e.val);
+					{	wapp.interactions.geolocation.set('minAccuracy', val);
 					}
 					break;
 				case "qlf":
@@ -236,7 +270,9 @@ wapp.initMap = function()
 					"VERSION": "1.3.0"
 				}
 			})
-		})
+		}),
+		// Layer pour l'affichage du guichet
+		new ol.layer.Group({ title:"Mon guichet", name: "guichet", visible: true })
 	];
 
 	// The map
@@ -439,7 +475,8 @@ wapp.initInteractions = function()
 			type: 'LineString',
 			followTrack: 'auto',
 			zoom: 17,
-			minAccuracy:wapp.param.minGPSAccuracy||20
+			tolerance: wapp.param.toleranceGPS||5,
+			minAccuracy: wapp.param.minGPSAccuracy||20
 		});
 	geodraw.setActive(false);
 	map.addInteraction(geodraw);
@@ -484,7 +521,7 @@ wapp.initInteractions = function()
 */
 wapp.initRipart = function()
 {	var self = this;
-	
+
 	this.ripart = new RIPart(
 		{	url: this.param.options.qlf ?  "https://qlf-collaboratif.ign.fr/collaboratif-develop/api/":null,
 			infoElement: '#options .connect [data-input-role="info"] span.connected',
@@ -557,9 +594,15 @@ wapp.initRipart = function()
 			}
 			*/
 		});
+		
+	// Patience
+	wapp.waitLogo ("Connexion...");
+	
 	$("#signalements button").click(function(){ wapp.select.getFeatures().clear(); });
 	if (wapp.ripart.param.profil) 
-	{	$("#splash img").attr('src', wapp.ripart.param.profil.logo);
+	{	wapp.getLogo(wapp.ripart.param.profil, function(logo)
+		{	$("#splash img").attr('src', logo || "");
+		});
 	}
 
 	$("#fiche").on("showonglet hidepage", function(e)
@@ -571,13 +614,6 @@ wapp.initRipart = function()
 	this.paramInput.change();
 
 	// Actualiser le compte
-	wapp.wait("Connexion...");
-	if (wapp.ripart.param.profil)
-	{	var img = $("<img>").attr('src', wapp.ripart.param.profil.logo)
-						.on('error', function(){ $(this).addClass('error'); });
-		var div = $("<div>").append(img).append($("<p>").text("Connexion..."));
-		wapp.wait(div, { className:'splash' });
-	}
 	this.ripart.checkUserInfo(
 		function ()
 		{	wapp.wait(false); 

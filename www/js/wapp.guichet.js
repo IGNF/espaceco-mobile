@@ -21,7 +21,11 @@ wapp.initGuichets = function()
 	var groupes = wapp.ripart.param.groupes;
 	var current = {};
 	for (var i=0, g; g = groupes[i]; i++)
-	{	// Guichet courant
+	{	// Chargement des logos
+		if (g.logo) 
+		{	CordovApp.File.dowloadFile(g.logo, "TMP/logo/"+g.id_groupe);
+		}
+		// Guichet courant
 		if (this.ripart.param.guichet == g.id_groupe) current = g;
 		// Affichage si WFS
 		var couches = "";
@@ -49,8 +53,9 @@ wapp.initGuichets = function()
 					}
 				})
 				.appendTo(ul);
-			$("<img>").attr("src",g.logo)
-				.prependTo(li);
+			wapp.getLogo (g, function(f)
+			{	$("<img>").attr("src",f).prependTo(this);
+			}, li);
 		}
 		else
 		{	$('#cartes [data-list="guichets"] ul.nomap').show();
@@ -59,10 +64,27 @@ wapp.initGuichets = function()
 	wapp.setGuichet(current);
 };
 
+/** Recupere le logo d'un goupe
+ * @param {any} g le groupe
+ * @param {function} cback callback fonction qui renvoie le nom du fichier
+ */
+wapp.getLogo = function (g, cback, scope)
+{	CordovApp.File.getFile("TMP/logo/"+g.id_groupe, 
+		function(fileEntry) { 
+			console.log(fileEntry);
+			cback.call(scope, fileEntry.toURL()); 
+		}, 
+		function() { 
+			cback.call(scope, g.logo); 
+		});
+}
+
 /** Guichet en cours de modification
 */
 wapp.setGuichet = function(groupe)
 {	if (!groupe) groupe = {};
+	// Layer du guichet
+	var guichet = wapp.map.getLayersByName('guichet')[0];
 	// Nouveau guichet
 	this.ripart.param.guichet = groupe.id_groupe;
 	wapp.ripart.saveParam();
@@ -74,10 +96,15 @@ wapp.setGuichet = function(groupe)
 	// Layers du guichet
 	if (this.vector) 
 	{	for (var i=0, l; l=this.vector[i]; i++) 
-			this.map.removeLayer(l);
+			guichet.getLayers().clear();
 	}
 	this.vector = [];
-	if (!groupe.layers) return;
+	if (!groupe.layers) 
+	{	guichet.set("displayInLayerSwitcher", false);
+		return;
+	}
+	guichet.set("displayInLayerSwitcher", true);
+	guichet.set("title", groupe.nom);
 	var nb=0, nbLoad=0;
 	var loading={};
 	// Ajouter les layers Webpart
@@ -151,7 +178,7 @@ wapp.setGuichet = function(groupe)
 					break;
 				}
 			}
-			this.map.addLayer(vector);
+			guichet.getLayers().push(vector);
 		}
 	}
 	// Mettre les remontées en haut de la pile de calque
@@ -288,7 +315,6 @@ wapp.connect = function()
 					msg = [ "Accès interdit" , "Utilisateur inconnu." ];
 					break;
 				case "no_profile":
-
 					msg = [ "Connexion", error.statusText ]
 					break;
 				default: 

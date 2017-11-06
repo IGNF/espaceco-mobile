@@ -17,7 +17,7 @@ function Dialog()
 {	var self = this;
 	// Constructor
 	var _back = $('<div>').attr("data-role","backDialog").appendTo("body");
-	var _dlg = $('<div>').attr("data-role","dialog").appendTo("body").hide();
+	var _dlg = $('<form>').attr("data-role","dialog").appendTo("body").hide();
 	var _cbox = $("<i>").addClass("fa fa-close")
 			.attr("data-role","closebox")
 			.appendTo(_dlg)
@@ -71,7 +71,8 @@ function Dialog()
 		if (_timeout) clearTimeout(_timeout);
 
 		function addButton(id, text)
-		{	$("<div>").text(text)
+		{	$("<input>").val(text)
+					.attr('type', id=='submit' ? 'submit':'button')
 					.attr("data-role","dialogBt")
 					.prependTo(_buttons)
 					.on ("click",function(e)
@@ -380,7 +381,7 @@ CordovApp.prototype.wait = function(msg, options)
 }
 
 CordovApp.prototype.isWaiting = function()
-{	return _wback.css("display")!="none";
+{	return _wback ? _wback.css("display")!="none" : false;
 	//return _wait.hasClass('visible');
 }
 

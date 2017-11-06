@@ -76,9 +76,14 @@
 	max-width: initial;
 }
 
+#help .gps
+{	bottom: 7.5em;
+	right: 0;
+	text-align: center;
+}
 #help .locate
-{	bottom: 3.5em;
-	right: 2.5em;
+{	bottom: 2.7em;
+	right: 3.5em;
 	text-align: center;
 }
 #help .signal

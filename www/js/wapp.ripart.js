@@ -825,9 +825,9 @@ RIPart.prototype.connectDialog = function (options)
 	wapp.dialog.show ( tp, 
 		{	title:"Connexion", 
 			classe: "connect", 
-			buttons: { cancel:"Annuler", deconnect: "Déconnexion", connect:"Connexion"},
+			buttons: { cancel:"Annuler", deconnect: "Déconnexion", submit:"Connexion"},
 			callback: function(bt)
-			{	if (bt == "connect")
+			{	if (bt == "submit")
 				{	if (self.param.user != nom.val())
 					{	self.param.profil = null;
 					}
@@ -938,13 +938,18 @@ RIPart.prototype.setProfil = function(id_groupe)
 	else
 	{	this.param.profil = {};
 	}
-	$("img", this.profilElement).attr("src", this.param.profil.logo || "");
-	$(".title", this.profilElement).text(this.param.profil.groupe || "");
+	
+	wapp.getLogo(this.param.profil, function(logo)
+	{	$(".title", this.profilElement).text(this.param.profil.groupe || "");
+		$("img", this.profilElement).attr("src", logo || "");
+	}, this);
 
 	// Sauvegarder
 	this.saveParam();
 }
 
+/** Dialog de changement de profil
+ */
 RIPart.prototype.choixProfil = function()
 {	var q = {};
 	for (var i=0, g; g=this.param.groupes[i]; i++)
@@ -956,7 +961,6 @@ RIPart.prototype.choixProfil = function()
 	}, { search: (this.param.groupes.length>8) });
 	//this.saveParam();
 }
-
 
 /** On a deja une connexion
 */
@@ -1085,6 +1089,8 @@ RIPart.prototype.selectTheme = function(th, atts, prompt)
 	}
 };
 
+/** Remise a zero du formulaire
+ */
 RIPart.prototype.resetFormulaireAttribut = function()
 {	var input = $(".attributes", this.formElement).data("vals", false);
 	$('[data-input-role="info"]', input).text("");
