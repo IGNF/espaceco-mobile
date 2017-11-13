@@ -629,7 +629,7 @@ wapp.initRipart = function()
 	// Gerer la coherence
 	$("#fiche").on('showpage', function(e)
 	{	var signalDiv = $(".signaler", this);
-		if (wapp.ripart.param.groupes.length > 1)
+		if (wapp.ripart.param.groupes && wapp.ripart.param.groupes.length > 1)
 		{	$(".changeGroupe", signalDiv).show();
 		}
 		else 
@@ -688,18 +688,25 @@ wapp.saveGPS = function()
 		{	featureProjection:wapp.map.getView().getProjection()
 		});
 		
-		console.log(gpx)
-		function fail()
-		{	wapp.alert ("Impossible de créer le fichier");
-		}
+		// Nom sur la date d'aujourd'hui
+		var d = new Date();
+		d = d.getFullYear()
+			+"-"+ ("00" + (d.getMonth() + 1)).slice(-2)
+			+"-"+ ("00" + d.getDate()).slice(-2);
+		var filename = d+".gpx";
+
+		function write()
+		{	CordovApp.File.write ("SD/GPX/"+filename, gpx, function()
+			{	wapp.message("La fichier GPX/"+filename+" a bien été enregistré","GPX")
+			}, function()
+			{	wapp.alert ("Impossible de créer le fichier");
+			});
+		};
+
+		// Verifier la non existence du fichier
 		CordovApp.File.listDirectory("SD/GPX",
 			function(files)
 			{	var nb = 0;
-				var d = new Date();
-				d = d.getFullYear()
-					+"-"+ ("00" + (d.getMonth() + 1)).slice(-2)
-					+"-"+ ("00" + d.getDate()).slice(-2);
-				var filename = d+".gpx";
 				while (true)
 				{	for (var i=0; i<files.length; i++)
 					{	if (files[i].name===filename) 
@@ -707,15 +714,14 @@ wapp.saveGPS = function()
 							break;
 						}
 					}
+					// incrmenter ?
 					if (i==files.length) break;
 					else filename = d+"-"+nb+".gpx";
 				}
-				CordovApp.File.write ("SD/GPX/"+filename, gpx, function()
-				{	wapp.message("La fichier GPX/"+filename+" a bien été enregistré","GPX")
-				}, fail);
-			}, fail);
+				write();
+			}, write );
 	}
-}
+};
 
 /** Sauvegarder une trace GPS */
 wapp.redStyle = function() 

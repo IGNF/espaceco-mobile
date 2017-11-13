@@ -1191,3 +1191,8 @@ body.trackingGeorem #fiche .signaler .movePosition
   50%{ visibility: hidden; }
   to { visibility: hidden; }
 }
+
+li[data-class="nb=0"],
+span[data-class="nb=1"] {
+	display: none;
+}

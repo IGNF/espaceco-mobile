@@ -6,7 +6,7 @@
 var apiKey = "woxaf4dkmx31elou2xvlt1mm";
 
 // App version
-CordovApp.prototype.version = "1.1.0c";
+CordovApp.prototype.version = "1.1.01";
 
 // Autoconfig GPP
 geoportailConfig.capabilities['default']=

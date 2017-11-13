@@ -260,6 +260,8 @@ wapp.showSelect = function(ripart)
 		// Georem
 		if (prop.georem)
 		{	div.addClass("georem").removeClass("fiche");
+			if (prop.georem.sketch) prop.georem.nb = wapp.ripart.sketch2feature(prop.georem.sketch).length;
+			else prop.georem.nb = 0;
 			wapp.dataAttributes($(".georem", div), prop.georem);
 		}
 		// Objet du guichet
