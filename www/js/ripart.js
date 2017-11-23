@@ -461,6 +461,7 @@ var RIPart = function(options)
 		return sendRequest ("georem_post", post, decode, cback);
 	};
 
+
 	/** Write feature(s) to sketch
 	* @param {String} the sketch
 	* @param {ol.proj.ProjectionLike} projection of the features, default EPSG:3857
@@ -468,7 +469,8 @@ var RIPart = function(options)
 	*/
 	this.sketch2feature = function(sketch , proj)
 	{	features = [];
-		var xml = $.parseXML(sketch.replace(/gml:/g,""));
+		sketch = "<CROQUIS>"+sketch+"</CROQUIS>";
+		var xml = $.parseXML(sketch.replace(/gml:|xmlns:/g,""));
 		var objects = $(xml).find("objet");
 		for (var i=0, f; f=objects[i]; i++)
 		{	var atts = $(f).find("attribut");

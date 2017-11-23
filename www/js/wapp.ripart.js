@@ -885,19 +885,26 @@ RIPart.prototype.checkUserInfo = function(success, fail)
 
 	this.getUserInfo (function(rep, error)
 	{	wapp.wait(false);
+		if (error) rep = {};
+		else self.param.groupes = rep.groupes
+		// Recherche du profil :
+		// profil courant
+		if (self.param.profil && self.param.profil.id_groupe) 
+		{	self.setProfil(self.param.profil.id_groupe);
+		}
+		// Profil du site
+		else if (rep.profil && rep.profil.id_groupe)
+		{	self.setProfil(rep.profil.id_groupe);
+		}
+		// Par defaut, premier groupe de l'utilisateur
+		else if (self.param.groupes && self.param.groupes.length)
+		{	self.setProfil(self.param.groupes[0].id_groupe);
+		}
 		if (error)
-		{	rep = {};
-			// self.param.profil = null;
-			if (self.param.profil) self.setProfil(self.param.profil.id_groupe);
-			fail(error);
+		{	fail(error);
 		}
 		else 
-		{	self.param.groupes = rep.groupes;
-			// self.param.themes = rep.themes;
-			// self.param.profil = rep.profil;
-			if (self.param.profil) self.setProfil(self.param.profil.id_groupe);
-			else self.setProfil(rep.profil.id_groupe);
-			success(rep);
+		{	success(rep);
 		}
 		self.saveParam();
 	});

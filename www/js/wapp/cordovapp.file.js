@@ -128,9 +128,9 @@ CordovApp.File =
 		var croot = cordova.file.externalRootDirectory;
 		var lup = [
 				[/^TMP\/?/, cordova.file.externalDataDirectory||cordova.file.dataDirectory],
-				[/^SDFILE\/?/, cordova.file.externalDataDirectory],
-				[/^SDCACHE\/?/, cordova.file.externalCacheDirectory],
-				[/^SD\/?/, cordova.file.externalRootDirectory],
+				[/^SDFILE\/?/, cordova.file.externalDataDirectory||cordova.file.dataDirectory],
+				[/^SDCACHE\/?/, cordova.file.externalCacheDirectory||cordova.file.cacheDirectory],
+				[/^SD\/?/, cordova.file.externalRootDirectory||cordova.file.dataDirectory],
 				[/^ASSET\/?/, cordova.file.applicationDirectory],
 				[/^CACHE\/?/, cordova.file.cacheDirectory],
 				[/^FILE\/?/, cordova.file.dataDirectory],
