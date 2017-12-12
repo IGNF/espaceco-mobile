@@ -22,7 +22,7 @@ var wapp = new CordovApp(
 	initWapp: function()
 	{	var self = this; 
 		// url du service => chercher sur internet
-		geoportailConfig.url = "http://wxs.ign.fr/";
+		geoportailConfig.url = "https://wxs.ign.fr/";
 
 		/*
 		// Splashscreen
@@ -266,7 +266,7 @@ wapp.initMap = function()
 			{	"url": "http://wxs.ign.fr/"+apiKey+"/inspire/v/wms",
 				"projection": "EPSG:3857",
 				"crossOrigin": "anonymous",
-				"tileLoadFunction": ol.source.Geoportail.tileLoadFunctionWithAuthentication("guichet:EspaceC08069", "image/png"),
+				"tileLoadFunction": ol.source.Geoportail.tileLoadFunctionWithAuthentication(auth, "image/png"),
 				"params": {
 					"LAYERS": "AD.Address",
 					"FORMAT": "image/png",
@@ -285,7 +285,7 @@ wapp.initMap = function()
 	var map = this.map = new ol.Map.Geoportail
 		({	target: 'map',
 			key: apiKey,
-			authentication: 'guichet:EspaceC08069',
+			authentication: auth, 
 			// Improve user experience by loading tiles while animating. Will make
 			// animations stutter on mobile or slow devices.
 			//loadTilesWhileAnimating: true,
@@ -351,6 +351,7 @@ wapp.initControls = function()
 	//this.addLocateControl(map);
 	var locCtrl = new ol.control.GeoportailLocate(
 		{	apiKey:apiKey, 
+			authentication: auth,
 			target: $('#search [data-role="content"]').get(0),
 			onGeocode: function(pos, r)
 			{	centerMap(ol.proj.transform(pos,'EPSG:4326', map.getView().getProjection()));

@@ -21,7 +21,7 @@ ol.control.GeoportailLocate = function(options)
 		.prependTo(element);
 
 	// Service de geocodage
-	var service = new GeoportailService(options.apiKey);
+	var service = window.gpservice = new GeoportailService(options.apiKey, null, options.authentication);
 	var goptions = {	
 		territoire:'ALL',
 		max: 20,
