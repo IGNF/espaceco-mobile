@@ -414,10 +414,16 @@
 	overflow: hidden;
 	vertical-align: middle;
 	font-size: 0.9em;
+	vertical-align: middle;
 }
 #fiche .fiche label:after
 {	content: "\A0:";
 }
+#fiche .selection > div span
+{	width: 70%;
+	display: inline-block;
+	vertical-align: middle;
+} 
 
 #fiche .fiche input,
 #fiche .fiche [data-input-role].selected 

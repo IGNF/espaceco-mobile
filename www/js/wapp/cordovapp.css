@@ -681,6 +681,11 @@ i.backArrowBt:before
 	text-shadow: 1px 1px #eee;
 	top: 50%;
 }
+[data-input="check"] label
+{	padding-right: 2em;
+	width: 100%;
+	display: inline-block;
+}
 
 [data-input="text"] input
 {	background: none;

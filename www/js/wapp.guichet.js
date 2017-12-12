@@ -264,16 +264,20 @@ wapp.showSelect = function(ripart)
 			else prop.georem.nb = 0;
 			wapp.dataAttributes($(".georem", div), prop.georem);
 		}
-		// Objet du guichet
+		// Objet utilisateur
 		else 
 		{	div.addClass("fiche");
+			// Trace GPS
 			if (f.layer.get('geolocation')) div.addClass("trace");
 			var prop = f.getProperties();
 			$(".fiche h3 span", div).text(f.layer.get("title")||f.layer.get("name"));
 			var ul = $(".fiche ul", div).html("");
-			var ftype = f.layer.getSource().featureType_;
-			if (ftype)
-			{	for (i in ftype.attributes) if (ftype.attributes.hasOwnProperty(i) && i!=ftype.geometryName)
+			// Trace GPS
+			if (f.layer.get('geolocation')) div.addClass("trace");
+			// Objet d'un guichet
+			else if (f.layer.getSource().featureType_)
+			{	var ftype = f.layer.getSource().featureType_;
+				for (i in ftype.attributes) if (i!=ftype.geometryName && f.get(i))
 				{	var att = ftype.attributes[i];
 					switch (att.type)
 					{	case "Point":
@@ -289,6 +293,27 @@ wapp.showSelect = function(ripart)
 								.appendTo(li);
 						}
 					}
+				}
+			}
+			// Objet WMS
+			else if (f.layer.get("getFeatureInfoMask"))
+			{	var visu = f.layer.get("getFeatureInfoMask").visu;
+				for (i in visu) 
+				{	var li = $("<li>").appendTo(ul);
+					$("<label>").text(visu[i].replace(/_/g,' '))
+						.appendTo(li);
+					$("<span>").text(f.get(i))
+						.appendTo(li);
+				}
+			}
+			else 
+			{	var prop = f.getProperties();
+				for (i in prop) if (i !== "geometry") 
+				{	var li = $("<li>").appendTo(ul);
+					$("<label>").text(i.replace(/_/g,' '))
+						.appendTo(li);
+					$("<span>").text(f.get(i))
+						.appendTo(li);
 				}
 			}
 		}

@@ -247,6 +247,8 @@ wapp.initMap = function()
 		}),
 		// Layer pour l'affichage du cache
 		new ol.layer.Group({ title:"Mes cartes", name: "cache", displayInLayerSwitcher: false }),
+		// Layer pour l'affichage du cache
+		new ol.layer.Group({ title:"Mes couches", name: "layerGroup", displayInLayerSwitcher: false }),
 		// Overlays
 		new ol.layer.Geoportail("ELEVATION.ELEVATIONGRIDCOVERAGE.SHADOW", { hidpi: false, visible: false }),
 //		new ol.layer.Geoportail("BUILDINGS.BUILDINGS", { hidpi: false, visible: false }),
@@ -264,6 +266,7 @@ wapp.initMap = function()
 			{	"url": "http://wxs.ign.fr/"+apiKey+"/inspire/v/wms",
 				"projection": "EPSG:3857",
 				"crossOrigin": "anonymous",
+				"tileLoadFunction": ol.source.Geoportail.tileLoadFunctionWithAuthentication("guichet:EspaceC08069", "image/png"),
 				"params": {
 					"LAYERS": "AD.Address",
 					"FORMAT": "image/png",
@@ -271,6 +274,8 @@ wapp.initMap = function()
 				}
 			})
 		}),
+		// Layer pour l'affichage du cache
+		new ol.layer.Group({ title:"Mes couches", name: "groupe", displayInLayerSwitcher: false }),
 		// Layer pour l'affichage du guichet
 		new ol.layer.Group({ title:"Mon guichet", name: "guichet", visible: true })
 	];
@@ -280,6 +285,7 @@ wapp.initMap = function()
 	var map = this.map = new ol.Map.Geoportail
 		({	target: 'map',
 			key: apiKey,
+			authentication: 'guichet:EspaceC08069',
 			// Improve user experience by loading tiles while animating. Will make
 			// animations stutter on mobile or slow devices.
 			//loadTilesWhileAnimating: true,
@@ -409,6 +415,7 @@ wapp.initInteractions = function()
 		}),
 	});
 	var selStroke = new ol.style.Stroke({color: '#f00', width: 3 });
+
 	var selLayer;
 	this.select = new ol.interaction.Select({
 		hitTolerance: 5,
@@ -440,6 +447,57 @@ wapp.initInteractions = function()
 	this.map.addInteraction(this.select);
 	this.select.on("select", this.onSelect, this);
 	wapp.onSelect();
+
+	// getFeatureInfo interaction
+	function getFeatureInfo(l, coord)
+	{	if (!l.getSource().getGetFeatureInfoUrl) return;
+		var	url = l.getSource().getGetFeatureInfoUrl(
+			coord, 
+			map.getView().getResolution(),
+			map.getView().getProjection(),
+			{ info_format: "application/json" }
+		);
+		var t = new Date();
+		$.ajax(url, {
+			dataType: "json",
+			success: function(resp)
+			{	var f = resp.features[0];
+				if (f) 
+				{	var crs = resp.crs.properties.name.replace(/(.*)EPSG\:\:(\d*)$/, "$2");
+					var proj = ol.proj.get("EPSG:"+crs);
+					if (proj)
+					{	var geom = new ol.geom[f.geometry.type](f.geometry.coordinates);
+						geom.transform(proj, map.getView().getProjection());
+						var feature = new ol.Feature(geom);
+						feature.layer = l;
+						delete f.geometry;
+						delete f.properties.bbox;
+						feature.setProperties(f.properties);
+						setTimeout(
+							function(){
+								wapp.select.getFeatures().push(feature);
+								wapp.onSelect({ selected:[feature] });
+							}, Math.max(0, 400+(t-(new Date())))
+						)
+					}
+				}
+			}
+		});
+	}
+	var lgroup = map.getLayersByName("groupe")[0];
+	map.on ("click", function(e) {
+		if (!wapp.select.getFeatures().length)
+		{	// Test pixel on at position
+			wapp.map.forEachLayerAtPixel(e.pixel, function(layer)
+			{	//if (layer.get("getFeatureInfoMask")) 
+				getFeatureInfo(layer, e.coordinate);
+			});
+			/*
+			var layers = lgroup.getLayers().getArray();
+			for (var k=0, l; l=layers[k]; k++) getFeatureInfo(l, e.coordinate);
+			*/
+		}
+	})
 
 	// Longtouch
 	map.addInteraction(new ol.interaction.LongTouch(
@@ -566,15 +624,7 @@ wapp.initRipart = function()
 			}, 
 			// Formatage du signalement / verification avant envoie
 			formatGeorem: function(georem, form)
-			{	/*
-				var f = wapp.select.getFeatures().getArray();
-				var current = form.parent().data('grem');
-				if (current && current.sketch)
-				{	georem.sketch = current.sketch;
-				}
-				else if (f.length) georem.sketch = wapp.ripart.feature2sketch(f, wapp.map.getView().getProjection());
-				*/
-				if (!georem.comment) 
+			{	if (!georem.comment) 
 				{	wapp.alert ("Merci de laisser un commentaire...");
 					return false;
 				}
@@ -594,6 +644,8 @@ wapp.initRipart = function()
 			}
 			*/
 		});
+
+	wapp.ripart.on("changegroup", function(e){ wapp.changeGroup(e); });
 		
 	// Patience
 	wapp.waitLogo ("Connexion...");
@@ -643,6 +695,44 @@ wapp.initRipart = function()
 		{	$(".warning_public", signalDiv).hide();
 		}
 	});
+};
+
+/** On a change de groupe 
+*/
+wapp.changeGroup = function (e)
+{	// Supprimer les layers des autres groupes
+	var lgroup = wapp.map.getLayersByName("groupe")[0];
+	lgroup.getLayers().clear();
+	// Verifier les layers disponibles
+	var layers = e.group.layers;
+	var attribution = new ol.Attribution({ "html":e.group.nom });
+	for (var i=0, l; l = layers[i]; i++)
+	{	if (l.type=="WMS")
+		{	var extent = l.extent;
+			extent = ol.proj.transformExtent(extent, "EPSG:4326", "EPSG:3857");
+			var wmsParam = {
+				"title": l.nom,
+				"extent": extent[0] ? extent : undefined,
+				"minResolution": new ol.View({ zoom: l.maxzoom }).getResolution(),
+				"maxResolution": new ol.View({ zoom: l.minzoom }).getResolution(),
+				"getFeatureInfoMask": l.getFeatureInfoMask,
+				"source": new ol.source.TileWMS({
+					"url": l.url,
+					"projection": "EPSG:3857",
+					// "crossOrigin": "anonymous",
+					"params": {
+						"LAYERS": l.layer,
+						"FORMAT": l.format,
+						"VERSION": l.version
+					},
+					"attributions": [attribution]
+				})
+			};
+			lgroup.getLayers().push( new ol.layer.Tile (wmsParam) );
+		}
+	}
+	lgroup.set('title', e.group.nom);
+	lgroup.set("displayInLayerSwitcher", !!(lgroup.getLayers().getLength()));
 };
 
 /** Gestion des parametres caches et du mode debug

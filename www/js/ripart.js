@@ -298,12 +298,25 @@ var RIPart = function(options)
 					layers:[]
 				};
 				att.find("LAYER").each(function()
-				{	g.layers.push(
-					{	nom: $(this).find("NOM").text(),
+				{	var l = {	
+						nom: $(this).find("NOM").text(),
 						type: $(this).find("TYPE").text(),
 						description: $(this).find("DESCRIPTION").text(),
 						url: $(this).find("URL").text()
-					});
+					};
+					if (l.type=="WMS")
+					{	l.minzoom = Number($(this).find("MINZOOM").text());
+						l.maxzoom = Number($(this).find("MAXZOOM").text());
+						l.extent = $(this).find("EXTENT").text().split(",");
+						for (var k=0; k<l.extent.length; k++) l.extent[k] = Number(l.extent[k]);
+						l.version = $(this).find("VERSION").text();
+						l.layer = $(this).find("LAYER").text();
+						l.format = $(this).find("FORMAT").text() || "image/png";
+						try {
+							l.getFeatureInfoMask = JSON.parse($(this).find("GETFEATUREINFOMASK").text());
+						} catch(e){};
+					}
+					g.layers.push(l);
 				});
 				var th={attributs: []}
 				var att, themes = [];

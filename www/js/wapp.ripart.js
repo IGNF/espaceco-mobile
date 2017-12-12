@@ -1,4 +1,5 @@
 ﻿/** @class RIPart
+* @fire changegroup
 * Gestion de connexion avec l'espace collaboratif pour la remontee d'informations
 * Gestion des dialogues dans l'application (connexion, formulaire de saisie d'une remontee)
 * Connexion avec la carte et les elements de l'applicaiton
@@ -953,6 +954,9 @@ RIPart.prototype.setProfil = function(id_groupe)
 
 	// Sauvegarder
 	this.saveParam();
+
+	// Emit event
+	$(document).trigger({ type:"changegroup", group: g });
 }
 
 /** Dialog de changement de profil
@@ -1138,7 +1142,7 @@ RIPart.prototype.formulaireAttribut = function(valdef, prompt)
 				case 'checkbox':
 					li = $("<li data-input='check'>").attr('data-param',a.att).appendTo(content);
 					$("<label>").text(a.att).appendTo(li);
-					vals[a.att] = (v!="0");
+					vals[a.att] = v; // (v!="0");
 					break;
 				default:
 					li = $("<li data-input='text'>").attr('data-param',a.att).appendTo(content);
@@ -1237,4 +1241,22 @@ RIPart.prototype.addFeature = function(features)
 	}
 	this.selectInteraction.getFeatures().clear();
 	$(".addfeatures .nb", this.formElement).text(this.selectOverlay.getSource().getFeatures().length);
+};
+
+/** Attach an event handler function for one or more events to the selected elements
+ */
+RIPart.prototype.on = function(events, handler)
+{	$(document).on (events, handler);
+};
+
+/** Remove an event handler.
+ */
+RIPart.prototype.un = function(events, handler)
+{	$(document).off (events, handler);
+};
+
+/** Attach a handler to an event for the elements. The handler is executed at most once per element per event type.
+ */
+RIPart.prototype.once = function(events, handler)
+{	$(document).one (events, handler);
 };
