@@ -233,7 +233,7 @@ CordovApp.File =
 	},
 
 
-	/** Read a file as text
+	/** Read a file as text (utf-8)
 	*	@param {DOMString} name URI referring to a local file  
 	*	@param {function} success callback that is passed the result of the read
 	*	@param {function} fail callback invoked on error
@@ -255,7 +255,12 @@ CordovApp.File =
 						(	function (file) 
 							{	var reader = new FileReader();
 								reader.onloadend = function(evt) 
-								{	success(evt.target.result);
+								{	var res = evt.target.result;
+									// remove utf-8 BOM 
+									if (res.charCodeAt(0) === 0xFEFF) {
+										res = res.substr(1);
+									}
+									success(res);
 								};
 								reader.readAsText(file);
 							}
