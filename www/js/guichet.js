@@ -667,14 +667,19 @@ wapp.initRipart = function()
 	this.paramInput.change();
 
 	// Actualiser le compte
+	var timer = new Date();
 	this.ripart.checkUserInfo(
 		function ()
-		{	wapp.wait(false); 
+		{	timer = (new Date())-timer;
+			wapp.waitLogo("Connecté au service...");
+			setTimeout (function () { wapp.wait(false); }, Math.max(0, 2000 - timer));
 			wapp.notification("Connecté au service",1200);
 			wapp.initGuichets();
 		}, 
 		function()
-		{	wapp.wait(false); 
+		{	timer = (new Date())-timer;
+			wapp.waitLogo("Chargement...");
+			setTimeout (function () { wapp.wait(false); }, Math.max(0, 2000 - timer)); 
 			wapp.initGuichets();
 		}
 	);

@@ -71,7 +71,6 @@ wapp.initGuichets = function()
 wapp.getLogo = function (g, cback, scope)
 {	CordovApp.File.getFile("TMP/logo/"+g.id_groupe, 
 		function(fileEntry) { 
-			console.log(fileEntry);
 			cback.call(scope, fileEntry.toURL()); 
 		}, 
 		function() { 

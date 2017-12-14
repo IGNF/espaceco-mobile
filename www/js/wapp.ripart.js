@@ -834,7 +834,11 @@ RIPart.prototype.connectDialog = function (options)
 					}
 					wapp.wait("Connexion au serveur...");
 					self.setUser (nom.val(), pwd.val(), true);
-					self.checkUserInfo (options.onConnect, (typeof (options.onError) == "function") ? options.onError : null);
+					self.checkUserInfo ( 
+						options.onConnect, 
+						(typeof (options.onError) == "function") ? options.onError : null,
+						function() { wapp.wait(false); }
+					);
 				}
 				else if (bt=="deconnect")
 				{	self.param.user = self.param.pwd = null;
@@ -862,8 +866,11 @@ RIPart.prototype.deconnect = function()
 
 
 /** Check user info : getUserInfo + save informations
+ * @param {function} success on success callback
+ * @param {function} fail on fail callback
+ * @param {function} allways callback
 */
-RIPart.prototype.checkUserInfo = function(success, fail)
+RIPart.prototype.checkUserInfo = function(success, fail, allways)
 {	var self = this;
 
 	if (typeof(success) != "function")
@@ -885,9 +892,10 @@ RIPart.prototype.checkUserInfo = function(success, fail)
 	}
 
 	this.getUserInfo (function(rep, error)
-	{	wapp.wait(false);
-		if (error) rep = {};
+	{	if (error) rep = {};
 		else self.param.groupes = rep.groupes
+		// allways trigger function
+		if (typeof(allways)==='function') allways(rep, error);
 		// Recherche du profil :
 		// profil courant
 		if (self.param.profil && self.param.profil.id_groupe) 
@@ -950,6 +958,12 @@ RIPart.prototype.setProfil = function(id_groupe)
 	wapp.getLogo(this.param.profil, function(logo)
 	{	$(".title", this.profilElement).text(this.param.profil.groupe || "");
 		$("img", this.profilElement).attr("src", logo || "");
+		// Show user info
+		$("img.logo").attr("src", logo || "");
+		$("body").attr("data-logo", logo?"":"none");
+		var info = (this.param.profil.groupe ? this.param.profil.groupe+"<br/>": "")
+			+ this.param.user;
+		$(".userinfo").html(info);
 	}, this);
 
 	// Sauvegarder

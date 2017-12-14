@@ -1,5 +1,68 @@
 /** Fonts */
 
+/** Menu */
+[data-role='menu'] {
+    background: #fff;
+	color: #666;
+	overflow-y: auto;
+	overflow-x: hidden;
+	padding:0;
+	width: 11em;
+	-webkit-transform: translate3d(-12em, 0, 0);
+	transform: translate3d(-12em, 0, 0);
+	box-shadow: 0.2em 0 0.5em #000;
+}
+[data-role='menu'].back {
+	background-color: rgba(0,0,0,0.5);
+}
+[data-role='menu'] ul li {
+	border-bottom: 0;
+	margin: 0 1em 0 .5em;
+}
+[data-role='menu'] .header {
+	position: relative;
+	height: 5em;
+	overflow: hidden;
+	box-shadow: 0 0.1em 0.3em;
+}
+[data-role='menu'] .img {
+	position: absolute;
+    bottom: .2em;
+    left: .5em;
+    width: 4em;
+    height: 4em;
+    border-radius: 50%;
+	overflow: hidden;
+	background-color: rgba(255,255,255,.8);
+}
+[data-role='menu'] img {
+	height:100%;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	-webkit-transform: translate(-50%, -50%);
+	transform: translate(-50%, -50%);
+}
+[data-role='menu'] p {
+    position: absolute;
+    left: 5em;
+    top: calc(50% + 1em);
+    line-height: 1em;
+    margin: 0;
+    -webkit-transform: scaleX(.6) translateY(-50%);
+    transform: scaleX(.6) translateY(-50%);
+    -webkit-transform-origin: 0 0;
+    transform-origin: 0 0;
+    font-weight: bold;
+    width: 10em;
+}
+[data-logo='none'] [data-role='menu'] p {
+	left: 1em;
+}
+[data-logo='none'] [data-role='menu'] .img {
+	display: none;
+}
+
 /* The map */
 #map 
 {	position:fixed;
@@ -256,6 +319,29 @@
 #apropos [data-role='content']
 {	overflow-x: hidden;
 }
+#apropos .img {
+	position: absolute;
+	width: 6em;
+	height: 6em;
+	border-radius: 50%;
+	top: 2em;
+	left: 1em;
+	overflow: hidden; 
+	z-index:1;
+	background-color: rgba(255,255,255,.8);
+}
+#apropos .img img.logo {
+	position: absolute;
+	height: 100%;
+	top: 50%;
+	left: 50%;
+	-webkit-transform: translate(-50%, -50%);
+	transform: translate(-50%, -50%);
+}
+[data-logo='none'] #apropos .img {
+	display: none;
+}
+
 #apropos p
 {	text-align:justify;
 }
