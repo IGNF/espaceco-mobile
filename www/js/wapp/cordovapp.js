@@ -269,12 +269,12 @@ var CordovApp = function(obj)
 		
 };
 
-/** Fires when the user presses the back button
-* @api
-*/
 (function(){
 
 var backButtonDate = 0;
+/** Fires when the user presses the back button
+* @api
+*/
 CordovApp.prototype.onBackButton = function() 
 {	if (new Date()-backButtonDate > 2000) 
 	{	backButtonDate = new Date();

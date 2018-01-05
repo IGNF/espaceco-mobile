@@ -95,11 +95,11 @@
 <h2>Gestion des pages et templates</h2><h3>Définition</h3><p>La gestion des pages et des templates est faite dans le fichier 
 <code>./js/wapp/cordovapp.page.js</code>.<br>Il gère l'affichage des pages et du menu.</p>
 <p>La navigation dans l'application web se fait via des pages qui s'affichent au dessus 
-de la carte. Généralement, une seule page est active en même, bien qu'il soit possible 
+de la carte. Généralement, une seule page est active à un moment donné, bien qu'il soit possible 
 d'afficher plusieurs pages en même temps.</p>
-<p>Les pages sont définies via des blocs avec un role 'page' dans la page de l'application 
+<p>Les pages sont définies via des blocs avec un role <code>page</code> dans la page de l'application 
 (HMTL). L'identifiant de la div permet de gérer la page (affichage, fermeture, etc.).</p>
-<pre class="prettyprint source lang-html"><code>&lt;!-- A propos -->
+<pre class="prettyprint source lang-xml"><code>&lt;!-- A propos -->
 &lt;div id=&quot;apropos&quot; data-role=&quot;page&quot;>...&lt;/div>
 &lt;!-- Options -->
 &lt;div id=&quot;options&quot; data-role=&quot;page&quot;>...&lt;/div></code></pre><p>L'affichage d'une page implique :</p>
@@ -128,7 +128,7 @@ correspond à la définition CSS avec la classe <code>visible</code>.<br>Par dé
 il est possible de les placer dans des templates en leur associant une donnée template. 
 Les templates sont des fichiers html spérarés qui seront chargés et intégrés dans la page 
 au lancement de l'application.</p>
-<pre class="prettyprint source lang-html"><code>&lt;!-- A propos -->
+<pre class="prettyprint source lang-xml"><code>&lt;!-- A propos -->
 &lt;div id=&quot;apropos&quot; data-role=&quot;page&quot; data-template=&quot;apropos&quot;>&lt;/div>
 &lt;!-- Options -->
 &lt;div id=&quot;options&quot; data-role=&quot;page&quot; data-template=&quot;options&quot;>&lt;/div></code></pre><p>Les templates des pages sont dans le dossier /templates de l'application avec le nom 
@@ -147,7 +147,7 @@ pour les pages les plus courantes, comprenant un haut de page et un contenu.<br>
 d'ajouter une flèche de retour.Le contenu est défini par un role content. 
 Un clic sur la flèche de retour exécutera la fonction pageBack de l'application 
 (par défaut, cela fermera la page).</p>
-<pre class="prettyprint source lang-html"><code>&lt;div data-role=&quot;header&quot; data-back-button=&quot;true&quot;>Ma page&lt;/div>
+<pre class="prettyprint source lang-xml"><code>&lt;div data-role=&quot;header&quot; data-back-button=&quot;true&quot;>Ma page&lt;/div>
 &lt;div data-role=&quot;content&quot;>
     Mon contenu...
 &lt;/div></code></pre><p>Pour les pages plus élaborées il est possible d'afficher des onglets via un role onglet. 
@@ -156,7 +156,7 @@ contrôle l'affichage des onglets de la page et d'une liste d'onglets
 (<code>data-role=&quot;onglet-li&quot;</code>). La correspondance entre le bouton et son onglet est donnée 
 par l'attribut data-list. Les onglets peuvent être défini dans la page elle même ou 
 via un template.</p>
-<pre class="prettyprint source lang-html"><code>&lt;div data-role=&quot;header&quot; data-back-button=&quot;true&quot;>Mon titre&lt;/div>
+<pre class="prettyprint source lang-xml"><code>&lt;div data-role=&quot;header&quot; data-back-button=&quot;true&quot;>Mon titre&lt;/div>
 &lt;div data-role=&quot;onglet&quot;>
     &lt;div data-role=&quot;onglet-bt&quot;>
         &lt;div data-list=&quot;onglet1&quot;>
@@ -175,8 +175,9 @@ via un template.</p>
 &lt;/div></code></pre><p>Les onglets sont gérés comme les page et l'objet application a les méthodes pour 
 les afficher (CordovApp#showonglet), les rendre actif (<a href="CordovApp.html#enableOnglet">CordovApp#enableOnglet</a>) 
 ou vérifier celui qui est affiché (<a href="CordovApp.html#isOnglet">CordovApp#isOnglet</a>).</p>
-<h2>Affichage des pages</h2><p>Pour afficher une page il suffit d'appeler la fonction showPage avec l'identifiant de 
-la page à afficher. Utiliser hidePage pour la masquer.</p>
+<h2>Affichage des pages</h2><p>Pour afficher une page il suffit d'appeler la fonction <a href="CordovApp.html#showPage">showPage</a> 
+avec l'identifiant de la page à afficher. Utiliser <a href="CordovApp.html#hidePage">hidePage</a> 
+pour la masquer.</p>
 <pre class="prettyprint source"><code>var wapp = new CordovApp();
 // Afficher la page &quot;search&quot; 
 wapp.showPage(&quot;search&quot;);
@@ -193,10 +194,14 @@ affichée ou fermée :</p>
 $(&quot;#search&quot;).on(&quot;hidepage&quot;, function(e)
 {    // Faire quelque chose lorsque la page s'affiche
 });</code></pre><p><em>NB: Lorsqu'une page est affichée, l'attibut <code>data-page</code> est rempli avec l'identifiant 
-de la page dans l'élément <code>&lt;body&gt;</code>.</em></p>
-<h2>Gestion des onglets</h2><p>Les onglets s'affichent automatiquement lorsqu'ils sont sélectionnés.</p>
+de la page dans l'élément <code>&lt;body&gt;</code>. Cela peut être util pour gérer un affichage spécifique 
+en fonction de la page affichée dans le CSS.</em></p>
+<pre class="prettyprint source lang-css"><code>/&#42; Masquer la carte lorsque la page edition est affichee &#42;/
+[data-page=&quot;edition&quot;] #map {
+    display: none;
+}</code></pre><h2>Gestion des onglets</h2><p>Les onglets s'affichent automatiquement lorsqu'ils sont sélectionnés.</p>
 <p>Il est également possible de les afficher programmatiquement via la méthode 
-<a href="CordovApp.html#showOnglet">CordovApp#showOnglet</a>, <a href="CordovApp.html#isOnglet">CordovApp#isOnglet</a> indique si l'onglet est 
+<a href="CordovApp.html#showOnglet">showOnglet</a>, <a href="CordovApp.html#isOnglet">isOnglet</a> indique si l'onglet est 
 affiché ou non.</p>
 <pre class="prettyprint source"><code>var wapp = new CordovApp();
 // Afficher l'onglet &quot;search&quot; 
@@ -205,15 +210,25 @@ wapp.showOnglet(&quot;search&quot;);
 var b = wapp.isOnglet(&quot;search&quot;)</code></pre><p>Il est possible de désactiver un onglet via la méthode <a href="CordovApp.html#enableOnglet">CordovApp#enableOnglet</a> :</p>
 <pre class="prettyprint source"><code>var wapp = new CordovApp();
 // Desactiver l'onglet &quot;search&quot; 
-wapp.enableOnglet(&quot;search&quot;, false);</code></pre><h2>Utilisation d'un menu</h2><p>Il est possible de définir un menu à l'application.</p>
-<pre class="prettyprint source lang-html"><code>&lt;div data-role=&quot;menu&quot; data-template=&quot;principal&quot;>&lt;/div></code></pre><p>L'objet application a les méthodes pour l'afficher/masquer 
-(<a href="CordovApp.html#showMenu">CordovApp#showMenu</a>, <a href="CordovApp.html#hideMenu">CordovApp#hideMenu</a>, <a href="CordovApp.html#toggleMenu">CordovApp#toggleMenu</a>) 
-ou savoir si le menu est affiché (<a href="CordovApp.html#isMenu">CordovApp#isMenu</a>).<br>L'affichage du menu est géré de manière identique à celui d'une page et un évènement 
-de type <code>menu</code> est envoyé avec un attribut <code>show</code> (booléen) indiquant si le menu est 
-affiché ou non.<br>Si le contenu d'un menu est libre, le formatage par défaut utilise une liste (<code>&lt;ul&gt;&lt;li&gt;</code>).</p>
-<p>Utilisez les métodes <a href="CordovApp.html#showMenu">CordovApp#showMenu</a>, <a href="CordovApp.html#hideMenu">CordovApp#hideMenu</a> et 
-<a href="CordovApp.html#toggleMenu">CordovApp#toggleMenu</a> pour afficher ou masquer le menu.<br>Lors de l'affichage ou du masquage du menu, un évènement <code>menu</code> est envoyé au document, 
-avec un attribut <code>show</code> (true/false) indiquant l'état du menu.</p></div>
+wapp.enableOnglet(&quot;search&quot;, false);</code></pre><h2>Utilisation d'un menu</h2><p>Il est possible de définir un menu à l'application. Pour cela, il suffit de déclarer un
+élément avec un <code>data-role=&quot;menu&quot;</code>.<br>Si le contenu d'un menu est libre, le formatage par défaut utilise une liste (<code>&lt;ul&gt;&lt;li&gt;</code>).<br>Le menu peut être contenu dans un template (menu-<code>nom du template</code>) du repertoire templates.</p>
+<pre class="prettyprint source lang-xml"><code>&lt;div data-role=&quot;menu&quot; data-template=&quot;principal&quot;>&lt;/div></code></pre><p>et dans <code>./templates/menu-principal.html</code>:</p>
+<pre class="prettyprint source lang-xml"><code>&lt;ul>
+    &lt;li class=&quot;search&quot; onclick='wapp.showPage(&quot;search&quot;);'>
+        &lt;i class=&quot;fa fa-search&quot;>&lt;/i> Rechercher
+    &lt;/li>
+    &lt;li onclick=&quot;wapp.showPage('apropos');&quot;>
+        &lt;i class=&quot;fa fa-info-circle&quot;>&lt;/i> A propos...
+    &lt;/li>
+&lt;/ul></code></pre><p>L'objet application a les méthodes pour gérer son affichage (<a href="CordovApp.html#showMenu">showMenu</a>, 
+<a href="CordovApp.html#hideMenu">hideMenu</a>, <a href="CordovApp.html#toggleMenu">toggleMenu</a>) 
+ou savoir si le menu est affiché (<a href="CordovApp.html#isMenu">isMenu</a>).<br>L'affichage du menu est géré de manière identique à celui d'une page et un évènement 
+de type <code>menu</code> est envoyé avec un attribut <code>show</code> (<code>boolean</code>) indiquant si le menu est 
+affiché ou non.    </p>
+<pre class="prettyprint source"><code>$(document).on(&quot;menu&quot;, function(e) {
+    if (e.menu) console.log(&quot;Ouverture du menu&quot;);
+    else console.log(&quot;Fermeture du menu&quot;);
+});</code></pre></div>
         
 
         

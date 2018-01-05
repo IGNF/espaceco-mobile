@@ -115,24 +115,24 @@ var pi = wapp.setParamInput($(&quot;#formulaire&quot;), p);</code></pre><h4>Déf
 Si aucun paramètre ne correspond à cette clé, celle-ci est ajoutée à l'objet.<br>L'application va ensuite gérer l'affichage et la saisie de la valeur en fonction des informations fournies par 
 le formulaire et du type d'input.<br>L'attribut data-default indique la valeur par défaut du paramètre concerné.<br>Les data-input type select doivent fournir un liste d'options (<code>data-input-role=&quot;option&quot;</code>) avec une valeur (<code>data-val</code>).<br>Les input de type <code>custom</code> ne sont pas traités par l'application et c'est au programmeur de gérer son comportement et 
 la mise à jour de la valeur associée dans le formulaire (afficher un dialogue par exemple).</p>
-<h5>input de type text</h5><pre class="prettyprint source lang-html"><code>&lt;ul>
+<h5>input de type text</h5><pre class="prettyprint source lang-xml"><code>&lt;ul>
     &lt;li data-input=&quot;text&quot; data-param=&quot;name&quot; data-default=&quot;sans nom&quot;>
         &lt;input type=&quot;text&quot;/>&lt;i class=&quot;clear-input&quot;>&lt;/i>
         &lt;div data-input-role=&quot;info&quot;>Entrez un nom.&lt;/div>
     &lt;/li>
-&lt;/ul></code></pre><h5>input de type check</h5><pre class="prettyprint source lang-html"><code>&lt;ul>
+&lt;/ul></code></pre><h5>input de type check</h5><pre class="prettyprint source lang-xml"><code>&lt;ul>
     &lt;li data-input=&quot;check&quot; data-param=&quot;zoombt&quot; data-default=&quot;true&quot; >
         &lt;label>Boutons de zoom &lt;/label>
         &lt;div data-input-role=&quot;info&quot;>Afficher les boutons de zoom sur la carte.&lt;/div>
     &lt;/li>
-&lt;/ul></code></pre><h5>input de type select</h5><pre class="prettyprint source lang-html"><code>&lt;ul>
+&lt;/ul></code></pre><h5>input de type select</h5><pre class="prettyprint source lang-xml"><code>&lt;ul>
     &lt;li data-input=&quot;select&quot; data-param=&quot;imgsize&quot;>
         &lt;label>Taille des images &lt;/label>
         &lt;div data-input-role=&quot;option&quot; data-val=&quot;max&quot;>Grande&lt;/div>
         &lt;div data-input-role=&quot;option&quot; data-val=&quot;med&quot;>Moyenne&lt;/div>
         &lt;div data-input-role=&quot;option&quot; data-val=&quot;min&quot; data-default=&quot;true&quot;>Petite&lt;/div>
     &lt;/li>
-&lt;/ul></code></pre><h5>input de type custom</h5><pre class="prettyprint source lang-html"><code>&lt;ul>
+&lt;/ul></code></pre><h5>input de type custom</h5><pre class="prettyprint source lang-xml"><code>&lt;ul>
     &lt;li data-input=&quot;custom&quot; class=&quot;connect&quot; onclick=&quot;wapp.connect();&quot;>
         &lt;label>Identifiant de connexion &lt;/label>
         &lt;div data-input-role=&quot;info&quot;>
