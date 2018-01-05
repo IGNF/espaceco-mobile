@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Documentation Module: CordovApp-Parametres</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Documentation</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="CordovApp.File.html">CordovApp.File</a></li><li><a href="CordovApp.help.html">CordovApp.help</a></li><li><a href="wapp.html">wapp</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-CordovApp.html">CordovApp</a></li><li><a href="module-CordovApp-Dialogues.html">CordovApp-Dialogues</a></li><li><a href="module-CordovApp-Help.html">CordovApp-Help</a></li><li><a href="module-CordovApp-Pages.html">CordovApp-Pages</a></li><li><a href="module-CordovApp-Parametres.html">CordovApp-Parametres</a></li><li><a href="module-Ripart.html">Ripart</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="CordovApp.html">CordovApp</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="RIPart.html">RIPart</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-8">
+	
+		<div id="main">
+			
+
+	<h1 class="page-title">Module: CordovApp-Parametres</h1>
+<section>
+
+<header>
+    
+</header>
+
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>Fichier: <code>./js/wapp/cordovapp.param.js</code></p>
+<h2>Gestion et affichage de paramètres</h2><p>L'objet CordovApp contient des fonctionnalités évoluées pour la gestion des paramètre et leur affichage.</p>
+<h3>Gestion des paramètres de l'application</h3><p>En standard, l'application gère, via le localStorage HTML5, la sauvegarde et la restauration des paramètres 
+de l'application. Ceux-ci sont enregistrés dans <code>WebApp@param</code> du localStorage (via la fonctino <a href="CordovApp.html#saveParam">CordovApp#saveParam</a>) 
+et sont stockées dans l'attribut param de l'application.
+Les paramètres sont automatiquement chargés au lancement de l'application et disponible dans le initialize 
+de l'application. Le programmeur est responsable de leur enregistrement, en particulier, il peut être utile
+de les sauvegarder lorsque l'application quitte ou se met en pause (dans la méthode CordovApp#onQuit
+ou CordovApp#onPause).</p>
+<pre class="prettyprint source"><code>var wapp = new CordovApp();
+// Modifier un parametre
+wapp.param.mon_option = 1;
+// Sauvegarder la modification pour la prochaine fois
+wapp.saveParam();</code></pre><h3>Lier un objet à un formulaire</h3><p>Il est possible de lier une liste de valeur à un formulaire via la méthode <a href="CordovApp.html#setParamInput">CordovApp#setParamInput</a> 
+de l'application. L'application va alors associer les blocs data-input correspondant au aux lignes de l'objet 
+fourni afin de les afficher et de gérer leur modification.</p>
+<pre class="prettyprint source"><code>var wapp = new CordovApp();
+var p = { name:&quot;sans nom&quot;, zoombt:true, imgsize:&quot;petite&quot; };
+// Lier au formulaire
+var pi = wapp.setParamInput($(&quot;#formulaire&quot;), p);</code></pre><h4>Définition des inputs d'un formulaire</h4><p>Les input son des blocs HTML avec un paramètre data-input précisant leur type (text, check ou select).</p>
+<p>L'attribut <code>data-param</code> définit la clé correspondant à la ligne de l'objet fourni. 
+Si aucun paramètre ne correspond à cette clé, celle-ci est ajoutée à l'objet.<br>L'application va ensuite gérer l'affichage et la saisie de la valeur en fonction des informations fournies par 
+le formulaire et du type d'input.<br>L'attribut data-default indique la valeur par défaut du paramètre concerné.<br>Les data-input type select doivent fournir un liste d'options (<code>data-input-role=&quot;option&quot;</code>) avec une valeur (<code>data-val</code>).<br>Les input de type <code>custom</code> ne sont pas traités par l'application et c'est au programmeur de gérer son comportement et 
+la mise à jour de la valeur associée dans le formulaire (afficher un dialogue par exemple).</p>
+<h5>input de type text</h5><pre class="prettyprint source lang-html"><code>&lt;ul>
+    &lt;li data-input=&quot;text&quot; data-param=&quot;name&quot; data-default=&quot;sans nom&quot;>
+        &lt;input type=&quot;text&quot;/>&lt;i class=&quot;clear-input&quot;>&lt;/i>
+        &lt;div data-input-role=&quot;info&quot;>Entrez un nom.&lt;/div>
+    &lt;/li>
+&lt;/ul></code></pre><h5>input de type check</h5><pre class="prettyprint source lang-html"><code>&lt;ul>
+    &lt;li data-input=&quot;check&quot; data-param=&quot;zoombt&quot; data-default=&quot;true&quot; >
+        &lt;label>Boutons de zoom &lt;/label>
+        &lt;div data-input-role=&quot;info&quot;>Afficher les boutons de zoom sur la carte.&lt;/div>
+    &lt;/li>
+&lt;/ul></code></pre><h5>input de type select</h5><pre class="prettyprint source lang-html"><code>&lt;ul>
+    &lt;li data-input=&quot;select&quot; data-param=&quot;imgsize&quot;>
+        &lt;label>Taille des images &lt;/label>
+        &lt;div data-input-role=&quot;option&quot; data-val=&quot;max&quot;>Grande&lt;/div>
+        &lt;div data-input-role=&quot;option&quot; data-val=&quot;med&quot;>Moyenne&lt;/div>
+        &lt;div data-input-role=&quot;option&quot; data-val=&quot;min&quot; data-default=&quot;true&quot;>Petite&lt;/div>
+    &lt;/li>
+&lt;/ul></code></pre><h5>input de type custom</h5><pre class="prettyprint source lang-html"><code>&lt;ul>
+    &lt;li data-input=&quot;custom&quot; class=&quot;connect&quot; onclick=&quot;wapp.connect();&quot;>
+        &lt;label>Identifiant de connexion &lt;/label>
+        &lt;div data-input-role=&quot;info&quot;>
+            &lt;span class=&quot;noinfo&quot;>Vous n'êtes pas connecté.&lt;/span>
+            &lt;span class=&quot;info&quot;>Vous êtes bien connecté.&lt;/span>
+        &lt;/div>
+    &lt;/li>
+&lt;/ul></code></pre><h4>Récupération des valeurs</h4><p>Les valeurs sont modifiées sur place (l'objet fourni est modifié). 
+Il n'est donc pas forcément nécessaire de récupérer la mise à jour. 
+Cependant, la méthode <a href="CordovApp.html#setParamInput">setParamInput</a> renvoi un objet permettant de récupérer 
+les valeurs (via getParams).</p>
+<p>De même si vous modifier la valeur d'un paramètre, la méthode change() de l'objet renvoyé permet 
+de mettre à jour le formulaire.</p>
+<p>Le troisième argument de <a href="CordovApp.html#setParamInput">setParamInput</a> est 
+une fonction de rappel appelée à chaque modification 
+d'une valeur et qui fourni l'information du paramètre modifié. 
+Il est alors possible de gérer la modification de manière spécifique pour d'appliquer 
+un contrôle de cohérence par exemple.</p></div>
+        
+
+        
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+		<div class="col-md-3">
+			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
+		</div>
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a>
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

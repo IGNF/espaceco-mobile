@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Documentation Module: CordovApp-Pages</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Documentation</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="CordovApp.File.html">CordovApp.File</a></li><li><a href="CordovApp.help.html">CordovApp.help</a></li><li><a href="wapp.html">wapp</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-CordovApp.html">CordovApp</a></li><li><a href="module-CordovApp-Dialogues.html">CordovApp-Dialogues</a></li><li><a href="module-CordovApp-Help.html">CordovApp-Help</a></li><li><a href="module-CordovApp-Pages.html">CordovApp-Pages</a></li><li><a href="module-CordovApp-Parametres.html">CordovApp-Parametres</a></li><li><a href="module-Ripart.html">Ripart</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="CordovApp.html">CordovApp</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="RIPart.html">RIPart</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-8">
+	
+		<div id="main">
+			
+
+	<h1 class="page-title">Module: CordovApp-Pages</h1>
+<section>
+
+<header>
+    
+</header>
+
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>Fichier: <code>./js/wapp/cordovapp.page.js</code></p>
+<h2>Gestion des pages et templates</h2><h3>Définition</h3><p>La gestion des pages et des templates est faite dans le fichier 
+<code>./js/wapp/cordovapp.page.js</code>.<br>Il gère l'affichage des pages et du menu.</p>
+<p>La navigation dans l'application web se fait via des pages qui s'affichent au dessus 
+de la carte. Généralement, une seule page est active en même, bien qu'il soit possible 
+d'afficher plusieurs pages en même temps.</p>
+<p>Les pages sont définies via des blocs avec un role 'page' dans la page de l'application 
+(HMTL). L'identifiant de la div permet de gérer la page (affichage, fermeture, etc.).</p>
+<pre class="prettyprint source lang-html"><code>&lt;!-- A propos -->
+&lt;div id=&quot;apropos&quot; data-role=&quot;page&quot;>...&lt;/div>
+&lt;!-- Options -->
+&lt;div id=&quot;options&quot; data-role=&quot;page&quot;>...&lt;/div></code></pre><p>L'affichage d'une page implique :</p>
+<ul>
+<li>la fermeture des autres pages / menu</li>
+<li>l'affichage de la page (ajout d'une classe visible + affichage de la div de la page)</li>
+<li>l'ajout d'un attribut data-page de valeur l'identifiant de la page sur le body 
+(afin de gérer l'affichage des autres éléments de l'application)</li>
+<li>l'envoie d'un évènement 'showpage' avec l'information de la page affichée</li>
+</ul>
+<p>La fermeture d'une page implique :</p>
+<ul>
+<li>le masquage de la page (suppression de la classe visible + masquage de la div de la page)</li>
+<li>la suppression de l'attribut data-page sur le body</li>
+<li>l'envoie d'un évènement 'hidepage' avec l'information de la page fermée</li>
+</ul>
+<p>L'ajout/suppression de la classe visible à la page permet l'animation de la page via 
+le CSS. S'il existe une animation standard, celle-ci reste surchargeable directement 
+dans le CSS. Dans ce cas, le css donne la position de départ et la position d'arrivée 
+correspond à la définition CSS avec la classe <code>visible</code>.<br>Par défaut, la page s'affiche via un glissé depuis la droite sur le fond. 
+<code>data-direction</code> permet de préciser la direction du glissé (up ou left).</p>
+<p>L'objet application a les méthodes pour les afficher/masquer (<a href="CordovApp.html#showPage">CordovApp#showPage</a>, 
+<a href="CordovApp.html#hidePage">CordovApp#hidePage</a>, <a href="CordovApp.html#togglePage">CordovApp#togglePage</a>) ou connaitre la page active 
+(<a href="CordovApp.html#getPage">CordovApp#getPage</a>).</p>
+<h2>Définition des templates</h2><p>Afin de mieux séparer les pages dans le fichier principal de l'application (index.html), 
+il est possible de les placer dans des templates en leur associant une donnée template. 
+Les templates sont des fichiers html spérarés qui seront chargés et intégrés dans la page 
+au lancement de l'application.</p>
+<pre class="prettyprint source lang-html"><code>&lt;!-- A propos -->
+&lt;div id=&quot;apropos&quot; data-role=&quot;page&quot; data-template=&quot;apropos&quot;>&lt;/div>
+&lt;!-- Options -->
+&lt;div id=&quot;options&quot; data-role=&quot;page&quot; data-template=&quot;options&quot;>&lt;/div></code></pre><p>Les templates des pages sont dans le dossier /templates de l'application avec le nom 
+page-nom.html où nom est le nom spécifié dans le fichier origine 
+(<code>templates/page-apropos.html</code> pour la page a propose dans l'exemple ci-dessus).
+Les templates peuvent eux-même contenir des référence à des templates.</p>
+<p>Les templates peuvent être chargés indépendamment en utilisant la méthode static 
+<a href="CordovApp.html#.template">CordovApp.template</a>. Par défaut, si aucun répertoire n'est précisé, 
+le template charge le fichier dans le répertoire /templates de l'application. 
+On peut changer ce comportement en précisant un répertoire.</p>
+<pre class="prettyprint source"><code>// Charger le fichier templates/exemple.html de l'application
+var temp1 = CordovApp.template('exemple');
+// Charger le fichier dossier/exemple.html de l'application
+var temp2 = CordovApp.template('dossier/exemple');</code></pre><h2>Structure d'une page</h2><p>Il n'y a pas de structure imposée pour une page mais une structure générique est proposée 
+pour les pages les plus courantes, comprenant un haut de page et un contenu.<br>Le haut de page est définit par un role header avec une option back-button permettant 
+d'ajouter une flèche de retour.Le contenu est défini par un role content. 
+Un clic sur la flèche de retour exécutera la fonction pageBack de l'application 
+(par défaut, cela fermera la page).</p>
+<pre class="prettyprint source lang-html"><code>&lt;div data-role=&quot;header&quot; data-back-button=&quot;true&quot;>Ma page&lt;/div>
+&lt;div data-role=&quot;content&quot;>
+    Mon contenu...
+&lt;/div></code></pre><p>Pour les pages plus élaborées il est possible d'afficher des onglets via un role onglet. 
+Dans ce cas, la page est composée d'un bloc de boutons (<code>data-role=&quot;onglet-bt&quot;</code>) qui 
+contrôle l'affichage des onglets de la page et d'une liste d'onglets 
+(<code>data-role=&quot;onglet-li&quot;</code>). La correspondance entre le bouton et son onglet est donnée 
+par l'attribut data-list. Les onglets peuvent être défini dans la page elle même ou 
+via un template.</p>
+<pre class="prettyprint source lang-html"><code>&lt;div data-role=&quot;header&quot; data-back-button=&quot;true&quot;>Mon titre&lt;/div>
+&lt;div data-role=&quot;onglet&quot;>
+    &lt;div data-role=&quot;onglet-bt&quot;>
+        &lt;div data-list=&quot;onglet1&quot;>
+            &lt;i class=&quot;fa fa-map-marker&quot;>&lt;/i>Premier
+        &lt;/div>&lt;div data-list=&quot;onglet2&quot;>
+            &lt;i class=&quot;fa tools-layers&quot;>&lt;/i>Second
+        &lt;/div>
+    &lt;/div>
+    &lt;!-- Premier onglet -->
+    &lt;div data-role=&quot;onglet-li&quot; data-list=&quot;onglet1&quot;>
+        ...
+    &lt;/div>
+    &lt;!-- Second onglet lu dans un template -->
+    &lt;div data-role=&quot;onglet-li&quot; data-list=&quot;onglet2&quot; data-template=&quot;onglet-onglet2&quot;>
+    &lt;/div>
+&lt;/div></code></pre><p>Les onglets sont gérés comme les page et l'objet application a les méthodes pour 
+les afficher (CordovApp#showonglet), les rendre actif (<a href="CordovApp.html#enableOnglet">CordovApp#enableOnglet</a>) 
+ou vérifier celui qui est affiché (<a href="CordovApp.html#isOnglet">CordovApp#isOnglet</a>).</p>
+<h2>Affichage des pages</h2><p>Pour afficher une page il suffit d'appeler la fonction showPage avec l'identifiant de 
+la page à afficher. Utiliser hidePage pour la masquer.</p>
+<pre class="prettyprint source"><code>var wapp = new CordovApp();
+// Afficher la page &quot;search&quot; 
+wapp.showPage(&quot;search&quot;);
+// Récuperer la page courante (renvoie &quot;search&quot;)
+var p = wapp.getPage();
+// Masquer la page courante
+wapp.hidePage();
+// Afficher 2 pages en meme temps
+wapp.showPage(['page1','page2']);</code></pre><p>Il est possible de placer un écouteur pour réaliser une action lorsqu'une page est 
+affichée ou fermée :</p>
+<pre class="prettyprint source"><code>$(&quot;#search&quot;).on(&quot;showpage&quot;, function(e)
+{    // Faire quelque chose lorsque la page s'affiche
+}); 
+$(&quot;#search&quot;).on(&quot;hidepage&quot;, function(e)
+{    // Faire quelque chose lorsque la page s'affiche
+});</code></pre><p><em>NB: Lorsqu'une page est affichée, l'attibut <code>data-page</code> est rempli avec l'identifiant 
+de la page dans l'élément <code>&lt;body&gt;</code>.</em></p>
+<h2>Gestion des onglets</h2><p>Les onglets s'affichent automatiquement lorsqu'ils sont sélectionnés.</p>
+<p>Il est également possible de les afficher programmatiquement via la méthode 
+<a href="CordovApp.html#showOnglet">CordovApp#showOnglet</a>, <a href="CordovApp.html#isOnglet">CordovApp#isOnglet</a> indique si l'onglet est 
+affiché ou non.</p>
+<pre class="prettyprint source"><code>var wapp = new CordovApp();
+// Afficher l'onglet &quot;search&quot; 
+wapp.showOnglet(&quot;search&quot;);
+// Vérifier que l'onglet &quot;search&quot; est affiche
+var b = wapp.isOnglet(&quot;search&quot;)</code></pre><p>Il est possible de désactiver un onglet via la méthode <a href="CordovApp.html#enableOnglet">CordovApp#enableOnglet</a> :</p>
+<pre class="prettyprint source"><code>var wapp = new CordovApp();
+// Desactiver l'onglet &quot;search&quot; 
+wapp.enableOnglet(&quot;search&quot;, false);</code></pre><h2>Utilisation d'un menu</h2><p>Il est possible de définir un menu à l'application.</p>
+<pre class="prettyprint source lang-html"><code>&lt;div data-role=&quot;menu&quot; data-template=&quot;principal&quot;>&lt;/div></code></pre><p>L'objet application a les méthodes pour l'afficher/masquer 
+(<a href="CordovApp.html#showMenu">CordovApp#showMenu</a>, <a href="CordovApp.html#hideMenu">CordovApp#hideMenu</a>, <a href="CordovApp.html#toggleMenu">CordovApp#toggleMenu</a>) 
+ou savoir si le menu est affiché (<a href="CordovApp.html#isMenu">CordovApp#isMenu</a>).<br>L'affichage du menu est géré de manière identique à celui d'une page et un évènement 
+de type <code>menu</code> est envoyé avec un attribut <code>show</code> (booléen) indiquant si le menu est 
+affiché ou non.<br>Si le contenu d'un menu est libre, le formatage par défaut utilise une liste (<code>&lt;ul&gt;&lt;li&gt;</code>).</p>
+<p>Utilisez les métodes <a href="CordovApp.html#showMenu">CordovApp#showMenu</a>, <a href="CordovApp.html#hideMenu">CordovApp#hideMenu</a> et 
+<a href="CordovApp.html#toggleMenu">CordovApp#toggleMenu</a> pour afficher ou masquer le menu.<br>Lors de l'affichage ou du masquage du menu, un évènement <code>menu</code> est envoyé au document, 
+avec un attribut <code>show</code> (true/false) indiquant l'état du menu.</p></div>
+        
+
+        
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+		<div class="col-md-3">
+			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
+		</div>
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a>
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>
