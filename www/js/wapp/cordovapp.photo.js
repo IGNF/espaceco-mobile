@@ -3,13 +3,13 @@
  */
 
 /** Prendre une photo
-	@param {function} win (url, button)  callback (renvoie l'url du fichier)
-	@param {function} fail (message) Erreur
-	@param {} param parametre de prise de vue
-	- name : nom du fichier ("TMP/img.jpg" ou "DIR/img.jpg") si null renvoie un fichier temporaire
-	- prompt : prompt pour le choix de la source
-	- buttons : list of buttons default {cancel:"annuler"}
-	@param {enum} source Camera.PictureSourceType.SAVEDPHOTOALBUM ou Camera.PictureSourceType.CAMERA
+ * @param {function} win (url, button)  callback (renvoie l'url du fichier)
+ * @param {function} fail (message) Erreur
+ * @param {} param parametre de prise de vue
+ * 	@param {string} param.name file name ("TMP/img.jpg" ou "DIR/img.jpg") si null renvoie un fichier temporaire
+ * 	@param {string} param.prompt prompt pour le choix de la source
+ * 	@param {string} param.buttons list of buttons default {cancel:"annuler"} used if no source provided
+ * @param {enum} source Camera.PictureSourceType.SAVEDPHOTOALBUM ou Camera.PictureSourceType.CAMERA
 */
 CordovApp.prototype.getPicture = function (win, fail, param, source)
 {	if (!window.Camera) 

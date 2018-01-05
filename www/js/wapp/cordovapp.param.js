@@ -22,7 +22,8 @@ Date.prototype.toISODateString = function()
 * @param {object} elt jQuery element that contains data-input
 * @param {object} param objet with key corresponding to data-param
 * @param {function} onchange a function that triggers change on params
-* @return {Object} to retrieve param and to reflect changes on values
+* @return {Object} an object with a getParams() and a change() method to 
+* 	retrieve param and to reflect changes on values
 */
 CordovApp.prototype.setParamInput = function(elt, param, onchange)
 {	var self = this;

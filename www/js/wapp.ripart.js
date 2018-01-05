@@ -7,6 +7,8 @@
 /**
 @function RIPart.showFormulaire
 @desc Gestion d'un formulaire de saisie 
+
+````
                            +---------------------------+
                            |  RIPart:showFormulaire()  |
                            +---------------------------+
@@ -31,11 +33,11 @@
 +----------+----------+  +-----------------------+--------------------+
 |RIPart:formulaireAttr|  | RIPart:cancelFormulaire()                  |
 +---------------------+  +--------------------------------------------+
-
+````
+_Arbre des appels_
 */
 /** 
 	Creation du compte > enregistrer les actions
-
 	@param {} options
 		@param {} options.infoElement : element pour l'info de connexion, default '#options .connect [data-input-role="info"] span.info'
 		@param {} options.formElement : formulaire de saisie d'un signalements, default '#fiche2 [data-role="onglet-li"][data-list="signal"]'
@@ -286,8 +288,7 @@ RIPart.prototype.initialize = function(options)
 };
 
 /** Get indice for a local rem
-* @param {Object} the rem to save
-* @param {function} a callback function
+* @param {georem|number} grem the georem or an indice
 */
 RIPart.prototype.getIndice = function(grem)
 {	if (typeof(grem) != 'number')
@@ -301,8 +302,7 @@ RIPart.prototype.getIndice = function(grem)
 };
 
 /** delete a local rem
-* @param {Object} the rem to save
-* @param {function} a callback function
+* @param {Object} i  the georem or an indice
 */
 RIPart.prototype.delLocalRem = function(i, options)
 {	// Chercher l'indice correspondant a une remontee
@@ -336,6 +336,7 @@ RIPart.prototype.delLocalRem = function(i, options)
 }
 
 /** Sauvegarde de la remontee depuis le formulaire
+ * @param {} form le formulaire
 */
 RIPart.prototype.saveFormulaire = function(form)
 {	var self = this;
@@ -408,8 +409,9 @@ RIPart.prototype.saveFormulaire = function(form)
 };
 
 /** Save a new local rem
-* @param {Object} the rem to save
-* @param {function} a callback function
+* @param {georem} georem the georem to save
+* @param {georem} current current georem
+* @param {function} cback a callback function
 */
 RIPart.prototype.saveLocalRem = function(georem, current, cback)
 {	var self = this;
@@ -449,12 +451,13 @@ RIPart.prototype.saveLocalRem = function(georem, current, cback)
 }
 
 /** Get the local rems
+ * @return {Array<georem>}
 */
 RIPart.prototype.getLocalRems = function()
 {	return this.param.georems;
 }
 
-/** Post local rems to server
+/** Post all local rems to server
 */
 RIPart.prototype.postLocalRems = function()
 {	var self = this;
@@ -994,7 +997,7 @@ RIPart.prototype.isConnected = function()
 };
 
 /** Gestion de la page de signalement
-* @param {georem|} b une remontee non deja envoyee
+* @param {georem|undefined} b une remontee non deja envoyee
 */
 RIPart.prototype.showFormulaire = function(grem)
 {	var self = this;

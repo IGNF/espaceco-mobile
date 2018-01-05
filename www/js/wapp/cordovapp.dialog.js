@@ -7,9 +7,9 @@
 */
 
 (function(){
-/** @namespace Dialog
+/** 
  * @classdesc
- * Dialogues pour l'applicaiton 
+ * Dialogues pour l'application 
  * @constructor
  * @private
  */
@@ -57,13 +57,13 @@ function Dialog()
 
 	/** Show a new dialog 
 	* @method Dialog.show
-	* @param {html} a jQuery objet that contents the dialog
-	* @param {options}
-	*	- closeBox {bool} ass a close box
-	*	- title {string} title of the dialog
-	*	- buttons {Array<String>} list of button to show 
-	*	- callback {function} callback function with index of pressed button as argument
-	*	- className {String} dialog class for css 
+	* @param {html} content a jQuery objet that contents the dialog
+	* @param {options} options
+	*	@param {bool} options.closeBox has a close box
+	*	@param {string} options.title title of the dialog
+	*	@param {Array<String>} options.buttons list of button to show 
+	*	@param {function} options.callback callback function with index of pressed button as argument
+	*	@param {String} options.className dialog class for css 
 	*/
 	this.show = function (content, options)
 	{	if (!options) options={};

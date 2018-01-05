@@ -4,14 +4,15 @@
    |_|  |_\___/_||_| \__, |\_,_|_\__|_||_\___|\__|
                      |___/                        
 */
-/** Web application geodesique
- * @type {CordovApp}
+/** Web application pour l'acces a l'espace collaboratif depuis un mobile.
  * 
+ * __Type:__ {@link CordovApp}
+ * @namespace
  */
 var wapp = new CordovApp(
 {	/**
-	* Initilize the application map 
-	* @method
+	* Initilize the application  
+	* @memberof wapp
 	*/
 	initialize: function() 
 	{	// Affichage d'une patience avant lancement
@@ -62,7 +63,9 @@ var wapp = new CordovApp(
 	},
 
 	/** Enable map rotation
-	*/
+	 * @param {boo} b true to enable rotation
+	 * @memberof wapp
+	 */
 	rotateMap: function(b)
 	{	if (!this.map) return;
 		var inter = this.map.getInteractions().getArray().filter(function(interaction) 
@@ -73,12 +76,14 @@ var wapp = new CordovApp(
 	},
 	
 	/** Show/hide menu
+	* @memberof wapp
 	*/
 	onMenu: function() 
 	{	this.hidePage();
 	},
 
 	/** Fires when the user presses the back button
+	* @memberof wapp
 	*/
 	onBackButton: function() 
 	{	// Ne pas sortir si en cours de traitement
@@ -91,11 +96,13 @@ var wapp = new CordovApp(
 	},
 
 	/** Fires when the user presses the menu button
+	* @memberof wapp
 	* @api
 	*/
 	onMenuButton: function() { if (!this.isWaiting()) this.toggleMenu(); },
 
 	/** Save current position 
+	* @memberof wapp
 	*/
 	saveContext: function()
 	{	var pos = this.map.getView().getCenter();
@@ -115,7 +122,8 @@ var wapp = new CordovApp(
 		this.saveParam();
 	},
 
-	/** Ask for quit on quit
+	/** Sauvegarde du contexte avant de quitter
+	* @memberof wapp
 	*/
 	quit: function()
 	{	this.saveContext();
@@ -123,6 +131,7 @@ var wapp = new CordovApp(
 	},
 
 	/** Save context on pause
+	* @memberof wapp
 	*/
 	pause: function()
 	{	this.saveContext();

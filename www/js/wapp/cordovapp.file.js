@@ -1,16 +1,19 @@
 /********************
-	@brief : Gestion de fichier avec PhoneGap
+	@brief : Gestion de fichier avec Cordova
 	@author : Jean-Marc Viglino (ign.fr)
 	@copyright: IGN 2012
-	
-	Gestion de fichier avec PhoneGap
 */
-/** @namespace CordovApp.File
+/**
+ * A set of usefull function to handle files with Cordova.   
+ * It wil solve the `resolveLocalFileSystemURL` for you.
+ * @namespace CordovApp.File
 */
 CordovApp.File = 
 {	
 	/** Scan a directory
-		success : A callback that is passed an array of FileEntry and DirectoryEntry objects
+	 * @param {string} path dir path
+	 * @param {function} success A callback that is passed an array of FileEntry and DirectoryEntry objects
+	 * @param {function} fail
 	*/
 	listDirectory: function (path, success, fail)
 	{	if (!success) success = this.success;
@@ -26,33 +29,41 @@ CordovApp.File =
 		);
 	},
 	
-	/** Name with no special cars
-	*/
+	/** Get a name with no special chars
+	 * @param {string} name the name
+	 * @return {string} a new name with no special chars
+	 */
 	fileName: function(name)
 	{	return name.replace(/\"/g,'').replace(/[ :\*\?<>\|]/g,'_');
 	},
 	
 	/** Get the file extention
+	 * @param {string} path the file name
+	 * @param {string} string after the last '.' (file extension)
 	*/
 	getExtension: function(path) 
 	{	return path.split('.').pop();
 	},
 	
-	/** Get the file extention
+	/** Get the file name
+	 * @param {string} path the file fullname
+	 * @param {string} the file name
 	*/
 	getFileName: function(path) 
 	{	return path.split('/').pop();
 	},
 	
 	/** Get the file dir
+	 * @param {string} path the file fullname
+	 * @param {string} the directory
 	*/
 	getDir: function (path)
 	{	return path.substring(0, path.lastIndexOf("/"));
 	},
 
 	/** Get the application directory for a path 
-	* > Android/data/<app-id>/
-	*	@param {DOMString} path URI referring to a local file or directory
+	* ie. Android/data/<app-id>/
+	*	@param {String} path URI referring to a local file or directory
 	*	@param {function} success callback that is passed a DirectoryEntry corresponding to appdir for the filesystem
 	*	@param {function} fail callback invoked on error
 	*/
@@ -72,7 +83,7 @@ CordovApp.File =
 	},
 
 	/** Test if a directory is rw (write/delete 'ok.ok' file)
-	*	@param {DOMString} path URI referring to a local directory 
+	*	@param {String} path URI referring to a local directory 
 	*	@param {function} success callback 
 	*	@param {function} fail callback invoked on error
 	*/
@@ -89,7 +100,7 @@ CordovApp.File =
 	},
 
 	/** Get a directory Entry
-	*	@param {DOMString} path URI referring to a local directory 
+	*	@param {String} path URI referring to a local directory 
 	*					can start with SD|SDFILE|SDCACHE|ASSET|CACHE|FILE|APP to refer to cordova.file roots
 	*	@param {function} success callback that is passed a DirectoryEntry objects
 	*	@param {function} fail callback invoked on error
@@ -165,7 +176,7 @@ CordovApp.File =
 	},
 	
 	/** Write a file
-	*	@param {DOMString} name URI referring to a local file  
+	*	@param {String} name URI referring to a local file  
 	*	@param {string} data to write
 	*	@param {function} success callback that is passed a FileEntry objects
 	*	@param {function} fail callback invoked on error
@@ -200,7 +211,7 @@ CordovApp.File =
 	},
 	
 	/** Get file info (name, localURL, type, lastModifiedDate, size)
-	*	@param {DOMString} name URI referring to a local file  
+	*	@param {String} name URI referring to a local file  
 	*	@param {function} success callback that is passed a FileEntry objects
 	*	@param {function} fail callback invoked on error
 	*/
@@ -234,7 +245,7 @@ CordovApp.File =
 
 
 	/** Read a file as text (utf-8)
-	*	@param {DOMString} name URI referring to a local file  
+	*	@param {String} name URI referring to a local file  
 	*	@param {function} success callback that is passed the result of the read
 	*	@param {function} fail callback invoked on error
 	*/
@@ -276,8 +287,8 @@ CordovApp.File =
 	},
 	
 	/** Move a file
-	*	@param {DOMString} file URI referring to a local file  
-	*	@param {DOMString} name URI referring to a local file to move to
+	*	@param {String} file URI referring to a local file  
+	*	@param {String} name URI referring to a local file to move to
 	*	@param {function} success callback 
 	*	@param {function} fail callback invoked on error
 	*/
@@ -306,8 +317,8 @@ CordovApp.File =
 	},
 	
 	/** Load a file from a remote adresse + save it to 'name'
-	*	@param {DOMString} url URI referring to a remote file 
-	*	@param {DOMString} name URI referring to a local file to move to
+	*	@param {String} url URI referring to a remote file 
+	*	@param {String} name URI referring to a local file to move to
 	*	@param {function} success callback 
 	*	@param {function} fail callback invoked on error
 	*/
@@ -347,7 +358,7 @@ CordovApp.File =
 	},
 	
 	/** Delete a file 
-	*	@param {DOMString} name URI referring to a local file to move to
+	*	@param {String} name URI referring to a local file to move to
 	*	@param {function} success callback 
 	*	@param {function} fail callback invoked on error
 	*/
@@ -364,7 +375,7 @@ CordovApp.File =
 	},
 	
 	/** Get file information
-	*	@param {DOMString} name URI referring to a local file to move to
+	*	@param {String} name URI referring to a local file to move to
 	*	@param {function} success callback that is passed a FileEntry
 	*	@param {function} fail callback invoked on error
 	*/
@@ -395,13 +406,15 @@ CordovApp.File =
 	
 	
 	/** Default succes function
-	*/
+	 * @private
+	 */
 	success: function()
 	{	console.log("Operation on file successfull!");
 	},
 	
 	/** Default fail function
-	*/
+	 * @private
+	 */
 	fail: function(error) 
 	{   console.log ("FILE ERROR: " + error.code);
     }
@@ -442,7 +455,7 @@ CordovApp.File =
 	/**
 	 * Create a Image file according to its database64 string.
 	 * 
-	 * @param {DOMString} name URI referring to a local file  
+	 * @param {String} name URI referring to a local file  
 	 * @param {String} name of the file that will be created
 	 * @param {String} content base64 string
 	 * @param {function} success callback that is passed a FileEntry objects

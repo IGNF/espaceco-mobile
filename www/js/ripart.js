@@ -1,17 +1,15 @@
-﻿/** Recuperation des signalements de l'espace collaboratif.
-
-
-Documentation : https://qlf-collaboratif.ign.fr/collaboratif-site/api-doc/georem
-
-http://developer.telerik.com/featured/securing-phonegapcordova-hybrid-mobile-app/
-iOS : https://github.com/shazron/KeychainPlugin
-
-Authorisations
-https://forum.ionicframework.com/t/how-to-set-authorization-header-in-ng-cordova-file-transfer-plugin/14891
-
-@constructor
-
-*/
+﻿/** 
+ * @classdesc 
+ * Recuperation des signalements de l'espace collaboratif.
+ * 
+ * Documentation : {@link https://espacecollaboratif.ign.fr/api/doc/georem}
+ * 
+ * @constructor
+ * @param {} options
+ * 	@param {string} options.url url du service, default https://espacecollaboratif.ign.fr/api/
+ * 	@param {string} options.user utilisateur du service
+ * 	@param {string} options.pwd mot de passe de l'utilisateur
+ */
 var RIPart = function(options)
 {	options = options || {};
 	// 
@@ -38,7 +36,7 @@ var RIPart = function(options)
 	/** Changement d'utilisateur
 	* @param {String} user user name
 	* @param {String} password user pwd
-	* @param {boolean} crypt encrypt password or not
+	* @param {boolean} crypt encrypted password or not
 	*/
 	this.setUser = function(u, p, cryp)
 	{	user = u;
@@ -56,7 +54,7 @@ var RIPart = function(options)
 	this.setUser (options.user, options.pwd, true);
 
 	/** Get the user name or pass
-	 * @param {boolean} b tru to get the pass
+	 * @param {boolean} b true to get the password (crypted)
 	 */
 	this.getUser = function(b)
 	{	if (b) return pwd;
@@ -402,10 +400,17 @@ var RIPart = function(options)
 		*/
 	};
 
+	/**
+	 * Response callback when get a ripart request
+	 * @callback RIPart.getGeoremCB
+	 * @param {} response json response
+	 * @param {} error
+	 */
+
 	/** Recuperer les info d'une remontee
 	* @param {String} id de la remontee
-	* @param {function} callback function (response, error)
-	* @param {any} options 
+	* @param {RIPart.getGeoremCB} callback function (response, error)
+	* @param {} options 
 	* 	@param {boolean} options.croquis extraire les croquis
 	*/
 	this.getGeorem = function (id, cback, options)
@@ -420,7 +425,7 @@ var RIPart = function(options)
 	/** Recuperer un ensemble de remontees
 	* @param {Object} params de la requete { offset, limit, territory, departement, group, status, box, ... }
 	* 	@param {boolean} params.croquis extraire les croquis
-	* @param {function} callback function (response, error)
+	* @param {RIPart.getGeoremCB} callback function (response, error)
 	*/
 	this.getGeorems = function (params, cback)
 	{	if (!params) params = {};
@@ -475,9 +480,9 @@ var RIPart = function(options)
 	};
 
 
-	/** Write feature(s) to sketch
-	* @param {String} the sketch
-	* @param {ol.proj.ProjectionLike} projection of the features, default EPSG:3857
+	/** Get feature(s) from sketch
+	* @param {String} sketch the sketch
+	* @param {ol.proj.ProjectionLike} proj projection of the features, default `EPSG:3857`
 	* @return {Array<ol.feature>} the feature(s)
 	*/
 	this.sketch2feature = function(sketch , proj)

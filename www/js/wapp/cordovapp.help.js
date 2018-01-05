@@ -61,19 +61,25 @@ function showHelp(template)
 	nextHelp(1);
 }
 
-/** @namespace 
+/** @namespace CordovApp.help
 */
 CordovApp.prototype.help = 
 {	/** Show help
+	* @function CordovApp.help.showHelp
+	* @param {string} name template name (in ./help directory)
 	*/
 	show: showHelp,
 	/** Hide help
+	* @function CordovApp.help.hideHelp
 	*/
 	hide: hideHelp,
 	/** Show next help page
+	* @function CordovApp.help.nextHelp
+	* @param {number} n next help 
 	*/
 	next: nextHelp,
 	/** Reset help
+	* @function CordovApp.help.resetParam
 	*/
 	reset: resetParam
 };

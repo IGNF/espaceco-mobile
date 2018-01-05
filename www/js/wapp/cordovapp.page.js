@@ -7,9 +7,7 @@
            \/                  \/                  \/|__|   |__|    
  */
 /**
- * @classdesc
- *	Web application geodesique
- * 
+ * jQuery object of the menu: $("[data-role='menu']")
  */
 CordovApp.prototype.menu = $("[data-role='menu']");
 

@@ -14,8 +14,6 @@ if (!window.cancelAnimationFrame && window.webkitCancelRequestAnimationFrame)
 {	window.cancelAnimationFrame = window.webkitCancelRequestAnimationFrame;
 }
 
-/** @namespace CordovApp
-*/
 /** 
  * @classdesc
  * Web application pour Cordova 

@@ -8,8 +8,8 @@
 /** File selector
 *	@param {String} path to start with
 *	@param {function} success callback that is passed an URI to a local file or directory
-*	@param {Object} options
-*		- dir {bool|string} Choice a directory / title for the button
+*	@param {} options
+*		@param {bool|string} options.dir Choice a directory / title for the button
 */
 CordovApp.prototype.fileDialog = function(path, success, options)
 {	options = options || {};
