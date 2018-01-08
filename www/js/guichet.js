@@ -51,7 +51,14 @@ var wapp = new CordovApp(
 		wapp.initInteractions();
 
 		// Gestion du cache
-		// this.cache = new CacheMap({ loadPage: "#loadMap", listMap: '#cartes [data-list="maps"] ul' });
+		this.cache = new CacheMap(
+			wapp.map, 
+			wapp.map.getLayersByName("cache")[0], 
+			{
+				loadPage: "#loadMap", 
+				listMap: '#cartes [data-list="maps"] ul' 
+			}
+		);
 
 		// Brancher les signalements
 		wapp.initRipart();
@@ -255,8 +262,8 @@ wapp.initMap = function()
 			]
 		}),
 		// Layer pour l'affichage du cache
-		new ol.layer.Group({ title:"Mes cartes", name: "cache", displayInLayerSwitcher: false }),
-		// Layer pour l'affichage du cache
+		new ol.layer.Group({ title:"Mes cartes", name: "cache", displayInLayerSwitcher: true }),
+		// Layer pour l'affichage des couches de l'utilisateur
 		new ol.layer.Group({ title:"Mes couches", name: "layerGroup", displayInLayerSwitcher: false }),
 		// Overlays
 		new ol.layer.Geoportail("ELEVATION.ELEVATIONGRIDCOVERAGE.SHADOW", { hidpi: false, visible: false }),
@@ -283,7 +290,7 @@ wapp.initMap = function()
 				}
 			})
 		}),
-		// Layer pour l'affichage du cache
+		// Layer pour l'affichage des couches du groupe
 		new ol.layer.Group({ title:"Mes couches", name: "groupe", displayInLayerSwitcher: false }),
 		// Layer pour l'affichage du guichet
 		new ol.layer.Group({ title:"Mon guichet", name: "guichet", visible: true })

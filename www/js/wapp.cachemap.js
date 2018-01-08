@@ -1,9 +1,12 @@
 /** Sauvegarde des tuilles en cache
-* @param {} options
-*	- loadPage : "#loadMap" page de chargement avec les boutons de chargement
-*	- listMap: '#cartes [data-list="maps"] ul' liste de cartes
-*/
-var CacheMap = function(options)
+ * Les cartes sont sauvegardees dans wapp.param.cacheMap.
+ * Les cartes sont automatiquement ajoutees au LayerGroup name="cache"
+ * @param {ol.Map} map carte contenant le cache
+ * @param {ol.layer.Group} layerGroup LayerGroup contenant les cartes en cache
+ *	@param {string} options.param.loadPage page de chargement avec les boutons de chargement, "#loadMap"
+ *	@param {string }options.param.listMap liste de cartes, '#cartes [data-list="maps"] ul'
+ */
+var CacheMap = function(map, layerGroup, options)
 {	var self = this;
 
 	// Carte en cours d'edition
@@ -70,7 +73,7 @@ var CacheMap = function(options)
 			return;
 		}
 		var layercache = new ol.layer.Geoportail("GEOGRAPHICALGRIDSYSTEMS.MAPS", { hidpi: false, key: apiKey });
-		var cache = new ol.cache.Tile (layercache);
+		var cache = new ol.cache.Tile (layercache, { authentication: map.authentication });
 		// 
 		var nb = 0;
 		var pos = 0;
@@ -190,8 +193,8 @@ var CacheMap = function(options)
 		}
 
 		// Remove associated layers
-		var layercache = wapp.map.getLayersByName("cache_"+smap.id);
-		wapp.map.getLayersByName("cache")[0].getLayers().remove(layercache[0]);
+		var layercache = map.getLayersByName("cache_"+smap.id);
+		layerGroup.getLayers().remove(layercache[0]);
 
 		// Remove associated files
 		removeCacheFiles (smap);
@@ -226,7 +229,7 @@ var CacheMap = function(options)
 	*/
 	function downloadMap(layercache, min, max, extent)
 	{	// Cache pour le chargement
-		var cache = new ol.cache.Tile (layercache);
+		var cache = new ol.cache.Tile (layercache, { authentication: map.authentication });
 		var nb = 0;
 		var t=[];
 		var path = (wapp.param.options.cacheRoot||"")+"geoportail/"+layercache.get("layer")+"/";
@@ -238,7 +241,18 @@ var CacheMap = function(options)
 		{	var e = t.pop();
 			if (e)
 			{	wapp.wait("Chargement... "+t.length+"/"+(nb+nberr));
-				CordovApp.File.dowloadFile (decodeURIComponent(e.url), path+e.id, 
+				var options = {};
+				if (map.authentication) {
+					options = {	
+						headers: {
+							'Authorization': "Basic "+map.authentication
+						}
+					}
+				}
+				// Download
+				CordovApp.File.dowloadFile (
+					decodeURIComponent(e.url), 
+					path+e.id, 
 					function()
 					{	// Suivant
 						differLoad();
@@ -252,8 +266,8 @@ var CacheMap = function(options)
 						// wapp.wait(false);
 						// Suivant
 						differLoad();
-					},
-					{ });
+					}, 
+					options);
 			}
 			else
 			{	wapp.wait(false);
@@ -304,9 +318,9 @@ var CacheMap = function(options)
 		var layerName = currentMap.layer||"GEOGRAPHICALGRIDSYSTEMS.MAPS";
 		var layercache = new ol.layer.Geoportail(layerName, { hidpi: false, key: apiKey });
 
-		var cache = new ol.cache.Tile (layercache);
+		var cache = new ol.cache.Tile (layercache, { authentication: map.authentication });
 
-		var extent = wapp.map.getView().calculateExtent(wapp.map.getSize());
+		var extent = map.getView().calculateExtent(map.getSize());
 
 		// Dialogue
 		var content = CordovApp.template("dialog-loadmap");
@@ -314,7 +328,7 @@ var CacheMap = function(options)
 			{ layer: layerName },
 			function(r) 
 			{	layercache = new ol.layer.Geoportail (r.val, { hidpi: false, key: apiKey });
-				cache = cache = new ol.cache.Tile (layercache);
+				cache = new ol.cache.Tile (layercache, { authentication: map.authentication });
 				if (min) estimate();
 			});
 		if (currentMap.extents.length) $("[data-input]", content).attr('data-disabled', true);
@@ -369,14 +383,15 @@ var CacheMap = function(options)
 	*/
 	function setLayerCache (smap)
 	{	// Layer de la carte
-		var layercache = wapp.map.getLayersByName("cache_"+smap.id);
+		var layercache = map.getLayersByName("cache_"+smap.id);
 
 		if (layercache.length)
 		{	// Lecture du cache
 			var cache = new ol.cache.Tile (layercache[0],
 			{	read: function(tile, callback)
 				{	callback ((wapp.param.options.cacheRoot||"")+"geoportail/"+smap.layer+"/"+tile.id);
-				}
+				},
+				authentication: map.authentication
 			});
 			cache.restore (smap.minZoom, smap.maxZoom, smap.extent);
 		}
@@ -414,7 +429,7 @@ var CacheMap = function(options)
 		var layercache = new ol.layer.Geoportail("GEOGRAPHICALGRIDSYSTEMS.MAPS", {hidpi: false, visible: isVisible });
 		layercache.set('title', smap.nom);
 		layercache.set('name', "cache_"+smap.id);
-		wapp.map.getLayersByName("cache")[0].getLayers().push(layercache);
+		layerGroup.getLayers().push(layercache);
 		setLayerCache (smap);
 
 		// Page d'info
@@ -424,7 +439,7 @@ var CacheMap = function(options)
 		$("input",li).val(smap.nom)
 			.on('change', function()
 			{	smap.nom = $(this).val();
-				wapp.map.getLayersByName("cache_"+smap.id)[0].set("title", smap.nom);
+				map.getLayersByName("cache_"+smap.id)[0].set("title", smap.nom);
 			});
 
 		// Suppression d'une carte
@@ -444,7 +459,7 @@ var CacheMap = function(options)
 			{	e.preventDefault();
 				e.stopPropagation();
 				if (smap.extents.length)
-				{	wapp.map.getView().fit(smap.extent, wapp.map.getSize());
+				{	map.getView().fit(smap.extent, map.getSize());
 					wapp.hidePage();
 				}
 			});
@@ -455,7 +470,6 @@ var CacheMap = function(options)
 		updateCacheMapInfo (smap);
 
 	};
-
 
 	/** Choix du repertoire de travail 
 	*	Le repertoire est stocke dans la variable 'wapp.param.options.cacheRoot'

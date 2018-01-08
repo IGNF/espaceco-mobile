@@ -12,7 +12,9 @@ ol.cache = {};
  * @constructor
  * @extends {ol.Object}
  * @fires savestart, save, saveend
- * @param {olx.view.option} View option
+ * @param {} options extends olx.View.options
+ * 	@param {function} options.read function(tile,callback) to read the saved tile
+ * 	@param {string} options.authentication: basic authentication as btoa("login:pwd") 
  */
 ol.cache.Tile = function (layer, options) 
 {	options = options || {};
@@ -25,6 +27,7 @@ ol.cache.Tile = function (layer, options)
 	this.tgMaxZoom = this.source.getTileGrid().maxZoom;
 
 	this.read = options.read;
+	this.authentication = options.authentication;
 
 	this.view = new ol.View(options);
 	this.baseurl = "";
@@ -72,7 +75,10 @@ ol.cache.Tile.prototype.saveResolution = function(e, r)
 };
 
 /** Get a list of image url to save in cache
-*/
+ * @param {Number} minZoom
+ * @param {Number} maxZoom
+ * @param {ol.extent} extent
+ */
 ol.cache.Tile.prototype.save = function (minZoom, maxZoom, extent)
 {	if (typeof(minZoom)=='undefined') return;
 	if (!this.estimate)
@@ -109,6 +115,9 @@ ol.cache.Tile.prototype.save = function (minZoom, maxZoom, extent)
 
 /** Restore cache to the layer 
 *	Cache must have been save before: ie. read can read save cache given an id/url
+* @param {Number} minZoom
+* @param {Number} maxZoom
+* @param {ol.extent} extent
 */
 ol.cache.Tile.prototype.restore = function (minZoom, maxZoom, extent)
 {	var self = this;
@@ -168,6 +177,10 @@ ol.cache.Tile.prototype.getLength = function()
 };
 
 /** Estimate cache size (Mo)
+ * @param {function} callback function({length,size,time}) callback function
+ * @param {Number} minZoom
+ * @param {Number} maxZoom
+ * @param {ol.extent} extent
 */
 ol.cache.Tile.prototype.estimateSize = function (callback, minZoom, maxZoom, extent)
 {	var tload, minZoom, maxZoom, extent, tgminZoom, tgmaxZoom;
@@ -180,6 +193,7 @@ ol.cache.Tile.prototype.estimateSize = function (callback, minZoom, maxZoom, ext
 		this.save(minZoom, maxZoom, extent);
 	}
 	var nb = this.length;
+	var authentication = this.authentication;
 	// Calculate
 	if (!nb) 
 	{	callback (0); 
@@ -190,6 +204,11 @@ ol.cache.Tile.prototype.estimateSize = function (callback, minZoom, maxZoom, ext
 			$.ajax(
 			{	//type: 'HEAD',
 				url: this.baseurl+"&dtime="+time,
+				beforeSend: function(xhr){ 
+					if (authentication) {
+						xhr.setRequestHeader("Authorization", "Basic " + authentication); 
+					}
+				},
 				success: function(msg, a, xhr)
 				{	var s = xhr.getResponseHeader('Content-Length') || xhr.responseText.length;
 					callback( 
@@ -213,4 +232,3 @@ ol.cache.Tile.prototype.estimateSize = function (callback, minZoom, maxZoom, ext
 		this.source.getTileGrid().maxZoom = tgmaxZoom;
 	}
 };
-
