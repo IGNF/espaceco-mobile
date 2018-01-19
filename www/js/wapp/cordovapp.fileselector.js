@@ -23,9 +23,31 @@ CordovApp.prototype.fileDialog = function(path, success, options)
 		self.closeDialog();
 	}
 
+	// Test sdcard
+	function getDirURL(entry){
+		if (entry.nativeURL == "file:///storage/emulated/") return "file:///storage/emulated/0/";
+		else return entry.nativeURL
+	}
+	function getDirName(entry) {
+		console.log(entry.fullPath+" "+entry.name)
+		switch (entry.fullPath) {
+			case "/storage/emulated/":
+			case "/":
+				return "Mémoire interne";
+			case "/storage/":
+				return "Mes fichiers";
+			default:
+				if (entry.fullPath=="/storage/"+entry.name+"/") return "SD ("+entry.name+")";
+				return entry.name;
+		}
+	}
+
 	// Remove path if empty (on local)
-	function testDir(path, li)
-	{	CordovApp.File.listDirectory (path,
+	function testDir(entry, li)
+	{	console.log(entry);
+		if (!entry.isDirectory) return;
+		var path = getDirURL(entry)
+		CordovApp.File.listDirectory (path,
 			function(entry)
 			{	if (!entry.length) li.remove();
 			});
@@ -58,19 +80,17 @@ CordovApp.prototype.fileDialog = function(path, success, options)
 	// Dialog selection
 	function select(dirEntry)
 	{	// Url
-		var dir = dirEntry.nativeURL;
-		if (dir == "file:///storage/emulated/") dir = "file:///storage/emulated/0/";
+		var dir = getDirURL(dirEntry);
 		// Prevent top root parent
 		var parent = dir.replace(/[^\/]*\/$/,"")
 		parent = parent.replace(/emulated\/$/,"");
-		if (parent=="file:///") parent = "";
 		// List directory
 		CordovApp.File.listDirectory (dir,
 			function(entry)
 			{	var html = $("<div>");
 				var ul = $("<ul>").appendTo(html);
 				// Link to parent
-				if (parent) 
+				if (parent && parent!="file:///") 
 				{	$("<li>").html('<i class="fa fa-reply-all" aria-hidden="true"></i> [...]')
 						.addClass ("dir parent")
 						.click(function()
@@ -88,7 +108,7 @@ CordovApp.prototype.fileDialog = function(path, success, options)
 							icon = '<i class="fa '+(iconTab[ext]||"fa-file-o")+'"></i>';
 						}
 						
-						var li = $("<li>").html(icon+entry[i].name)
+						var li = $("<li>").html(icon+getDirName(entry[i]))
 							.addClass (entry[i].isDirectory ? "dir":"file" )
 							.addClass ("li_"+i )
 							.data("path", entry[i].nativeURL)
@@ -102,12 +122,12 @@ CordovApp.prototype.fileDialog = function(path, success, options)
 							})
 							.appendTo(ul);
 						// Remove root empty dir 
-						if (!parent && entry[i].isDirectory) testDir(entry[i].nativeURL, li);
+						if (!parent || parent==="file:///") testDir(entry[i], li);
 					}
 				}
 				// Show dialog
 				self.dialog.show (html, 
-					{	title: dirEntry.name || "Mémoire interne", 
+					{	title: getDirName(dirEntry), 
 						className:"file-selector", 
 						closeBox: true, 
 						noClose: true, 

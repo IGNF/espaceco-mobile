@@ -451,15 +451,14 @@ i.backArrowBt:before
 	text-transform: uppercase;
 	background: none;
 	border: 0;
-
 /*	font-stretch: condensed; */	
 	font-size: 0.8em;
 	margin: 0.8em 0;
-	height:1em;
-	transform: scale(1,1.5);
-	transform-origin: 0 0;
+	height: 1.1em;
 	-webkit-transform: scale(1,1.5);
 	-webkit-transform-origin: 0 100%;
+	transform: scale(1,1.5);
+	transform-origin: 0 0;
 }
 [data-role=dialog] ul[data-role=select]
 {	list-style: none;

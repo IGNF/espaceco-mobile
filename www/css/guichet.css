@@ -669,15 +669,17 @@
 }
 
 /** Load maps page */
-#loadMap
-{	bottom: 0;
-	font-size: 2em;
-	height: 2em;
-	padding: 0.5em;
-	top: auto;
+#loadMap {	
+    top: auto;
+	bottom: 0;
+    font-size: 2em;
+    height: 2.5em;
+    padding: 0.5em;
 }
 #loadMap .button
 {	float: right;
+	font-size: 1em;
+	top: auto;
 }
 
 [data-page="loadMap"] #map:after
@@ -685,7 +687,7 @@
 	position: absolute;
 	pointer-events: none;
 	content: "";
-	bottom: 10px;
+	bottom: 20px;
 	left: 10px;
 	right: 10px;
 	top: 10px;
@@ -770,6 +772,23 @@
 	color: #369;
 	font-size: 0.8em;
 } 
+
+#cartes ul.cartes .menu {
+	float: right;
+	font-size: .7em;
+}
+#cartes ul.cartes li {
+	padding: 0.5em;
+}
+#cartes ul.cartes input {
+	width: calc(100% - 7em);
+}
+#cartes ul.cartes .fa.button {
+	width: 2em;
+    text-align: center;
+    padding: .5em 0;
+    margin: .1em .1em;
+}
 
 /* Template pour la creation*/
 [data-role="template"]

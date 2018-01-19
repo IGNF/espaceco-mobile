@@ -61,6 +61,16 @@ CordovApp.File =
 	{	return path.substring(0, path.lastIndexOf("/"));
 	},
 
+	/** Get free space disk 
+	 *	@param {function} success callback that is passed the resulting space (byte)
+	 *	@param {function} fail callback invoked on error
+	 */
+	getFreeDiskSpace: function(success, fail) {
+		if (!success) success = this.success;
+		if (!fail) fail = this.fail;
+		cordova.exec(success, fail, "File", "getFreeDiskSpace", []);
+	},
+
 	/** Get the application directory for a path 
 	* ie. Android/data/<app-id>/
 	*	@param {String} path URI referring to a local file or directory
