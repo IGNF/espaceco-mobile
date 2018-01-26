@@ -10,6 +10,21 @@
 */
 CordovApp.File = 
 {	
+	/** Test if a path refer to a local path
+	 * @param {string} path
+	 * @return {boolean}
+	 */
+	isLoacalFile: function(path, root) {
+		return (
+		// Android
+			/^file\:\/\/\//.test(path) ||
+		// Windows
+			/^ms-appdata:\/\/\//.test(path) ||
+		// iOS
+			/^\/var\/mobile\/Applications\//.test(path)
+		);
+	},
+
 	/** Scan a directory
 	 * @param {string} path dir path
 	 * @param {function} success A callback that is passed an array of FileEntry and DirectoryEntry objects
@@ -71,8 +86,8 @@ CordovApp.File =
 		cordova.exec(success, fail, "File", "getFreeDiskSpace", []);
 	},
 
-	/** Get the application directory for a path 
-	* ie. Android/data/<app-id>/
+	/** Get the application directory for a path (Android only)
+	* 	ie. Android/data/<app-id>/
 	*	@param {String} path URI referring to a local file or directory
 	*	@param {function} success callback that is passed a DirectoryEntry corresponding to appdir for the filesystem
 	*	@param {function} fail callback invoked on error
@@ -81,8 +96,7 @@ CordovApp.File =
 	{	if (!success) success = this.success;
 		if (!fail) fail = this.fail;
 		var id = this.getFileName(cordova.file.applicationStorageDirectory.replace(/\/$/,""));
-		if (!/^file\:\/\/\//.test(path) || path=="file:///") fail({ code:"-1" });
-		else
+		if (!this.isLoacalFile(path) && path!=="file:///") 
 		{	var self = this;
 			window.resolveLocalFileSystemURL (path+"Android/data/"+id+"/", success, 
 				function()
@@ -90,6 +104,7 @@ CordovApp.File =
 					self.getApplicationDirectory (path, success, fail);
 				});
 		}
+		else fail({ code:"-1" }); 
 	},
 
 	/** Test if a directory is rw (write/delete 'ok.ok' file)
@@ -125,7 +140,7 @@ CordovApp.File =
 		}
 
 		// File systhem URL
-		if (/^file\:/.test(path))
+		if (this.isLoacalFile(path))
 		{	// Create directory if doesn't exist
 			if (create)
 			{	path = path.replace(/\/$/,"");
@@ -392,7 +407,7 @@ CordovApp.File =
 	getFile: function(name, success, fail)
 	{	if (!success) success = this.success;
 		if (!fail) fail = this.fail;
-		if (name.match ( /^file:\/\/\//) )
+		if (this.isLoacalFile(name))
 		{	resolveLocalFileSystemURL (name,success,fail);
 		}
 		else
