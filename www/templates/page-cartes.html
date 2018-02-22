@@ -29,11 +29,10 @@
 
 	<!-- Liste des cartes-->
 	<div data-role="onglet-li" data-list="maps">
-<!--
-		<p style="margin:1em;">
-			Vous pourrez prochainement charger vos propres cartes sur cette page...
-		</p>
--->
+<p style="margin:1em;">
+	Vous pourrez prochainement charger vos propres cartes sur cette page...
+</p>
+<div class="debug">
 		<button class="button big-button" style="float:right;" onclick="wapp.cache.getCacheDir()">Répertoire de sauvegarde (<span class="cacheroot"></span>)</button>
 		<ul class="cartes" data-role="list">
 			<li data-role="template">
@@ -52,5 +51,6 @@
 			</li>
 		</ul>
 		<button class="button big-button addmap" style="float:right;">Ajouter une carte...</button>
+</div>
 	</div>
 </div>

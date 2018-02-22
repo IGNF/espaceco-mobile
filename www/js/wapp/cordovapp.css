@@ -469,6 +469,7 @@ i.backArrowBt:before
 	padding: 0.5em 1.8em 0.5em 0;
 	border-bottom: 1px solid #666;
 	cursor: pointer;
+	clear: both;
 }
 [data-role=dialog] ul[data-role=select] li:last-child
 {	border:0;

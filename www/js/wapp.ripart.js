@@ -840,13 +840,14 @@ RIPart.prototype.connectDialog = function (options)
 					self.checkUserInfo ( 
 						options.onConnect, 
 						(typeof (options.onError) == "function") ? options.onError : null,
-						function() { wapp.wait(false); }
+						function() { 
+							if (options.page) setTimeout(function(){wapp.showPage(options.page); });
+							wapp.wait(false); 
+						}
 					);
 				}
 				else if (bt=="deconnect")
-				{	self.param.user = self.param.pwd = null;
-					self.param.profil = null;
-					self.saveParam();
+				{	self.deconnect()
 					if (typeof (options.onConnect) == "function") options.onConnect({connected:false});
 				}
 				if (typeof (options.onQuit) == "function") options.onQuit({ dialog:tp, target: this });
@@ -862,11 +863,15 @@ RIPart.prototype.connectDialog = function (options)
 /** Deconnect current user
 */
 RIPart.prototype.deconnect = function()
-{	this.param.profil = null;
+{	this.param = { georems:[], nbrem:0 };
 	this.saveParam();
+	$("img.logo").attr("");
+	$("body").attr("data-logo", "none");
+	$(".userinfo").html("Espace collaboratif");
+	wapp.closeDialog();
+	wapp.hidePage()
 	this.onUpdate();
 }
-
 
 /** Check user info : getUserInfo + save informations
  * @param {function} success on success callback
@@ -980,8 +985,17 @@ RIPart.prototype.setProfil = function(id_groupe)
  */
 RIPart.prototype.choixProfil = function()
 {	var q = {};
+	function libelle(g) {
+		var d = $("<div>").html(g.nom);
+		wapp.getLogo(g, function(f){
+			$("<div>").addClass("listimage")
+				.append($("<img>").attr("src",f))
+				.prependTo(d);
+		});
+		return d;
+	}
 	for (var i=0, g; g=this.param.groupes[i]; i++)
-	{	q[g.id_groupe] = g.nom;
+	{	q[g.id_groupe] = libelle (g);
 	}
 	var self = this;
 	wapp.selectDialog(q, this.param.profil.id_groupe, function(n)

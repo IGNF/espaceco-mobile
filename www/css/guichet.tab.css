@@ -126,12 +126,12 @@ body.fullscreenMap #fiche .trackingInfo
 {	clear: both;
 }
 
-
 #loadMap button {
-	margin-top: 0.8em;
+	margin-top: 0.4em!important;
 }
 
 #fiche .selection > div label,
+#fiche .selection > div li > span,
 #fiche .selection > div input,
 #fiche .selection > div [data-input-role].selected
 {	width:100%;

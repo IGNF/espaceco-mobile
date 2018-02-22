@@ -32,6 +32,7 @@ ol.cache.Tile = function (layer, options)
 	this.view = new ol.View(options);
 	this.baseurl = "";
 	this.extent = [];
+	this.maxTileLoad = options.maxTileLoas || 20000;
 };
 ol.inherits(ol.cache.Tile, ol.Object);
 
@@ -70,7 +71,9 @@ ol.cache.Tile.prototype.saveResolution = function(e, r)
 		{	var url = fn.call(this.source, [z,r,c], this.source.getProjection());
 			if (!this.estimate) this.write (z+"-"+c+"-"+r, url);	
 			this.length++;
+			if (this.estimate && this.length > this.maxTileLoad) break;
 		}
+		if (this.estimate && this.length > this.maxTileLoad) break;
 	}
 };
 
@@ -107,6 +110,10 @@ ol.cache.Tile.prototype.save = function (minZoom, maxZoom, extent)
 	{	this.view.setZoom(z);
 		r = this.view.getResolution();
 		this.saveResolution(extent, r);
+		if (this.estimate && this.length > this.maxTileLoad) break;
+	}
+	if (this.estimate && this.length > this.maxTileLoad) {
+		this.length = -1;
 	}
 	
 	if (!this.estimate) this.dispatchEvent({ type:'saveend', length: this.length });

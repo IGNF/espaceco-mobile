@@ -342,19 +342,16 @@ CordovApp.File =
 	},
 	
 	/** Load a file from a remote adresse + save it to 'name'
-	*	@param {String} url URI referring to a remote file 
-	*	@param {String} name URI referring to a local file to move to
-	*	@param {function} success callback 
-	*	@param {function} fail callback invoked on error
-	*/
+	 *	@param {String} url URI referring to a remote file 
+	 *	@param {String} name URI referring to a local file to move to
+	 *	@param {function} success callback 
+	 *	@param {function} fail callback invoked on error
+	 */
 	dowloadFile: function (url, name, success, fail, options)
 	{	if (!success) success = this.success;
 		if (!fail) fail = this.fail;
+		var self = this;
 		// Recherche du repertoire
-		/*
-		var dir = name.substring(0, name.lastIndexOf("/"));
-		name = name.substring(name.lastIndexOf("/")+1);
-		*/
 		var dir = this.getDir(name);
 		name = this.getFileName(name);
 		this.getDirectory 
@@ -364,8 +361,10 @@ CordovApp.File =
 				var uri = encodeURI(url);
 				ft.download
 				(	uri,
-					fileEntry.toURL()+name,
-					success,
+					fileEntry.toURL()+"__"+name,
+					function(){
+						self.moveFile(fileEntry.toURL()+"__"+name, fileEntry.toURL()+name, success, fail);
+					},
 					fail,
 					false,
 					options

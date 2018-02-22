@@ -46,17 +46,28 @@
 	transform: translate(-50%, -50%);
 }
 [data-role='menu'] .img img {
-	transform: translate(-50%, -50%);
-	height: 95%;
+    background-color: #fff;
+    max-height: 90%;
+    max-width: 100%;
+    height: auto;
+}
+[data-role='menu'] .img img.back {
+	min-height:100%; 
+	min-width:100%;
+	-webkit-filter: blur(5px);
+	-moz-filter: blur(5px);
+	-o-filter: blur(5px);
+	-ms-filter: blur(5px);
+	filter: blur(5px);
 }
 [data-role='menu'] p {
     position: absolute;
     left: 5em;
-    top: calc(50% + 1em);
+    bottom: .2em;
     line-height: 1em;
     margin: 0;
-    -webkit-transform: scaleX(.6) translateY(-50%);
-    transform: scaleX(.6) translateY(-50%);
+    -webkit-transform: scaleX(.6);
+    transform: scaleX(.6);
     -webkit-transform-origin: 0 0;
     transform-origin: 0 0;
     font-weight: bold;
@@ -128,8 +139,7 @@
 	color: #fff;
 }
 [data-page="fiche"] #signaler
-{
-	display: none;
+{	display: none;
 }
 
 #selection
@@ -454,16 +464,16 @@
 	border-radius: 50%;
 	box-sizing: unset;
 	color: #fff;
-	font-size: 1.4em;
+	font-size: 1.1em;
 	font-weight: bold;
-	height: 1em;
 	line-height: 1;
 	padding: 2px;
 	position: absolute;
-	right: -0.5em;
 	text-align: center;
 	top: -0.25em;
-	width: 1em;
+	right: -0.8em;
+	width: 1.3em;
+	height: 1.3em;
 }
 [data-role="menu"] li button.hidden
 {	display: none;
@@ -511,7 +521,7 @@
 #fiche .fiche label:after
 {	content: "\A0:";
 }
-#fiche .selection > div span
+#fiche .selection > div li > span
 {	width: 70%;
 	display: inline-block;
 	vertical-align: middle;
@@ -679,24 +689,47 @@
     top: auto;
 	bottom: 0;
     font-size: 2em;
-    height: 2.5em;
+    height: 2em;
     padding: 0.5em;
 }
 #loadMap .button
 {	float: right;
 	font-size: 1em;
 	top: auto;
+	margin-top: -0.2em;
 }
 
 [data-page="loadMap"] #map:after
-{	border: 20px dashed rgba(255, 0, 0, 0.5);
-	position: absolute;
-	pointer-events: none;
-	content: "";
-	bottom: 20px;
-	left: 10px;
-	right: 10px;
-	top: 10px;
+{	border: 40px solid rgba(0, 0, 0, 0.5);
+    border-bottom-width: 60px;
+    position: absolute;
+    pointer-events: none;
+    content: "";
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: 0;
+}
+[data-page="loadMap"] p.error,
+[data-page="loadMap"] p.tileCount {
+	color: #fff;
+    position: absolute;
+    bottom: 35px;
+    width: 100%;
+    text-align: center;
+    z-index: 1;
+    pointer-events: none;
+}
+[data-page="loadMap"] p.error,
+[data-page="loadMap"] .noTile p.tileCount {
+	display: none;
+}
+[data-page="loadMap"] .noTile p.error{
+	display: block;
+}
+[data-page="loadMap"] #signaler,
+[data-page="loadMap"] #map .ol-control {
+	display: none;
 }
 
 /**Recherche
@@ -1262,6 +1295,37 @@ body.trackingGeorem #fiche .signaler .movePosition
 }
 [data-role="dialog"].attributes li[data-input] 
 {	padding:0.5em 0;
+}
+
+[data-role="dialog"] ul div.listimage {
+    position: relative;
+    height: 2em;
+    width: 3em;
+    overflow: hidden;
+    margin: -.5em .5em .5em 0;
+    float: left;
+}
+[data-role="dialog"] ul .listimage img {
+    position: absolute;
+    max-width: 100%;
+    max-height: 100%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    padding: 0;
+}
+[data-role="dialog"] ul img.listimage {
+    max-height: 2.15em;
+    float: left;
+    margin-top: -.5em;
+    padding-right: .5em;
+}
+[data-role="dialog"].attributes ul img.listimage {
+	margin-top:-1.2em;
+}
+[data-role="dialog"].attributes label.listimage {
+	padding-left: 3em;
 }
 
 #fiche .signaler .attributes div

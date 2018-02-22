@@ -24,7 +24,7 @@ var CacheMap = function(map, layerGroup, options)
 	this.listMap = $(options.listMap);
 	this.liTemplate = $('[data-role="template"]', this.listMap).html();
 	this.page = this.listMap.closest('[data-role="page"]');
-	this.loadPage = $(options.loadPage);
+	var loadPage = this.loadPage = $(options.loadPage);
 
 	if (!wapp.param.options.cacheRoot)
 	{	CordovApp.File.getDirectory(options.directory||'SD', function(d)
@@ -36,6 +36,55 @@ var CacheMap = function(map, layerGroup, options)
 	$('.ok', this.loadPage).click(loadMapDlg);
 	$('.cancel', this.loadPage).click(cancelLoadMap);
 	$('.addmap', this.page).click(function() { addCacheMap(); });
+
+	function showInfo() {
+		var extent = map.getView().calculateExtent(map.getSize());
+		var layerName = currentMap.layer||"GEOGRAPHICALGRIDSYSTEMS.MAPS";
+		var layercache = new ol.layer.Geoportail(layerName, { hidpi: false, key: apiKey });
+		var cache = new ol.cache.Tile (layercache, { authentication: authentication });
+
+		cache.estimateSize (function(s){
+			if (s.length<0) {
+				loadPage.addClass('noTile');
+			}
+			else {
+				loadPage.removeClass('noTile');
+
+				$(".tileCount .size", loadPage).text(s.size);
+				$(".tileCount .length", loadPage).text(s.length);
+				// Hours
+				if (s.time>60000*60) {
+					var mn = Math.round(s.time/60000);
+					var h = Math.floor(mn/60);
+					mn -= h*60;
+					$(".tileCount .time", loadPage).text(h+" h "+mn);
+				}
+				// minutes
+				else {
+					$(".tileCount .time", loadPage).text(Math.round(s.time/60000)||"-");
+				}
+			}
+		}, currentMap.minZoom, currentMap.maxZoom, extent);
+		
+/*
+		content.addClass("loading");
+		var vmin = Number(min.val());
+		var vmax = Math.min (18, Number(max.val()));
+		if (vmax-vmin>5) vmax = vmin+5;
+		max.val(vmax);
+		setTimeout(function()
+		{	cache.estimateSize (setSize, vmin, vmax, extent);
+		}, 100);
+*/
+	};
+	$(this.loadPage).on('showpage', function(){
+		map.on('moveend', showInfo);
+		showInfo();
+	})
+	.on('hidepage', function(){
+		map.un('moveend', showInfo);
+	})
+
 	
 	$(this.page).on("showpage", function(e)
 	{	showWroot();
@@ -237,6 +286,7 @@ var CacheMap = function(map, layerGroup, options)
 	*/
 	function downloadMap(layercache, min, max, extent)
 	{	// Cache pour le chargement
+		console.log("download")
 		var cache = new ol.cache.Tile (layercache, { authentication: authentication });
 		var nb = 0;
 		var t=[];
@@ -322,7 +372,7 @@ var CacheMap = function(map, layerGroup, options)
 	/* Dialogue de chargement d'une carte
 	*/
 	function loadMapDlg()
-	{	
+	{
 		var layerName = currentMap.layer||"GEOGRAPHICALGRIDSYSTEMS.MAPS";
 		var layercache = new ol.layer.Geoportail(layerName, { hidpi: false, key: apiKey });
 
@@ -339,7 +389,8 @@ var CacheMap = function(map, layerGroup, options)
 				cache = new ol.cache.Tile (layercache, { authentication: authentication });
 				if (min) estimate();
 			});
-		if (currentMap.extents.length) $("[data-input]", content).attr('data-disabled', true);
+		//if (currentMap.extents.length) 
+		$("[data-input]", content).attr('data-disabled', true);
 
 		var min = $(".min", content).on("change", estimate).val(typeof(currentMap.minZoom)!="undefined" ? currentMap.minZoom : 15);
 		var max = $(".max", content).on("change", estimate).val(typeof(currentMap.maxZoom)!="undefined" ? currentMap.maxZoom : 15);
@@ -348,7 +399,7 @@ var CacheMap = function(map, layerGroup, options)
 		{	min.prop("disabled",true);
 			max.prop("disabled",true);
 		}
-
+		
 		wapp.dialog.show (content, 
 			{	title: "Chargement...", 
 				buttons: { charger:"Charger...", cancel:"Annuler" },
@@ -363,7 +414,17 @@ var CacheMap = function(map, layerGroup, options)
 		{	content.removeClass("loading");
 			$(".size", content).text(s.size);
 			$(".length", content).text(s.length);
-			$(".time", content).text(Math.round(s.time/60000)||"-");
+			// Hours
+			if (s.time>60000*60) {
+				var mn = Math.round(s.time/60000);
+				var h = Math.floor(mn/60);
+				mn -= h*60;
+				$(".time", content).text(h+" h "+mn);
+			}
+			// minutes
+			else {
+				$(".time", content).text(Math.round(s.time/60000)||"-");
+			}
 		}
 		function estimate()
 		{	//$(".minimg", content).attr("src", layercache);
@@ -397,8 +458,7 @@ var CacheMap = function(map, layerGroup, options)
 		{	// Lecture du cache
 			var cache = new ol.cache.Tile (layercache[0],
 			{	read: function(tile, callback)
-				{	
-                    callback ((wapp.param.options.cacheRoot||"")+"geoportail/"+smap.layer+"/"+tile.id);
+				{  callback ((wapp.param.options.cacheRoot||"")+"geoportail/"+smap.layer+"/"+tile.id);
 				},
 				authentication: authentication
 			});
@@ -420,14 +480,31 @@ var CacheMap = function(map, layerGroup, options)
 	*	@param {CacheMap|undefined} smap carte a charger sinon en cree un nouvelle
 	*/
 	function addCacheMap(smap)
-	{	if (!smap)	
+	{	// Creer une carte ?
+		if (!smap)	
 		{	var c = wapp.param.cacheMap.length;
 			while (true)
 			{	c++;
 				if (!getCacheMapByName("Carte #"+c)) break;
 			}
 			smap = new CacheMap ( "Carte #"+c );
-			wapp.param.cacheMap.push(smap);
+
+			var content = CordovApp.template("dialog-addmap");
+			wapp.setParamInput( content, smap);
+	
+			wapp.dialog.show (content, 
+			{	title: "Ajouter une carte", 
+				buttons: { ajouter:"Ajouter...", cancel:"Annuler" },
+				className: "attributes",
+				callback: function(b)
+				{	if (b=='ajouter')
+					{	smap.maxZoom = smap.minZoom = parseInt(smap.minZoom);
+						wapp.param.cacheMap.push(smap);
+						addCacheMap(smap)
+					}
+				}
+			});
+			return;
 		}
 
 		// Visible ?

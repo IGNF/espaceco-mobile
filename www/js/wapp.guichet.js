@@ -33,8 +33,7 @@ wapp.initGuichets = function()
 		{	if (g.layers[j].type=="WFS") couches += (couches?", ":"")+g.layers[j].nom;
 		}
 		if (couches)
-		{	$('#cartes [data-list="guichets"] ul.nomap').hide();
-			var li = $("<li>")
+		{	var li = $("<li>")
 				.data('groupe', g)
 				.text(g.nom)
 				.append($("<i>").text(couches))
@@ -57,10 +56,9 @@ wapp.initGuichets = function()
 			{	$("<img>").attr("src",f).prependTo(this);
 			}, li);
 		}
-		else
-		{	$('#cartes [data-list="guichets"] ul.nomap').show();
-		}
 	}
+	if ($("li", ul).length) $('#cartes [data-list="guichets"] ul.nomap').hide();
+	else $('#cartes [data-list="guichets"] ul.nomap').show();
 	wapp.setGuichet(current);
 };
 
@@ -69,7 +67,8 @@ wapp.initGuichets = function()
  * @param {function} cback callback fonction qui renvoie le nom du fichier
  */
 wapp.getLogo = function (g, cback, scope)
-{	CordovApp.File.getFile("TMP/logo/"+g.id_groupe, 
+{	
+	CordovApp.File.getFile("TMP/logo/"+g.id_groupe, 
 		function(fileEntry) { 
 			cback.call(scope, fileEntry.toURL()); 
 		}, 
