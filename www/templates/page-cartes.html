@@ -5,7 +5,7 @@
 			<i class="fa fa-address-card"></i>Guichets
 		</div>
 		<div data-list="maps">
-			<i class="fa tools-layers"></i>Cartes
+			<i class="fa tools-layers"></i>Hors-ligne
 		</div>
 	</div>
 
@@ -29,28 +29,28 @@
 
 	<!-- Liste des cartes-->
 	<div data-role="onglet-li" data-list="maps">
-<p style="margin:1em;">
-	Vous pourrez prochainement charger vos propres cartes sur cette page...
-</p>
-<div class="debug">
-		<button class="button big-button" style="float:right;" onclick="wapp.cache.getCacheDir()">Répertoire de sauvegarde (<span class="cacheroot"></span>)</button>
-		<ul class="cartes" data-role="list">
-			<li data-role="template">
-				<i class="fa fa-map-o"></i>
-				<input type="text" class="nom" placeholder="Nom de la carte" /><i class="clear-input"></i>
-				<div class="menu">
-					<i class="fa fa-map-o button"></i>
-					<i class="fa tools-locate button"></i>
-					<br />
-					<i class="fa fa-refresh button"></i>
-					<i class="fa fa-trash button"></i>
-				</div>
-				<div class="info">
-					<span class="dalle">x</span> dalle(s) chargée(s) le <span class="date">01/01/2015</span>.
-				</div>
-			</li>
-		</ul>
-		<button class="button big-button addmap" style="float:right;">Ajouter une carte...</button>
-</div>
+		<p style="margin:1em;">
+			Votre compte ne vous permet pas de charger des cartes hors-ligne...
+		</p>
+		<div class="debug">
+				<button class="button big-button" style="float:right;" onclick="wapp.cache.getCacheDir()">Répertoire de sauvegarde (<span class="cacheroot"></span>)</button>
+				<ul class="cartes" data-role="list">
+					<li data-role="template">
+						<i class="fa fa-map-o"></i>
+						<input type="text" class="nom" placeholder="Nom de la carte" /><i class="clear-input"></i>
+						<div class="menu">
+							<i class="fa fa-map-o button"></i>
+							<i class="fa tools-locate button"></i>
+							<br />
+							<i class="fa fa-refresh button"></i>
+							<i class="fa fa-trash button"></i>
+						</div>
+						<div class="info">
+							<span class="dalle">x</span> dalle(s) chargée(s) le <span class="date">01/01/2015</span>.
+						</div>
+					</li>
+				</ul>
+				<button class="button big-button addmap" style="float:right;">Ajouter une carte...</button>
+		</div>
 	</div>
 </div>

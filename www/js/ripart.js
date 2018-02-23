@@ -341,13 +341,12 @@ var RIPart = function(options)
 							{	att.val.push($(this).text());
 							});
 							switch(att.type)
-							{	case 'list': 
+							{	case 'checkbox':
+									att.val = [(att.val[0] == 1)];
 								break;
-								case 'checkbox':
-									att.val = (att.val[0] == 1);
-								break;
+								case 'list': 
+								case 'date': 
 								default:
-									att.val = att.val[0];
 								break;
 							}
 							th.attributs.push(att);

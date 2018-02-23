@@ -14,7 +14,8 @@ ol.cache = {};
  * @fires savestart, save, saveend
  * @param {} options extends olx.View.options
  * 	@param {function} options.read function(tile,callback) to read the saved tile
- * 	@param {string} options.authentication: basic authentication as btoa("login:pwd") 
+ * 	@param {string} options.authentication basic authentication as btoa("login:pwd") 
+ * 	@param {number} options.maxTileLoad Maximum number of tile to load
  */
 ol.cache.Tile = function (layer, options) 
 {	options = options || {};
@@ -32,7 +33,7 @@ ol.cache.Tile = function (layer, options)
 	this.view = new ol.View(options);
 	this.baseurl = "";
 	this.extent = [];
-	this.maxTileLoad = options.maxTileLoas || 20000;
+	this.maxTileLoad = options.maxTileLoad || 20000;
 };
 ol.inherits(ol.cache.Tile, ol.Object);
 
@@ -53,10 +54,10 @@ ol.cache.Tile.prototype.write = function(id, url)
 }
 
 /** Private : getURLSforResolution
-*	@param {Array<string>} urls list of url
-*	@param {ol.extent} e extent to load
-*	@param {integer} r resolution
-*/
+ *	@param {Array<string>} urls list of url
+ *	@param {ol.extent} e extent to load
+ *	@param {integer} r resolution
+ */
 ol.cache.Tile.prototype.saveResolution = function(e, r)
 {	var tl = this.source.getTileGrid().getTileCoordForCoordAndResolution([e[0],e[1]], r);
 	var br = this.source.getTileGrid().getTileCoordForCoordAndResolution([e[2],e[3]], r);
@@ -77,7 +78,11 @@ ol.cache.Tile.prototype.saveResolution = function(e, r)
 	}
 };
 
-/** Get a list of image url to save in cache
+/** Get a list of image url to save in cache, use estimateSize to estimate the size before
+ * Use the event to get 
+ * - savestart : start saving
+ * - save : get the current tile to save
+ * - saveend : end saving
  * @param {Number} minZoom
  * @param {Number} maxZoom
  * @param {ol.extent} extent

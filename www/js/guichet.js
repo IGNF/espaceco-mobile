@@ -249,7 +249,14 @@ wapp.initParams = function()
 /** Initialise la carte
 */
 wapp.initMap = function()
-{	// Layers (set hdpi:false to enable tile cache)
+{	
+	// Layer pour l'affichage du cache
+	var layerCache = new ol.layer.Group({ title:"Cartes hors-ligne", name: "cache", displayInLayerSwitcher: false })
+	layerCache.on('change', function(e) {
+		if (layerCache.getLayers().getLength) layerCache.set('displayInLayerSwitcher', true);
+	});
+
+	// Layers (set hdpi:false to enable tile cache)
 	var layers = this.layers =  [
 		// Fonds de plan
 		new ol.layer.Group(
@@ -262,7 +269,7 @@ wapp.initMap = function()
 			]
 		}),
 		// Layer pour l'affichage du cache
-		new ol.layer.Group({ title:"Mes cartes", name: "cache", displayInLayerSwitcher: true }),
+		layerCache,
 		// Layer pour l'affichage des couches de l'utilisateur
 		new ol.layer.Group({ title:"Mes couches", name: "layerGroup", displayInLayerSwitcher: false }),
 		// Overlays

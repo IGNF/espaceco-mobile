@@ -28,7 +28,6 @@ Date.prototype.toISODateString = function()
 CordovApp.prototype.setParamInput = function(elt, param, onchange)
 {	var self = this;
 	elt = $(elt);
-			
 	function setValue (elt, v)
 	{	var p = elt.data("param");
 		switch (elt.data("input"))
@@ -49,6 +48,11 @@ CordovApp.prototype.setParamInput = function(elt, param, onchange)
 				if (!found) v = $('[data-input-role="option"][data-default]', elt).addClass("selected").data('val');
 				break;
 			case "date":
+				if (typeof(v)=="undefined") v = elt.data('default');
+				var d = v.split('/');
+				d = d[2]+"-"+d[1]+"-"+d[0];
+				$("input", elt).val(d);
+				break;
 			case "number":
 			case "text":
 				if (typeof(v)=="undefined") v = elt.data('default');
@@ -103,8 +107,16 @@ CordovApp.prototype.setParamInput = function(elt, param, onchange)
 		{	var $this = $(this);
 			var p = $(this).data('param');
 			switch ($this.data('input'))
-			{	case "text": 
-				case "date": 
+			{	case "date": 
+					if (!$("input", $this).val()) {
+						param[p] = "";
+					}
+					else {
+						var v = $("input", $this).val().split('-');
+						param[p] = v[2]+"/"+v[1]+"/"+v[0];
+					}
+					break;
+				case "text": 
 				case "number": 
 					param[p] = $("input", $this).val();
 					break;

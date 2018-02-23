@@ -83,7 +83,8 @@ CordovApp.File =
 	getFreeDiskSpace: function(success, fail) {
 		if (!success) success = this.success;
 		if (!fail) fail = this.fail;
-		cordova.exec(success, fail, "File", "getFreeDiskSpace", []);
+		if (!window.cordova) fail(-1);
+		else cordova.exec(success, fail, "File", "getFreeDiskSpace", []);
 	},
 
 	/** Get the application directory for a path (Android only)

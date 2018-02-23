@@ -32,6 +32,9 @@ function Dialog()
 	var _buttons = $("<div>").addClass("buttons").appendTo(_dlg);
 	var _timeout = null;
 
+	// Prevent submission (prevent change page)
+	_dlg.on('submit', function(e) { e.preventDefault(); })
+
 	/** A dialog is shown on the app
 	* @method Dialog.isOpen
 	* @return {bool} true if a dialog is shown
@@ -71,15 +74,17 @@ function Dialog()
 		if (_timeout) clearTimeout(_timeout);
 
 		function addButton(id, text)
-		{	$("<input>").val(text)
+		{	return $("<input>").val(text)
 					.attr('type', id=='submit' ? 'submit':'button')
 					.attr("data-role","dialogBt")
 					.prependTo(_buttons)
 					.on ("click",function(e)
 					{	e.stopPropagation();
 						e.preventDefault();
-						self.close();
-						if (options.callback) options.callback(id);
+						if ($(this).css('display')!='none') {
+							self.close();
+							if (options.callback) options.callback(id);
+						}
 					});
 		}
 

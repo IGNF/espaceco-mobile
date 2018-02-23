@@ -1161,6 +1161,7 @@ RIPart.prototype.formulaireAttribut = function(valdef, prompt)
 		}
 		for (var i=0, a; a = att[i]; i++)
 		{	var v = (valdef ? valdef[a.att] : a.val[0]);
+			vals[a.att] = v;
 			switch (a.type)
 			{	case 'list':
 					li = $("<li data-input='select'>").attr('data-param',a.att).appendTo(content);
@@ -1168,19 +1169,21 @@ RIPart.prototype.formulaireAttribut = function(valdef, prompt)
 					for (var k=0; k<a.val.length; k++)
 					{	$("<div data-input-role='option' data-val='"+a.val[k]+"'>").html(a.val[k]||"<i>sans</i>").appendTo(li);
 					}
-					vals[a.att] = v;
 					break;
 				case 'checkbox':
 					li = $("<li data-input='check'>").attr('data-param',a.att).appendTo(content);
 					$("<label>").text(a.att).appendTo(li);
-					vals[a.att] = v; // (v!="0");
+					break;
+				case 'date':
+					li = $("<li data-input='date'>").attr('data-param',a.att).appendTo(content);
+					$("<label>").text(a.att).appendTo(li);
+					$("<input>").attr("type","date").appendTo(li);
 					break;
 				default:
 					li = $("<li data-input='text'>").attr('data-param',a.att).appendTo(content);
 					$("<label>").text(a.att).appendTo(li);
 					$("<input>").attr("type","text").appendTo(li);
 					$('<i class="clear-input">').appendTo(li);
-					vals[a.att] = v;
 					break;
 			}
 		};

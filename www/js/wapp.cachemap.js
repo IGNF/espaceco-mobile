@@ -33,7 +33,10 @@ var CacheMap = function(map, layerGroup, options)
 	}
 
 	// Initialisation
-	$('.ok', this.loadPage).click(loadMapDlg);
+	loadPage.addClass('noTile');
+	$('.ok', this.loadPage).click(function() {
+		if (!loadPage.hasClass('noTile')) loadMapDlg();
+	});
 	$('.cancel', this.loadPage).click(cancelLoadMap);
 	$('.addmap', this.page).click(function() { addCacheMap(); });
 
@@ -49,7 +52,6 @@ var CacheMap = function(map, layerGroup, options)
 			}
 			else {
 				loadPage.removeClass('noTile');
-
 				$(".tileCount .size", loadPage).text(s.size);
 				$(".tileCount .length", loadPage).text(s.length);
 				// Hours
@@ -410,6 +412,10 @@ var CacheMap = function(map, layerGroup, options)
 				}
 			});
 
+		CordovApp.File.getFreeDiskSpace(function(s){
+			$(".free", content).text(Math.round(s/1024/1024*10)/10);
+		});
+		
 		function setSize(s)
 		{	content.removeClass("loading");
 			$(".size", content).text(s.size);
