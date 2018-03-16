@@ -109,46 +109,78 @@ wapp.setGuichet = function(groupe)
 	for (var i=0, l; l=groupe.layers[i]; i++)
 	{	if (l.type=="WFS")
 		{	nb++;
-			var url = l.url.replace(/(.*)\?(.*)/,"$1");
-			var base = l.url.replace(/.*databasename=(.*)/,"$1");
-			var vector = new ol.layer.Vector.Webpart(
-			{	url: url,
-				name: l.nom,
-				database: base,
-				username: wapp.ripart.getUser(),
-				password: wapp.ripart.getUser(true),
-				// style: guichet.style,
-				maxResolution: 40, // zoom 13
-				checkSourceOptions: function (options, featureType)
-				{	// Limiter la taille des tuilles en fonction du minZoom
-					if (featureType.minZoomLevel) options.tileZoom = Math.max(featureType.minZoomLevel-2, 13);
-					// Eviter un affichage en zoom 0
-					else featureType.minZoomLevel = 12;
+			var vector;
+			// WFS externe
+			if (l.external) {
+				if (!l.mask.id) {
+					nb--;
+					continue;
 				}
-			},
-			{	// preserved: select.getFeatures(),
-				filter: (base=="bduni_metropole" ? {detruit:false} : {}),
-				// Tile zoom to calculate tiles
-				tileZoom: 13,
-				maxFeatures: 5000,
-				maxReload: wapp.param.options.maxReload || 10000
-			});
+				else {
+					vector = new ol.layer.Vector.WFS (l, function(layer, cback) {
+						var content = CordovApp.template("dialog-authenticate");
+						console.log(layer)
+						$('span', content).text(layer.get('name'));
+						wapp.dialog.show (content, {
+							title: "Connexion", 
+							buttons: { submit:"OK", cancel:"Annuler" },
+							callback: function(b) {
+								if (b=='submit') {
+									cback($('.nom', content).val(), $('.pwd', content).val());
+								}
+								else {
+									cback(false);
+								}
+							}
+						});
+					});
+				}
+			} 
+			// Guichet
+			else {
+				var url = l.url.replace(/(.*)\?(.*)/,"$1");
+				var base = l.url.replace(/.*databasename=(.*)/,"$1");
+				vector = new ol.layer.Vector.Webpart(
+					{	url: url,
+						name: l.nom,
+						title: l.nom,
+						database: base,
+						username: wapp.ripart.getUser(),
+						password: wapp.ripart.getUser(true),
+						// style: guichet.style,
+						maxResolution: 40, // zoom 13
+						checkSourceOptions: function (options, featureType)
+						{	// Limiter la taille des tuilles en fonction du minZoom
+							if (featureType.minZoomLevel) options.tileZoom = Math.max(featureType.minZoomLevel-2, 13);
+							// Eviter un affichage en zoom 0
+							else featureType.minZoomLevel = 12;
+						}
+					},
+					{	// preserved: select.getFeatures(),
+						filter: (base=="bduni_metropole" ? {detruit:false} : {}),
+						// Tile zoom to calculate tiles
+						tileZoom: 13,
+						maxFeatures: 5000,
+						maxReload: wapp.param.options.maxReload || 10000
+					});
+			}	
 			this.vector.push(vector);
 			// Probleme au chargement
-			vector.on("error", function(e)
-			{	if (e.status===401)
-				{	wapp.message ("Impossible de charger la couche."
+			vector.on("error", function(e){
+				if (e.status===401)
+				{	wapp.message ("Impossible de charger la couche <i>"+this.get('name')+"</i>."
 							+"<i class='error'><br/>"+e.status+" - "+e.error+"</i>",
 							"Connexion", { ok:"ok" });
 				}
 				else
-				{	wapp.alert ("Impossible de charger la couche."
+				{	wapp.alert ("Impossible de charger la couche <i>"+this.get('title')+"</i>."
 							+"<i class='error'><br/>"+e.status+" - "+e.error+"</i>");
 				}
 				return;
 			});
-			vector.on("ready", function()
-			{	// Marquer le layer sur l'objet
+			vector.on("ready", function(){
+				console.log('READY',this)
+				// Marquer le layer sur l'objet
 				this.getSource().on('addfeature', function (e) 
 				{	e.feature.layer = this; 
 				}, this);

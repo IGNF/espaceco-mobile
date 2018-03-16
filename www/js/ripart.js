@@ -262,7 +262,9 @@ var RIPart = function(options)
 	* @param {function} callback function (response, error)
 	*/
 	this.getUserInfo = function (cback)
-	{	// Decodage de la reponse
+	{	// Origine
+		var serviceHost = this.getServiceUrl().replace(/(^https:\/\/[^\/]*)(.*)/,'$1');
+		// Decodage de la reponse
 		function decode(resp)
 		{	var r = {};
 			r.auteur =
@@ -300,12 +302,12 @@ var RIPart = function(options)
 						nom: $(this).find("NOM").text(),
 						type: $(this).find("TYPE").text(),
 						description: $(this).find("DESCRIPTION").text(),
+						minzoom: Number($(this).find("MINZOOM").text()),
+						maxzoom: Number($(this).find("MAXZOOM").text()),
+						extent: $(this).find("EXTENT").text().split(","),
 						url: $(this).find("URL").text()
 					};
-					if (l.type=="WMS")
-					{	l.minzoom = Number($(this).find("MINZOOM").text());
-						l.maxzoom = Number($(this).find("MAXZOOM").text());
-						l.extent = $(this).find("EXTENT").text().split(",");
+					if (l.type==="WMS") {
 						for (var k=0; k<l.extent.length; k++) l.extent[k] = Number(l.extent[k]);
 						l.version = $(this).find("VERSION").text();
 						l.layer = $(this).find("LAYER").text();
@@ -313,6 +315,16 @@ var RIPart = function(options)
 						try {
 							l.getFeatureInfoMask = JSON.parse($(this).find("GETFEATUREINFOMASK").text());
 						} catch(e){};
+					}
+					if (l.type==='WFS') {
+						l.external = !(new RegExp('^'+ serviceHost)).test(l.url);
+						l.version = $(this).find("VERSION").text();
+						l.typename = $(this).find("TYPENAME").text();
+						l.format = $(this).find("FORMAT").text();
+						l.mask = $(this).find("GETFEATUREINFOMASK").text();
+						try {
+							l.mask = JSON.parse(l.mask);
+						} catch(e) { l.mask = false; }
 					}
 					g.layers.push(l);
 				});
@@ -585,17 +597,41 @@ var RIPart = function(options)
 		return croquis;
 	};
 
+
+	//
+	function cryptPwd (groupes, crypt) {
+		if (!groupes) return;
+		for (var i=0, g; g=groupes[i]; i++) {
+			for (var j=0, l; l=g.layers[j]; j++) {
+				if (l.password) {
+					if (crypt) l.password = CryptoJS.AES.encrypt(l.password, secret).toString();
+					else l.password = CryptoJS.AES.decrypt(l.password, secret).toString(CryptoJS.enc.Utf8);
+				}
+			}
+		}
+	}
+
 	/** Save connection parameters to localstorage
 	*/
 	this.saveParam = function()
 	{	var pwd = this.param.pwd;
+		// Ne pas sauvegarder les mots de passe 
 		if (!window.cordova) delete this.param.pwd;
+		// Ou les encrypter
+		cryptPwd (this.param.groupes, true);
+		// Enregistrer
 		localStorage['WebApp@ripart'] = JSON.stringify(this.param);
+		// Decrypter
+		cryptPwd (this.param.groupes, false);
 		this.param.pwd = pwd;
 		this.onUpdate();
 	};
 
-	if (localStorage['WebApp@ripart']) this.param = JSON.parse(localStorage['WebApp@ripart']);
+	if (localStorage['WebApp@ripart']) {
+		this.param = JSON.parse(localStorage['WebApp@ripart']);
+		// Decrypter les mots de passe
+		cryptPwd (this.param.groupes, false);
+	}
 	else this.param = { georems:[], nbrem:0 };
 
 	this.initialize(options);

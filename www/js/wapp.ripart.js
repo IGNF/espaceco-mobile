@@ -901,7 +901,34 @@ RIPart.prototype.checkUserInfo = function(success, fail, allways)
 
 	this.getUserInfo (function(rep, error)
 	{	if (error) rep = {};
-		else self.param.groupes = rep.groupes
+		else {
+			function getLayer(idgroupe,lname) {
+				var groupes = self.param.groupes;
+				for (var i=0, g; g=groupes[i]; i++) {
+					if (idgroupe===g.id_groupe) {
+						for (var j=0, l; l=g.layers[j]; j++) {
+							if (l.nom === lname) return l;
+						}
+					}
+				}
+				return null;
+			}
+			var groupes = self.param.groupes;
+			self.param.groupes = rep.groupes;
+			if (groupes) {
+				for (var i=0, g; g=groupes[i]; i++) {
+					for(var j=0, l; l=g.layers[j]; j++) {
+						if (l.username) {
+							var layer = getLayer(g.id_groupe, l.nom);
+							if (layer) {
+								layer.username = l.username;
+								layer.password = l.password;
+							}
+						}
+					}
+				}
+			}
+		}
 		// allways trigger function
 		if (typeof(allways)==='function') allways(rep, error);
 		// Recherche du profil :
@@ -923,6 +950,7 @@ RIPart.prototype.checkUserInfo = function(success, fail, allways)
 		else 
 		{	success(rep);
 		}
+		console.log(self.param)
 		self.saveParam();
 	});
 };
