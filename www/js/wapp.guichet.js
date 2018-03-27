@@ -168,18 +168,19 @@ wapp.setGuichet = function(groupe)
 			// Probleme au chargement
 			vector.on("error", function(e){
 				if (e.status===401)
-				{	wapp.message ("Impossible de charger la couche <i>"+this.get('name')+"</i>."
-							+"<i class='error'><br/>"+e.status+" - "+e.error+"</i>",
+				{	wapp.message ("Impossible de charger la couche <i>"
+							+(this.get('name')||this.get('title'))
+							+"</i>.<i class='error'><br/>"+e.status+" - "+e.error+"</i>",
 							"Connexion", { ok:"ok" });
 				}
 				else
-				{	wapp.alert ("Impossible de charger la couche <i>"+this.get('title')+"</i>."
-							+"<i class='error'><br/>"+e.status+" - "+e.error+"</i>");
+				{	wapp.alert ("Impossible de charger la couche <i>"
+							+(this.get('name')||this.get('title'))
+							+"</i>.<i class='error'><br/>"+e.status+" - "+e.error+"</i>");
 				}
 				return;
 			});
 			vector.on("ready", function(){
-				console.log('READY',this)
 				// Marquer le layer sur l'objet
 				this.getSource().on('addfeature', function (e) 
 				{	e.feature.layer = this; 

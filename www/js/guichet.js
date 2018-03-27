@@ -782,7 +782,10 @@ wapp.setDebugMode = function()
 			$(".debug").show();
 		}
 	});
-	if (this.param.options.qlf) $(".debug").show();
+	// Mode debug en qualif
+	if (this.param.options.qlf) {
+		$(".debug").show();
+	}
 };
 
 /** Affichage des layers
@@ -815,7 +818,8 @@ wapp.saveGPS = function()
 		var filename = d+".gpx";
 
 		function write()
-		{	CordovApp.File.write ("SD/GPX/"+filename, gpx, function()
+		{	var path = "SD/"+ (cordova.platform === 'ios' ? "" : "GPX/");
+			CordovApp.File.write (path + filename, gpx, function()
 			{	wapp.message("La fichier GPX/"+filename+" a bien été enregistré","GPX")
 			}, function()
 			{	wapp.alert ("Impossible de créer le fichier");

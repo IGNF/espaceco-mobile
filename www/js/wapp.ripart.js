@@ -902,6 +902,10 @@ RIPart.prototype.checkUserInfo = function(success, fail, allways)
 	this.getUserInfo (function(rep, error)
 	{	if (error) rep = {};
 		else {
+			// offline mode
+			self.param.offline = rep.offline;
+			delete wapp.param.offline;
+			//
 			function getLayer(idgroupe,lname) {
 				var groupes = self.param.groupes;
 				for (var i=0, g; g=groupes[i]; i++) {
@@ -950,7 +954,6 @@ RIPart.prototype.checkUserInfo = function(success, fail, allways)
 		else 
 		{	success(rep);
 		}
-		console.log(self.param)
 		self.saveParam();
 	});
 };
@@ -1001,6 +1004,14 @@ RIPart.prototype.setProfil = function(id_groupe)
 			+ this.param.user;
 		$(".userinfo").html(info);
 	}, this);
+
+	// Offline mode
+	if (this.param.offline) {
+		$('body').addClass('offline');
+	}
+	else {
+		$('body').removeClass('offline');
+	}
 
 	// Sauvegarder
 	this.saveParam();

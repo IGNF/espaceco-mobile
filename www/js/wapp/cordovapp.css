@@ -543,6 +543,21 @@ i.backArrowBt:before
 {	margin-top: 1em;
 }
 
+#wait .pourcent {
+    border: 1px solid #369;
+    height: 25px;
+    width: 80%;
+    margin: 1em auto;
+    max-width: 400px;
+}
+#wait .pourcent > div {
+	background-color: #369;
+    display: block;
+    height: 100%;
+    max-width: 100%;
+    box-sizing: content-box;
+}
+
 /** Notification
 */
 [data-role=notification]

@@ -347,7 +347,7 @@ CordovApp.prototype.notinfo = function(title, msg, options)
 
 /** Wait dialog
 */
-var _wait=null, _wback=null, _message=null;
+var _wait=null, _wback=null, _message=null, _pourcent=null;
 var _wtimeout = null;
 
 /** Wait dialog
@@ -363,6 +363,8 @@ CordovApp.prototype.wait = function(msg, options)
 		var spin = $("<i>").addClass("fa fa-spinner fa-pulse")
 						.appendTo(_wait);
 		_message = $("<div>").insertAfter(spin);
+		var pc = $("<div class='pourcent'>").appendTo(_wait);
+		_pourcent = $("<div>").appendTo(pc);
 	}
 	if (_wtimeout) clearTimeout(_wtimeout);
 	if (msg !== false) 
@@ -375,6 +377,12 @@ CordovApp.prototype.wait = function(msg, options)
 			else _wtimeout = setTimeout (function() { _wait.addClass('visible'); }, 200);
 		}
 		else _wait.removeClass().addClass('visible');
+		if (options.pourcent!==undefined) {
+			_pourcent.css("width",options.pourcent+"%").parent().show();
+		}
+		else {
+			_pourcent.parent().hide();
+		}
 		if (options.className) _wait.addClass(options.className);
 	}
 	else 

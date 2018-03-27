@@ -167,7 +167,7 @@ CordovApp.File =
 				[/^TMP\/?/, cordova.file.externalDataDirectory||cordova.file.dataDirectory],
 				[/^SDFILE\/?/, cordova.file.externalDataDirectory||cordova.file.dataDirectory],
 				[/^SDCACHE\/?/, cordova.file.externalCacheDirectory||cordova.file.cacheDirectory],
-				[/^SD\/?/, cordova.file.externalRootDirectory||cordova.file.dataDirectory],
+				[/^SD\/?/, cordova.file.externalRootDirectory||cordova.file.documentsDirectory],
 				[/^ASSET\/?/, cordova.file.applicationDirectory],
 				[/^CACHE\/?/, cordova.file.cacheDirectory],
 				[/^FILE\/?/, cordova.file.dataDirectory],
@@ -398,7 +398,7 @@ CordovApp.File =
 			fail
 		); 
 	},
-	
+
 	/** Get file information
 	*	@param {String} name URI referring to a local file to move to
 	*	@param {function} success callback that is passed a FileEntry

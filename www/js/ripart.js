@@ -271,6 +271,7 @@ var RIPart = function(options)
 				{	nom: resp.find("AUTEUR NOM").text(),
 					statut: resp.find("AUTEUR STATUTXT").text()
 				};
+			r.offline = false;
 			r.profil = 
 				{	id: Number(resp.find("PROFIL ID_GEOPROFIL").text()),
 					titre: resp.find("PROFIL TITRE").text(),
@@ -293,10 +294,12 @@ var RIPart = function(options)
 					status: att.find("STATUS").first().text(),
 					//filter: filter,
 					logo: att.find("LOGO").text(),
+					offline: !!att.find("OFFLINE_ALLOWED").text(),
 					lonlat: [ Number(att.find("LON").text()), Number(att.find("LAT").text()) ],
 					filter: att.find("FILTER").last().text(),
 					layers:[]
 				};
+				r.offline = r.offline || g.offline;
 				att.find("LAYER").each(function()
 				{	var l = {	
 						nom: $(this).find("NOM").text(),

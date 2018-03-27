@@ -195,6 +195,10 @@ var CordovApp = function(obj)
 					self.append(d);
 					onPagesready();
 				});
+				$('<link/>', {
+					rel: 'stylesheet', 
+					href: "templates/page-"+self.data("template")+".css"
+				}).appendTo('head');				
 			}
 		});
 		// Load menu template
