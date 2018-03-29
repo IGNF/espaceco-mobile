@@ -46,11 +46,13 @@ var CacheMap = function(map, layerGroup, options)
 		image.onload = function() {
 			pattern = ctx.createPattern(image,"repeat");
 		};
-		image.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAnQAAAJ0Bj3LnbgAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAADISURBVCiRldKxCoJgGIXh183BwvhxiO43LyFo8DJyaIlyr3BzL+0CJDLiNGiF/SY5nO17OHD4kJCEsoz7bEYBnL7jupzXa66vWwkhoeMRBQECO66LVqsPeMPDgWoy6Uaeh7ZbG0mI6ZTLr6Y47kbLJSVAPqRpPkeNaUPPQ7tdL7Lhn6gNR6PfKAytDWo4ENVwPKZIkkGohpsNty60WCDH6Ya+T8HAJhmD0pTKgn1NxqD9vvmcx+ODoojSccib1VoJAi5pSvW6fQL1HHSThZb5ywAAAABJRU5ErkJggg=='
+		image.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAMAAAAolt3jAAAAGFBMVEUAAACPjwCmpgCbmwCCggD+/gCXlwD//wDWAMTYAAAAB3RSTlOAsr64rP62hR4cWgAAADpJREFUCNetzTEOACAIA8ACYv//YwVJxF0mLm0AJAUxtjeCPq6IkvKwNYM9c/ko1AdLTLxNtEyZbFcWKysC1htDphIAAAAASUVORK5CYII='
 
 		vector.on('postcompose', function (e){
+			e.context.save();
 			e.context.fillStyle = pattern;
-			e.context.globalAlpha = .1 * layerGroup.getOpacity();
+			e.context.globalAlpha = .3 * layerGroup.getOpacity();
+			e.context.scale(e.frameState.pixelRatio,e.frameState.pixelRatio);
 			layerGroup.getLayers().forEach(function(l) {
 				if (l.getVisible()) {
 					var cache = getCacheMapById(l.get('name').replace('cache_',''));
@@ -64,7 +66,7 @@ var CacheMap = function(map, layerGroup, options)
 				}
 			});
 			e.context.fill();
-			e.context.globalAlpha = 1;
+			e.context.restore();
 		});
 	})();
 
