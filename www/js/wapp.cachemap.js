@@ -602,8 +602,10 @@ var CacheMap = function(map, layerGroup, options)
 	*	@param {string} id
 	*/
 	function getCacheMapById(id)
-	{	for (var i=0, c; c=wapp.param.cacheMap[i]; i++)
-		{	if (c.id == id) return c;
+	{	if (wapp.param.cacheMap) { 
+			for (var i=0, c; c=wapp.param.cacheMap[i]; i++)
+			{	if (c.id == id) return c;
+			}
 		}
 		return null;
 	}
