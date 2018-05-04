@@ -63,7 +63,8 @@ ol.source.Vector.WFS.prototype.loaderFn_ = function(extent, resolution, projecti
 		request: 'GetFeature',
 //		outputFormat: 'JSON',
 		typeName: this.get('typename'),
-		bbox: extent.join(','),
+//		bbox: extent.join(','),
+		boundedBy: extent.join(','),
 //		maxFeatures: this.maxFeatures_,
 		version: this.get('version'),
 	};
