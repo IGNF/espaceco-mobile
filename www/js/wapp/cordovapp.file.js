@@ -49,7 +49,20 @@ CordovApp.File =
 	 * @return {string} a new name with no special chars
 	 */
 	fileName: function(name)
-	{	return name.replace(/\"/g,'').replace(/[ :\*\?<>\|]/g,'_');
+	{	// return name.replace(/\"/g,'').replace(/[ :\*\?<>\|]/g,'_');
+
+		var illegalRe = /[\/\?<>\\:\*\|":]/g;
+		var controlRe = /[\x00-\x1f\x80-\x9f]/g;
+		var reservedRe = /^\.+$/;
+		var windowsReservedRe = /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i;
+		var windowsTrailingRe = /[\. ]+$/;
+
+		return (name || '_')
+			.replace(illegalRe, '_')
+			.replace(controlRe, '_')
+			.replace(reservedRe, '_')
+			.replace(windowsReservedRe, '_')
+			.replace(windowsTrailingRe, '_');
 	},
 	
 	/** Get the file extention

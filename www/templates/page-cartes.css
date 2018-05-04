@@ -60,15 +60,26 @@
 }
 
 /* Offline mode*/
-.offlinemap > button {
+.offlinemap > buttons {
 	display: none;
 }
 .offlinemap .nomap {
 	display: block;
 }
-.offline .offlinemap > button {
+.offline .offlinemap > buttons {
 	display: block;
 }
 .offline .offlinemap .nomap {
 	display: none;
+}
+
+.offlinemap .info {
+	font-size: .75em;
+	line-height: initial;
+	color: #369;
+}
+.offlinemap .info .layer {
+	word-wrap: break-word;
+	display: block;
+	font-weight: bold;
 }

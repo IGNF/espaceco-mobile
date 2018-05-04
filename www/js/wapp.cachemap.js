@@ -22,7 +22,7 @@ var CacheMap = function(map, layerGroup, options)
     
 	// Carte en cours d'edition
 	var currentMap;
-	var currentId=0;
+	var currentId = 0;
 
 	this.listMap = $(options.listMap);
 	this.liTemplate = $('[data-role="template"]', this.listMap).html();
@@ -89,6 +89,7 @@ var CacheMap = function(map, layerGroup, options)
 	});
 	$('.cancel', this.loadPage).click(cancelLoadMap);
 	$('.addmap', this.page).click(function() { addCacheMap(); });
+	$('.savemap', this.page).click(saveCacheFile);
 
 	/**
 	 * Show info
@@ -340,7 +341,9 @@ var CacheMap = function(map, layerGroup, options)
 			}
 		}
 		if (li)
-		{	$(".info .dalle", li).text(smap.length);
+		{	var layerName = new ol.layer.Geoportail(smap.layer).get('name')
+			$(".info .layer", li).text(layerName+" : z"+smap.minZoom);
+			$(".info .dalle", li).text(smap.length);
 			$(".info .date", li).text(smap.date);
 		}
 	};
@@ -608,6 +611,65 @@ var CacheMap = function(map, layerGroup, options)
 			}
 		}
 		return null;
+	}
+
+	/** Charger un fichier de cache */
+	function loadCacheFile(name) {
+		console.log(name);
+		wapp.dialog.close();
+		// addCacheMap(smap)
+		CordovApp.File.read (name, function(cache){
+			var smap = JSON.parse(cache);
+			smap.length = 0;
+			smap.date = (new Date()).toISODateString();
+			delete smap.id;
+			wapp.param.cacheMap.push(smap);
+			addCacheMap(smap);
+			wapp.notification("Une emprise ajouté.");
+		}, function(){
+			wapp.alert("Impossible de charger l'emprise...");
+		})
+	}
+
+	/** Enregistrer les fichiers de cache sur l'appareil
+	 */
+	function saveCacheFile() {
+		if (window.cordova) {
+			var content = CordovApp.template("dialog-savecache");
+			var path = "SD/"+ (cordova.platform === 'ios' ? "" : "guichet/");
+			function addEntry(entry) {
+				$("<li>").text(entry.name)
+				.click(function() {
+					loadCacheFile(path+entry.name);
+				})
+				.appendTo($("ul", content));
+			}
+			CordovApp.File.listDirectory (path, function(entry) {
+				for (var i=0; i<entry.length; i++)
+				{	if (!entry[i].isDirectory && /\.cache$/.test(entry[i].name)) {
+						addEntry(entry[i]);
+					}
+				}
+			});
+			wapp.dialog.show(content,
+				{	title: "Gestion des emprises",
+					buttons: { save:'Enregistrer', cancel: 'Annuler' },
+					callback: function (b) {
+						if (b==='save') {
+							var cache = wapp.param.cacheMap;
+							if (cache.length) {
+								for (var i=0, c; c = cache[i]; i++) {
+									var filename = path + CordovApp.File.fileName(c.nom) + ".cache";
+									CordovApp.File.write (filename, JSON.stringify(c))
+								}
+							}
+							var s = cache.length>1 ? 's' : '';
+							wapp.message(cache.length+' fichier'+s
+								+' enregistré'+s+' dans le répertoire '+path);
+						}
+					}
+				});
+		}
 	}
 
 	/* Ajoute une carte a l'application : layer / 

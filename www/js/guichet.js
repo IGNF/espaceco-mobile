@@ -196,6 +196,7 @@ wapp.setOperations = function()
 wapp.initParams = function()
 {	if (!this.param.options) this.param.options={};
 	var options = this.param.options;
+	// On change
 	var inputs = this.paramInput = this.setParamInput("#options", options, function(e)
 		{	switch (e.name)
 			{	case "rotmap":
@@ -204,6 +205,9 @@ wapp.initParams = function()
 				case "zoombt":
 					if (e.val===false) $("#map .ol-zoom").hide();
 					else $("#map .ol-zoom").show();
+					break;
+				case 'extended':
+					$('body').attr('data-mode', options.extended?'extended':null);
 					break;
 				case "searchbt":
 					if (e.val===false) $("#map .searchCtrl").hide();

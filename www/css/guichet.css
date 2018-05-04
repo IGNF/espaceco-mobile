@@ -621,6 +621,7 @@
 {	position: absolute;
 	right: 0.5em;
 	top: 0.5em;
+	z-index: 1;
 }
 #layerswitcher .ol-layerswitcher .panel li.dropover
 {	transform:scale(0.95);
@@ -1330,4 +1331,25 @@ body.trackingGeorem #fiche .signaler .movePosition
 li[data-class="nb=0"],
 span[data-class="nb=1"] {
 	display: none;
+}
+
+
+/* Dialog savecache */
+.dialog-savecache ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.dialog-savecache li {
+	padding: .5em;
+	border-bottom: 1px solid #ccc;
+	
+}
+
+/* Mode avance */
+.extended {
+	display: none;
+}
+[data-mode="extended"] .extended {
+	display: inline-block;
 }
