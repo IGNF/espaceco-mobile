@@ -998,7 +998,7 @@ RIPart.prototype.setProfil = function(id_groupe)
 	{	$(".title", this.profilElement).text(this.param.profil.groupe || "");
 		$("img", this.profilElement).attr("src", logo || "");
 		// Show user info
-		$("img.logo").attr("src", logo || "");
+		$("img.logo").attr("src", logo || "img/ign.png");
 		$("body").attr("data-logo", logo?"":"none");
 		var info = (this.param.profil.groupe ? this.param.profil.groupe+"<br/>": "")
 			+ this.param.user;
