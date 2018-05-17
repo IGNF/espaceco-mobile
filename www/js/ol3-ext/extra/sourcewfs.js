@@ -116,7 +116,7 @@ ol.source.Vector.WFS.prototype.hasFeature = function(feature) {
 		if (id===f.get(this.get('id'))) return true;
 	}
 	return false;
-}
+};
 
 /**
  * No Feature type
@@ -124,4 +124,4 @@ ol.source.Vector.WFS.prototype.hasFeature = function(feature) {
  */
 ol.source.Vector.WFS.prototype.getFeatureType = function() {
 	return {};
-}
+};

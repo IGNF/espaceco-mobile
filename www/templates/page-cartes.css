@@ -60,13 +60,13 @@
 }
 
 /* Offline mode*/
-.offlinemap > buttons {
+.offlinemap > .buttons {
 	display: none;
 }
 .offlinemap .nomap {
 	display: block;
 }
-.offline .offlinemap > buttons {
+.offline .offlinemap > .buttons {
 	display: block;
 }
 .offline .offlinemap .nomap {
