@@ -92,6 +92,7 @@ ol.layer.Vector.Webpart.Style.Image = function (fstyle)
 			case "star":
 			case "square":
 			case "triangle":
+			case "x":
 				var graphic = 
 					{	cross: [ 4, radius, 0, 0 ],
 						square: [ 4, radius, undefined, Math.PI/4 ],
@@ -107,7 +108,7 @@ ol.layer.Vector.Webpart.Style.Image = function (fstyle)
 						rotation: g[3],
 						stroke: ol.layer.Vector.Webpart.Style.Stroke(fstyle),
 						fill: ol.layer.Vector.Webpart.Style.Fill(fstyle)
-					})
+					});
 				break;
 			default:
 				image = new ol.style.Circle(
@@ -125,27 +126,29 @@ ol.layer.Vector.Webpart.Style.Image = function (fstyle)
 *	@param {featureType.style | undefined}
 *	@return ol.style.Text
 */
-ol.layer.Vector.Webpart.Style.Text = function (fstyle)
-{	return new ol.style.Text(
-		{	font: (fstyle.fontWeight || '')
-				+ " "
-				+ (fstyle.fontSize || "12px")
-				+ " "
-				+ (fstyle.fontFamily || 'Sans-serif'),
-			text: fstyle.label,
-			rotation: (fstyle.labelRotation || 0),
-			textAlign: "left",
-			textBaseline: "middle",
-			offsetX: fstyle.labelXOffset||0,
-			offsetY: -fstyle.labelYOffset||0,
-			stroke: new ol.style.Stroke(
-					{	color: fstyle.labelOutlineColor || "#fff",
-						width: Number(fstyle.labelOutlineWidth) || 2
-					}),
-			fill: new ol.style.Fill(
-				{	color: fstyle.fontColor
-				})
-		});
+ol.layer.Vector.Webpart.Style.Text = function (fstyle) {
+	if (!fstyle.label) return undefined;
+	var s = {
+		font: (fstyle.fontWeight || '')
+			+ " "
+			+ (fstyle.fontSize || "12") +'px'
+			+ " "
+			+ (fstyle.fontFamily || 'Sans-serif'),
+		text: fstyle.label,
+		rotation: (fstyle.labelRotation || 0),
+		textAlign: "left",
+		textBaseline: "middle",
+		offsetX: fstyle.labelXOffset||0,
+		offsetY: -fstyle.labelYOffset||0,
+		stroke: new ol.style.Stroke(
+				{	color: fstyle.labelOutlineColor || "#fff",
+					width: Number(fstyle.labelOutlineWidth) || 2
+				}),
+		fill: new ol.style.Fill(
+			{	color: fstyle.fontColor
+			})
+	};
+	return new ol.style.Text(s);
 };
 
 /** Get ol.style.function as defined in featureType
@@ -158,15 +161,53 @@ ol.layer.Vector.Webpart.Style.getFeatureStyleFn = function(featureType)
 	{	return ol.layer.Vector.Webpart.Style[featureType.name](featureType);
 	}
 	else return function(feature, res)
-	{	var fstyle = ol.layer.Vector.Webpart.Style.formatFeatureStyle (featureType.style, feature);
+	{	var style = featureType.style;
+		// Conditionnal style
+		if (featureType.style && featureType.style.children) {
+			for (var i=0, fi; fi=featureType.style.children[i]; i++) {
+				var test = true;
+				for (var k=0, cond; cond = fi.condition[k]; k++) {
+					var val = feature.get(cond.field);
+					switch (cond.operator) {
+						case '>':
+							test = test && (val > cond.value);
+							break;
+						case '>=':
+							test = test && (val >= cond.value);
+							break;
+						case '<':
+							test = test && (val < cond.value);
+							break;
+						case '<=':
+							test = test && (val <= cond.value);
+							break;
+						case '==':
+							test = test && (val == cond.value);
+							break;
+						case '!=':
+							test = test && (val != cond.value);
+							break;
+						default: 
+							test = false; 
+							break;
+					}
+				}
+				if (test) {
+					style = fi;
+					break;
+				}
+			}
+		}
+
+		var fstyle = ol.layer.Vector.Webpart.Style.formatFeatureStyle (style, feature);
 		// Gestion d'une bibliotheque de symboles
-		if (featureType.style && featureType.style.name && featureType.symbo_attribute)
+		if (style && style.name && featureType.symbo_attribute)
 		{	fstyle.img = featureType.uri.replace(/gcms\/.*/,"")
 				+ "gcms/style/image/"
-				+ featureType.style.name
+				+ style.name
 				+ "/" + feature.get(featureType.symbo_attribute.name)
-				+"?width="+featureType.style.graphicWidth
-				+"&height="+featureType.style.graphicHeight;
+				+"?width="+style.graphicWidth
+				+"&height="+style.graphicHeight;
 		}
 		return [	
 			new ol.style.Style (
@@ -178,6 +219,7 @@ ol.layer.Vector.Webpart.Style.getFeatureStyleFn = function(featureType)
 		];
 	}
 };
+
 
 /** Default style
  *	@return {ol.style.Style}

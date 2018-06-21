@@ -144,8 +144,13 @@ CordovApp.prototype.showPage = function(id_page)
 	{	setTimeout (function() { item.addClass("visible"); }, 100);
 	}
 	for (var i=0; i<id_page.length; i++)
-	{	var self = $("#"+id_page[i])
-			.trigger( { type:"showpage", page:id_page[i] } )
+	{	var self = $("#"+id_page[i]);
+		if (self.attr("data-onshow")) {
+			try {
+				eval(self.attr("data-onshow"));
+			} catch(e) {};
+		}
+		self.trigger( { type:"showpage", page:id_page[i] } )
 			.show();
 		show (self);
 	}

@@ -48,24 +48,25 @@ var CacheMap = function(map, layerGroup, options)
 		};
 		image.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAMAAAAolt3jAAAAGFBMVEUAAACPjwCmpgCbmwCCggD+/gCXlwD//wDWAMTYAAAAB3RSTlOAsr64rP62hR4cWgAAADpJREFUCNetzTEOACAIA8ACYv//YwVJxF0mLm0AJAUxtjeCPq6IkvKwNYM9c/ko1AdLTLxNtEyZbFcWKysC1htDphIAAAAASUVORK5CYII='
 
-		vector.on('postcompose', function (e){
+		vector.on('postcompose', function (e) {
 			e.context.save();
-			e.context.fillStyle = pattern;
-			e.context.globalAlpha = .3 * layerGroup.getOpacity();
-			e.context.scale(e.frameState.pixelRatio,e.frameState.pixelRatio);
-			layerGroup.getLayers().forEach(function(l) {
-				if (l.getVisible()) {
-					var cache = getCacheMapById(l.get('name').replace('cache_',''));
-					if (cache && cache.minZoom > map.getView().getZoom()) {
-						for (var k=0, extent; extent=cache.extents[k]; k++) {
-							var p0 = map.getPixelFromCoordinate([extent[0], extent[1]]);
-							var p1 = map.getPixelFromCoordinate([extent[2], extent[3]]);
-							e.context.rect(p0[0],p0[1],p1[0]-p0[0],p1[1]-p0[1]);
+				e.context.fillStyle = pattern;
+				e.context.globalAlpha = .3 * layerGroup.getOpacity();
+				e.context.scale(e.frameState.pixelRatio,e.frameState.pixelRatio);
+				e.context.beginPath();
+				layerGroup.getLayers().forEach(function(l) {
+					if (l.getVisible()) {
+						var cache = getCacheMapById(l.get('name').replace('cache_',''));
+						if (cache && cache.minZoom > map.getView().getZoom()) {
+							for (var k=0, extent; extent=cache.extents[k]; k++) {
+								var p0 = map.getPixelFromCoordinate([extent[0], extent[1]]);
+								var p1 = map.getPixelFromCoordinate([extent[2], extent[3]]);
+								e.context.rect(p0[0],p0[1],p1[0]-p0[0],p1[1]-p0[1]);
+							}
 						}
 					}
-				}
-			});
-			e.context.fill();
+				});
+				e.context.fill();
 			e.context.restore();
 		});
 	})();
@@ -241,7 +242,7 @@ var CacheMap = function(map, layerGroup, options)
 			if (!wapp.param.cacheMap.length) {
 				CordovApp.File.listDirectory(getPath(), function(entries){
 					for (var i=0, entry; entry = entries[i]; i++) {
-						if (entry.isDirectory) entry.removeRecursively(function(){},function(){});
+						if (entry.isDirectory) entry.removeRecursively();
 					}
 				});
 			}
@@ -753,7 +754,9 @@ var CacheMap = function(map, layerGroup, options)
 			});
 	
 		// Gestion de l'aide
-		if (wapp.getPage()==self.page.attr('id')) wapp.help.show("cartes_load");
+		if (wapp.getPage()==self.page.attr('id')) {
+			wapp.help.show("cartes-hors-ligne");
+		}
 	
 		updateCacheMapInfo (smap);
 

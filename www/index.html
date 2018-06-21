@@ -29,6 +29,8 @@
 	<link rel="stylesheet" type="text/css" href="js/gppkiss/geoportail.css" />
 	<link rel="stylesheet" type="text/css" href="js/wapp/cordovapp.css" />
 
+	<link rel="stylesheet" type="text/css" href="js/ol3-ext/control/Search.css" />
+
 	<link rel="stylesheet" type="text/css" href="css/font-tools.css" />
 	<link rel="stylesheet" type="text/css" href="css/font-awesome.min.css" />
 	<link rel="stylesheet" type="text/css" href="css/guichet.css" />
@@ -68,6 +70,9 @@
 	<!-- Options -->
 	<div id="options" data-role="page" data-template="options"></div>
 
+	<!-- Maintenance -->
+	<div id="maintenance" data-role="page" data-template="maintenance" data-onshow="wapp.maintain()"></div>
+
 	<!-- Layers -->
 	<div id="layers" data-role="page" data-template="layers"></div>
 
@@ -105,7 +110,7 @@
 	<script type="text/javascript" src="js/gppkiss/ol.js"></script>
 	<script type="text/javascript" src="js/gppkiss/geoportailconfig.js"></script>
 	<script type="text/javascript" src="js/gppkiss/geoportail.js"></script>
-	<script type="text/javascript" src="js/gppkiss/GeoportailService.js"></script>
+
 	<!-- OL3-ext -->
 	<script type="text/javascript" src="js/ol3-ext/control/buttoncontrol.js"></script>
 	<script type="text/javascript" src="js/ol3-ext/control/togglecontrol.js"></script>
@@ -117,10 +122,13 @@
 	<script type="text/javascript" src="js/ol3-ext/utils/ol.map.pulse.js"></script>
 	<script type="text/javascript" src="js/ol3-ext/layer/getpreview.js"></script>
 
+	<script type="text/javascript" src="js/ol3-ext/control/Search.js"></script>
+	<script type="text/javascript" src="js/ol3-ext/control/SearchFeature.js"></script>
+	<script type="text/javascript" src="js/ol3-ext/control/SearchJSON.js"></script>
+	<script type="text/javascript" src="js/ol3-ext/control/SearchGeoportail.js"></script>
+
 	<script type="text/javascript" src="js/ol3-ext/interaction/longtouchinteraction.js"></script>
 	<script type="text/javascript" src="js/ol3-ext/interaction/geolocationdrawinteraction.js"></script>
-
-	<script type="text/javascript" src="js/ol3-ext/extra/geoportaillocate.js"></script>
 	<script type="text/javascript" src="js/ol3-ext/extra/geolocatecontrol.js"></script>
 	<script type="text/javascript" src="js/ol3-ext/extra/webpartsource.js"></script>
 	<script type="text/javascript" src="js/ol3-ext/extra/webpartlayer.js"></script>
@@ -132,6 +140,7 @@
 	<script type="text/javascript" src="js/ol3-ext/style/shadowstyle.js"></script>
 	<script type="text/javascript" src="js/ol3-ext/style/fontsymbol.js"></script>
 	<script type="text/javascript" src="js/ol3-ext/style/fontawesome.def.js"></script>
+	<script type="text/javascript" src="js/ol3-ext/style/FillPattern.js"></script>
 
 	<script type="text/javascript" src="js/wapp/cordovapp.js"></script>
 	<script type="text/javascript" src="js/wapp/cordovapp.page.js"></script>

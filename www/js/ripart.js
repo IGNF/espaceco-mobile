@@ -289,6 +289,7 @@ var RIPart = function(options)
 				} catch(e){};
 				var g = 
 				{	nom: att.find("NOM").first().text(),
+					desc: att.find("DESCRIPTION").first().text(),
 					id_groupe: Number(att.find("ID_GEOGROUPE").text()),
 					global: (att.find("STATUS").first().text() == "global"),
 					status: att.find("STATUS").first().text(),

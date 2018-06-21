@@ -65,6 +65,17 @@ var wapp = new CordovApp(
 
 		wapp.setDebugMode();
 
+		// A propos
+		$('#apropos').on('showpage', function(){
+			if (wapp.ripart.param.profil) {
+				var groupe = wapp.ripart.param.groupes.find( function(g){
+					return g.id_groupe === wapp.ripart.param.profil.id_groupe;
+				});
+				$("#apropos .groupe h3 span").html('').text(groupe.nom);
+				$("#apropos .groupe div").html('').html(groupe.desc);
+			}
+		});
+
 		// Fin
 //		wapp.wait(false);
 	},
@@ -108,13 +119,32 @@ var wapp = new CordovApp(
 	*/
 	onMenuButton: function() { if (!this.isWaiting()) this.toggleMenu(); },
 
+	/** Save current position
+	 */
+	savePosition: function() {
+		var pos = this.map.getView().getCenter();
+		var zoom = this.map.getView().getZoom();
+		var position = this.param['position'] = { 
+			lon: Math.round(pos[0]*100)/100, 
+			lat: Math.round(pos[1]*100)/100, 
+			zoom:zoom 
+		};
+		localStorage['WebApp@position'] = JSON.stringify(position);
+	},
+
+	/** Get the saved position
+	 * @return {ol.coordinate|null} the saved position or null if none
+	 */
+	getPosition: function() {
+		if (localStorage['WebApp@position']) return JSON.parse(localStorage['WebApp@position']);
+		else return null;
+	},
+
 	/** Save current position 
 	* @memberof wapp
 	*/
-	saveContext: function()
-	{	var pos = this.map.getView().getCenter();
-		var zoom = this.map.getView().getZoom();
-		this.param['position'] = { lon:Math.round(pos[0]*100)/100, lat:Math.round(pos[1]*100)/100, zoom:zoom };
+	saveContext: function() {
+		this.savePosition();
 		var layers=[], hidden=[]; 
 		function saveVisibility(lays)
 		{	lays.forEach(function(l)
@@ -308,7 +338,7 @@ wapp.initMap = function()
 	];
 
 	// The map
-	var pos = this.param.position || {};
+	var pos = this.getPosition() || this.param.position || {};
 	var map = this.map = new ol.Map.Geoportail
 		({	target: 'map',
 			key: apiKey,
@@ -317,14 +347,18 @@ wapp.initMap = function()
 			// animations stutter on mobile or slow devices.
 			//loadTilesWhileAnimating: true,
 			view: new ol.View
-			({	zoom: pos.zoom || 5,
+			({	zoom: Math.min(18, pos.zoom || 5),
 				center: [pos.lon || 166326, pos.lat || 5992663]
 			}),
 			controls: ol.control.defaults({ attribution:false }),
 			interactions: ol.interaction.defaults(),
 			layers: layers
 		});
-	if (map.getView().getZoom()>18) map.getView().setZoom(18);
+
+	// Save position on move end (for iOS)
+	map.on('moveend', function(){
+		this.savePosition();
+	}, this);
 
 	// Prevent link to open 
 	ol.Attribution.uniqueAttributionKey = {};
@@ -376,15 +410,21 @@ wapp.initControls = function()
 
 	// Geolocation Control
 	//this.addLocateControl(map);
-	var locCtrl = new ol.control.GeoportailLocate(
+//	var locCtrl = new ol.control.GeoportailLocate(
+	var locCtrl = new ol.control.SearchGeoportail(
 		{	apiKey:apiKey, 
 			authentication: auth,
-			target: $('#search [data-role="content"]').get(0),
+			target: $('#search [data-role="onglet-li"][data-list="adress"]').get(0),
 			onGeocode: function(pos, r)
 			{	centerMap(ol.proj.transform(pos,'EPSG:4326', map.getView().getProjection()));
 				wapp.hidePage();
 			}
 		});
+	locCtrl.set('copy', null);
+	locCtrl.on('select', function(e) {
+		centerMap(e.coordinate);
+		wapp.hidePage();
+	});
 	map.addControl (locCtrl);
 	// Search button
 	var searchCtrl = new ol.control.Button(
@@ -396,6 +436,19 @@ wapp.initControls = function()
 			}
 		});
 	map.addControl (searchCtrl);
+
+	var searchFeature = new ol.control.SearchFeature({
+		placeholder: 'chercher une donnée...',
+		target: $('#search [data-role="onglet-li"][data-list="data"]').get(0),
+		maxItems: 50
+	});
+	map.addControl(searchFeature);
+	searchFeature.on('select', function (e) {
+		wapp.select.getFeatures().clear();
+		wapp.select.getFeatures().push(e.search);
+		wapp.showSelect();
+	});
+	wapp.setSearchSource ();
 
 	// Scale line
 	map.addControl (new ol.control.CanvasScaleLine());
@@ -428,6 +481,27 @@ wapp.initControls = function()
 	map.addControl(geoloc);
 };
 
+/** Definir la source pour la recherche
+ * @param {ol.source.Vector} source
+ */
+wapp.setSearchSource = function(source, prop) {
+	if (source && prop) {
+		var ctrl;
+		wapp.map.getControls().forEach(function (c) { 
+			if (c instanceof ol.control.SearchFeature) {
+				ctrl = c;
+			}
+		});
+		if (ctrl) {
+			$('#search').removeClass('noOnglet');
+			ctrl.setSource(source);
+			ctrl.set('property', prop);
+		}
+	} else {
+		wapp.showOnglet('adress');
+		$('#search').addClass('noOnglet');
+	}
+};
 
 /** Ajout des interactions sur la carte
 */
@@ -525,7 +599,7 @@ wapp.initInteractions = function()
 			for (var k=0, l; l=layers[k]; k++) getFeatureInfo(l, e.coordinate);
 			*/
 		}
-	})
+	});
 
 	// Longtouch
 	map.addInteraction(new ol.interaction.LongTouch(
@@ -656,6 +730,30 @@ wapp.initRipart = function()
 				{	wapp.alert ("Merci de laisser un commentaire...");
 					return false;
 				}
+				// Forcer la jointure avec un objet d'une couche vecteur
+				if (!georem.sketch) {
+					console.log('nosketch')
+					var proj = wapp.map.getView().getProjection();
+					var coord = ol.proj.fromLonLat([georem.lon,georem.lat], proj);
+					for (var i=0, l; l = wapp.vector[i]; i++) {
+						if (l.get('attach')) {
+							var coord = ol.proj.fromLonLat([georem.lon,georem.lat], proj);
+							var extent = ol.extent.buffer (ol.extent.boundingExtent([coord]), .1);
+							var f, features = l.getSource().getFeaturesInExtent(extent);
+							for (var k=0; f=features[k]; k++) {
+								var geom = f.getGeometry();
+								if (geom.intersectsCoordinate && geom.intersectsCoordinate(coord)) {
+									break;
+								}
+							}
+							if (!f) f = l.getSource().getClosestFeatureToCoordinate(coord);
+							if (f) {
+								georem.sketch = wapp.ripart.feature2sketch(f, proj);
+								break;
+							}
+						}
+					}
+				}
 				// Forcer le groupe
 				// georem.id_groupe = this.param.groupes[0].id_groupe;
 				// Protocol
@@ -737,34 +835,38 @@ wapp.changeGroup = function (e)
 	var lgroup = wapp.map.getLayersByName("groupe")[0];
 	lgroup.getLayers().clear();
 	// Verifier les layers disponibles
-	var layers = e.group.layers;
-	var attribution = new ol.Attribution({ "html":e.group.nom });
-	for (var i=0, l; l = layers[i]; i++)
-	{	if (l.type=="WMS")
-		{	var extent = l.extent;
-			extent = ol.proj.transformExtent(extent, "EPSG:4326", "EPSG:3857");
-			var wmsParam = {
-				"title": l.nom,
-				"extent": extent[0] ? extent : undefined,
-				"minResolution": new ol.View({ zoom: l.maxzoom }).getResolution(),
-				"maxResolution": new ol.View({ zoom: l.minzoom }).getResolution(),
-				"getFeatureInfoMask": l.getFeatureInfoMask,
-				"source": new ol.source.TileWMS({
-					"url": l.url,
-					"projection": "EPSG:3857",
-					// "crossOrigin": "anonymous",
-					"params": {
-						"LAYERS": l.layer,
-						"FORMAT": l.format,
-						"VERSION": l.version
-					},
-					"attributions": [attribution]
-				})
-			};
-			lgroup.getLayers().push( new ol.layer.Tile (wmsParam) );
+	if (e.group) {
+		var layers = e.group.layers;
+		var attribution = new ol.Attribution({ "html":e.group.nom });
+		for (var i=0, l; l = layers[i]; i++) {
+			if (l.type=="WMS") {
+				var extent = l.extent;
+				extent = ol.proj.transformExtent(extent, "EPSG:4326", "EPSG:3857");
+				var wmsParam = {
+					"title": l.nom,
+					"logo": e.group.logo,
+					"extent": extent[0] ? extent : undefined,
+					"minResolution": new ol.View({ zoom: l.maxzoom }).getResolution(),
+					"maxResolution": new ol.View({ zoom: l.minzoom }).getResolution(),
+					"getFeatureInfoMask": l.getFeatureInfoMask,
+					"source": new ol.source.TileWMS({
+						"url": l.url,
+						"projection": "EPSG:3857",
+						// "crossOrigin": "anonymous",
+						"params": {
+							"LAYERS": l.layer,
+							"FORMAT": l.format,
+							"VERSION": l.version
+						},
+						"attributions": [attribution]
+					})
+				};
+				lgroup.getLayers().push( new ol.layer.Tile (wmsParam) );
+			}
 		}
+		lgroup.set('title', e.group.nom);
 	}
-	lgroup.set('title', e.group.nom);
+	// Afficher ?
 	lgroup.set("displayInLayerSwitcher", !!(lgroup.getLayers().getLength()));
 };
 

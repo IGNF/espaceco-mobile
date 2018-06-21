@@ -92,10 +92,7 @@ wapp.setGuichet = function(groupe)
 		else $(this).removeClass('selected');
 	});
 	// Layers du guichet
-	if (this.vector) 
-	{	for (var i=0, l; l=this.vector[i]; i++) 
-			guichet.getLayers().clear();
-	}
+	guichet.getLayers().clear();
 	this.vector = [];
 	if (!groupe.layers) 
 	{	guichet.set("displayInLayerSwitcher", false);
@@ -104,56 +101,183 @@ wapp.setGuichet = function(groupe)
 	guichet.set("displayInLayerSwitcher", true);
 	guichet.set("title", groupe.nom);
 	var nb=0, nbLoad=0;
-	var loading={};
+	var loading = {};
 	// Ajouter les layers Webpart
+	wapp.setSearchSource ();
 	for (var i=0, l; l=groupe.layers[i]; i++)
 	{	if (l.type=="WFS")
 		{	nb++;
 			var vector;
 			// WFS externe
 			if (l.external) {
-				if (!l.mask.id) {
-					nb--;
-					continue;
-				}
-				else {
-					vector = new ol.layer.Vector.WFS (l, function(layer, cback) {
-						var content = CordovApp.template("dialog-authenticate");
-						console.log(layer)
-						$('span', content).text(layer.get('name'));
-						wapp.dialog.show (content, {
-							title: "Connexion", 
-							buttons: { submit:"OK", cancel:"Annuler" },
-							callback: function(b) {
-								if (b=='submit') {
-									cback($('.nom', content).val(), $('.pwd', content).val());
-								}
-								else {
-									cback(false);
-								}
+				if (!/sitecentroid/.test(l.typename)) l.typename+=',sitecentroid';
+				// Methode de chargement
+				l.strategy = new ol.loadingstrategy.all();
+				l.once = true;			// Chargement en une fois
+				l.search = 'nom';		// Propriete de recherche
+				l.attach = true;		// Joindre aux remontees
+				// Gestion des attributs
+				l.attributes = {
+					/* Symbologie * /
+					"symb__label" : { "title" : "symb@label", "type" : "Style"},
+					"symb__lColor" : { "title" : "symb@lColor", "type" : "Style"},
+					"symb__lsColor" : { "title" : "symb@lsColor", "type" : "Style"},
+					"symb__lSize" : { "title" : "symb@lSize", "type" : "Style"},
+					"symb__sColor" : { "title" : "symb@sColor", "type" : "Style"},
+					"symb__sWidth" : { "title" : "symb@sWidth", "type" : "Style"},
+					"symb__sDash" : { "title" : "symb@sDash", "type" : "Style"},
+					"symb__fColor" : { "title" : "symb@fColor", "type" : "Style"},
+					"symb__fPattern" : { "title" : "symb@fPattern", "type" : "Style"},
+					"symb__pColor" : { "title" : "symb@pColor", "type" : "Style"},
+					"symb__pAngle" : { "title" : "symb@pAngle", "type" : "Style"},
+					"symb__pWidth" : { "title" : "symb@pWidth", "type" : "Style"},
+					"symb__pSpace" : { "title" : "symb@pSpace", "type" : "Style"},
+					/*/
+					"symb__label" : { "title" : "symb@label", "type" : "Style"},
+					"symb__sColor" : { "title" : "symb@sColor", "type" : "Style"},
+					"symb__sWidth" : { "title" : "symb@sWidth", "type" : "Style"},
+					"symb__sDash" : { "title" : "symb@sDash", "type" : "Style"},
+					"symb__fColor" : { "title" : "symb@fColor", "type" : "Style"},
+					"symb__fPattern" : { "title" : "symb@fPattern", "type" : "Style"},
+					"symb__pColor" : { "title" : "symb@pColor", "type" : "Style"},
+					/* unused */
+					"symb__pPattern" : { "title" : "symb@pPattern", "type" : "Style"},
+					/* Attributs */
+					"nom" : { "title" : "Site@Nom", "type" : "String", "readOnly":true},
+					"label" : { "title" : "Informations générales@Nom", "type" : "String", "readOnly":true},
+					"surface" : { "title" : "Informations générales@Surface", "type" : "Float", "readOnly":true},
+					"essence_principale" : { "title" : "Informations@Essence principale", "type" : "String", "readOnly":true},
+					"date_implantation" : { "title" : "Informations@Date d'implantation", "type" : "String", "readOnly":true},
+					"peuplement_actuel" : { "title" : "Informations@Type de peuplement actuel", "type" : "String", "readOnly":true},
+					"peuplement_cible" : { "title" : "Informations@Type de peuplement cible", "type" : "String", "readOnly":true},
+					"observations" : { "title" : "Informations@Observations", "type" : "String", "readOnly":true},
+					"structure" : { "title" : "Informations@Répartition par classe de diamètre", "type" : "String", "readOnly":true},
+					"qualite" : { "title" : "Informations@Qualitatif", "type" : "String", "readOnly":true},
+					"surface_terriere" : { "title" : "Informations@Surface terrière", "type" : "String", "readOnly":true},
+					/* Interventions */
+					"interventions_psg" : { "title" : "Interventions PSG@Interventions", "type" : "JsonValue", "readOnly":true},
+					"interventions_hpsg" : { "title" : "Interventions hors-PSG@Interventions", "type" : "JsonValue", "readOnly":true},
+				
+					/* unused * /
+					"symb__pPattern" : { "title" : "symb@pPattern", "type" : "Style"},
+					/* Attributs * /
+					"id": { "title": "Informations générales@Identifiant"},
+					"site_id": { "title": "Informations générales@No du site"},
+					"label" : { "title" : "Informations générales@Nom", "type" : "String", "readOnly":true},
+					"surface" : { "title" : "Informations générales@Surface", "type" : "Float", "readOnly":true},
+					"essence_principale" : { "title" : "Informations générales@Essence principale", "type" : "String", "readOnly":true},
+					"date_implantation" : { "title" : "Informations générales@Date d'implantation", "type" : "String", "readOnly":true},
+					"peuplement_actuel" : { "title" : "Informations générales@Type de peuplement actuel", "type" : "String", "readOnly":true},
+					"peuplement_cible" : { "title" : "Informations générales@Type de peuplement cible", "type" : "String", "readOnly":true},
+					"observations" : { "title" : "Informations générales@Observations", "type" : "String", "readOnly":true},
+					"structure" : { "title" : "Informations générales@Répartition par classe de diamètre", "type" : "String", "readOnly":true},
+					"qualite" : { "title" : "Informations générales@Qualitatif", "type" : "String", "readOnly":true},
+					"surface_terriere" : { "title" : "Informations générales@Surface terrière", "type" : "String", "readOnly":true},
+					"interventions_psg" : { "title" : "Interventions@intervention", "type" : "JSON", "readOnly":true},
+					/**/
+				};
+				//
+				l.authentication = function(layer, cback) {
+					var content = CordovApp.template("dialog-authenticate");
+					$('span', content).text(layer.get('name'));
+					wapp.dialog.show (content, {
+						title: "Connexion", 
+						buttons: { submit:"OK", cancel:"Annuler" },
+						callback: function(b) {
+							if (b=='submit') {
+								cback($('.nom', content).val(), $('.pwd', content).val());
 							}
-						});
+							else {
+								cback(false);
+							}
+						}
 					});
-				}
+				};
+				// Gestion du cache
+				var cache = {
+					saveCache: function(response, extent, resolution) {
+						var fileName = 'FILE/cache/'+this.getCacheFileName(extent, resolution); 
+						CordovApp.File.getDirectory('FILE/cache', 
+							function() {
+								CordovApp.File.write(
+									fileName, 
+									response,
+									options.success,
+									options.error
+								);
+							}, 
+							function(){},
+							true
+						);
+					},
+					loadCache: function(options) {
+						if (wapp.param.options.nocache) {
+							options.error('nocache');
+							console.log("NOCACHE");
+							return;
+						}
+						var fileName = 'FILE/cache/'+this.getCacheFileName(options.extent, options.resolution);
+						CordovApp.File.info(
+							fileName, 
+							function(file){
+								// Obsolete (plus d'un jour)
+								if ((new Date() - file.lastModified) > 24*3600*1000 ) {
+									options.error('obsolete');
+								} else {
+									// Lire le cache
+									CordovApp.File.read(
+										fileName, 
+										options.success,
+										options.error
+									);
+								}
+							},
+							function() {
+								options.error('nocache');
+							}
+						);
+					}
+				};
+				// Layer a charger
+				vector = new ol.layer.Vector.WFS (l, cache);
+				
+				// Menage
+				delete l.strategy;
+				delete l.authentication;
+
+				//
+				vector.set('logo', groupe.logo);
+				vector.set('attach', l.attach);
+				// Chargement OK
+				vector.once('ready', function() { 
+					// Sauvegarde login / pwd
+					wapp.ripart.saveParam();
+					// Recherche sur la couche ?
+					wapp.setSearchSource(this.getSource(), this.get('search'));
+				}, vector);
+				// Probleme au chargement
+				vector.on("error", function(e){});
 			} 
 			// Guichet
 			else {
 				var url = l.url.replace(/(.*)\?(.*)/,"$1");
 				var base = l.url.replace(/.*databasename=(.*)/,"$1");
+				var extent = [];
+				for (var k=0; k<l.extent.length; k++) extent[k] = parseFloat(l.extent[k]);
+				extent = ol.proj.transformExtent(extent, 'EPSG:4326', wapp.map.getView().getProjection());
 				vector = new ol.layer.Vector.Webpart(
 					{	url: url,
 						name: l.nom,
 						title: l.nom,
 						database: base,
+						extent: extent,
 						username: wapp.ripart.getUser(),
 						password: wapp.ripart.getUser(true),
 						// style: guichet.style,
 						maxResolution: 40, // zoom 13
 						checkSourceOptions: function (options, featureType)
 						{	// Limiter la taille des tuilles en fonction du minZoom
-							if (featureType.minZoomLevel) options.tileZoom = Math.max(featureType.minZoomLevel-2, 13);
-							// Eviter un affichage en zoom 0
-							else featureType.minZoomLevel = 12;
+							options.tileZoom = Math.max(featureType.minZoomLevel-2, 4);
 						}
 					},
 					{	// preserved: select.getFeatures(),
@@ -187,7 +311,7 @@ wapp.setGuichet = function(groupe)
 				}, this);
 				// Ooops probleme d'overload
 				this.getSource().on('overload', function (e) 
-				{	wapp.notification("loading overload...");
+				{	wapp.notification("overloading...");
 				});
 				// Notification de chargement
 				this.getSource().on(['loadstart', 'loadend'], function (e) 
@@ -275,6 +399,74 @@ wapp.delGeorem = function()
 	}
 }
 
+
+/* Add attribute line to the selection list
+* @param {} th container
+* @param {} ul the list
+* @param {string} title
+* @param {string} val
+*/
+function _addLine(th, ul, title, val, type) {
+	var theme, label;
+	var index = title.indexOf('@');
+	if (index > -1) {
+		theme = title.substring(0, index);
+		label = title.substring(index+1);
+	} else {
+		theme = "hidden";
+		label = title;
+	}
+	// Hidden themes
+//	if (theme==='symb') return;
+	// Add new theme
+	var className = theme.replace(/ /g,'_');
+	if (theme && !$('.'+className, th).length) {
+		$('<div>').addClass(className)
+			.text(theme)
+			.click(function(){
+				$('div', th).removeClass('selected');
+				$('.'+className, th).addClass('selected');
+				$('li', ul).hide();
+				$('.'+className, ul).show();
+			})
+			.appendTo(th);
+	}
+	// Add line
+	var li = $("<li>").addClass(className).appendTo(ul);
+	switch (type) {
+		case 'JSON':
+		case 'JsonValue':
+			// Json decode
+			var json;
+			try { json = JSON.parse (val); }
+			catch(e){};
+			// Array
+			if (json instanceof Array && json.length) {
+				var tab = $("<table>").appendTo(li);
+				var tr = $("<tr>").appendTo(tab);
+				for (var k in json[0]) {
+					$("<td>").text(k.replace(/_/g,' ')).appendTo(tr);
+				}
+				for (var i=0; i<json.length; i++) {
+					tr = $("<tr>").appendTo(tab);
+					for (var k in json[i]) {
+						$("<td>").text(json[i][k])
+							.addClass(typeof(json[i][k]))
+							.appendTo(tr);
+					}
+				}
+				break;
+			}
+		default:
+			$("<label>")
+				.text(label)
+				.appendTo(li);
+			$("<span>").text(val)
+				.appendTo(li);
+		break;
+	}
+};
+
 /** Afficher la fiche
 * @param {bool} ripart true si vient de la page de remontees 
 */
@@ -302,11 +494,18 @@ wapp.showSelect = function(ripart)
 			if (f.layer.get('geolocation')) div.addClass("trace");
 			var prop = f.getProperties();
 			$(".fiche h3 span", div).text(f.layer.get("title")||f.layer.get("name"));
-			var ul = $(".fiche ul", div).html("");
+			if (f.layer.get("logo")) {
+				$(".fiche img.guichet", div).attr('src', f.layer.get("logo")).show();
+			} else {
+				$(".fiche img.guichet", div).hide();
+			}
+			var saveTheme =  $(".fiche .themes .selected", div).removeClass('selected').attr('class');
+			var ul = $(".fiche ul", div).html('');
+			var th = $(".fiche .themes", div).html("");
 			// Trace GPS
 			if (f.layer.get('geolocation')) div.addClass("trace");
 			// Objet d'un guichet
-			else if (f.layer.getSource().featureType_)
+			else if (f.layer instanceof ol.layer.Vector.Webpart)
 			{	var ftype = f.layer.getSource().featureType_;
 				for (i in ftype.attributes) if (i!=ftype.geometryName && f.get(i))
 				{	var att = ftype.attributes[i];
@@ -317,11 +516,7 @@ wapp.showSelect = function(ripart)
 						case "MultiPolygon":
 							break;
 						default:
-						{	var li = $("<li>").appendTo(ul);
-							$("<label>").text(att.title)
-								.appendTo(li);
-							$("<span>").text(f.get(i))
-								.appendTo(li);
+						{	_addLine(th, ul, att.title, f.get(i), att.type);
 						}
 					}
 				}
@@ -330,23 +525,21 @@ wapp.showSelect = function(ripart)
 			else if (f.layer.get("getFeatureInfoMask"))
 			{	var visu = f.layer.get("getFeatureInfoMask").visu;
 				for (i in visu) 
-				{	var li = $("<li>").appendTo(ul);
-					$("<label>").text(visu[i].replace(/_/g,' '))
-						.appendTo(li);
-					$("<span>").text(f.get(i))
-						.appendTo(li);
+				{	_addLine(th, ul, visu[i].replace(/_/g,' '), f.get(i));
 				}
 			}
+			// Objet WFS
 			else 
 			{	var prop = f.getProperties();
-				for (i in prop) if (i !== "geometry") 
-				{	var li = $("<li>").appendTo(ul);
-					$("<label>").text(i.replace(/_/g,' '))
-						.appendTo(li);
-					$("<span>").text(f.get(i))
-						.appendTo(li);
+				var geometryName = f.getGeometryName();
+				var att = f.layer.getFeatureType().attributes || {};
+				for (i in prop) if (i !== geometryName) {
+					_addLine(th, ul, (att[i]?att[i].title:i).replace(/_/g,' '), f.get(i), att[i]?att[i].type:'string');
 				}
 			}
+			// select first theme
+			if (saveTheme) $("."+saveTheme, th).click();
+			else $(th.children()[0]).click();
 		}
 	}
 	wapp.showPage("fiche");
@@ -469,5 +662,101 @@ $("#cartes").on("showpage", function(e)
 $("#fiche").on("showpage hidepage", function(e)
 {	wapp.map.updateSize();
 });
+
+/**
+ * Affichage de la maitenance
+ */
+wapp.maintain = function() {
+  // Info
+	var freeDiskSpace = 0;
+	var cacheImage = {};
+  var cacheVecteur = {};
+
+  // Affichage des infos (en asynchrone)
+  var count = 0;
+  function countCache(cache, className) {
+    var ul = $("#maintenance .resume");
+    var s = 0;
+    for (var i in cache) {
+      var c = cache[i];
+      s += c.size;
+      $("<li>").append($('<p>').addClass('title').text(i))
+        .append($('<p>').text(c.nb+' fichiers - '+(c.size/1024/1024).toFixed(2)+' Mo'))
+        .appendTo(ul);
+    }
+    $("#maintenance .info span."+className).text((s/1024/1024).toFixed(2));
+    return s;
+  }
+	function show(async) {
+    if (async) {
+      count--;
+      if (!count) {
+        console.log(freeDiskSpace, cacheImage, cacheVecteur);
+        $("#maintenance .info span.diskspace").text((freeDiskSpace/1024/1024).toFixed(1));
+        $("#maintenance .resume").html('');
+        var total = countCache(cacheImage, 'cimage') 
+                  + countCache(cacheVecteur, 'cvector');
+        total /= 1024;
+        if (total) {
+          var n = total / (total + freeDiskSpace) * 360;
+          console.log(n, total, freeDiskSpace)
+          if (total/1024/1024 > .5) $("#maintenance .pie p").text((total/1024/1024).toFixed(1)+' Go');
+          else $("#maintenance .pie p").text((total/1024).toFixed(1)+' Mo');
+          if (n<180) {
+            $("#maintenance .pie .sector50").hide();
+            $("#maintenance .pie .sector").css({ transform: "rotate(-180deg)" });
+            $("#maintenance .pie .sector > div").css({ transform: "rotate("+(180+n)+"deg)" });
+          } else {
+            $("#maintenance .pie .sector50").show();
+            $("#maintenance .pie .sector").css({ transform: "rotate("+(n-360)+"deg)" });
+            $("#maintenance .pie .sector > div").css({ transform: "rotate(0deg)" });
+          }
+        } 
+      }
+    } else {
+      count++;
+      setTimeout(function(){ show(true); }, 200);
+    }
+    return;
+  }
+  
+  // Espcae libre
+	CordovApp.File.getFreeDiskSpace(function (s){
+		freeDiskSpace = s;
+		show();
+  });
+
+  // Calcul du cache
+  function getCache(d, cache) {
+    CordovApp.File.listDirectory("FILE/"+d.fullPath,
+      function(l2) {
+        cache[d.name] = { nb:0, size:0 };
+        for (var i=0, f; f=l2[i]; i++) {
+          CordovApp.File.info("FILE/"+f.fullPath, function(f){
+            cache[d.name].nb++;
+            cache[d.name].size += f.size;
+            show();
+          });
+        }
+      }
+    );
+  };
+  // Cache geoportail
+	CordovApp.File.listDirectory("FILE/geoportail",
+		function(l) {
+			for (var i=0, d; d=l[i]; i++) {
+        getCache(d, cacheImage);
+			}
+		}
+  );
+  // Cache vecteur
+	CordovApp.File.listDirectory("FILE/cache",
+		function(l) {
+			for (var i=0, d; d=l[i]; i++) {
+        getCache(d, cacheVecteur);
+			}
+		}
+	);
+};
 
 })();

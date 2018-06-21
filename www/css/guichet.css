@@ -250,6 +250,9 @@
 .ol-touch .searchCtrl
 {	top:3.5em;
 }
+.ol-search.searching:before {
+	top: 2.6em;
+}
 .ol-zoom 
 {	left: auto;
 	top: 3em;
@@ -329,45 +332,6 @@
 	border: 15px solid transparent;
 	border-top-color: inherit;
 	border-width: 17px 14px;
-}
-
-/** A propos */
-#apropos [data-role='content']
-{	overflow-x: hidden;
-}
-#apropos .img {
-	position: absolute;
-	width: 6em;
-	height: 6em;
-	border-radius: 50%;
-	top: 2em;
-	left: 1em;
-	overflow: hidden; 
-	z-index:1;
-	background-color: rgba(255,255,255,.8);
-}
-#apropos .img img.logo {
-	position: absolute;
-	height: 100%;
-	top: 50%;
-	left: 50%;
-	-webkit-transform: translate(-50%, -50%);
-	transform: translate(-50%, -50%);
-}
-[data-logo='none'] #apropos .img {
-	display: none;
-}
-
-#apropos p
-{	text-align:justify;
-}
-#apropos img.bandeau
-{	position: relative;
-    left: 50%;
-    transform: translateX(-50%);
-	margin:-1em 0;
-	min-width: Calc(100% + 2em);
-    min-height: 200px;
 }
 
 /** warning */
@@ -477,108 +441,6 @@
 }
 [data-role="menu"] li button.hidden
 {	display: none;
-}
-
-
-/** Fiche */
-#fiche .selection > i
-{	display: block;
-}
-#fiche .selection.georem > i,
-#fiche .selection.fiche > i
-{	display: none;
-}
-#fiche .selection > div 
-{	display: none;
-}
-#fiche .selection.georem > div.georem 
-{	display: block;
-}
-#fiche .selection.fiche > div.fiche
-{	display: block;
-}
-
-#fiche .selection > div ul 
-{   margin: 0;
-    padding: 0;
-    list-style: none;
-    border-bottom: 1px solid #ccc;
-	clear: both;
-}
-#fiche .selection > div ul li 
-{	background-color: #fff;
-	border: 0;
-	border-top: 1px solid #ccc;
-}
-#fiche .selection > div label 
-{	display: inline-block;
-	width:30%;
-	overflow: hidden;
-	vertical-align: middle;
-	font-size: 0.9em;
-	vertical-align: middle;
-}
-#fiche .fiche label:after
-{	content: "\A0:";
-}
-#fiche .selection > div li > span
-{	width: 70%;
-	display: inline-block;
-	vertical-align: middle;
-} 
-
-#fiche .fiche input,
-#fiche .fiche [data-input-role].selected 
-{	width: 70%;
-	box-sizing: border-box;
-	display: inline-block;
-	vertical-align: middle;
-	background: none;
-}
-
-#fiche [data-role="onglet-bt"]
-{	background-color: #e0e0e0;
-}
-#fiche > div
-{	background-color:#eee;
-}
-
-#fiche i.fromRipart
-{	display: none;
-}
-#fiche span.fromRipart
-{	display: none;
-	font-style: normal;
-	font-size: 1.7em;
-	height: 1em;
-	line-height: 0.7em;
-	vertical-align: middle;
-	margin: 0 0.3em 0 0;
-	cursor: pointer;
-}
-#fiche.fromRipart i.fa-close,
-#fiche.fromRipart i.backArrowBt
-{	display:none;
-}
-#fiche.fromRipart i.fromRipart,
-#fiche.fromRipart .fromRipart 
-{	display: initial
-}
-
-#fiche .trace
-{	display: none;
-}
-#fiche .trace .trace
-{	display: block;
-}
-
-#fiche .warning_public
-{	text-align: center;
-	border: 5px solid #ccc;
-    padding: 0.5em;
-    margin: 1em;
-	font-size: 0.8em;
-	line-height: 1.5em;
 }
 
 /** LayerSwitcher */
@@ -747,42 +609,6 @@
 	display: none;
 }
 
-/**Recherche
-*/
-#search > div[data-role='header']
-{	white-space: nowrap;
-	text-overflow: ellipsis;
-	overflow: hidden;
-}
-#search .fa-search
-{	position:absolute;
-	color:#aaa;
-}
-#search .ol-locate input
-{	font-size:1.2em;
-	padding: 0.3em 0 0.3em 1.2em;
-}
-#search i.wapp-search
-{	font-size:1.2em;
-	padding: 0.3em 0;
-	z-index:1;
-}
-#search .autocomplete {
-  cursor: pointer;
-  margin: 0 -0.5em;
-  padding: 0;
-}
-#search .autocomplete li {
-    background-image: linear-gradient(#fff, #eee);
-    border-color: #ccc;
-    border-style: solid;
-    border-width: 1px 0;
-    padding: 0.5em;
-    width: 100%;
-}
-#search .ol-loading .autocomplete li
-{	color: #f90;
-}
 
 /* Template pour la creation*/
 [data-role="template"]

@@ -1,11 +1,21 @@
 ﻿<div data-role="header" data-back-button="true">Rechercher un lieu ou une adresse</div>
-<div data-role="content">
-	<i class="fa fa-search wapp-search"></i>
-<!--
-	<form>
-		<input class="wapp-search" type="search" placeholder="Code postal|commune|adresse" />
-		<!input type="submit" class="button big-button" value="Chercher" />
-	</form>
-	<ul data-role="list"></ul>
--->
+<div data-role="onglet">
+	<div data-role="onglet-bt">
+		<div data-list="adress">
+			<i class="fa fa-map-marker"></i>Adresse
+		</div>
+		<div data-list="data">
+			<i class="fa fa-info-circle"></i>Donnée
+		</div>
+	</div>
+
+	<!-- Search adress -->
+	<div class="search_adress" data-role="onglet-li" data-list="adress" >
+    <i class="fa fa-search wapp-search"></i>
+	</div>
+	<!-- Search data -->
+	<div class="search_data" data-role="onglet-li" data-list="data" >
+    <i class="fa fa-search wapp-search"></i>
+  </div>
+
 </div>

@@ -90,7 +90,7 @@ CordovApp.File =
 	},
 
 	/** Get free space disk 
-	 *	@param {function} success callback that is passed the resulting space (byte)
+	 *	@param {function} success callback that is passed the resulting space (Kbyte)
 	 *	@param {function} fail callback invoked on error
 	 */
 	getFreeDiskSpace: function(success, fail) {
@@ -446,15 +446,15 @@ CordovApp.File =
 	/** Default succes function
 	 * @private
 	 */
-	success: function()
-	{	console.log("Operation on file successfull!");
+	success: function() {
+		console.log("Operation on file successfull!");
 	},
 	
 	/** Default fail function
 	 * @private
 	 */
-	fail: function(error) 
-	{   console.log ("FILE ERROR: " + error.code);
+	fail: function(error) {
+		// console.log ("FILE ERROR: " + error.code);
     }
 
 };

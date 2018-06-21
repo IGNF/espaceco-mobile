@@ -54,6 +54,16 @@
 			<div data-input-role="info">Afficher plus de fonctionnalités.</div>
 		</li>
 
+		<li data-input="check" data-param="nocache" data-default=false>
+			<label>No cache</label>
+			<div data-input-role="info">Ne pas gérer de cache vecteur (au prochain redémarrage).</div>
+		</li>
+
+		<li class="debug0" data-input="button" onclick="wapp.showPage('maintenance')">
+			<label>Maintenance</label>
+			<div data-input-role="info">Afficher le status de l'application et le contenu téléchargé.</div>
+		</li>
+
 		<li data-input="text" data-param="minGPSAccuracy" data-default=100>
 			<label style="display: block; width: Calc(100% + 1em);">
 				Précison GPS (m)&nbsp;: 

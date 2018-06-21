@@ -10,7 +10,7 @@
     <content src="index.html" />
     <icon src="www/img/logo.png" />
     <preference name="AppendUserAgent" value="/Esp@ceC08069" />
-    <preference name="BackupWebStorage" value="local" />
+    <preference name="BackupWebStorage" value="none" />
     <allow-navigation href="*://*.ign.fr/*" />
     <access origin="*" />
     <allow-intent href="http://*/*" />

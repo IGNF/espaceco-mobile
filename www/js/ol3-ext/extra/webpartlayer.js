@@ -15,7 +15,6 @@ ol.layer.Vector.Webpart  = function(options, source_options)
 {   var self = this;
 	if (!options) options = {};
 	if (!source_options) source_options = {};
-	
 	this.url_ = options.url.replace("/wfs","/database/") || "https://espacecollaboratif.ign.fr/gcms/database/"; // Ancien wpart "http://webpart.ign.fr/gcms/database/";
 	this.proxy_ = options.proxy;
 	this.database_ = options.database;
@@ -52,9 +51,18 @@ ol.layer.Vector.Webpart  = function(options, source_options)
 			{	v.setZoom(featureType.maxZoomLevel);
 				self.setMinResolution(v.getResolution());
 			}
-			if (featureType.minZoomLevel)
-			{	v.setZoom(featureType.minZoomLevel);
+			if (featureType.minZoomLevel || featureType.minZoomLevel===0)
+			{	v.setZoom(Math.max(featureType.minZoomLevel,4));
 				self.setMaxResolution(v.getResolution());
+			}
+			// Decode condition (parse string)
+			if (featureType.style && featureType.style.children) {
+				for (var i=0, s; s=featureType.style.children[i]; i++) {
+					if (typeof(s.condition)==='string') {
+						try { s.condition = JSON.parse(s.condition); }
+						catch(e){};
+					}
+				}
 			}
 
 			// Style of the feature style

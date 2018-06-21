@@ -5,7 +5,7 @@
  * @param {any}
  * @returns {ol.source.Vector.WFS}
  */
-ol.source.Vector.WFS = function(options) 
+ol.source.Vector.WFS = function(options, cache) 
 {   options = options || {};
 	
 	// Proxy to load features
@@ -17,35 +17,48 @@ ol.source.Vector.WFS = function(options)
 
 	this.featureFilter_ = options.filter || {};
 	
-	// Strategy for loading source (bbox or tile)
-	var strategy = options.strategy || ol.loadingstrategy.bbox;
-	if (options.minzoom)
-	{	var tileZoom = options.minzoom+2;
+	// Strategy for loading source (custom or bbox or tile)
+	var strategy = options.strategy;
+	if (!strategy && options.minzoom) {
+		var tileZoom = options.minzoom+2;
 		this.tiled_ = true;
 		var tileGrid = ol.tilegrid.createXYZ({ minZoom: tileZoom, maxZoom: tileZoom, tileSize:options.tileSize||256  }),
 		strategy = ol.loadingstrategy.tile (tileGrid);
+	} else {
+		strategy = ol.loadingstrategy.bbox;
 	}
 
 	if (this.tiled_) this.maxReload_ = options.maxReload;
 
-	ol.source.Vector.call(this, 
-		{	// Loader function
-			loader: this.loaderFn_,
-			// bbox strategy
-			strategy: strategy,
-			// Features
-			features: new ol.Collection(),
-			// ol.source.Vector attributes
-			attributions: options.attribution,
-			useSpatialIndex: true, // force to true for loading strategy tile
-			wrapX: options.wrapX
-    	});
+	if (cache && cache.loadCache) {
+		this.loadCache = cache.loadCache;
+	}
+	if (cache && cache.saveCache) {
+		this.saveCache = cache.saveCache;
+	}
+
+	// Inherits
+	ol.source.Vector.call(this, {
+		// Loader function
+		loader: this.loaderFn_,
+		// bbox strategy
+		strategy: strategy,
+		// Features
+		features: new ol.Collection(),
+		// ol.source.Vector attributes
+		attributions: options.attribution,
+		useSpatialIndex: true, // force to true for loading strategy tile
+		wrapX: options.wrapX
+	});
 
 	this.set('url', options.url);
+	var cachedir = options.url.replace(/^((http[s]?|ftp):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?$/,"$3").replace(/\./g,'_');
+	this.set('cache', cachedir + '/' + options.typename);
+	this.set('once', options.once);
 	this.set('typename', options.typename);
 	this.set('version', options.version);
 	this.set('projection', options.srs||'EPSG:4326');
-	this.set('_id', options.mask.id);
+	this.set('id', options.mask.id);
 };
 ol.inherits(ol.source.Vector.WFS, ol.source.Vector);
 
@@ -54,6 +67,10 @@ ol.inherits(ol.source.Vector.WFS, ol.source.Vector);
  * @private
  */
 ol.source.Vector.WFS.prototype.loaderFn_ = function(extent, resolution, projection) {
+	// Load once
+	if (this._done && this.get('once')) return;
+	this._done = true;
+	// 
 	var self = this;
 
 	// WFS parameters
@@ -66,41 +83,132 @@ ol.source.Vector.WFS.prototype.loaderFn_ = function(extent, resolution, projecti
 //		bbox: extent.join(','),
 		boundedBy: extent.join(','),
 //		maxFeatures: this.maxFeatures_,
+		srsname:'EPSG:4326',
 		version: this.get('version'),
 	};
 	// WFS request
-    this.dispatchEvent({type:"loadstart", remains:++this.tileloading_ } );
+    this.dispatchEvent({ type:"loadstart", remains:++this.tileloading_ } );
 	
-	$.ajax({
-		url: this.get('url'),
-		data: parameters,
-		// Authentification
-		username: this.username,
-		password: this.password,
+	// Load Cache
+	this.loadCache({
+		extent: extent, 
+		resolution: resolution, 
+		// Cache charge
 		success: function(response) {
-			var data = (new ol.format.WFS()).readFeatures(response);
-			var features = []
-			for (var i=0, f; f=data[i]; i++) {
-				f.getGeometry().transform('EPSG:4326', projection);
-				if (!self.hasFeature(f)) {
-					features.push(f);
-				}
-			}
-			self.addFeatures(features);
-			self.dispatchEvent({ type:"loadend", remains: --self.tileloading_ });
-//			if (data.length == self.maxFeatures_) self.dispatchEvent({ type:"overload" });
+			self.handleResponse_(response, projection);
 		},
-		// Error
-		error: function(jqXHR, status, error) 
-		{   if (status !== 'abort') 
-			{	// console.log(jqXHR);
-				self.dispatchEvent({ type:"loadend", error:error, status:status, remains:--self.tileloading_ });
-			}
-			else 
-			{	self.dispatchEvent({ type:"loadend", remains:--self.tileloading_ });
-			}
+		// On error => load online
+		error: function(cacheError) {
+			$.ajax({
+				url: self.get('url'),
+				dataType: "text",
+				data: parameters,
+				// Timout 3mn
+				timeout: 3*60*1000,
+				// Authentification
+				username: self.username,
+				password: self.password,
+				success: function(response) {
+					//console.log('loading:', response.length)
+					self.saveCache(response, extent, resolution)
+					self.handleResponse_(response, projection);
+				},
+				// Online fail
+				error: function(jqXHR, status, error) {
+					console.log('error:', status)
+					// Try to load an older version
+					if (cacheError === 'obsolete') {
+						this.loadCache({
+							extent: extent, 
+							resolution: resolution, 
+							// Cache charge
+							success: function(response) {
+								self.handleResponse_(response, projection);
+							},
+							error: function() {
+								self.handleError_(jqXHR, status, error);
+							}
+						});
+					} else {
+						self.handleError_(jqXHR, status, error);
+					}
+				}
+			});
 		}
 	});
+};
+
+/**
+ * Get cache file name
+ * @param {ol.extent} extent 
+ * @param {Number} resolution 
+ */
+ol.source.Vector.WFS.prototype.getCacheFileName = function(extent, resolution) {
+	if (this.get('once')) {
+		return this.get('cache')+'.cache';
+	}
+	else return '';
+};
+
+/**
+ * Load in cache, default no cache
+ * @param {} options 
+ * 	@param {} options.extent
+ * 	@param {} options.resolution
+ * 	@param {funcion} options.success success callback
+ * 	@param {funcion} options.error error callback
+ */
+ol.source.Vector.WFS.prototype.loadCache = function(options) {
+	console.log(options.extent, options.resolution, this.getProperties());
+	options.error('nocache');
+};
+
+/**
+ * Save cache, default no cache
+ * @param {} response something to save
+ * @param {} extent
+ * @param {} resolution
+ */
+ol.source.Vector.WFS.prototype.saveCache = function(response, extent, resolution) {};
+
+/**
+ * 
+ * @param {*} response 
+ * @param {*} projection 
+ * @private
+ */
+ol.source.Vector.WFS.prototype.handleResponse_ = function(response, projection) {
+	var data = (new ol.format.WFS()).readFeatures(response);
+	var features = [];
+	var hasFeatures = (this.getFeatures().length > 0);
+	for (var i=0, f; f=data[i]; i++) {
+		var p = f.getGeometry().getFirstCoordinate();
+// BUG
+if (p[0]>=360 || p[0]<=-360) continue;
+		f.getGeometry().transform('EPSG:4326', projection);
+		if (!hasFeatures || !this.get('id') || !this.hasFeature(f)) {
+			features.push(f);
+		}
+	}
+	this.addFeatures(features);
+	console.log("addfeatures")
+	this.dispatchEvent({ type:"loadend", remains: --this.tileloading_ });
+};
+
+/**
+ * 
+ * @param {*} jqXHR 
+ * @param {*} status 
+ * @param {*} error 
+ * @private
+ */
+ol.source.Vector.WFS.prototype.handleError_ = function(jqXHR, status, error) {
+	if (status !== 'abort') {
+		// console.log(jqXHR);
+		this.dispatchEvent({ type:"loadend", error:error, status:status, remains:--this.tileloading_ });
+	} else {
+		this.dispatchEvent({ type:"loadend", remains:--this.tileloading_ });
+	}
 };
 
 /**
@@ -109,13 +217,17 @@ ol.source.Vector.WFS.prototype.loaderFn_ = function(extent, resolution, projecti
  * @return {boolean} 
  */
 ol.source.Vector.WFS.prototype.hasFeature = function(feature) {
-	var p = feature.getGeometry().getFirstCoordinate();
 	var id = feature.get(this.get('id'));
-	var existing = this.getFeaturesInExtent([p[0]-0.1, p[1]-0.1, p[0]+0.1, p[1]+0.1]);
-	for (var i=0, f; f=existing[i]; i++) {
-		if (id===f.get(this.get('id'))) return true;
+	if (id) {
+		var p = feature.getGeometry().getFirstCoordinate();
+		var existing = this.getFeaturesInExtent([p[0]-0.1, p[1]-0.1, p[0]+0.1, p[1]+0.1]);
+		for (var i=0, f; f=existing[i]; i++) {
+			if (id===f.get(this.get('id'))) return true;
+		}
+		return false;
+	} else {
+		return false;
 	}
-	return false;
 };
 
 /**
@@ -123,5 +235,5 @@ ol.source.Vector.WFS.prototype.hasFeature = function(feature) {
  * @return {any}
  */
 ol.source.Vector.WFS.prototype.getFeatureType = function() {
-	return {};
+	return this.featureType_ || {};
 };
