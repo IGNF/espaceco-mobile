@@ -312,7 +312,7 @@ function setLayerAttribution (map, l, ex, z, mode)
 			}
 		}
 		if (!attrib.length) attrib.push ( getAttrib(map, mode) );
-		// l.getSource().setAttributions(attrib);
+		l.getSource().setAttributions(attrib);
 	}
 	// Layer group > set attribution for all layers in the groupe
 	else if (l.getLayers)

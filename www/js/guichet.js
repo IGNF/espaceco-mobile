@@ -408,8 +408,7 @@ wapp.initControls = function()
 		map.pulse(pos);
 	};
 
-	// Geolocation Control
-	//this.addLocateControl(map);
+	// SearchGeoportail Control
 	var locCtrl = new ol.control.SearchGeoportail(
 		{	apiKey:apiKey, 
 			authentication: auth,
@@ -422,6 +421,7 @@ wapp.initControls = function()
 		wapp.hidePage();
 	});
 	map.addControl (locCtrl);
+
 	// Search button
 	var searchCtrl = new ol.control.Button(
 		{	className: "searchCtrl",
@@ -489,12 +489,14 @@ wapp.initControls = function()
 	// Layer switcher
 	map.addControl (new ol.control.LayerSwitcher({ target:$("#layerswitcher").get(0), extent:true, reordering: true }));
 
+	/*
 	// Geolocation Control
 	var geoloc = window.geoloc = new ol.control.Geolocate();
 	geoloc.on("geolocate", function(e) 
 		{	centerMap(e.position);
 		});
 	map.addControl(geoloc);
+	*/
 };
 
 /** Definir la source pour la recherche
@@ -626,6 +628,11 @@ wapp.initInteractions = function()
 			}
 		}));
 
+	this.setGeolocationControl(map);
+
+};
+
+wapp.setGeolocationControl = function(map) {
 	// Geolocation draw
 	var geodrawlayer = new ol.layer.Vector(
 	{	name: 'Trace',
@@ -645,6 +652,7 @@ wapp.initInteractions = function()
 	this.overlays.gps = geodrawlayer;
 	geodrawlayer.getSource().on('addfeature', function(e) { e.feature.layer = geodrawlayer; });
 	map.addLayer(geodrawlayer);
+
 	// Draw interaction
 	var geodraw = this.interactions.geolocation = new ol.interaction.GeolocationDraw(
 		{	source: geodrawlayer.getSource(),
@@ -657,40 +665,75 @@ wapp.initInteractions = function()
 	geodraw.setActive(false);
 	map.addInteraction(geodraw);
 	
-	var centerButton = new ol.control.TextButton(
-		{	"className": "geodrawCtrl", 
-			"html": "<i class='fa fa-location-arrow'></i> Recentrer",
-			"handleClick": function()
-			{	$(centerButton.element).hide();
-				geodraw.setFollowTrack('auto');
-			}
-		});
-	map.addControl (centerButton);
-	geodraw.on('drawend', function()
-	{	$(centerButton.element).hide();
-	});
-	geodraw.on('follow', function(e)
-	{	if (!e.following) $(centerButton.element).show();
-	});
+	// Control bar
+	var geodrawBar = new ol.control.Bar({ className:'geodrawBar ol-bottom ol-right' });
+	map.addControl(geodrawBar);
 
 	// Control d'activation
-	map.addControl (new ol.control.Toggle(
-	{	"className": "geodrawCtrl", 
+	geodrawBar.addControl (new ol.control.Toggle({
+		"className": "geodrawCtrl", 
 		"html": "<i class='fa fa-location-arrow'></i>",
-		"toggleFn": function(b)
-		{	if (geodraw.getActive())
-			{	geodraw.stop();
-				$(centerButton.element).hide();
+		"toggleFn": function(b) {
+			console.log('toggle')
+			if (geodraw.getActive()) {
+				geodraw.stop();
+				$(geodrawBar.element).removeClass('active');
 				geodraw.setActive(false);
 				geodraw.setFollowTrack('auto');
-			}
-			else
-			{	geodraw.setActive(true);
-				geodraw.start();
+				$(centerButton.element).removeClass('active');
+			} else {
+				geodraw.setActive(true);
+				geodraw.pause(true);
+				$(geodrawBar.element).addClass('active');
+				$(startButton.element).addClass('active');
+				$(pauseButton.element).removeClass('active');
+				$(centerButton.element).removeClass('active');
+				geodraw.setFollowTrack('auto');
+				map.getView().animate({zoom: 17});
 			}
 		}
 	}));
 
+	var centerButton = new ol.control.TextButton({
+		"className": "centerBt", 
+		"html": "Centrer",
+		"handleClick": function() {
+			$(centerButton.element).removeClass('active');
+			geodraw.setFollowTrack('auto');
+		}
+	});
+	map.addControl (centerButton);
+	geodrawBar.addControl(centerButton);
+
+	var startButton = new ol.control.TextButton({
+		"className": "startBt", 
+		"html": "Démarrer",
+		"handleClick": function() {
+			$(startButton.element).removeClass('active');
+			$(pauseButton.element).addClass('active');
+			geodraw.pause(false);
+			geodraw.setFollowTrack('auto');
+			$(centerButton.element).removeClass('active');
+		}
+	});
+	geodrawBar.addControl (startButton);
+	var pauseButton = new ol.control.TextButton({
+		"className": "pauseBt", 
+		"html": "Pause",
+		"handleClick": function() {
+			$(startButton.element).addClass('active');
+			$(pauseButton.element).removeClass('active');
+			geodraw.pause(true);
+		}
+	});
+	geodrawBar.addControl (pauseButton);
+
+	geodraw.on('drawend', function() {
+		$(geodrawBar.element).removeClass('active');
+	});
+	geodraw.on('follow', function(e) {
+		if (!e.following) $(centerButton.element).addClass('active');
+	});
 };
 
 /** Initialisation des signalements

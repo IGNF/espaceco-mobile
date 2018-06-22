@@ -56,6 +56,7 @@ ol.layer.Vector.WFS = function(options, cache) {
             if (login) {
               options.username = login,
               options.password = CryptoJS.AES.encrypt(pwd, secret).toString();
+              // try again
               getCapabilities();
             } else {
               self.dispatchEvent({ type:"error", error:error, status:jqXHR.status, statusText:status });
