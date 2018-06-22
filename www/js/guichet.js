@@ -410,15 +410,11 @@ wapp.initControls = function()
 
 	// Geolocation Control
 	//this.addLocateControl(map);
-//	var locCtrl = new ol.control.GeoportailLocate(
 	var locCtrl = new ol.control.SearchGeoportail(
 		{	apiKey:apiKey, 
 			authentication: auth,
-			target: $('#search [data-role="onglet-li"][data-list="adress"]').get(0),
-			onGeocode: function(pos, r)
-			{	centerMap(ol.proj.transform(pos,'EPSG:4326', map.getView().getProjection()));
-				wapp.hidePage();
-			}
+			placeholder: "rechercher...",
+			target: $('#search [data-role="onglet-li"][data-list="adress"]').get(0)
 		});
 	locCtrl.set('copy', null);
 	locCtrl.on('select', function(e) {
@@ -432,11 +428,29 @@ wapp.initControls = function()
 			html: "<i class='fa fa-search'></i>",
 			handleClick: function()
 			{	wapp.showPage('search');
-				$("#search input").focus();
+				//$("#search input").focus();
+				$("#search > div div:visible input.search").focus();
 			}
 		});
 	map.addControl (searchCtrl);
 
+	// Search Parcelle
+	var searchParcel = new ol.control.SearchGeoportailParcelle({
+		apiKey:apiKey, 
+		authentication: auth,
+		target: $('#search [data-role="onglet-li"][data-list="parcel"]').get(0)
+	});
+	map.addControl(searchParcel);
+	searchParcel.on('parcelle', function (e) {
+		centerMap(e.coordinate);
+		wapp.hidePage();
+	});
+	// Focus on input
+	$('#search [data-role="onglet-li"]').on('showonglet', function(e){
+		setTimeout (function(){ $('.search', e.target).focus();}, 0);
+	});
+
+	// Search feature
 	var searchFeature = new ol.control.SearchFeature({
 		placeholder: 'chercher une donnée...',
 		target: $('#search [data-role="onglet-li"][data-list="data"]').get(0),
@@ -446,7 +460,9 @@ wapp.initControls = function()
 	searchFeature.on('select', function (e) {
 		wapp.select.getFeatures().clear();
 		wapp.select.getFeatures().push(e.search);
-		wapp.showSelect();
+		wapp.onSelect({ selected: [e.search] });
+		wapp.hidePage();
+		wapp.map.getView().setCenter(ol.extent.getCenter(e.search.getGeometry().getExtent()));
 	});
 	wapp.setSearchSource ();
 

@@ -63,8 +63,8 @@ ol.source.Vector.Webpart = function(opt_options)
 	var strategy = options.strategy || ol.loadingstrategy.bbox;
 	if (options.tileZoom)
 	{	this.tiled_ = true;
-		var tileGrid = ol.tilegrid.createXYZ({ minZoom: options.tileZoom, maxZoom: options.tileZoom, tileSize:options.tileSize||256  }),
-		strategy = ol.loadingstrategy.tile (tileGrid);
+		this._tileGrid = ol.tilegrid.createXYZ({ minZoom: options.tileZoom, maxZoom: options.tileZoom, tileSize:options.tileSize||256  }),
+		strategy = ol.loadingstrategy.tile (this._tileGrid);
 	}
 
 	if (this.tiled_) this.maxReload_ = options.maxReload;
@@ -365,6 +365,8 @@ ol.source.Vector.Webpart.prototype.loaderFn_ = function (extent, resolution, pro
 {
 	// if (resolution > this.maxResolution_) return;
 	var self = this;
+
+console.log('TILE',this._tileGrid.getTileCoordForCoordAndResolution(extent,resolution));
 
 	// Save projection for writing
 	this.projection_ = projection;

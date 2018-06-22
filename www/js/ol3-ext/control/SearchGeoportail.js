@@ -6,9 +6,9 @@
  * Search places using the French National Base Address (BAN) API.
  *
  * @constructor
- * @extends {ol.control.Search}
+ * @extends {ol.control.SearchJSON}
  * @fires select
- * @param {Object=} Control options.
+ * @param {any} options extend ol.control.SearchJSON options
  *	@param {string} options.className control class name
  *	@param {boolean | undefined} options.apiKey the service api key.
  *	@param {string | undefined} options.authentication: basic authentication for the service API as btoa("login:pwd")
@@ -19,7 +19,7 @@
  *	@param {integer | undefined} options.minLength minimum length to start searching, default 3
  *	@param {integer | undefined} options.maxItems maximum number of items to display in the autocomplete list, default 10
  *
- *	@param {StreetAddress|PositionOfInterest|CadastralParcel|Commune} options.type type of search, default StreetAddress,PositionOfInterest
+ *	@param {StreetAddress|PositionOfInterest|CadastralParcel|Commune} options.type type of search. Using Commune will return the INSEE code, default StreetAddress,PositionOfInterest
  * @see {@link https://geoservices.ign.fr/documentation/geoservices/geocodage.html}
  */
 ol.control.SearchGeoportail = function(options) {
@@ -94,7 +94,7 @@ ol.control.SearchGeoportail.prototype.select = function (f){
     this.searchCommune(f);
   }
 };
-/** Search if no position :(
+/** Search if no position and get the INSEE code
  * @param {string} s le nom de la commune
  */
 ol.control.SearchGeoportail.prototype.searchCommune = function (f, cback) {

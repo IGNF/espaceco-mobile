@@ -36,52 +36,53 @@ ol.layer.Vector.WFS = function(options, cache) {
   }
 
   // Get capabilities
-	$.ajax({
-		url: options.url,
-		username: options.username, // guichet-ign - guichet_ign$8
-    password: options.password ? CryptoJS.AES.decrypt(options.password, secret).toString(CryptoJS.enc.Utf8) : "", 
-    timeout: 10000,
-		data: {
-			service: 'WFS',
-			request: 'GetCapabilities'
-    },
-    // Success: load response
-		success: createSource,
-		// Error
-		error: function(jqXHR, status, error) {
-      // Unauthorized
-      if (jqXHR.status===401 && typeof(authenticationFn) === 'function') {
-				authenticationFn(self, function(login, pwd){
-					if (login) {
-						options.username = login,
-						options.password = pwd;
-						createSource();
-						options.password = CryptoJS.AES.encrypt(pwd, secret).toString();
-					}
-					else {
-						self.dispatchEvent({ type:"error", error:error, status:jqXHR.status, statusText:status });
-					}
-				});
-      } else if (cache) {
-        switch (jqXHR.status) {
-          // Service unavaliable
-          case 403:
-          case 404:
-          case 500:
-          case 503:
-            self.dispatchEvent({ type:"error", error:error, status:jqXHR.status, statusText:status });
-            break;
-          // Try to load cache anyway
-          default:
-            // navigator.onLine 
-            createSource();
-            break;
+  var getCapabilities = function () {
+    $.ajax({
+      url: options.url,
+      username: options.username, // guichet-ign - guichet_ign$8
+      password: options.password ? CryptoJS.AES.decrypt(options.password, secret).toString(CryptoJS.enc.Utf8) : "", 
+      timeout: 10000,
+      data: {
+        service: 'WFS',
+        request: 'GetCapabilities'
+      },
+      // Success: load response
+      success: createSource,
+      // Error
+      error: function(jqXHR, status, error) {
+        // Unauthorized
+        if (jqXHR.status===401 && typeof(authenticationFn) === 'function') {
+          authenticationFn(self, function(login, pwd){
+            if (login) {
+              options.username = login,
+              options.password = CryptoJS.AES.encrypt(pwd, secret).toString();
+              getCapabilities();
+            } else {
+              self.dispatchEvent({ type:"error", error:error, status:jqXHR.status, statusText:status });
+            }
+          });
+        } else if (cache) {
+          switch (jqXHR.status) {
+            // Service unavaliable
+            case 403:
+            case 404:
+            case 500:
+            case 503:
+              self.dispatchEvent({ type:"error", error:error, status:jqXHR.status, statusText:status });
+              break;
+            // Try to load cache anyway
+            default:
+              // navigator.onLine 
+              createSource();
+              break;
+          }
+        } else {
+          self.dispatchEvent({ type:"error", error:error, status:jqXHR.status, statusText:status });
         }
-      } else {
-        self.dispatchEvent({ type:"error", error:error, status:jqXHR.status, statusText:status });
       }
-    }
-	});
+    });
+  }
+  getCapabilities();
 
   // Zoom level
 	var v = new ol.View();

@@ -17,6 +17,8 @@
  *	@param {Element | string | undefined} options.target Specify a target if you want the control to be rendered outside of the map's viewport.
  *	@param {string | undefined} options.label Text label to use for the search button, default "search"
  *	@param {string | undefined} options.placeholder placeholder, default "Search..."
+ *	@param {string | undefined} options.inputLabel label for the input, default none
+ *	@param {string | undefined} options.noCollapse prevent collapsing on input blur, default false
  *	@param {number | undefined} options.typing a delay on each typing to start searching (ms) use -1 to prevent autocompletion, default 300.
  *	@param {integer | undefined} options.minLength minimum length to start searching, default 1
  *	@param {integer | undefined} options.maxItems maximum number of items to display in the autocomplete list, default 10
@@ -54,9 +56,15 @@ ol.control.Search = function(options) {
 		element.appendChild(this.button);
 	}
 	element.setAttribute('class', classNames);
+	// Input label
+	if (options.inputLabel) {
+		var label = document.createElement("LABEL");
+		label.innerText = options.inputLabel;
+		element.appendChild(label);
+	}
 	// Search input
 	var tout, cur="";
-	var input = document.createElement("INPUT");
+	var input = this._input = document.createElement("INPUT");
 	input.setAttribute("type", "search");
 	input.setAttribute("class", "search");
 	input.setAttribute("placeholder", options.placeholder||"Search...");
@@ -116,12 +124,14 @@ ol.control.Search = function(options) {
 	input.addEventListener("cut", doSearch);
 	input.addEventListener("paste", doSearch);
 	input.addEventListener("input", doSearch);
-	input.addEventListener('blur', function() {
-    setTimeout(function(){ element.classList.add('ol-collapsed') }, 200);
-  });
-	input.addEventListener('focus', function() {
-    element.classList.remove('ol-collapsed');
-  });
+	if (!options.noCollapse) {
+		input.addEventListener('blur', function() {
+			setTimeout(function(){ element.classList.add('ol-collapsed') }, 200);
+		});
+		input.addEventListener('focus', function() {
+			element.classList.remove('ol-collapsed');
+		});
+	}
 	element.appendChild(input);
 	// Autocomplete list
 	var ul = document.createElement('UL');
@@ -194,25 +204,32 @@ ol.control.Search.prototype.select = function (f) {
  * @private
  */
 ol.control.Search.prototype._handleSelect = function (f) {
+	if (!f) return;
   // Save input in history
   var hist = this.get('history');
   // Prevent error on stringify
   try {
     var fstr = JSON.stringify(f);
-    for (var i=hist.length-1, h; h=hist[i]; i--) {
-      if (JSON.stringify(h) === fstr) {
+    for (var i=hist.length-1; i>=0; i--) {
+      if (!hist[i] || JSON.stringify(hist[i]) === fstr) {
         hist.splice(i,1);
       }
     }
-    hist.unshift(f);
-    while (hist.length > (this.get('maxHistory')||10)) {
-      hist.pop();
-    } 
-		this.saveHistory();
-		this.drawList_();
-  } catch (e) {};
-  // Select feature
-  this.select(f);
+  } catch (e) {
+    for (var i=hist.length-1; i>=0; i--) {
+      if (!hist[i] || hist[i] === f) {
+        hist.splice(i,1);
+      }
+    }
+	};
+	hist.unshift(f);
+	while (hist.length > (this.get('maxHistory')||10)) {
+		hist.pop();
+	} 
+	this.saveHistory();
+	// Select feature
+	this.select(f);
+	//this.drawList_();
 };
 /** Save history (in the localstorage)
  */
@@ -282,15 +299,17 @@ ol.control.Search.prototype.drawList_ = function (auto) {
   }
 	var max = Math.min (self.get("maxItems"),auto.length);
 	for (var i=0; i<max; i++) {	
-		if (!i || !self.equalFeatures(auto[i], auto[i-1])) {
-			var li = document.createElement("LI");
-			li.setAttribute("data-search", i);
-			this._list.push(auto[i]);
-			li.addEventListener("click", function(e) {
-        self._handleSelect(self._list[e.currentTarget.getAttribute("data-search")]);
-      });
-			li.innerHTML = self.getTitle(auto[i]);
-			ul.appendChild(li);
+		if (auto[i]) {
+			if (!i || !self.equalFeatures(auto[i], auto[i-1])) {
+				var li = document.createElement("LI");
+				li.setAttribute("data-search", i);
+				this._list.push(auto[i]);
+				li.addEventListener("click", function(e) {
+					self._handleSelect(self._list[e.currentTarget.getAttribute("data-search")]);
+				});
+				li.innerHTML = self.getTitle(auto[i]);
+				ul.appendChild(li);
+			}
 		}
 	}
 	if (max && this.get("copy")) {

@@ -22,8 +22,8 @@ ol.source.Vector.WFS = function(options, cache)
 	if (!strategy && options.minzoom) {
 		var tileZoom = options.minzoom+2;
 		this.tiled_ = true;
-		var tileGrid = ol.tilegrid.createXYZ({ minZoom: tileZoom, maxZoom: tileZoom, tileSize:options.tileSize||256  }),
-		strategy = ol.loadingstrategy.tile (tileGrid);
+		this._tileGrid = ol.tilegrid.createXYZ({ minZoom: tileZoom, maxZoom: tileZoom, tileSize:options.tileSize||256  }),
+		strategy = ol.loadingstrategy.tile (this._tileGrid);
 	} else {
 		strategy = ol.loadingstrategy.bbox;
 	}
