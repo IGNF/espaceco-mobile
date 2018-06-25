@@ -70,34 +70,41 @@
 	left:2.5em;
 	text-align: center;
 }
-#help .menu-content
-{	top:0;
+#help .menu-content {
+	top: 0;
 	left: 4em;
 	max-width: initial;
 }
 
-#help .gps
-{	bottom: 7.5em;
-	right: 0;
+#help .gps {
+	bottom: 9.5em;
+    right: 1.5em;
+	text-align: left;
+	width: 15em;
+    max-width: 50%;
+}
+#help .gps .fa {
+    position: absolute;
+    left: -1em;
+    margin: .08em;
+}
+#help .locate {
+	bottom: 3.5em;
+	right: 4em;
 	text-align: center;
 }
-#help .locate
-{	bottom: 2.7em;
-	right: 3.5em;
-	text-align: center;
-}
-#help .signal
-{	bottom: 0em;
+#help .signal {
+	bottom: 0em;
 	right: 3em;
 	text-align: right;
 	max-width: 13em;
 }
-#help .signal p
-{	margin: 0 4em 0 0;
+#help .signal p {
+	margin: 0 4em 0 0;
 }
 
-#help .signaler-placer
-{	top: 9.5em;
+#help .signaler-placer {
+	top: 9.5em;
 	transform: translateY(-100%);
 	-webkit-transform: translateY(-100%);
 	left: 3em;
@@ -144,6 +151,7 @@
 }
 }
 
+#help .center,
 #help .signalements
 {	left: 50%;
 	top: 50%;

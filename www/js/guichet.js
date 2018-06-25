@@ -428,8 +428,10 @@ wapp.initControls = function()
 			html: "<i class='fa fa-search'></i>",
 			handleClick: function()
 			{	wapp.showPage('search');
-				//$("#search input").focus();
-				$("#search > div div:visible input.search").focus();
+				// Focus on first input
+				setTimeout( function(){
+					$("#search > div div:visible input.search").first().focus();
+				}, 100);
 			}
 		});
 	map.addControl (searchCtrl);
@@ -632,6 +634,7 @@ wapp.initInteractions = function()
 
 };
 
+/** Ajout de la barre de geolocalisation */
 wapp.setGeolocationControl = function(map) {
 	// Geolocation draw
 	var geodrawlayer = new ol.layer.Vector(
@@ -650,89 +653,26 @@ wapp.setGeolocationControl = function(map) {
 		]
 	});
 	this.overlays.gps = geodrawlayer;
-	geodrawlayer.getSource().on('addfeature', function(e) { e.feature.layer = geodrawlayer; });
+	geodrawlayer.getSource().on('addfeature', function(e) { 
+		e.feature.layer = geodrawlayer;
+		wapp.help.show('main-trace'); 
+	});
 	map.addLayer(geodrawlayer);
 
-	// Draw interaction
-	var geodraw = this.interactions.geolocation = new ol.interaction.GeolocationDraw(
-		{	source: geodrawlayer.getSource(),
-			type: 'LineString',
-			followTrack: 'auto',
-			zoom: 17,
-			tolerance: wapp.param.toleranceGPS||5,
-			minAccuracy: wapp.param.minGPSAccuracy||20
-		});
-	geodraw.setActive(false);
-	map.addInteraction(geodraw);
-	
-	// Control bar
-	var geodrawBar = new ol.control.Bar({ className:'geodrawBar ol-bottom ol-right' });
-	map.addControl(geodrawBar);
-
-	// Control d'activation
-	geodrawBar.addControl (new ol.control.Toggle({
-		"className": "geodrawCtrl", 
-		"html": "<i class='fa fa-location-arrow'></i>",
-		"toggleFn": function(b) {
-			console.log('toggle')
-			if (geodraw.getActive()) {
-				geodraw.stop();
-				$(geodrawBar.element).removeClass('active');
-				geodraw.setActive(false);
-				geodraw.setFollowTrack('auto');
-				$(centerButton.element).removeClass('active');
-			} else {
-				geodraw.setActive(true);
-				geodraw.pause(true);
-				$(geodrawBar.element).addClass('active');
-				$(startButton.element).addClass('active');
-				$(pauseButton.element).removeClass('active');
-				$(centerButton.element).removeClass('active');
-				geodraw.setFollowTrack('auto');
-				map.getView().animate({zoom: 17});
-			}
-		}
-	}));
-
-	var centerButton = new ol.control.TextButton({
-		"className": "centerBt", 
-		"html": "Centrer",
-		"handleClick": function() {
-			$(centerButton.element).removeClass('active');
-			geodraw.setFollowTrack('auto');
-		}
+	// Bar de geolocalisation
+	var geolocBar = new ol.control.GeolocationBar({
+		centerLabel: 'recentrer',
+		source: geodrawlayer.getSource(),
+		type: 'LineString',
+		followTrack: 'auto',
+		zoom: 17,
+		tolerance: wapp.param.toleranceGPS||5,
+		minAccuracy: wapp.param.minGPSAccuracy||20
 	});
-	map.addControl (centerButton);
-	geodrawBar.addControl(centerButton);
-
-	var startButton = new ol.control.TextButton({
-		"className": "startBt", 
-		"html": "Démarrer",
-		"handleClick": function() {
-			$(startButton.element).removeClass('active');
-			$(pauseButton.element).addClass('active');
-			geodraw.pause(false);
-			geodraw.setFollowTrack('auto');
-			$(centerButton.element).removeClass('active');
-		}
-	});
-	geodrawBar.addControl (startButton);
-	var pauseButton = new ol.control.TextButton({
-		"className": "pauseBt", 
-		"html": "Pause",
-		"handleClick": function() {
-			$(startButton.element).addClass('active');
-			$(pauseButton.element).removeClass('active');
-			geodraw.pause(true);
-		}
-	});
-	geodrawBar.addControl (pauseButton);
-
-	geodraw.on('drawend', function() {
-		$(geodrawBar.element).removeClass('active');
-	});
-	geodraw.on('follow', function(e) {
-		if (!e.following) $(centerButton.element).addClass('active');
+	map.addControl(geolocBar);
+	this.interactions.geolocation = geolocBar.getInteraction();
+	this.interactions.geolocation.on('change:active', function(){
+		wapp.help.show('main-geolocation');
 	});
 };
 

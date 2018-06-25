@@ -665,11 +665,21 @@ $("#fiche").on("showpage hidepage", function(e)
 
 /**
  * Affichage de la maitenance
+ * @param {boolean} nodelay 
  */
-wapp.maintain = function() {
+wapp.maintain = function(nodelay) {
+  // Calcul avec un delais pour l'affichage
+  if (!nodelay) {
+    $("#maintenance").addClass('calculating');
+    $("#maintenance .pie p").text('calcul');
+    setTimeout(function(){
+      wapp.maintain(true); 
+    }, 500)
+    return;
+  }
   // Info
-	var freeDiskSpace = 0;
-	var cacheImage = {};
+  var freeDiskSpace = 0;
+  var cacheImage = {};
   var cacheVecteur = {};
 
   // Affichage des infos (en asynchrone)
@@ -712,6 +722,7 @@ wapp.maintain = function() {
             $("#maintenance .pie .sector > div").css({ transform: "rotate(0deg)" });
           }
         } 
+        $("#maintenance").removeClass('calculating');
       }
     } else {
       count++;

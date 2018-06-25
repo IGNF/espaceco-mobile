@@ -4,28 +4,22 @@
 @media screen and (orientation:landscape) and (min-width:1024px) 
 {
 
-#fiche
-{	width:50%;
-}
+	#fiche
+	{	width:50%;
+	}
 
-#fiche label,
-#fiche input,
-#fiche [data-input-role].selected
-{	width:100%;
-}
+	[data-page="fiche"] #map
+	{	width:50%;
+		left:auto;
+	}
+	[data-page="fiche"] #map .menuCtrl,
+	[data-page="fiche"] #map .ol-zoom
+	{	display: block;
+	}
 
-[data-page="fiche"] #map
-{	width:50%;
-	left:auto;
-}
-[data-page="fiche"] #map .menuCtrl,
-[data-page="fiche"] #map .ol-zoom
-{	display: block;
-}
-
-#layers
-{	width: 50%;
-}
+	#layers {
+		width: 50%;
+	}
 
 }
 
@@ -34,15 +28,15 @@
 */
 @media screen and (orientation:portrait) and (min-height:1024px) {
 
-#fiche
-{	height: 65%;
-	top: 35%;
-}
+	#fiche
+	{	height: 65%;
+		top: 35%;
+	}
 
-[data-page="fiche"] #map
-{	height:35%;
-	bottom:auto;
-}
+	[data-page="fiche"] #map
+	{	height:35%;
+		bottom:auto;
+	}
 
 }
 
@@ -50,21 +44,8 @@
 	Smartphone
 */
 
-#fiche .trackingInfo
-{	display: none;
-	line-height: 2em;
-	padding: 0 0.5em;
-	font-size: 1.5em;
-	cursor: pointer;
-}
-#fiche .trackingInfo .fa
-{	float: right;
-	line-height: 1.5em;
-	font-size: 1.5em;
-}
 
-@media screen and (max-height:255px)
-{
+@media screen and (max-height:255px) {
 	[data-role="onglet-bt"]
 	{	display: none;
 	}
@@ -73,29 +54,6 @@
 	}
 }
 
-@media screen and (orientation:landscape) and (max-width:1023px), 
-screen and (orientation:portrait) and (max-height:1023px) 
-{	
-
-body.fullscreenMap #fiche.visible
-{	-webkit-transform: translate3d(0, 100%, 0)!important;
-	transform: translate3d(0, 100%, 0)!important;
-	margin-top: -3em;
-	font-size: 1.33em;
-}
-
-body.fullscreenMap #fiche [data-role="onglet-bt"],
-body.fullscreenMap #fiche [data-role="header"]
-{	display: none;
-}
-body.fullscreenMap #fiche [data-role="onglet"]
-{	top:0;
-}
-body.fullscreenMap #fiche .trackingInfo
-{	display: block;
-}
-
-}
 
 @media screen and (max-width:800px) {
 	#loadMap div {
@@ -105,52 +63,30 @@ body.fullscreenMap #fiche .trackingInfo
 
 @media screen and (max-width:600px) 
 {
-#apropos p
-{	text-align:left;
-}
-#loadMap span {
-	margin: -0.5em 0;
-	display: block;
-}
+	#loadMap span {
+		margin: -0.5em 0;
+		display: block;
+	}
 
-#signalements button
-{	font-size:0.85em;
-	margin: 0;
-	transform: scaleX(0.95);
-	padding: 0.5em 0.25em;
-}
-#signalements li
-{	font-size: 0.9em;
-}
-#signalements li .info
-{	clear: both;
-}
+	#signalements button
+	{	font-size:0.85em;
+		margin: 0;
+		transform: scaleX(0.95);
+		padding: 0.5em 0.25em;
+	}
+	#signalements li
+	{	font-size: 0.9em;
+	}
+	#signalements li .info
+	{	clear: both;
+	}
 
-#loadMap button {
-	margin-top: 0.4em!important;
-}
+	#loadMap button {
+		margin-top: 0.4em!important;
+	}
 
-#fiche .selection > div label,
-#fiche .selection > div li > span,
-#fiche .selection > div input,
-#fiche .selection > div [data-input-role].selected
-{	width:100%;
-}
-
-.photodel[data-role=dialog] [data-role=dialogBt]:nth-child(3)
-{	clear: right;
-}
+	.photodel[data-role=dialog] [data-role=dialogBt]:nth-child(3)
+	{	clear: right;
+	}
 
 }
-
-/* Fiche */
-@media screen and (orientation:landscape) and (max-width:1030px), 
-screen and (max-width:600px) 
-{
-
-#fiche
-{	font-size: 1.3em;
-}
-
-}
-
