@@ -2,12 +2,16 @@
 */
 if (!proj4) throw ("PROJ4 is not defined!");
 
-/* Define Lambert projections
+/* Define projections
 */
 if (!proj4.defs["EPSG:2154"]) proj4.defs("EPSG:2154","+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
 if (!proj4.defs["IGNF:LAMB93"]) proj4.defs("IGNF:LAMB93","+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
 if (!proj4.defs["EPSG:27572"]) proj4.defs("EPSG:27572","+proj=lcc +lat_1=46.8 +lat_0=46.8 +lon_0=0 +k_0=0.99987742 +x_0=600000 +y_0=2200000 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +no_defs");
 if (!proj4.defs["EPSG:2975"]) proj4.defs("EPSG:2975","+proj=utm +zone=40 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
+// Saint-Pierre et Miquelon
+if (!proj4.defs["EPSG:4467"]) proj4.defs("EPSG:4467","+proj=utm +zone=21 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
+// Antilles
+if (!proj4.defs["EPSG:4559"]) proj4.defs("EPSG:4559","+proj=utm +zone=20 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
 
 /** ol.source.Vector.Webpart
  * @constructor
@@ -56,6 +60,10 @@ ol.source.Vector.Webpart = function(opt_options)
 	var crs = this.featureType_.attributes[this.featureType_.geometryName];
 	crs = crs ? crs.crs : 'IGNF:LAMB93';
 	this.srsName_  = crs || 'IGNF:LAMB93'; // 'EPSG:4326';
+
+	if (!proj4.defs[this.srsName_]) {
+		console.error('PROJECTION INCONNUE', this.srsName_);
+	}
 				
 	this.featureFilter_ = options.filter || {};
 	
@@ -366,12 +374,14 @@ ol.source.Vector.Webpart.prototype.loaderFn_ = function (extent, resolution, pro
 	// if (resolution > this.maxResolution_) return;
 	var self = this;
 
-console.log('TILE',this._tileGrid.getTileCoordForCoordAndResolution(extent,resolution));
-
 	// Save projection for writing
 	this.projection_ = projection;
 
-    // TODO self.srsName_
+	// TODO self.srsName_
+	if (!proj4.defs[this.srsName_]) {
+		return;
+	}
+
 	var bbox = ol.proj.transformExtent(extent, projection, this.srsName_);
     var bboxStr = bbox.join(',');
     

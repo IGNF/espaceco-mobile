@@ -34,12 +34,13 @@ ol.layer.Vector.Webpart.Style.formatFeatureStyle = function (fstyle, feature)
 *	@return ol.style.Stroke
 */
 ol.layer.Vector.Webpart.Style.Stroke = function (fstyle)
-{	var stroke = new ol.style.Stroke(
+{	if (fstyle.strokeOpacity===0) return;
+	var stroke = new ol.style.Stroke(
 					{	color: fstyle.strokeColor || "#00f",
 						width: Number(fstyle.strokeWidth) || 1,
 						lineDash: fstyle.dash ? [5,5] : undefined
 					});
-	if (fstyle.strokeOpacity)
+	if (fstyle.strokeOpacity<1)
 	{	var a = ol.color.asArray(stroke.getColor());
 		if (a.length)
 		{	a[4] = fstyle.strokeOpacity;
@@ -54,10 +55,11 @@ ol.layer.Vector.Webpart.Style.Stroke = function (fstyle)
 *	@return ol.style.Fill
 */
 ol.layer.Vector.Webpart.Style.Fill = function (fstyle)
-{	var fill = new ol.style.Fill(
+{	if (fstyle.fillOpacity===0) return;
+	var fill = new ol.style.Fill(
 					{	color: fstyle.fillColor || "rgba(255,255,255,0.5)",
 					});
-	if (fstyle.fillOpacity)
+	if (fstyle.fillOpacity < 1)
 	{	var a = ol.color.asArray(fill.getColor());
 		if (a.length)
 		{	a[3] = Number(fstyle.fillOpacity);

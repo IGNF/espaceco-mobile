@@ -424,7 +424,7 @@ wapp.initControls = function()
 
 	// Search button
 	var searchCtrl = new ol.control.Button(
-		{	className: "searchCtrl",
+		{	className: "searchCtrl needsclick",
 			html: "<i class='fa fa-search'></i>",
 			handleClick: function()
 			{	wapp.showPage('search');
@@ -481,7 +481,7 @@ wapp.initControls = function()
 
 	// Menu
 	map.addControl (new ol.control.Toggle(
-	{	"className": "menuCtrl", 
+	{	"className": "menuCtrl needsclick", 
 		"html": "<i class='fa fa-bars'></i>",
 		"toggleFn": function(b)
 		{	wapp.toggleMenu();

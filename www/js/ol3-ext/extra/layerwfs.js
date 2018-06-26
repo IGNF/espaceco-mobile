@@ -13,7 +13,8 @@ ol.layer.Vector.WFS = function(options, cache) {
 
   var cachedir = options.url.replace(/^((http[s]?|ftp):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?$/,"$3").replace(/\./g,'_');
 	ol.layer.Vector.call(this,{ 
-		title: options.nom,
+    title: options.nom,
+    //renderMode: "image",
     name: cachedir +':'+ options.typename,
     style: new ol.style.Style.WFS(options.attributes),
     search : options.search,
@@ -86,7 +87,7 @@ ol.layer.Vector.WFS = function(options, cache) {
   getCapabilities();
 
   // Zoom level
-	var v = new ol.View();
+  var v = new ol.View();
 	if (options.maxzoom) {
     v.setZoom(options.maxzoom);
 		this.setMinResolution(v.getResolution());

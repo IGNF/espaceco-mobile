@@ -19,7 +19,7 @@ ol.layer.Vector.Webpart  = function(options, source_options)
 	this.proxy_ = options.proxy;
 	this.database_ = options.database;
 	this.name_ = options.name;
-	
+
 	if (!source_options.username) source_options.username = options.username;
 	if (!source_options.password) source_options.password = options.password;
 

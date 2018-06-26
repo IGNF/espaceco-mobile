@@ -185,6 +185,9 @@
 .ol-bar.ol-geobar .geolocBt button:after {
 	content: none;
 }
+.ol-bar.ol-geobar .startBt button:before {
+	font-size: .85em;
+}
 .ol-geobar .ol-active button
 {	-webkit-animation: blink-animation 1s linear infinite;
 	animation: blink-animation 1s linear infinite;
