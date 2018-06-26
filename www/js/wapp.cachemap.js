@@ -13,6 +13,23 @@
 var CacheMap = function(map, layerGroup, options)
 {	var self = this;
 
+	// Sort cache on layer order when order change
+	layerGroup.getLayers().on('remove', function(e) {
+		var layers = layerGroup.getLayers().getArray();
+		setTimeout(function(){
+			wapp.param.cacheMap.sort(function (a,b) {
+				var ia = layers.findIndex( function(l) { 
+					return l.get('name')==='cache_'+a.id
+				});
+				var ib = layers.findIndex( function(l) { 
+					return l.get('name')==='cache_'+b.id
+				})
+				return ia - ib;
+			});
+			wapp.saveParam();
+		}, 0);
+	});
+
     var apiKey = options.apiKey || map.gppKey;
 	var authentication = options.authentication || map.authentication;
 	var dirName = options.dirName || "geoportail";
@@ -709,7 +726,10 @@ var CacheMap = function(map, layerGroup, options)
 		smap.id = currentId++;
 
 		// Ajouter un layer a la carte (juste avant les layers vecteur)
-		var layercache = new ol.layer.Geoportail(smap.layer||"GEOGRAPHICALGRIDSYSTEMS.MAPS", { hidpi: false, visible: isVisible });
+		var layercache = new ol.layer.Geoportail(smap.layer||"GEOGRAPHICALGRIDSYSTEMS.MAPS", {
+				hidpi: false, 
+				visible: isVisible 
+			});
 		layercache.set('title', smap.nom);
 		layercache.set('name', "cache_"+smap.id);
 		layerGroup.getLayers().push(layercache);

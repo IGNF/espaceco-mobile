@@ -443,6 +443,7 @@
 #layerswitcher .li-content,
 #layerswitcher label
 {	width:100%;
+	max-width: calc(100% - 1em);
 }
 #layerswitcher ul.panel 
 {	bottom: 0;
@@ -519,6 +520,7 @@
     bottom: 14px;
 }
 
+#layerswitcher li.ol-dragover .layerswitcher-opacity,
 #layerswitcher ul ul .layerswitcher-opacity
 {	display: none;
 }
