@@ -936,6 +936,13 @@ RIPart.prototype.checkUserInfo = function(success, fail, allways)
 		// allways trigger function
 		if (typeof(allways)==='function') allways(rep, error);
 		// Recherche du profil :
+		// Themes globaux
+		if (rep.themes) {
+			self.param.themes = [];
+			for (var i=0, t; t=rep.themes[i]; i++){
+				if (t.global) self.param.themes.push(t);
+			}
+		}
 		// profil courant
 		if (self.param.profil && self.param.profil.id_groupe) 
 		{	self.setProfil(self.param.profil.id_groupe);
@@ -976,13 +983,12 @@ RIPart.prototype.setProfil = function(id_groupe)
 			logo: g.logo
 		}
 		// Themes
-		this.param.themes = [];
-		// Themes globaux
-		for (var i=0; i<groupes.length; i++) 
-		{	if (groupes[i].id_groupe != id_groupe)
-			{	for (var j=0, th; th = groupes[i].themes[j]; j++)
-				{	if (th.global || groupes[i].global) this.param.themes.push(th);
-				}
+		if (!this.param.themes) this.param.themes = [];
+		// Conserver les themes globaux
+		for (var i=this.param.themes.length-1; i>=0; i--) {
+			var th = this.param.themes[i];
+			if (!th.global || th.id_groupe===id_groupe) {
+				this.param.themes.splice(i,1);
 			}
 		}
 		// Themes du groupe

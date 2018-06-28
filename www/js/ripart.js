@@ -340,7 +340,7 @@ var RIPart = function(options)
 							th = {
 								nom: $(this).find('NOM').text(),
 								id_groupe: g.id_groupe,
-								global: ($(this).find('GLOBAL') == 1),
+								global: ($(this).find('GLOBAL').text() == 1),
 								aide: $(this).find('AIDE').text(),
 								attributs: []
 							};
@@ -381,6 +381,7 @@ var RIPart = function(options)
 				t = 
 				{	nom: att.find("NOM").text(),
 					id_groupe: Number(att.find("ID_GEOGROUPE").text()),
+					global: ($(this).find('GLOBAL').text() == 1),
 					attributs: []
 				};
 				r.themes.push(t);

@@ -74,7 +74,7 @@ var CacheMap = function(map, layerGroup, options)
 				layerGroup.getLayers().forEach(function(l) {
 					if (l.getVisible()) {
 						var cache = getCacheMapById(l.get('name').replace('cache_',''));
-						if (cache && cache.minZoom > map.getView().getZoom()) {
+						if (cache && cache.minZoom-2 > map.getView().getZoom()) {
 							for (var k=0, extent; extent=cache.extents[k]; k++) {
 								var p0 = map.getPixelFromCoordinate([extent[0], extent[1]]);
 								var p1 = map.getPixelFromCoordinate([extent[2], extent[3]]);
@@ -483,13 +483,10 @@ var CacheMap = function(map, layerGroup, options)
 		{	currentMap.minZoom = min;
 			currentMap.maxZoom = max;
 			currentMap.layer = layercache.get("layer");
-			if (currentMap.extents.length) 
-			{	currentMap.extent = ol.extent.extend (currentMap.extent, extent);
-			}
-			else currentMap.extent = extent;
+			if (!currentMap.extent) currentMap.extent = ol.extent.createEmpty();
+			currentMap.extent = ol.extent.extend (currentMap.extent, extent);
 			currentMap.extents.push (extent);
 			wapp.saveParam();
-			console.log('saveparam', wapp.param)
 			downloadTiles (t, layercache.get("layer"), function(){
 				setLayerCache (currentMap);
 				currentMap.date = (new Date()).toISODateString();

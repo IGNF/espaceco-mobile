@@ -731,7 +731,6 @@ wapp.initRipart = function()
 				}
 				// Forcer la jointure avec un objet d'une couche vecteur
 				if (!georem.sketch) {
-					console.log('nosketch')
 					var proj = wapp.map.getView().getProjection();
 					var coord = ol.proj.fromLonLat([georem.lon,georem.lat], proj);
 					for (var i=0, l; l = wapp.vector[i]; i++) {

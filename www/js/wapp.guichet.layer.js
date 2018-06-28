@@ -209,6 +209,7 @@ wapp.loadLayers = function (groupe) {
 	var guichet = wapp.map.getLayersByName('guichet')[0];
 
 	// Layers du guichet
+	this.vector = [];
 	guichet.getLayers().clear();
 	if (!groupe.layers) 
 	{	guichet.set("displayInLayerSwitcher", false);
@@ -218,7 +219,6 @@ wapp.loadLayers = function (groupe) {
   guichet.set("title", groupe.nom);
 
   // Chargement
-	this.vector = [];
 	var nb=0, nbLoad=0;
 	var loading = {};
 	// Reset source pour la recherche

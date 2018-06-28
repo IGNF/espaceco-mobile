@@ -21,7 +21,7 @@ if (!proj4.defs["EPSG:4559"]) proj4.defs("EPSG:4559","+proj=utm +zone=20 +ellps=
  *		- proxy {string} proxy path, default none
  *		- username {string} authentification
  *		- password {string} authentification
- *		- maxFeatures {integer} max number of feature to load before overload, default 50000
+ *		- maxFeatures {integer} max number of feature to load before overload, default 5000
  *		- maxReload {integer} max number of feature before reload (for tiled layers), default +Infinity
  *		- featureType {featureType} 
  *		- filter {Object} Webpart filter, ie: {detruit:false}, default {}
