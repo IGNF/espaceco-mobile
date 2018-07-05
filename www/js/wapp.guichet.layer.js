@@ -44,8 +44,8 @@ wapp.layerWFS = function(groupe, l) {
     "symb__pPattern" : { "title" : "symb@pPattern", "type" : "Style"},
     /* Attributs */
     "nom" : { "title" : "Site@Nom", "type" : "String", "readOnly":true},
-    "label" : { "title" : "Informations générales@Nom", "type" : "String", "readOnly":true},
-    "surface" : { "title" : "Informations générales@Surface", "type" : "Float", "readOnly":true},
+    "label" : { "title" : "Informations@Nom", "type" : "String", "readOnly":true},
+    "surface" : { "title" : "Informations@Surface", "type" : "Float", "readOnly":true},
     "essence_principale" : { "title" : "Informations@Essence principale", "type" : "String", "readOnly":true},
     "date_implantation" : { "title" : "Informations@Date d'implantation", "type" : "String", "readOnly":true},
     "peuplement_actuel" : { "title" : "Informations@Type de peuplement actuel", "type" : "String", "readOnly":true},

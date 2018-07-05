@@ -166,7 +166,8 @@
 /** GeodrawCtrl */
 #map .ol-geobar {
 	bottom: 1.5em;
-	right: 0.5em
+	right: 0.5em;
+	background: rgba(255,255,255,.8);
 }
 
 .ol-bar.ol-geobar .geolocBt button:before {
@@ -187,6 +188,12 @@
 }
 .ol-bar.ol-geobar .startBt button:before {
 	font-size: .85em;
+}
+.ol-control.ol-geobar .ol-control.ol-text-button button {
+	transform: scaleY(2.7);
+    font-size: .7em;
+    color: rgba(0, 60, 136, .75);
+    padding-bottom: .1em;
 }
 .ol-geobar .ol-active button
 {	-webkit-animation: blink-animation 1s linear infinite;

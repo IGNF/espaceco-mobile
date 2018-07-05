@@ -165,7 +165,7 @@ function _addLine(th, ul, title, val, type) {
 		label = title;
 	}
 	// Hidden themes
-//	if (theme==='symb') return;
+	if (theme==='symb') return;
 	// Add new theme
 	var className = theme.replace(/ /g,'_');
 	if (theme && !$('.'+className, th).length) {
@@ -287,7 +287,7 @@ wapp.showSelect = function(ripart)
 			}
 			// select first theme
 			if (saveTheme) $("."+saveTheme, th).click();
-			else $(th.children()[0]).click();
+			else $('[class!="hidden"]', th).first().click();
 		}
 	}
 	wapp.showPage("fiche");
