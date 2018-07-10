@@ -540,6 +540,7 @@ wapp.initInteractions = function()
 
 	var selLayer;
 	this.select = new ol.interaction.Select({
+		multi: true,
 		hitTolerance: 5,
 		filter: function(f,l) 
 		{	selLayer = l;
@@ -665,7 +666,6 @@ wapp.setGeolocationControl = function(map) {
 		source: geodrawlayer.getSource(),
 		type: 'LineString',
 		followTrack: 'auto',
-		zoom: 17,
 		tolerance: wapp.param.toleranceGPS||5,
 		minAccuracy: wapp.param.minGPSAccuracy||20
 	});
@@ -697,7 +697,7 @@ wapp.initRipart = function()
 				wapp.select.getFeatures().clear();
 				wapp.select.selectFeature(f, wapp.ripart.layer);
 				wapp.showOnglet("info");
-				wapp.showSelect(!add);
+				wapp.showSelect({ ripart: !add });
 			},
 			// Affichage du dialogue
 			onShow: function(form)

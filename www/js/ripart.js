@@ -587,7 +587,7 @@ var RIPart = function(options)
 			delete att.geometry;
 			for (a  in att) 
 			{	attr += '<attribut name="'+a.replace('"',"_")+'">'
-					+ String(att[a]).replace(/\&/g,"&amp;").replace(/</g,"&inf;").replace(/>/g,"&sup;") 
+					+ String(att[a]).replace(/\&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;") 
 					+'</attribut>';
 			}
 			attr = "<attributs>"+attr+"</attributs>";

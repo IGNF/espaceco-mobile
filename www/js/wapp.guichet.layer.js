@@ -10,72 +10,11 @@
 wapp.layerWFS = function(groupe, l) {
   var vector;
 
-  if (!/sitecentroid/.test(l.typename)) l.typename+=',sitecentroid';
   // Methode de chargement
-  l.strategy = new ol.loadingstrategy.all();
-  l.once = true;			// Chargement en une fois
-  l.search = 'nom';		// Propriete de recherche
-  l.attach = true;		// Joindre aux remontees
-  // Gestion des attributs
-  l.attributes = {
-    /* Symbologie * /
-    "symb__label" : { "title" : "symb@label", "type" : "Style"},
-    "symb__lColor" : { "title" : "symb@lColor", "type" : "Style"},
-    "symb__lsColor" : { "title" : "symb@lsColor", "type" : "Style"},
-    "symb__lSize" : { "title" : "symb@lSize", "type" : "Style"},
-    "symb__sColor" : { "title" : "symb@sColor", "type" : "Style"},
-    "symb__sWidth" : { "title" : "symb@sWidth", "type" : "Style"},
-    "symb__sDash" : { "title" : "symb@sDash", "type" : "Style"},
-    "symb__fColor" : { "title" : "symb@fColor", "type" : "Style"},
-    "symb__fPattern" : { "title" : "symb@fPattern", "type" : "Style"},
-    "symb__pColor" : { "title" : "symb@pColor", "type" : "Style"},
-    "symb__pAngle" : { "title" : "symb@pAngle", "type" : "Style"},
-    "symb__pWidth" : { "title" : "symb@pWidth", "type" : "Style"},
-    "symb__pSpace" : { "title" : "symb@pSpace", "type" : "Style"},
-    /*/
-    "symb__label" : { "title" : "symb@label", "type" : "Style"},
-    "symb__sColor" : { "title" : "symb@sColor", "type" : "Style"},
-    "symb__sWidth" : { "title" : "symb@sWidth", "type" : "Style"},
-    "symb__sDash" : { "title" : "symb@sDash", "type" : "Style"},
-    "symb__fColor" : { "title" : "symb@fColor", "type" : "Style"},
-    "symb__fPattern" : { "title" : "symb@fPattern", "type" : "Style"},
-    "symb__pColor" : { "title" : "symb@pColor", "type" : "Style"},
-    /* unused */
-    "symb__pPattern" : { "title" : "symb@pPattern", "type" : "Style"},
-    /* Attributs */
-    "nom" : { "title" : "Site@Nom", "type" : "String", "readOnly":true},
-    "label" : { "title" : "Informations@Nom", "type" : "String", "readOnly":true},
-    "surface" : { "title" : "Informations@Surface", "type" : "Float", "readOnly":true},
-    "essence_principale" : { "title" : "Informations@Essence principale", "type" : "String", "readOnly":true},
-    "date_implantation" : { "title" : "Informations@Date d'implantation", "type" : "String", "readOnly":true},
-    "peuplement_actuel" : { "title" : "Informations@Type de peuplement actuel", "type" : "String", "readOnly":true},
-    "peuplement_cible" : { "title" : "Informations@Type de peuplement cible", "type" : "String", "readOnly":true},
-    "observations" : { "title" : "Informations@Observations", "type" : "String", "readOnly":true},
-    "structure" : { "title" : "Informations@Répartition par classe de diamètre", "type" : "String", "readOnly":true},
-    "qualite" : { "title" : "Informations@Qualitatif", "type" : "String", "readOnly":true},
-    "surface_terriere" : { "title" : "Informations@Surface terrière", "type" : "String", "readOnly":true},
-    /* Interventions */
-    "interventions_psg" : { "title" : "Interventions PSG@Interventions", "type" : "JsonValue", "readOnly":true},
-    "interventions_hpsg" : { "title" : "Interventions hors-PSG@Interventions", "type" : "JsonValue", "readOnly":true},
-
-    /* unused * /
-    "symb__pPattern" : { "title" : "symb@pPattern", "type" : "Style"},
-    /* Attributs * /
-    "id": { "title": "Informations générales@Identifiant"},
-    "site_id": { "title": "Informations générales@No du site"},
-    "label" : { "title" : "Informations générales@Nom", "type" : "String", "readOnly":true},
-    "surface" : { "title" : "Informations générales@Surface", "type" : "Float", "readOnly":true},
-    "essence_principale" : { "title" : "Informations générales@Essence principale", "type" : "String", "readOnly":true},
-    "date_implantation" : { "title" : "Informations générales@Date d'implantation", "type" : "String", "readOnly":true},
-    "peuplement_actuel" : { "title" : "Informations générales@Type de peuplement actuel", "type" : "String", "readOnly":true},
-    "peuplement_cible" : { "title" : "Informations générales@Type de peuplement cible", "type" : "String", "readOnly":true},
-    "observations" : { "title" : "Informations générales@Observations", "type" : "String", "readOnly":true},
-    "structure" : { "title" : "Informations générales@Répartition par classe de diamètre", "type" : "String", "readOnly":true},
-    "qualite" : { "title" : "Informations générales@Qualitatif", "type" : "String", "readOnly":true},
-    "surface_terriere" : { "title" : "Informations générales@Surface terrière", "type" : "String", "readOnly":true},
-    "interventions_psg" : { "title" : "Interventions@intervention", "type" : "JSON", "readOnly":true},
-    /**/
-  };
+  if (l.mask.loadStartegy==='all') {
+    l.strategy = new ol.loadingstrategy.all();
+    l.once = true;			// Chargement en une fois
+  }
   //
   l.authentication = function(layer, cback) {
     var content = CordovApp.template("dialog-authenticate");
@@ -147,7 +86,7 @@ wapp.layerWFS = function(groupe, l) {
 
   //
   vector.set('logo', groupe.logo);
-  vector.set('attach', l.attach);
+  vector.set('attach', l.mask.joinData);
   // Chargement OK
   vector.once('ready', function() { 
       // Sauvegarde login / pwd

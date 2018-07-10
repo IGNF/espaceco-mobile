@@ -16,8 +16,8 @@ ol.layer.Vector.WFS = function(options, cache) {
     title: options.nom,
     //renderMode: "image",
     name: cachedir +':'+ options.typename,
-    style: new ol.style.Style.WFS(options.attributes),
-    search : options.search,
+    style: new ol.style.Style.WFS(options.mask.attributes),
+    search : options.mask.searchAttribute,
     logo: options.logo
   });
 
@@ -27,7 +27,7 @@ ol.layer.Vector.WFS = function(options, cache) {
   function createSource() {
     var source = new ol.source.Vector.WFS(options, cache);
     source.featureType_ = {
-      attributes: options.attributes
+      attributes: options.mask.attributes
     }
     self.setSource( source );
     setTimeout (function() { self.dispatchEvent({ type:"ready", source: source })}, 100);
@@ -151,7 +151,15 @@ ol.style.Style.WFS = function(options) {
         pattern: '',
         angle: 0
       }
+/**/
+      style.pattern = feature.get(attr('symb@fPattern'));
+      style.angle = feature.get(attr('symb@pAngle'));
+      style.size = feature.get(attr('symb@pWidth'));
+      style.spacing = feature.get(attr('symb@pSpace'));
+
+/*/
       var pat = feature.get(attr('symb@fPattern'));
+     
       var pat2 = feature.get(attr('symb@pPattern'));
       if (/B1|B2/.test(pat)) {
         var tmp = pat2;
@@ -200,12 +208,14 @@ ol.style.Style.WFS = function(options) {
           }
           break;
       }
+/**/
       if (style.pattern) {
         pattern = new ol.style.FillPattern({
           pattern: style.pattern,
           color: feature.get(attr('symb@pColor')) || 'transparent',
           fill: new ol.style.Fill({
-            color: pat2==='B1' ? 'transparent' : feature.get(attr('symb@fColor')) || 'rgba(255,255,255,0.4)'
+//            color: pat2==='B1' ? 'transparent' : feature.get(attr('symb@fColor')) || 'rgba(255,255,255,0.4)'
+            color: feature.get(attr('symb@fColor')) || 'rgba(255,255,255,0.4)'
           }),
           size: style.size || 2,
           spacing: style.spacing || 5,

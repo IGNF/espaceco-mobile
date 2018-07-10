@@ -91,6 +91,27 @@
   display: block;
 }
 
+#fiche .selection .multi {
+  display: none;
+  background: #ddd;
+  margin: -.5em -.5em 1em;
+  line-height: 1.6em;
+  text-align: center;
+}
+#fiche .selection .multi button {
+  display: inline-block;
+  background: #369;
+  border: 0;
+  font-size: 1.5em;
+  color: #fff;
+  line-height: 1em;
+  width: 1em;
+  text-align: center;
+}
+#fiche .selection.multi .multi {
+  display: block;
+}
+
 #fiche .warning_public {
   text-align: center;
 	border: 5px solid #ccc;

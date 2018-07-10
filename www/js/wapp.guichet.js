@@ -94,11 +94,16 @@ wapp.setGuichet = function(groupe)
 
 /** Afficher la selection dans la barre et la fiche
 */
-wapp.onSelect = function(e)
-{	var f = e ? e.selected[0] : null;
+wapp.onSelect = function(e) {
+	var nb = wapp.select.getFeatures().getLength();
 	// wapp.ripart.cancelFormulaire();
-	if (f)
-	{	$("#selection").html (f.get("nom")||"Afficher la sélection...");
+	if (nb>1) {
+		$("#selection").html (nb + ' objets sélectionnés...');
+		wapp.showOnglet("info");
+	}
+	else if (nb===1) {
+		var f = e ? e.selected[0] : null;
+		$("#selection").html (f.get("nom")||"Afficher la sélection...");
 		wapp.showOnglet("info");
 	}
 	else
@@ -215,33 +220,97 @@ function _addLine(th, ul, title, val, type) {
 	}
 };
 
-/** Afficher la fiche
-* @param {bool} ripart true si vient de la page de remontees 
-*/
-wapp.showSelect = function(ripart)
-{	var f = this.select.getFeatures().item(0);
 
-	if (ripart) $("#fiche").addClass("fromRipart");
+wapp.getGeomFr = function(g) {
+	switch (g.getType()) {
+		case 'LineString': return 'Ligne';
+		case 'Polygon': return 'Surface';
+		default: return g.getType();
+	}
+}
+wapp.getFeatureTitle = function(f) {
+	var prop = f.getProperties();
+	if (prop.georem) {
+		return ('Signalement'+(prop.georem.id?'#'+prop.georem.id:''));
+	}
+	for (var i in prop) {
+		if (/name|nom|label/.test(i)) {
+			return prop[i] + 
+			' <i>('+wapp.getGeomFr(f.getGeometry())+')</i>';
+		}
+	}
+	return '<i>sans nom</i>';
+};
+
+/** Afficher la fiche
+* @param {any}  options
+*	@param {bool} options.ripart true si vient de la page de remontees 
+*	@param {int} options.index position dans le liste de selection
+*/
+wapp.showSelect = function(options) {
+	options = options || {};
+	var features = options.features || $.extend([],this.select.getFeatures().getArray())
+	var nb = features.length;
+
+	// Ne pas passer par le liste
+	options.index = options.index || 0;
+
+	// Current feature
+	if (options.index && options.index>=nb) options.index = 0;
+	if (options.index && options.index<0) options.index = nb-1;
+	var f = features[options.index || 0];
+
+	if (options.ripart) $("#fiche").addClass("fromRipart");
 	else $("#fiche").removeClass("fromRipart");
 
-	var div = $('#fiche .selection').removeClass("georem fiche trace");
+	var div = $('#fiche .selection').removeClass("georem fiche trace multi");
+
 	// Pas de selection
-	if (f) 
-	{	var prop = f.getProperties();
+	if (options.index===undefined && nb>1) {
+		div.addClass("fiche");
+		$(".fiche h3", div).html(nb+' objets sélectionnés :');
+		$(".fiche img.guichet", div).hide();
+		var ul = $(".fiche ul", div).html('');
+		var th = $(".fiche .themes", div).html('');
+		var i = 0;
+		this.select.getFeatures().forEach (function(f){
+			$('<li>').html(wapp.getFeatureTitle(f))
+				.data('index', i++)
+				.click(function(){
+					wapp.showSelect({ index: $(this).data('index'), features: features });
+				})
+				.appendTo(ul);
+		});
+	} else if (f) {
+		if (nb>1) {
+			div.addClass('multi');
+			$('.multi span', div).html(((options.index||0)+1)+'/'+nb);
+		}
+		$(".next", div).off().click(function(){
+			wapp.showSelect({ index: (options.index||0)+1, features: features });
+		});
+		$(".prev", div).off().click(function(){
+			wapp.showSelect({ index: (options.index||0)-1, features: features });
+		});
+
+		this.select.getFeatures().clear();
+		this.select.getFeatures().push(f);
+		$("#selection").html (f.get("nom")||"Afficher la sélection...");
+		var prop = f.getProperties();
 		// Georem
-		if (prop.georem)
-		{	div.addClass("georem").removeClass("fiche");
+		if (prop.georem) {
+			div.addClass("georem").removeClass("fiche");
 			if (prop.georem.sketch) prop.georem.nb = wapp.ripart.sketch2feature(prop.georem.sketch).length;
 			else prop.georem.nb = 0;
 			wapp.dataAttributes($(".georem", div), prop.georem);
 		}
 		// Objet utilisateur
-		else 
-		{	div.addClass("fiche");
+		else {
+			div.addClass("fiche");
 			// Trace GPS
 			if (f.layer.get('geolocation')) div.addClass("trace");
 			var prop = f.getProperties();
-			$(".fiche h3 span", div).text(f.layer.get("title")||f.layer.get("name"));
+			$(".fiche h3", div).text('Couche : '+f.layer.get("title")||f.layer.get("name"));
 			if (f.layer.get("logo")) {
 				$(".fiche img.guichet", div).attr('src', f.layer.get("logo")).show();
 			} else {
