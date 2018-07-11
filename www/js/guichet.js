@@ -489,7 +489,45 @@ wapp.initControls = function()
 	}));
 
 	// Layer switcher
-	map.addControl (new ol.control.LayerSwitcher({ target:$("#layerswitcher").get(0), extent:true, reordering: true }));
+	map.addControl (new ol.control.LayerSwitcher({ 
+		target:$("#layerswitcher").get(0), 
+		extent:true, 
+		reordering: true,
+		oninfo: function (layer) {
+			var content = CordovApp.template("dialog-infolayer");
+			$('.description', content).html(layer.get('description'));
+			// Supprimer les authentification
+			function removeAuthentications() {
+				var url = layer.getSource().get('url');
+				for (var i=0, g; g=wapp.ripart.param.groupes[i]; i++) {
+					for (var k=0, l; l=g.layers[k]; k++) {
+						if (l.url === url) {
+							delete l.password;
+						}
+					}
+				}
+				wapp.setGuichet();
+				wapp.ripart.saveParam();
+				// Clear credentials
+				var win = window.open('logout.html','_blank','clearsessioncache=yes,hidden=yes');
+				setTimeout(function(){ win.close(); }, 100);
+				wapp.dialog.close();
+			}
+			if (layer.get('authentication')) {
+				$('.auth', content).show();
+				$('a', content).click(removeAuthentications);
+			}
+			else $('.auth', content).hide();
+			// Info sur le layer
+			wapp.dialog.show (content, {
+				title: '<i class="fa fa-info-circle"></i> ' + layer.get('title'), 
+				className: 'layerinfo',
+				buttons: { submit:"OK" },
+				callback: function(b) {
+				}
+			  });
+		}
+	}));
 
 	/*
 	// Geolocation Control
@@ -828,8 +866,11 @@ wapp.initRipart = function()
 
 /** On a change de groupe 
 */
-wapp.changeGroup = function (e)
-{	// Supprimer les layers des autres groupes
+wapp.changeGroup = function (e) {
+	// Supprimer la selection
+	wapp.select.getFeatures().clear();
+	wapp.onSelect();
+	// Supprimer les layers des autres groupes
 	var lgroup = wapp.map.getLayersByName("groupe")[0];
 	lgroup.getLayers().clear();
 	// Verifier les layers disponibles

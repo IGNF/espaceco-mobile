@@ -14,6 +14,7 @@ ol.layer.Vector.WFS = function(options, cache) {
   var cachedir = options.url.replace(/^((http[s]?|ftp):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?$/,"$3").replace(/\./g,'_');
 	ol.layer.Vector.call(this,{ 
     title: options.nom,
+    description: options.description,
     //renderMode: "image",
     name: cachedir +':'+ options.typename,
     style: new ol.style.Style.WFS(options.mask.attributes),
@@ -37,11 +38,12 @@ ol.layer.Vector.WFS = function(options, cache) {
   }
 
   // Get capabilities
+  this.set('authentication', options.username);
   var getCapabilities = function () {
     $.ajax({
       url: options.url,
       username: options.username, // guichet-ign - guichet_ign$8
-      password: options.password ? CryptoJS.AES.decrypt(options.password, secret).toString(CryptoJS.enc.Utf8) : "", 
+      password: options.password ? CryptoJS.AES.decrypt(options.password, secret).toString(CryptoJS.enc.Utf8) : undefined, 
       timeout: 10000,
       data: {
         service: 'WFS',
@@ -52,10 +54,11 @@ ol.layer.Vector.WFS = function(options, cache) {
       // Error
       error: function(jqXHR, status, error) {
         // Unauthorized
-        if (jqXHR.status===401 && typeof(authenticationFn) === 'function') {
+        if ((jqXHR.status===401 || jqXHR.status===500) && typeof(authenticationFn) === 'function') {
           authenticationFn(self, function(login, pwd){
             if (login) {
-              options.username = login,
+              options.username = login;
+              self.set('authentication', options.username);
               options.password = CryptoJS.AES.encrypt(pwd, secret).toString();
               // try again
               getCapabilities();
@@ -209,13 +212,14 @@ ol.style.Style.WFS = function(options) {
           break;
       }
 /**/
+      var fillColor = ol.color.asArray(feature.get(attr('symb@fColor'))) || 'rgba(255,255,255,0.4)';
       if (style.pattern) {
         pattern = new ol.style.FillPattern({
           pattern: style.pattern,
           color: feature.get(attr('symb@pColor')) || 'transparent',
           fill: new ol.style.Fill({
 //            color: pat2==='B1' ? 'transparent' : feature.get(attr('symb@fColor')) || 'rgba(255,255,255,0.4)'
-            color: feature.get(attr('symb@fColor')) || 'rgba(255,255,255,0.4)'
+            color: fillColor
           }),
           size: style.size || 2,
           spacing: style.spacing || 5,
@@ -223,7 +227,7 @@ ol.style.Style.WFS = function(options) {
         });
       } else {
         pattern = new ol.style.Fill({
-          color: feature.get(attr('symb@fColor')) || 'rgba(255,255,255,0.4)'
+          color: fillColor
         })
       }
       var text;
@@ -261,7 +265,8 @@ ol.style.Style.WFS = function(options) {
 	}
 }
 
-// BUG
+/* For debug
+*/
 function centerWFS(n) {
   var f = wapp.vector[0].getSource().getFeatures()[n];
   if (!f) return;

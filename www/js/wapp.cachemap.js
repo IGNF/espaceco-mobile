@@ -743,25 +743,25 @@ var CacheMap = function(map, layerGroup, options)
 			});
 
 		// Suppression d'une carte
-		$(".fa-trash",li).on ("touchstart click", function(e)
+		$(".fa-trash",li).on ("click", function(e)
 			{	e.preventDefault();
 				e.stopPropagation();
 				removeCacheMap(smap);
 			});
 		// Choix des tuilles de la carte
-		$(".fa-map-o",li).on ("touchstart click", function(e)
+		$(".fa-map-o",li).on ("click", function(e)
 			{	e.preventDefault();
 				e.stopPropagation();
 				loadCacheMap(smap);
 			});
 		// Refresh map
-		$(".fa-refresh",li).on ("touchstart click", function(e)
+		$(".fa-refresh",li).on ("click", function(e)
 			{	e.preventDefault();
 				e.stopPropagation();
 				refreshCacheMap(smap);
 			});
 		// Zoom to extent
-		$(".tools-locate",li).on ("touchstart click", function(e)
+		$(".tools-locate",li).on ("click", function(e)
 			{	e.preventDefault();
 				e.stopPropagation();
 				if (smap.extents.length)

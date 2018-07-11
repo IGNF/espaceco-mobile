@@ -170,7 +170,7 @@ function _addLine(th, ul, title, val, type) {
 		label = title;
 	}
 	// Hidden themes
-	if (theme==='symb') return;
+//	if (theme==='symb') return;
 	// Add new theme
 	var className = theme.replace(/ /g,'_');
 	if (theme && !$('.'+className, th).length) {

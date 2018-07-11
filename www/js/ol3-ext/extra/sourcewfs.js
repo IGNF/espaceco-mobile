@@ -84,7 +84,7 @@ ol.source.Vector.WFS.prototype.loaderFn_ = function(extent, resolution, projecti
 		boundedBy: extent.join(','),
 //		maxFeatures: this.maxFeatures_,
 		srsname:'EPSG:4326',
-		version: this.get('version'),
+		version: this.get('version')
 	};
 	// WFS request
     this.dispatchEvent({ type:"loadstart", remains:++this.tileloading_ } );
@@ -101,12 +101,14 @@ ol.source.Vector.WFS.prototype.loaderFn_ = function(extent, resolution, projecti
 		error: function(cacheError) {
 			$.ajax({
 				url: self.get('url'),
+				headers : { "cache-control": "no-cache" },
+				cache: false,
 				dataType: "text",
 				data: parameters,
 				// Timout 3mn
 				timeout: 3*60*1000,
 				// Authentification
-				username: self.username,
+				username: self.username||"",
 				password: self.password,
 				success: function(response) {
 					//console.log('loading:', response.length)
@@ -183,15 +185,14 @@ ol.source.Vector.WFS.prototype.handleResponse_ = function(response, projection) 
 	var hasFeatures = (this.getFeatures().length > 0);
 	for (var i=0, f; f=data[i]; i++) {
 		var p = f.getGeometry().getFirstCoordinate();
-// BUG
-if (p[0]>=360 || p[0]<=-360) continue;
+		// BUG
+		if (p[0]>=360 || p[0]<=-360) continue;
 		f.getGeometry().transform('EPSG:4326', projection);
 		if (!hasFeatures || !this.get('id') || !this.hasFeature(f)) {
 			features.push(f);
 		}
 	}
 	this.addFeatures(features);
-	console.log("addfeatures")
 	this.dispatchEvent({ type:"loadend", remains: --this.tileloading_ });
 };
 
