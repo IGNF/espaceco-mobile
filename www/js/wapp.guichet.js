@@ -16,6 +16,7 @@ wapp.initGuichets = function()
 {	// Reset list
 	var ul = $('#cartes [data-list="guichets"] ul.guichet');
 	ul.html("");
+	wapp.setGuichet();
 	if (!this.ripart.isConnected()) return;
 	// Recherche des groupes
 	var groupes = wapp.ripart.param.groupes;
@@ -66,24 +67,25 @@ wapp.initGuichets = function()
  * @param {any} g le groupe
  * @param {function} cback callback fonction qui renvoie le nom du fichier
  */
-wapp.getLogo = function (g, cback, scope)
-{	
-	CordovApp.File.getFile("TMP/logo/"+g.id_groupe, 
+wapp.getLogo = function (g, cback, scope) {	
+	CordovApp.File.getFile("TMP/logo/"+(g ? g.id_groupe : '_nologo_'), 
 		function(fileEntry) { 
 			cback.call(scope, fileEntry.toURL()); 
 		}, 
 		function() { 
-			cback.call(scope, g.logo); 
+			cback.call(scope, g ? g.logo : null); 
 		});
 }
 
 /** Guichet en cours de modification
 */
-wapp.setGuichet = function(groupe)
-{	if (!groupe) groupe = {};
+wapp.setGuichet = function(groupe) {
+	if (!groupe) groupe = {};
 	// Nouveau guichet
 	this.ripart.param.guichet = groupe.id_groupe;
 	wapp.ripart.saveParam();
+	wapp.select.getFeatures().clear();
+	wapp.onSelect();
 	// Mettre a jour la liste
 	$('#cartes [data-list="guichets"] ul.guichet li').each(function()
 	{	if ($(this).data('groupe')===groupe) $(this).addClass('selected');
@@ -170,7 +172,7 @@ function _addLine(th, ul, title, val, type) {
 		label = title;
 	}
 	// Hidden themes
-//	if (theme==='symb') return;
+	if (theme==='symb') return;
 	// Add new theme
 	var className = theme.replace(/ /g,'_');
 	if (theme && !$('.'+className, th).length) {
@@ -355,7 +357,7 @@ wapp.showSelect = function(options) {
 				}
 			}
 			// select first theme
-			if (saveTheme) $("."+saveTheme, th).click();
+			if (saveTheme && $("."+saveTheme, th).length) $("."+saveTheme, th).click();
 			else $('[class!="hidden"]', th).first().click();
 		}
 	}
@@ -373,11 +375,14 @@ wapp.showSelect = function(options) {
 */
 wapp.connect = function()
 {	wapp.ripart.connectDialog(
-	{	onConnect: function()
-		{	wapp.initGuichets();
+	{	onConnect: function() {
+			console.log('onconnect')
+			wapp.initGuichets();
 		},
-		onError: function(error)
-		{	var msg = [];
+		onError: function(error) {
+			var msg = [];
+			wapp.initGuichets();
+		
 			switch (error.status)
 			{	case 401: 
 					msg = [ "Accès interdit" , "Utilisateur inconnu." ];

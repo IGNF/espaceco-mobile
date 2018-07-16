@@ -822,8 +822,8 @@ RIPart.prototype.connectDialog = function (options)
 			classe: "connect", 
 			buttons: { cancel:"Annuler", deconnect: "Déconnexion", submit:"Connexion"},
 			callback: function(bt)
-			{	if (bt == "submit")
-				{	if (self.param.user != nom.val())
+			{	if (bt == "submit") {
+					if (self.param.user != nom.val())
 					{	self.param.profil = null;
 					}
 					wapp.wait("Connexion au serveur...");
@@ -853,14 +853,14 @@ RIPart.prototype.connectDialog = function (options)
 
 /** Deconnect current user
 */
-RIPart.prototype.deconnect = function()
-{	this.param = { georems:[], nbrem:0 };
+RIPart.prototype.deconnect = function() {
+	this.param = { georems:[], nbrem:0 };
 	this.saveParam();
 	$("img.logo").attr("");
-	$("body").attr("data-logo", "none");
+	// $("body").attr("data-logo", "none");
 	$(".userinfo").html("Espace collaboratif");
 	wapp.closeDialog();
-	wapp.hidePage()
+	// wapp.hidePage()
 	this.onUpdate();
 }
 
@@ -926,31 +926,37 @@ RIPart.prototype.checkUserInfo = function(success, fail, allways)
 		}
 		// allways trigger function
 		if (typeof(allways)==='function') allways(rep, error);
-		// Recherche du profil :
-		// Themes globaux
-		if (rep.themes) {
-			self.param.themes = [];
-			for (var i=0, t; t=rep.themes[i]; i++){
-				if (t.global) self.param.themes.push(t);
+		// Trigger function
+		if (error) {
+/*
+			self.param.groupes = [];
+			self.setProfil(null);
+*/
+			self.deconnect();
+			self.setProfil(null);
+			fail(error);
+		} else {
+			// Recherche du profil :
+			// Themes globaux
+			if (rep.themes) {
+				self.param.themes = [];
+				for (var i=0, t; t=rep.themes[i]; i++){
+					if (t.global) self.param.themes.push(t);
+				}
 			}
-		}
-		// profil courant
-		if (self.param.profil && self.param.profil.id_groupe) 
-		{	self.setProfil(self.param.profil.id_groupe);
-		}
-		// Profil du site
-		else if (rep.profil && rep.profil.id_groupe)
-		{	self.setProfil(rep.profil.id_groupe);
-		}
-		// Par defaut, premier groupe de l'utilisateur
-		else if (self.param.groupes && self.param.groupes.length)
-		{	self.setProfil(self.param.groupes[0].id_groupe);
-		}
-		if (error)
-		{	fail(error);
-		}
-		else 
-		{	success(rep);
+			// profil courant
+			if (self.param.profil && self.param.profil.id_groupe) 
+			{	self.setProfil(self.param.profil.id_groupe);
+			}
+			// Profil du site
+			else if (rep.profil && rep.profil.id_groupe)
+			{	self.setProfil(rep.profil.id_groupe);
+			}
+			// Par defaut, premier groupe de l'utilisateur
+			else if (self.param.groupes && self.param.groupes.length)
+			{	self.setProfil(self.param.groupes[0].id_groupe);
+			}
+			success(rep);
 		}
 		self.saveParam();
 	});
@@ -961,7 +967,7 @@ RIPart.prototype.checkUserInfo = function(success, fail, allways)
  */
 RIPart.prototype.setProfil = function(id_groupe)
 {	// recherche du groupe
-	var groupes = this.param.groupes;
+	var groupes = this.param.groupes || [];
 	for (var i=0, g; g=groupes[i]; i++) 
 	{	if (g.id_groupe == id_groupe) break;
 	}
@@ -988,17 +994,19 @@ RIPart.prototype.setProfil = function(id_groupe)
 		}
 	}
 	else
-	{	this.param.profil = {};
+	{	if (id_groupe===null) this.param.profil = null;
+		else this.param.profil = {};
 	}
 	
-	wapp.getLogo(this.param.profil, function(logo)
-	{	$(".title", this.profilElement).text(this.param.profil.groupe || "");
+	wapp.getLogo(this.param.profil, function(logo) {
+		var groupe = this.param.profil ? this.param.profil.groupe : "";
+		$(".title", this.profilElement).text(groupe);
 		$("img", this.profilElement).attr("src", logo || "");
 		// Show user info
 		$("img.logo").attr("src", logo || "img/ign.png");
-		$("body").attr("data-logo", logo?"":"none");
-		var info = (this.param.profil.groupe ? this.param.profil.groupe+"<br/>": "")
-			+ this.param.user;
+		//$("body").attr("data-logo", logo ? "":"none");
+		var info = (groupe ? groupe+"<br/>": "")
+			+ (this.param.user || "Espace collaboratif");
 		$(".userinfo").html(info);
 	}, this);
 

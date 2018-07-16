@@ -159,7 +159,7 @@ ol.source.Vector.Webpart.prototype.reload = function()
     this.on ('removefeature', this.onDeleteFeature_, this);
 	this.isloading_ = false;
 	console.log('reload')
-	self.dispatchEvent({ type:"reload", maxreload: this.maxReload_ });
+	this.dispatchEvent({ type:"reload", maxreload: this.maxReload_ });
 }
 
 /** Get save actions

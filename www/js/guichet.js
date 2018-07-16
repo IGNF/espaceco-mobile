@@ -71,8 +71,15 @@ var wapp = new CordovApp(
 				var groupe = wapp.ripart.param.groupes.find( function(g){
 					return g.id_groupe === wapp.ripart.param.profil.id_groupe;
 				});
-				$("#apropos .groupe h3 span").html('').text(groupe.nom);
-				$("#apropos .groupe div").html('').html(groupe.desc);
+				if (groupe) {
+					$("#apropos .groupe").show();
+					$("#apropos .groupe h3 span").html('').text(groupe.nom);
+					$("#apropos .groupe div").html('').html(groupe.desc);
+				} else {
+					$("#apropos .groupe").hide();
+				}
+			} else {
+				$("#apropos .groupe").hide();
 			}
 		});
 
@@ -676,10 +683,11 @@ wapp.initInteractions = function()
 /** Ajout de la barre de geolocalisation */
 wapp.setGeolocationControl = function(map) {
 	// Geolocation draw
-	var geodrawlayer = new ol.layer.Vector(
-	{	name: 'Trace',
+	var geodrawlayer = new ol.layer.Vector({
+		name: 'Trace',
+		title: 'Trace',
 		geolocation: true,
-		vivible: true,
+		visible: true,
 		displayInLayerSwitcher: false,
 		source: new ol.source.Vector(),
 		style: 

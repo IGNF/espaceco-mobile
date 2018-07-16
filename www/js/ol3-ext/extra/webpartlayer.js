@@ -11,8 +11,8 @@
  *		- password {string}
  * @returns {ol.source.Vector.Webpart}
  */
-ol.layer.Vector.Webpart  = function(options, source_options) 
-{   var self = this;
+ol.layer.Vector.Webpart  = function(options, source_options) {
+	var self = this;
 	if (!options) options = {};
 	if (!source_options) source_options = {};
 	this.url_ = options.url.replace("/wfs","/database/") || "https://espacecollaboratif.ign.fr/gcms/database/"; // Ancien wpart "http://webpart.ign.fr/gcms/database/";
@@ -47,13 +47,13 @@ ol.layer.Vector.Webpart  = function(options, source_options)
 
 			// Set zoom level / resolution for the layer
 			var v = new ol.View();
-			if (featureType.maxZoomLevel)
-			{	v.setZoom(featureType.maxZoomLevel);
+			if (featureType.maxZoomLevel && featureType.maxZoomLevel<20) {
+				v.setZoom(featureType.maxZoomLevel);
 				self.setMinResolution(v.getResolution());
 			}
-			if (featureType.minZoomLevel || featureType.minZoomLevel===0)
-			{	v.setZoom(Math.max(featureType.minZoomLevel,4));
-				self.setMaxResolution(v.getResolution());
+			if (featureType.minZoomLevel || featureType.minZoomLevel===0) {
+				v.setZoom(Math.max(featureType.minZoomLevel,4));
+				self.setMaxResolution(v.getResolution()+1);
 			}
 			// Decode condition (parse string)
 			if (featureType.style && featureType.style.children) {
@@ -78,6 +78,7 @@ ol.layer.Vector.Webpart  = function(options, source_options)
         }
 	});
 
+	options.renderMode = options.renderMode || 'image';
 	ol.layer.Vector.call(this, options);
 	this.set("name", options.database+":"+options.name);
 };
