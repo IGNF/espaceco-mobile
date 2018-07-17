@@ -860,9 +860,11 @@ RIPart.prototype.deconnect = function() {
 	// $("body").attr("data-logo", "none");
 	$(".userinfo").html("Espace collaboratif");
 	wapp.closeDialog();
-	// wapp.hidePage()
 	this.onUpdate();
-}
+	// Clear credentials
+	var win = window.open('logout.html','_blank','clearsessioncache=yes,hidden=yes');
+	if (win) setTimeout(function(){ win.close(); }, 100);
+};
 
 /** Check user info : getUserInfo + save informations
  * @param {function} success on success callback
@@ -928,12 +930,10 @@ RIPart.prototype.checkUserInfo = function(success, fail, allways)
 		if (typeof(allways)==='function') allways(rep, error);
 		// Trigger function
 		if (error) {
-/*
-			self.param.groupes = [];
-			self.setProfil(null);
-*/
-			self.deconnect();
-			self.setProfil(null);
+			if (error.status===401) {
+				self.deconnect();
+				self.setProfil(null);
+			}
 			fail(error);
 		} else {
 			// Recherche du profil :
@@ -997,10 +997,9 @@ RIPart.prototype.setProfil = function(id_groupe)
 	{	if (id_groupe===null) this.param.profil = null;
 		else this.param.profil = {};
 	}
-	
 	wapp.getLogo(this.param.profil, function(logo) {
 		var groupe = this.param.profil ? this.param.profil.groupe : "";
-		$(".title", this.profilElement).text(groupe);
+		$(".title", this.profilElement).text(groupe||"");
 		$("img", this.profilElement).attr("src", logo || "");
 		// Show user info
 		$("img.logo").attr("src", logo || "img/ign.png");

@@ -93,7 +93,7 @@ CordovApp.prototype.setParamInput = function(elt, param, onchange)
 						}
 						self.selectDialog(s, s0, function(c)
 						{	setValue ($this, c);
-						});
+						},{ search: (l.length>8) });
 						break;
 					default: break;
 				};
@@ -178,6 +178,7 @@ CordovApp.prototype.selectInput = function(input, value, onchange)
 					n++;
 				}
 			}
+
 			if (n>1)
 			{	self.selectDialog(s, s0, function(c)
 				{	setValue(c);

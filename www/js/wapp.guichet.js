@@ -376,7 +376,6 @@ wapp.showSelect = function(options) {
 wapp.connect = function()
 {	wapp.ripart.connectDialog(
 	{	onConnect: function() {
-			console.log('onconnect')
 			wapp.initGuichets();
 		},
 		onError: function(error) {

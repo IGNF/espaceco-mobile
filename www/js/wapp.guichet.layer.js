@@ -146,8 +146,8 @@ wapp.layerWebpart = function(groupe, l) {
 wapp.loadLayers = function (groupe) {
   	// Layer du guichet
 	var guichet = wapp.map.getLayersByName('guichet')[0];
-console.log("loadlayer",groupe)
-	// Layers du guichet
+
+  // Layers du guichet
 	this.vector = [];
 	guichet.getLayers().clear();
 	if (!groupe.layers) 
