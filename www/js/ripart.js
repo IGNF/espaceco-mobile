@@ -621,7 +621,7 @@ var RIPart = function(options)
 	this.saveParam = function()
 	{	var pwd = this.param.pwd;
 		// Ne pas sauvegarder les mots de passe 
-		if (!window.cordova) delete this.param.pwd;
+		// if (!window.cordova) delete this.param.pwd;
 		// Ou les encrypter
 		cryptPwd (this.param.groupes, true);
 		// Enregistrer

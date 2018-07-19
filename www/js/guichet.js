@@ -30,6 +30,10 @@ var wapp = new CordovApp(
 		wapp.showPage('splash');
 		setTimeout(function(){ wapp.hidePage('splash'); }, 2000);
 		*/
+		// Gestion du mode hors-connexion 
+		document.addEventListener("online", function(){
+			wapp.online();
+		}, false);
 
 		// Version => cordova-plugin-app-version ???
 		$(".version").text(this.version);
@@ -1015,4 +1019,41 @@ wapp.redStyle = function()
 			stroke: redStroke
 		})
 	];
+};
+
+/** Gestion du mode hors-connexion */
+wapp.online = function() {
+	console.log('ONLINE');
+	wapp.refreshMap();
+};
+
+/**
+ * Refresh the map to relaod the tiles
+ * @param {ol.Collection<ol.layer>} layers, default refresh all layers
+ */
+wapp.refreshMap = function(layers) {
+	if (!layers) wapp.refreshMap(wapp.map.getLayers())
+	else {
+		layers.forEach(function(l) {
+			// Group
+			if (l.getLayers) {
+				wapp.refreshMap(l.getLayers());
+			} 
+			// Geoportail layer
+			else if (l.getSource) {
+				if (l.getSource().setTileLoadFunction) {
+					// console.log(l.get('name'), l);
+					l.getSource().setTileLoadFunction(l.getSource().getTileLoadFunction())
+				}
+				// Webpart layer
+				else if (l.getSource().reload) {
+					l.getSource().reload();
+				}
+			}
+			// Others
+			else {
+				// console.log("REFRESH", l);
+			}
+		});
+	}
 };

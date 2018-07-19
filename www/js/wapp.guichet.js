@@ -12,12 +12,14 @@
 
 /** Recherche des guichets de l'utilisateur
 */
-wapp.initGuichets = function()
-{	// Reset list
+wapp.initGuichets = function() {
+	// Reset list
 	var ul = $('#cartes [data-list="guichets"] ul.guichet');
 	ul.html("");
-	wapp.setGuichet();
-	if (!this.ripart.isConnected()) return;
+	if (!this.ripart.isConnected()) {
+		wapp.setGuichet();
+		return;
+	}
 	// Recherche des groupes
 	var groupes = wapp.ripart.param.groupes;
 	var current = {};
@@ -81,6 +83,7 @@ wapp.getLogo = function (g, cback, scope) {
 */
 wapp.setGuichet = function(groupe) {
 	if (!groupe) groupe = {};
+	console.log("setGuichet")
 	// Nouveau guichet
 	this.ripart.param.guichet = groupe.id_groupe;
 	wapp.ripart.saveParam();

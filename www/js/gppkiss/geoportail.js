@@ -158,6 +158,9 @@ ol.source.Geoportail.tileLoadFunctionWithAuthentication = function(authenticatio
 			var imageUrl = urlCreator.createObjectURL(blob);
 			tile.getImage().src = imageUrl;
 		};
+		xhr.onerror = function () {
+			tile.getImage().src = "";
+		};
 		xhr.send();
 	};
 };

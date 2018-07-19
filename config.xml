@@ -44,11 +44,11 @@
         <icon height="100" src="res/ios/icon-50@2x.png" width="100" />
         <icon height="167" src="res/ios/icon-83.5@2x.png" width="167" />
     </platform>
-	<platform name="ios">
-		<config-file target="*-Info.plist" parent="UIFileSharingEnabled">
-			<true />
-		</config-file>
-	</platform>
+    <platform name="ios">
+        <config-file parent="UIFileSharingEnabled" target="*-Info.plist">
+            <true />
+        </config-file>
+    </platform>
     <platform name="windows">
         <preference name="windows-target-version" value="10.0" />
     </platform>
@@ -63,4 +63,5 @@
     <plugin name="cordova-plugin-geolocation" spec="~2.4.0" />
     <plugin name="cordova-plugin-inappbrowser" spec="~1.5.0" />
     <plugin name="cordova-plugin-whitelist" spec="1" />
+    <plugin name="cordova-plugin-network-information" spec="~2.0.1" />
 </widget>
