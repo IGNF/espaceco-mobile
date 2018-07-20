@@ -33,49 +33,52 @@ wapp.layerWFS = function(groupe, l) {
     });
   };
   // Gestion du cache
-  var cache = {
-    saveCache: function(response, extent, resolution) {
-      var fileName = 'FILE/cache/'+this.getCacheFileName(extent, resolution); 
-      CordovApp.File.getDirectory('FILE/cache', 
-        function() {
-          CordovApp.File.write(
-            fileName, 
-            response,
-            options.success,
-            options.error
-          );
-        }, 
-        function(){},
-        true
-      );
-    },
-    loadCache: function(options) {
-      if (wapp.param.options.nocache) {
-        options.error('nocache');
-        console.log("NOCACHE");
-        return;
-      }
-      var fileName = 'FILE/cache/'+this.getCacheFileName(options.extent, options.resolution);
-      CordovApp.File.info(
-        fileName, 
-        function(file){
-          // Obsolete (plus d'un jour)
-          if ((new Date() - file.lastModified) > 24*3600*1000 ) {
-              options.error('obsolete');
-          } else {
-            // Lire le cache
-            CordovApp.File.read(
+  var cache = {};
+  if (l.once) {
+    cache = {
+      saveCache: function(response, extent, resolution) {
+        var fileName = 'FILE/cache/'+this.getCacheFileName(extent, resolution); 
+        CordovApp.File.getDirectory('FILE/cache', 
+          function() {
+            CordovApp.File.write(
               fileName, 
+              response,
               options.success,
               options.error
             );
-          }
-        },
-        function() {
+          }, 
+          function(){},
+          true
+        );
+      },
+      loadCache: function(options) {
+        if (wapp.param.options.nocache) {
           options.error('nocache');
+          console.log("NOCACHE");
+          return;
         }
-      );
-    }
+        var fileName = 'FILE/cache/'+this.getCacheFileName(options.extent, options.resolution);
+        CordovApp.File.info(
+          fileName, 
+          function(file){
+            // Obsolete (plus d'un jour)
+            if ((new Date() - file.lastModified) > 24*3600*1000 ) {
+                options.error('obsolete');
+            } else {
+              // Lire le cache
+              CordovApp.File.read(
+                fileName, 
+                options.success,
+                options.error
+              );
+            }
+          },
+          function() {
+            options.error('nocache');
+          }
+        );
+      }
+    };
   };
   // Layer a charger
   vector = new ol.layer.Vector.WFS (l, cache);

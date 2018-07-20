@@ -20,20 +20,20 @@
     max-height: 3em;
     position: absolute;
     top: 50%;
-	left: 0.5em;
+	left: 2em;
     transform: translateY(-50%);
 }
 #cartes ul li.selected:before
 {	content: "\f00c";
 	font-family: Fontawesome;
 	position: absolute;
-	right: 0.5em;
+	left: 0.5em;
 	top: 50%;
 	-webkit-transform: translateY(-50%);
 	transform: translateY(-50%);
 }
 #cartes ul.guichet li 
-{	padding: 0.6em 1.5em 0.6em 4em;
+{	padding: 0.6em 1.5em 0.6em 5.5em;
 	line-height: 1em;
 }
 #cartes ul.guichet i 
@@ -42,6 +42,16 @@
 	font-size: 0.8em;
 } 
 
+#cartes ul.guichet i.fa-info-circle {
+	position: absolute;
+	font-size: 1.2em;
+    right: 0.5em;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+	transform: translateY(-50%);
+}
+
+/* Liste de cartes */
 #cartes ul.cartes .menu {
 	float: right;
 	font-size: .7em;

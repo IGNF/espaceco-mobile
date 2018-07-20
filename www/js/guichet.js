@@ -63,6 +63,10 @@ var wapp = new CordovApp(
 				listMap: '#cartes [data-list="maps"] ul' 
 			}
 		);
+		// Gestion du cache vecteur
+		this.vectorCache = new CacheVector({
+			loadPage: "#guichet" 
+		});
 
 		// Brancher les signalements
 		wapp.initRipart();

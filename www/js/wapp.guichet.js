@@ -55,6 +55,13 @@ wapp.initGuichets = function() {
 					}
 				})
 				.appendTo(ul);
+			$("<i>").addClass('fa fa-info-circle')
+				.click(function(e){
+					e.preventDefault();
+					e.stopPropagation();
+					wapp.showGuichetInfo($(this).parent().data('groupe'));
+				})
+				.appendTo(li);
 			wapp.getLogo (g, function(f)
 			{	$("<img>").attr("src",f).prependTo(this);
 			}, li);
@@ -63,6 +70,66 @@ wapp.initGuichets = function() {
 	if ($("li", ul).length) $('#cartes [data-list="guichets"] ul.nomap').hide();
 	else $('#cartes [data-list="guichets"] ul.nomap').show();
 	wapp.setGuichet(current);
+};
+
+/** Afficher les infos du guichet
+ * @param {} groupe
+ */
+wapp.showGuichetInfo = function (groupe){
+	wapp.showPage('guichet');
+	var page = $('#guichet');
+	wapp.vectorCache.setCurrentGuichet(groupe);
+	$('img', page).hide();
+	wapp.getLogo(groupe, function(src) {
+		$('img', page).attr('src',src).show();
+	});
+	var ul = $("ul.layers", page).html('');
+	$("h3.title", page).text(groupe.nom);
+	$(".description", page).html(groupe.desc);
+	var auth = false;
+	var offline = false;
+	for (var i=0, l; l=groupe.layers[i]; i++) {
+		if (l.type==='WFS') {
+			// Has authentication ?
+			auth = auth || l.username;
+			// Hors ligne ?
+			if (!offline && l.mask && l.mask.loadStartegy) offline = 'once';
+			else offline = true;
+			// Add to list
+			$('<li>').html('')
+				.append($('<h4>').html(l.nom+(l.external?' <i>(externe)</i>':'')))
+				.append($('<div>').text(l.description))
+				.appendTo(ul);
+		}
+	}
+	// Gestion du cache vecteur
+	if (offline) {
+		page.addClass('offline');
+		$('[data-mode="offline"] > *', page).hide();
+		if (offline==='once') {
+			$('.once', page).show();
+		} else {
+			$('.cartes', page).show();
+			wapp.vectorCache.showList();
+		}
+	} else {
+		page.removeClass('offline');
+	}
+	if (auth) {
+		$(".auth", page).off()
+			.click(function () {
+				for (var k=0, l; l=groupe.layers[k]; k++) {
+					delete l.password;
+				}
+				if (wapp.ripart.param.guichet === groupe.id_groupe) wapp.setGuichet();
+				wapp.ripart.saveParam();
+				// Clear credentials
+				var win = window.open('logout.html','_blank','clearsessioncache=yes,hidden=yes');
+				setTimeout(function(){ win.close(); }, 100);
+			})
+			.show();
+	}
+	else $(".auth", page).hide();
 };
 
 /** Recupere le logo d'un goupe
