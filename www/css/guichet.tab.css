@@ -56,6 +56,7 @@
 
 
 @media screen and (max-width:800px) {
+	#loadGuichet div,
 	#loadMap div {
 		font-size: 0.8em;
 	}
@@ -63,6 +64,7 @@
 
 @media screen and (max-width:600px) 
 {
+	#loadGuichet span,
 	#loadMap span {
 		margin: -0.5em 0;
 		display: block;
@@ -81,6 +83,7 @@
 	{	clear: both;
 	}
 
+	#loadGuichet button,
 	#loadMap button {
 		margin-top: 0.4em!important;
 	}

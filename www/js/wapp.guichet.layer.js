@@ -112,7 +112,8 @@ wapp.layerWebpart = function(groupe, l) {
   var vector;
 
   var url = l.url.replace(/(.*)\?(.*)/,"$1");
-  var base = l.url.replace(/.*databasename=(.*)/,"$1");
+  // var base = l.url.replace(/.*databasename=(.*)/,"$1");
+  var base = l.url.replace(/.*databasename=([^\&]*).*/,"$1");
   var extent = [];
   for (var k=0; k<l.extent.length; k++) extent[k] = parseFloat(l.extent[k]);
   extent = ol.proj.transformExtent(extent, 'EPSG:4326', wapp.map.getView().getProjection());

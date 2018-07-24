@@ -129,6 +129,13 @@ ol.Feature.prototype.setState = function(state)
 {	this.state_ = state;
 }
 
+/** Get layer's tile grid
+* @return { ol.tilegrid.TileGrid }
+*/
+ol.source.Vector.Webpart.prototype.getTileGrid = function()
+{	return this._tileGrid;
+}
+
 /** Get the layer featureType
 * @return { featureType }
 */
@@ -365,26 +372,16 @@ ol.source.Vector.Webpart.prototype.findFeature_ = function(f)
     return f;
 };
 
+
 /**
- * The loader function used to load features
- * @private
+ * Parametres du WFS
+ * @param {ol.extent} extent
+ * @param {ol.projection} projection
  */
-ol.source.Vector.Webpart.prototype.loaderFn_ = function (extent, resolution, projection) 
-{
-	// if (resolution > this.maxResolution_) return;
-	var self = this;
-
-	// Save projection for writing
-	this.projection_ = projection;
-
-	// TODO self.srsName_
-	if (!proj4.defs[this.srsName_]) {
-		return;
-	}
-
+ol.source.Vector.Webpart.prototype.getWFSParam = function (extent, projection) {
 	var bbox = ol.proj.transformExtent(extent, projection, this.srsName_);
     var bboxStr = bbox.join(',');
-    
+
 	// WFS parameters
 	var parameters = {
 		service	: 'WFS',
@@ -397,6 +394,27 @@ ol.source.Vector.Webpart.prototype.loaderFn_ = function (extent, resolution, pro
 		version: '1.1.0'
 	};
 	if (this.proxy_) parameters.url = this.featureType_.wfs;
+	return parameters;
+};
+
+/**
+ * The loader function used to load features
+ * @private
+ */
+ol.source.Vector.Webpart.prototype.loaderFn_ = function (extent, resolution, projection) {
+	// if (resolution > this.maxResolution_) return;
+	var self = this;
+
+	// Save projection for writing
+	this.projection_ = projection;
+
+	// TODO self.srsName_
+	if (!proj4.defs[this.srsName_]) {
+		return;
+	}
+
+	// WFS parameters
+	var parameters = this.getWFSParam(extent, projection);
 
 	// Abort existing request
     if (this.request_ && !this.tiled_) this.request_.abort();

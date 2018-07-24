@@ -259,6 +259,9 @@
 	margin:0;
 }
 
+.ol-layerswitcher .layerExtent {
+	display: none;
+}
 .ol-layerswitcher .layerup
 {	float: right;
 	height:2.5em;

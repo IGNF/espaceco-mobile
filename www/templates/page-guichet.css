@@ -7,17 +7,17 @@
   max-height: 3em;
 }
 #guichet ul {
-  margin: 0;
+  margin: 0 -.5em;
 }
 #guichet ul.layers {
   padding: 0;
   list-style: none;
-  margin: .5em 0 2em;
+  margin: .5em -.5em 2em;
   border-top: 1px solid #999;
 }
 #guichet ul.layers li {
   border-bottom: 1px solid #999;
-  padding: 0 .5em
+  padding: 0 1em
 }
 #guichet ul.layers h4 {
   margin:0;
@@ -98,6 +98,11 @@
     text-align: center;
     padding: .5em 0;
     margin: .1em .1em;
+}
+#guichet ul.cartes .layer {
+  display: block;
+  color: #369;
+  font-weight: bold;
 }
 
 /* Dialog de cacha */

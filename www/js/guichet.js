@@ -65,7 +65,8 @@ var wapp = new CordovApp(
 		);
 		// Gestion du cache vecteur
 		this.vectorCache = new CacheVector({
-			loadPage: "#guichet" 
+			page: "#guichet",
+			loadPage: "#loadGuichet" 
 		});
 
 		// Brancher les signalements

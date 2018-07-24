@@ -460,6 +460,7 @@
 }
 
 /** Load maps page */
+#loadGuichet,
 #loadMap {	
     top: auto;
 	bottom: 0;
@@ -467,6 +468,7 @@
     height: 2em;
     padding: 0.5em;
 }
+#loadGuichet .button,
 #loadMap .button
 {	float: right;
 	font-size: 1em;
@@ -474,8 +476,9 @@
 	margin-top: -0.2em;
 }
 
-[data-page="loadMap"] #map:after
-{	border: 40px solid rgba(0, 0, 0, 0.5);
+[data-page="loadGuichet"] #map:after,
+[data-page="loadMap"] #map:after {
+	border: 40px solid rgba(0, 0, 0, 0.5);
     border-bottom-width: 60px;
     position: absolute;
     pointer-events: none;
@@ -502,9 +505,11 @@
 [data-page="loadMap"] .noTile p.error{
 	display: block;
 }
+[data-page="loadGuichet"] #signaler,
+[data-page="loadGuichet"] #map .ol-control,
 [data-page="loadMap"] #signaler,
 [data-page="loadMap"] #map .ol-control {
-	display: none;
+		display: none;
 }
 
 

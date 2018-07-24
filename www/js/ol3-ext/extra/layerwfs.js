@@ -91,7 +91,7 @@ ol.layer.Vector.WFS = function(options, cache) {
 
   // Zoom level
   var v = new ol.View();
-	if (options.maxzoom) {
+	if (options.maxzoom && options.maxzoom<20) {
     v.setZoom(options.maxzoom);
 		this.setMinResolution(v.getResolution());
 	}
