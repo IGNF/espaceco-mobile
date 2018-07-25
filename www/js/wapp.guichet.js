@@ -164,6 +164,13 @@ wapp.setGuichet = function(groupe) {
 	wapp.loadLayers(groupe);
 };
 
+/**
+ * Guichet en cours
+ */
+wapp.getIdGuichet = function(){
+	return this.ripart.param.guichet;
+};
+
 /** Afficher la selection dans la barre et la fiche
 */
 wapp.onSelect = function(e) {

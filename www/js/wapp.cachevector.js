@@ -10,6 +10,8 @@ var CacheVector = function(options) {
   this.page = $(options.page || '#guichet');
   this.loadPage = $(options.loadPage || '#loadGuichet');
 
+  if (!wapp.param.vectorCache) wapp.param.vectorCache = [];
+
   $('.addmap', this.page).click(function(){
     self.addDialog();
   });
@@ -21,6 +23,65 @@ var CacheVector = function(options) {
     self.uploadCache();
   });
 
+  // Create dir if doesn't exist
+  CordovApp.File.getDirectory (this.getCacheFileName(), null, null, true);
+};
+
+/** Layers en cache d'un guichet
+ * @param {groupe} guichet
+ */
+CacheVector.prototype.getLayers = function(guichet) {
+  var layers = [];
+
+  function addPostcompose (l, extents) {
+    l.on('postcompose', function(e){
+      var canvas = document.createElement('canvas');
+      canvas.width = e.context.canvas.width;
+      canvas.height = e.context.canvas.height;
+      var ctx = canvas.getContext('2d');
+      ctx.strokeStyle = 'rgb(255,0,0)';
+      ctx.lineWidth = 30;
+      ctx.scale(e.frameState.pixelRatio,e.frameState.pixelRatio);
+      var rects = [];
+      ctx.beginPath();
+        for (var k=0, extent; extent=extents[k]; k++) {
+          var p0 = wapp.map.getPixelFromCoordinate([extent[0], extent[1]]);
+          var p1 = wapp.map.getPixelFromCoordinate([extent[2], extent[3]]);
+          rects.push([p0[0],p0[1],p1[0]-p0[0],p1[1]-p0[1]]);
+          ctx.rect(p0[0],p0[1],p1[0]-p0[0],p1[1]-p0[1]);
+        }
+      ctx.stroke();
+      for (var k=0, r; r=rects[k]; k++) {
+        ctx.clearRect(r[0],r[1],r[2],r[3]);
+      }
+      e.context.save();
+        e.context.globalAlpha = .1;
+        e.context.drawImage(canvas,0,0);
+      e.context.restore();
+    });
+  }
+
+  for (var i=0, c; c = wapp.param.vectorCache[i]; i++) {
+    if (c.id_guichet === guichet.id_groupe) {
+      var g = new ol.layer.Group({ 
+        title: c.nom, 
+        name: c.id_guichet+'-'+c.id, 
+        baseLayer: true 
+      });
+      for (var k=0, l; l=c.layers[k]; k++) if (l.featureType) {
+        l = wapp.layerWebpart(l, this.getCacheFileName(c,k));
+        if (c.layers.length===1) l.set('displayInLayerSwitcher',false);
+        g.getLayers().push(l);
+        // Marquer le layer sur l'objet
+        l.getSource().on('addfeature', function (e) {
+          e.feature.layer = this; 
+        }.bind(l));
+        addPostcompose(l, c.extents);
+      }
+      if (g.getLayers().getLength()) layers.push(g);
+    }
+  }
+  return layers;
 };
 
 /** Set Guichet courant
@@ -53,10 +114,12 @@ CacheVector.prototype.showList = function() {
     for (var k=0, l; l=cache.layers[k]; k++) layerName += (layerName ? ' - ':'') + l.nom;
     $(".info .layer", li).text(layerName);
     $(".info .date", li).text(cache.date);
+    // Input
     $('input', li).val(cache.nom)
       .on('change', function(){
         $(this).parent().data('cache').nom = this.value;
       });
+    // Buttons
     $('.fa-map-o', li).click(function(){
       self.loadCache($(this).parent().parent().data('cache'));
     });
@@ -91,6 +154,8 @@ CacheVector.prototype.removeCache = function(cache) {
   // Update
   wapp.saveParam();
   this.showList();
+  var guichet = this.getCurrentGuichet();
+  if (wapp.getIdGuichet()===guichet.id_groupe) wapp.setGuichet(guichet);
 };
 
 /**
@@ -132,11 +197,12 @@ CacheVector.prototype.uploadCache = function() {
  */
 CacheVector.prototype.uploadLayers = function(cache, layers) {
   var self = this;
+  var guichet = this.getCurrentGuichet();
   if (!layers) {
     layers = [];
-    var guichet = this.getCurrentGuichet();
     for (var i=0, l; l = cache.layers[i]; i++) {
-      var wp = wapp.layerWebpart(guichet, l);
+      console.log('layer',l)
+      var wp = wapp.layerWebpart(l);
       layers.push(wp);
       wp.on('ready', function(){ self.uploadLayers(cache, layers); });
       wp.on("error", function(e){
@@ -155,6 +221,7 @@ CacheVector.prototype.uploadLayers = function(cache, layers) {
       // calculate tiles
       var tiles = [];
       for (var i=0, l; l=layers[i]; i++) {
+        cache.layers[i].featureType = l.getFeatureType();
         tiles.push ({
           id_layer: i,
           source: l.getSource(),
@@ -162,6 +229,7 @@ CacheVector.prototype.uploadLayers = function(cache, layers) {
        })
       }
       this.uploadTiles(cache, tiles);
+      if (wapp.getIdGuichet()===guichet.id_groupe) wapp.setGuichet(guichet);
     }
   }
 };
@@ -200,8 +268,10 @@ CacheVector.prototype.calculateTiles = function(cache, l) {
  * @param {*} tileCoord 
  */
 CacheVector.prototype.getCacheFileName = function(cache, id_layer, tileCoord) {
-  var dir = 'FILE/cache/' + CordovApp.File.fileName ('G'+cache.id_guichet);
-  if (!id_layer) return dir;
+  var dir = 'FILE/cache' ;
+  if (!cache) return dir;
+  dir += '/' + CordovApp.File.fileName ('G'+cache.id_guichet);
+  if (!id_layer && id_layer!==0) return dir;
   var l = cache.layers[id_layer];
   var base = CordovApp.File.fileName(
               cache.id 
@@ -359,8 +429,10 @@ CacheVector.prototype.addDialog = function() {
         var name = $('input',content).val() || 'Sans titre';
         var layers = [];
         $("li", ul).each(function() {
-          if ($(this).hasClass('selected')) layers.push($(this).data('layer'));
+          var l = $(this).data('layer');
+          if ($(this).hasClass('selected')) layers.push($.extend({},l));
         });
+        console.log(layers)
         self.addCache(name, layers);
       }
     }

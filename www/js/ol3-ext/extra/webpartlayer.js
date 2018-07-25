@@ -23,66 +23,80 @@ ol.layer.Vector.Webpart  = function(options, source_options) {
 	if (!source_options.username) source_options.username = options.username;
 	if (!source_options.password) source_options.password = options.password;
 
-	var url = this.url_+this.database_+"/feature-type/"+this.name_+".json";
-	$.ajax(
-	{	url: (this.proxy_ || url ),
-		dataType: 'json', 
-		// Authentification
-		username: options.username,
-		password: options.password,
-
-		data: { url: this.proxy_ ? url : undefined },
-		success: function (featureType) 
-		{	source_options.proxy = self.proxy_;
-			source_options.featureType = featureType;
-			// Check for source option
-			if (options.checkSourceOptions) options.checkSourceOptions.call(self, source_options, featureType);
-
-			// Webpart source
-			var vectorSource = new ol.source.Vector.Webpart(source_options);
-			self.setSource(vectorSource);
-
-			// Webpart Layer
-			self.set("title", featureType.title);
-
-			// Set zoom level / resolution for the layer
-			var v = new ol.View();
-			if (featureType.maxZoomLevel && featureType.maxZoomLevel<20) {
-				v.setZoom(featureType.maxZoomLevel);
-				self.setMinResolution(v.getResolution());
-			}
-			if (featureType.minZoomLevel || featureType.minZoomLevel===0) {
-				v.setZoom(Math.max(featureType.minZoomLevel,4));
-				self.setMaxResolution(v.getResolution()+1);
-			}
-			// Decode condition (parse string)
-			if (featureType.style && featureType.style.children) {
-				for (var i=0, s; s=featureType.style.children[i]; i++) {
-					if (typeof(s.condition)==='string') {
-						try { s.condition = JSON.parse(s.condition); }
-						catch(e){};
-					}
-				}
-			}
-
-			// Style of the feature style
-			if (!options.style && ol.layer.Vector.Webpart.Style) 
-			{	self.setStyle (ol.layer.Vector.Webpart.Style.getFeatureStyleFn(featureType));
-			}
-
-			self.dispatchEvent({ type:"ready", source: vectorSource });
-		},
-		error: function(jqXHR, status, error) 
-		{	//console.log(jqXHR)
-			self.dispatchEvent({ type:"error", error:error, status:jqXHR.status, statusText:status });
-        }
-	});
-
 	options.renderMode = options.renderMode || 'image';
 	ol.layer.Vector.call(this, options);
 	this.set("name", options.database+":"+options.name);
+
+	if (options.cacheUrl) {
+		source_options.cacheUrl = options.cacheUrl;
+		this.createSource(options, source_options, options.featureType);
+	} else {
+		var url = this.url_+this.database_+"/feature-type/"+this.name_+".json";
+		$.ajax(
+		{	url: (this.proxy_ || url ),
+			dataType: 'json', 
+			// Authentification
+			username: options.username,
+			password: options.password,
+			data: { url: this.proxy_ ? url : undefined },
+			success: function (featureType) {
+				self.createSource(options, source_options, featureType);
+			},
+			error: function(jqXHR, status, error) 
+			{	//console.log(jqXHR)
+				self.dispatchEvent({ type:"error", error:error, status:jqXHR.status, statusText:status });
+			}
+		});
+	}
+
 };
 ol.inherits(ol.layer.Vector.Webpart, ol.layer.Vector);
+
+/**
+ * Creat the layer source when loaded
+ * @param {*} source_options 
+ * @param {*} featureType 
+ */
+ol.layer.Vector.Webpart.prototype.createSource = function(options, source_options, featureType) {
+	source_options.proxy = this.proxy_;
+	source_options.featureType = featureType;
+	// Check for source option
+	if (options.checkSourceOptions) options.checkSourceOptions.call(this, source_options, featureType);
+
+	// Webpart source
+	var vectorSource = new ol.source.Vector.Webpart(source_options);
+	this.setSource(vectorSource);
+
+	// Webpart Layer
+	this.set("title", featureType.title);
+
+	// Set zoom level / resolution for the layer
+	var v = new ol.View();
+	if (featureType.maxZoomLevel && featureType.maxZoomLevel<20) {
+		v.setZoom(featureType.maxZoomLevel);
+		this.setMinResolution(v.getResolution());
+	}
+	if (featureType.minZoomLevel || featureType.minZoomLevel===0) {
+		v.setZoom(Math.max(featureType.minZoomLevel,4));
+		this.setMaxResolution(v.getResolution()+1);
+	}
+	// Decode condition (parse string)
+	if (featureType.style && featureType.style.children) {
+		for (var i=0, s; s=featureType.style.children[i]; i++) {
+			if (typeof(s.condition)==='string') {
+				try { s.condition = JSON.parse(s.condition); }
+				catch(e){};
+			}
+		}
+	}
+
+	// Style of the feature style
+	if (!options.style && ol.layer.Vector.Webpart.Style) 
+	{	this.setStyle (ol.layer.Vector.Webpart.Style.getFeatureStyleFn(featureType));
+	}
+
+	this.dispatchEvent({ type:"ready", source: vectorSource });
+};
 
 /** Is the layer ready
 *	@return {bool} the layer is ready (source is connected)

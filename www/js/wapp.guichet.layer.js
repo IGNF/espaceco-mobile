@@ -105,10 +105,9 @@ wapp.layerWFS = function(groupe, l) {
 
 /**
  * Creer un layer Webpart
- * @param {} groupe
  * @param {} l layer options
  */
-wapp.layerWebpart = function(groupe, l) {
+wapp.layerWebpart = function(l, cacheUrl) {
   var vector;
 
   var url = l.url.replace(/(.*)\?(.*)/,"$1");
@@ -122,6 +121,8 @@ wapp.layerWebpart = function(groupe, l) {
     //renderMode: 'image',
     name: l.nom,
     title: l.nom,
+    cacheUrl: cacheUrl,
+    featureType: l.featureType,
     database: base,
     extent: extent,
     username: wapp.ripart.getUser(),
@@ -154,12 +155,49 @@ wapp.loadLayers = function (groupe) {
   // Layers du guichet
 	this.vector = [];
 	guichet.getLayers().clear();
-	if (!groupe.layers) 
-	{	guichet.set("displayInLayerSwitcher", false);
+	if (!groupe.layers) {
+    guichet.set("displayInLayerSwitcher", false);
 		return;
 	}
 	guichet.set("displayInLayerSwitcher", true);
-  guichet.set("title", groupe.nom);
+  guichet.set("title", 'Guichet: '+groupe.nom);
+
+  var hiddenLayers = this.param.hidden || [];
+  function testHiddden (layer) {
+    for (var k=0; k<hiddenLayers.length; k++){
+      if (layer.get("name") == hiddenLayers[k]) {
+      	layer.setVisible(false);
+        break;
+      }
+    }
+    if (layer.getLayers) {
+      layer.getLayers().forEach(function(l){
+        testHiddden(l);
+      });
+    }
+  };
+
+  // Layers en cache
+  var cache = wapp.vectorCache.getLayers(groupe);
+  if (cache.length) {
+    var c = new ol.layer.Group({ 
+      title: guichet.get('title')+' (en ligne)', 
+      name: groupe.id_groupe+'-0',
+      baseLayer: true 
+    });
+    guichet.set('openInLayerSwitcher', true);
+    testHiddden(c);
+    var visible = c.getVisible();
+    for (var i=0; i<cache.length; i++) {
+      // Un seu lvisible
+      testHiddden(cache[i]);
+      if (!visible) visible = cache[i].getVisible();
+      else cache[i].setVisible(false);
+      guichet.getLayers().push(cache[i]);
+    }
+    guichet.getLayers().push(c);
+    guichet = c;
+  }
 
   // Chargement
 	var nb=0, nbLoad=0;
@@ -174,14 +212,17 @@ wapp.loadLayers = function (groupe) {
 			// WFS externe
 			if (l.external) vector = wapp.layerWFS(groupe, l);
 			// Guichet
-			else vector = wapp.layerWebpart(groupe, l);
-			this.vector.push(vector);
+			else vector = wapp.layerWebpart(l);
+      this.vector.push(vector);
+      testHiddden(vector)
+      /*
 			if (this.param.hidden) for (var k=0; k<this.param.hidden.length; k++)
 			{	if (vector.get("name") == this.param.hidden[k]) 
 				{	vector.setVisible(false);
 					break;
 				}
-			}
+      }
+      */
       guichet.getLayers().push(vector);
 
       // Probleme au chargement

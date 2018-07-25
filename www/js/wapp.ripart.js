@@ -1301,8 +1301,8 @@ RIPart.prototype.photo = function()
 		name: "TMP/photo.jpg",
 		buttons: $("img", photoElt).attr("src") ? { del:"supprimer", cancel:"annuler" } : false,
 		className: $("img", photoElt).attr("src") ? "photodel":"",
-		targetWidth: self.param.width || 1200,
-		targetHeight: self.param.heigth || 1200,
+		targetWidth: self.param.imgWidth || 1200,
+		targetHeight: self.param.imgHeight || 1200,
 		correctOrientation: (self.param.imgOrient!==false)
 	});
 };

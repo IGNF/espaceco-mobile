@@ -89,7 +89,9 @@ ol.source.Vector.Webpart = function(opt_options)
 			logo: options.logo,
 			useSpatialIndex: true, // force to true for loading strategy tile
 			wrapX: options.wrapX
-    	});
+		});
+		
+	this.set('cacheUrl', options.cacheUrl);
     
     // Collection of feature we want to preserve when reloaded
 	this.preserved_ = options.preserved || new ol.Collection();
@@ -413,84 +415,103 @@ ol.source.Vector.Webpart.prototype.loaderFn_ = function (extent, resolution, pro
 		return;
 	}
 
-	// WFS parameters
-	var parameters = this.getWFSParam(extent, projection);
-
-	// Abort existing request
-    if (this.request_ && !this.tiled_) this.request_.abort();
-	
-    this.dispatchEvent({type:"loadstart", remains:++this.tileloading_ } );
-
 	// Reload all if maxFeatures
 	if (this.maxReload_ && this.tileloading_==1 && this.getFeatures().length > this.maxReload_)
 	{	// console.log('clear: '+this.getFeatures().length)
 		this.reload();
 	}
 
-	// Ajax request to get features in bbox
-	this.request_ = $.ajax(
-	{	url: this.proxy_ || this.featureType_.wfs,
-		dataType: 'json', 
-		data: parameters,
-		success: function(data) 
-		{   var feature, features = [];
-            var geometryAttribute = self.featureType_.geometryName;
-            var format = new ol.format.WKT();
-			var r3d = /([-+]?(\d*[.])?\d+) ([-+]?(\d*[.])?\d+) ([-+]?(\d*[.])?\d+)/g;
-			//
-            for (var f=0; f<data.length; f++) 
-			{	var geom = data[f][geometryAttribute];
-				// 
-				if (geom.type)
-				{	var g = new ol.geom[geom.type] (geom.coordinates);
-					g.transform (self.srsName_, projection);
-					feature = new ol.Feature (g);
-				}
-				// WKT
-				else
-				{   geom = geom.replace (r3d, "$1 $3");
-					feature = format.readFeature(geom, 
-						{   dataProjection: self.srsName_,
-							featureProjection : projection
-						});
-				}
-               
-                var properties = data[f];
-                delete properties[geometryAttribute];
-                feature.setProperties(properties, true);
-
-				// Find preserved features
-                feature = self.findFeature_(feature);
-                if (feature) 
-				{	features.push( feature );
-				}
-            }
-            
-            // Add new inserted features
-            var l = self.insert_.length;
-            for (var i=0; i<l; i++) 
-			{   if (self.insert_[i].getState()===ol.Feature.State.INSERT) features.push( self.insert_[i] );
-            }
-
-            // Start replacing features
-            self.isloading_ = true;
-			if (!self.tiled_) self.getFeaturesCollection().clear();
-			if (features.length) self.addFeatures(features);
-            self.isloading_ = false;
-			self.dispatchEvent({ type:"loadend", remains: --self.tileloading_ });
-			if (data.length == self.maxFeatures_) self.dispatchEvent({ type:"overload" });
-        },
-		// Error
-        error: function(jqXHR, status, error) 
-		{   if (status !== 'abort') 
-			{	// console.log(jqXHR);
-				self.dispatchEvent({ type:"loadend", error:error, status:status, remains:--self.tileloading_ });
+	function onSuccess(data) 
+	{   var feature, features = [];
+		var geometryAttribute = self.featureType_.geometryName;
+		var format = new ol.format.WKT();
+		var r3d = /([-+]?(\d*[.])?\d+) ([-+]?(\d*[.])?\d+) ([-+]?(\d*[.])?\d+)/g;
+		//
+		for (var f=0; f<data.length; f++) 
+		{	var geom = data[f][geometryAttribute];
+			// 
+			if (geom.type)
+			{	var g = new ol.geom[geom.type] (geom.coordinates);
+				g.transform (self.srsName_, projection);
+				feature = new ol.Feature (g);
 			}
-			else 
-			{	self.dispatchEvent({ type:"loadend", remains:--self.tileloading_ });
+			// WKT
+			else
+			{   geom = geom.replace (r3d, "$1 $3");
+				feature = format.readFeature(geom, 
+					{   dataProjection: self.srsName_,
+						featureProjection : projection
+					});
 			}
-        }
-    });
+		
+			var properties = data[f];
+			delete properties[geometryAttribute];
+			feature.setProperties(properties, true);
+
+			// Find preserved features
+			feature = self.findFeature_(feature);
+			if (feature) 
+			{	features.push( feature );
+			}
+		}
+		
+		// Add new inserted features
+		var l = self.insert_.length;
+		for (var i=0; i<l; i++) 
+		{   if (self.insert_[i].getState()===ol.Feature.State.INSERT) features.push( self.insert_[i] );
+		}
+
+		// Start replacing features
+		self.isloading_ = true;
+		if (!self.tiled_) self.getFeaturesCollection().clear();
+		if (features.length) self.addFeatures(features);
+		self.isloading_ = false;
+		self.dispatchEvent({ type:"loadend", remains: --self.tileloading_ });
+		if (data.length == self.maxFeatures_) self.dispatchEvent({ type:"overload" });
+	};
+
+	function onError(jqXHR, status, error) {
+		if (status !== 'abort') 
+		{	// console.log(jqXHR);
+			self.dispatchEvent({ type:"loadend", error:error, status:status, remains:--self.tileloading_ });
+		}
+		else 
+		{	self.dispatchEvent({ type:"loadend", remains:--self.tileloading_ });
+		}
+	};
+	
+	this.dispatchEvent({type:"loadstart", remains:++this.tileloading_ } );
+
+	if (this.get('cacheUrl')) {
+		var url = this.get('cacheUrl');
+		var tgrid = this.getTileGrid();
+		var tcoord = tgrid.getTileCoordForCoordAndResolution(ol.extent.getCenter(extent), resolution);
+		url += tcoord.join('-');
+		console.log(url);
+		CordovApp.File.read(url, function(data) {
+			console.log('loading', data)
+			try{
+				data = JSON.parse(data);
+			} catch(e) { onError(null, 'JSON', 'Bad JSON response') }
+			onSuccess(data)
+		}, onError);
+	} else {
+		// WFS parameters
+		var parameters = this.getWFSParam(extent, projection);
+
+		// Abort existing request
+		if (this.request_ && !this.tiled_) this.request_.abort();
+
+		// Ajax request to get features in bbox
+		this.request_ = $.ajax(
+		{	url: this.proxy_ || this.featureType_.wfs,
+			dataType: 'json', 
+			data: parameters,
+			success: onSuccess,
+			// Error
+			error: onError
+		});
+	}
 };
 
 /** Gestion des documents
