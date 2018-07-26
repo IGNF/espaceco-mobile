@@ -642,6 +642,27 @@ var RIPart = function(options)
 	this.initialize(options);
 };
 
+/**
+ * Recupere le groupe avec son identifiant
+ * @param {number} id 
+ * @return {groupe | null}
+ */
+RIPart.prototype.getGroupById = function(id) {
+	var g = null;
+	for (var i=0; g=this.param.groupes[i]; i++) {
+		if (g.id_groupe === id) break;
+	}
+	return g;
+};
+
+/**
+ * Recupere le guichet courant
+ * @return {groupe | null}
+ */
+RIPart.prototype.getGuichet = function() {
+	return this.getGroupById(wapp.ripart.param.guichet);
+};
+
 /** Initialize function 
 * @api
 */

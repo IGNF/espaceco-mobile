@@ -146,7 +146,7 @@ CordovApp.File =
 	*	@param {bool} create if true create the directory (only one level), default false
 	*/
 	getDirectory: function (path, success, fail, create)
-	{	if (!success) success = this.success;
+	{	if (!success) success = this.success || function(){};
 		if (!fail) fail = this.fail;
 		if (!window.LocalFileSystem)
 		{	fail({code:-1});

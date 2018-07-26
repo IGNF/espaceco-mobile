@@ -40,7 +40,7 @@ CacheVector.prototype.getLayers = function(guichet) {
       canvas.height = e.context.canvas.height;
       var ctx = canvas.getContext('2d');
       ctx.strokeStyle = 'rgb(255,0,0)';
-      ctx.lineWidth = 30;
+      ctx.lineWidth = Math.max(30, 1000 * e.frameState.pixelRatio / e.frameState.viewState.resolution);
       ctx.scale(e.frameState.pixelRatio,e.frameState.pixelRatio);
       var rects = [];
       ctx.beginPath();
@@ -69,16 +69,24 @@ CacheVector.prototype.getLayers = function(guichet) {
         baseLayer: true 
       });
       for (var k=0, l; l=c.layers[k]; k++) if (l.featureType) {
-        l = wapp.layerWebpart(l, this.getCacheFileName(c,k));
+        l = wapp.layerWebpart(l, this.getCacheFileName(c,k)+'/');
         if (c.layers.length===1) l.set('displayInLayerSwitcher',false);
         g.getLayers().push(l);
         // Marquer le layer sur l'objet
         l.getSource().on('addfeature', function (e) {
           e.feature.layer = this; 
         }.bind(l));
-        addPostcompose(l, c.extents);
       }
-      if (g.getLayers().getLength()) layers.push(g);
+      if (g.getLayers().getLength()) {
+        layers.push(g);
+        var l = new ol.layer.Vector({ 
+          title: 'extent',
+          displayInLayerSwitcher: false,
+          source: new ol.source.Vector()
+        });
+        addPostcompose(l, c.extents);
+        g.getLayers().push(l);
+      }
     }
   }
   return layers;
@@ -110,6 +118,9 @@ CacheVector.prototype.showList = function() {
     var li = $("<li>").html(tmp.html())
       .data('cache', cache)
       .appendTo(ul);
+    var ddate = new Date() - new Date(cache.date);
+    if (ddate > 15*24*60*60*1000) li.addClass('err');
+    else if (ddate > 7*24*60*60*1000) li.addClass('warn');
     var layerName = '';
     for (var k=0, l; l=cache.layers[k]; k++) layerName += (layerName ? ' - ':'') + l.nom;
     $(".info .layer", li).text(layerName);
@@ -196,12 +207,12 @@ CacheVector.prototype.uploadCache = function() {
  * @param {*} layers liste des layers a charger (interne / recursif)
  */
 CacheVector.prototype.uploadLayers = function(cache, layers) {
+  cache.date = (new Date()).toISODateString();
   var self = this;
   var guichet = this.getCurrentGuichet();
   if (!layers) {
     layers = [];
     for (var i=0, l; l = cache.layers[i]; i++) {
-      console.log('layer',l)
       var wp = wapp.layerWebpart(l);
       layers.push(wp);
       wp.on('ready', function(){ self.uploadLayers(cache, layers); });
@@ -230,6 +241,8 @@ CacheVector.prototype.uploadLayers = function(cache, layers) {
       }
       this.uploadTiles(cache, tiles);
       if (wapp.getIdGuichet()===guichet.id_groupe) wapp.setGuichet(guichet);
+      wapp.saveParam();
+      this.showList();
     }
   }
 };
@@ -322,7 +335,6 @@ CacheVector.prototype.uploadTiles = function(cache, tiles, pos, size, error) {
       // Chargement
       var url = (t.source.proxy_ || t.source.featureType_.wfs) + p;
       var fileName = this.getCacheFileName(cache, t.id_layer, tcoord)
-      console.log(url, fileName);
       CordovApp.File.dowloadFile(
         url,
         fileName,
@@ -335,27 +347,14 @@ CacheVector.prototype.uploadTiles = function(cache, tiles, pos, size, error) {
           self.uploadTiles(cache, tiles, pos, size, error);
         }
       );
-      /*
-      this.request_ = $.ajax({
-        url: t.source.proxy_ || t.source.featureType_.wfs,
-        dataType: 'text', 
-        data: parameters,
-        success: function(data) {
-          var path = "FILE/cache/");
-
-          self.uploadTiles(cache, tiles, pos, size);
-        },
-        error: function(){
-          console.log('error');
-          self.uploadTiles(cache, tiles, pos, size);
-        }
-      });
-      */
       return;
     }
   }
+  // Alert on error
   if (error) {
     wapp.alert(error+ ' / ' + size + ' fichier(s) en erreur...', 'Chargement')
+  } else {
+    wapp.message(size + ' fichier(s) chargé(s).', 'Chargement')
   }
   //getTileCoordExtent + getWFSParam
   wapp.wait(false);
@@ -366,7 +365,8 @@ CacheVector.prototype.uploadTiles = function(cache, tiles, pos, size, error) {
  * @param {*} cache 
  */
 CacheVector.prototype.locateCache = function(cache) {
-  wapp.map.getView().fitExtent(cache.extent, wapp.map.getSize());
+  wapp.map.getView().fit(cache.extent, wapp.map.getSize());
+  wapp.hidePage();
 };
 
 /**
@@ -395,6 +395,8 @@ CacheVector.prototype.addCache = function(name, layers) {
   wapp.param.vectorCache.push (cache);
   wapp.saveParam();
   this.showList();
+  // Gestion de l'aide
+  wapp.help.show("guichet-hors-ligne");
 };
 
 /** Dialogue d'ajout de carte

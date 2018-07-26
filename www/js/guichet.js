@@ -188,8 +188,15 @@ var wapp = new CordovApp(
 	*/
 	pause: function()
 	{	this.saveContext();
+	},
+
+	/** On resume refresh the map 
+	* @memberof wapp
+	*/
+	resume: function()
+	{	this.refreshMap();
 	}
-	
+
 });
 
 /** Message d'attente avec affichage du logo du groupe
@@ -505,45 +512,23 @@ wapp.initControls = function()
 	}));
 
 	// Layer switcher
-	map.addControl (new ol.control.LayerSwitcher({ 
+	var lswitcher = new ol.control.LayerSwitcher({ 
 		target:$("#layerswitcher").get(0), 
-		extent:true, 
-		reordering: true,
-		oninfo: function (layer) {
-			var content = CordovApp.template("dialog-infolayer");
-			$('.description', content).html(layer.get('description'));
-			// Supprimer les authentification
-			function removeAuthentications() {
-				var url = layer.getSource().get('url');
-				for (var i=0, g; g=wapp.ripart.param.groupes[i]; i++) {
-					for (var k=0, l; l=g.layers[k]; k++) {
-						if (l.url === url) {
-							delete l.password;
-						}
-					}
-				}
-				wapp.setGuichet();
-				wapp.ripart.saveParam();
-				// Clear credentials
-				var win = window.open('logout.html','_blank','clearsessioncache=yes,hidden=yes');
-				setTimeout(function(){ win.close(); }, 100);
-				wapp.dialog.close();
-			}
-			if (layer.get('authentication')) {
-				$('.auth', content).show();
-				$('a', content).click(removeAuthentications);
-			}
-			else $('.auth', content).hide();
-			// Info sur le layer
-			wapp.dialog.show (content, {
-				title: '<i class="fa fa-info-circle"></i> ' + layer.get('title'), 
-				className: 'layerinfo',
-				buttons: { submit:"OK" },
-				callback: function(b) {
-				}
-			  });
+		reordering: true
+	});
+
+	// Guichet info
+	lswitcher.on('drawlist', function(e) {
+		if (e.layer.get('name')==='guichet') {
+			$('<div>').addClass('layerInfo')
+				.appendTo($('.ol-layerswitcher-buttons', e.li).first())
+				.click(function(){
+					wapp.showGuichetInfo(wapp.ripart.getGuichet());
+				});
 		}
-	}));
+	});
+
+	map.addControl (lswitcher);
 
 	/*
 	// Geolocation Control
@@ -1026,7 +1011,9 @@ wapp.redStyle = function()
 	];
 };
 
-/** Gestion du mode hors-connexion */
+/** Gestion du mode hors-connexion 
+ * Rafraichir la carte quand on recupere la connexion
+ */
 wapp.online = function() {
 	console.log('ONLINE');
 	wapp.refreshMap();

@@ -49,8 +49,9 @@
 	transform:scaleX(0.9);
 }
 #layerswitcher .layerup,
-#layerswitcher .layerdown
-{	display: none;
+#layerswitcher .layerdown {
+	display: none;
+	color: #999;
 }
 #layerswitcher .ol-layer-group ul .layerup,
 #layerswitcher .ol-layer.group ul .layerdown {
@@ -110,25 +111,6 @@
 }
 
 #layerswitcher .layerInfo {
-    display: none;
-    text-shadow: none;
-}
-#layerswitcher .ol-layer-group .ol-layer-vector .layerInfo {
-    display: inline-block;
-}
-
-[data-role="dialog"].layerinfo i.fa {
-    font-size: 2em;
-    float: left;
-    margin-right: .3em;
-    position: relative;
-    top: -.2em;
-}
-
-[data-role="dialog"].layerinfo a {
-    cursor: pointer;
-    background: #fff;
-    width: 100%;
-    text-align: center;
-    display: block;
+	text-shadow: none;
+	margin-left: .5em;
 }

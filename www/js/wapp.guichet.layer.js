@@ -205,24 +205,17 @@ wapp.loadLayers = function (groupe) {
 	// Reset source pour la recherche
 	wapp.setSearchSource ();
 	// Ajouter les layers du guichet
-	for (var i=0, l; l=groupe.layers[i]; i++)
-	{	if (l.type=="WFS")
-		{	nb++;
+	for (var i=0, l; l=groupe.layers[i]; i++) {
+    if (l.type=="WFS") {
+      nb++;
 			var vector;
 			// WFS externe
 			if (l.external) vector = wapp.layerWFS(groupe, l);
 			// Guichet
-			else vector = wapp.layerWebpart(l);
+      else vector = wapp.layerWebpart(l);
+      // Ajouter
       this.vector.push(vector);
       testHiddden(vector)
-      /*
-			if (this.param.hidden) for (var k=0; k<this.param.hidden.length; k++)
-			{	if (vector.get("name") == this.param.hidden[k]) 
-				{	vector.setVisible(false);
-					break;
-				}
-      }
-      */
       guichet.getLayers().push(vector);
 
       // Probleme au chargement
@@ -240,7 +233,7 @@ wapp.loadLayers = function (groupe) {
         return;
       });
 
-      // Chargement OK
+      // Chargement OK > gerer load / overload
       vector.on("ready", function(){
         // Marquer le layer sur l'objet
         this.getSource().on('addfeature', function (e) {

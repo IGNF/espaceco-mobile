@@ -482,17 +482,19 @@ ol.source.Vector.Webpart.prototype.loaderFn_ = function (extent, resolution, pro
 	
 	this.dispatchEvent({type:"loadstart", remains:++this.tileloading_ } );
 
+	// Read in cache
 	if (this.get('cacheUrl')) {
 		var url = this.get('cacheUrl');
 		var tgrid = this.getTileGrid();
 		var tcoord = tgrid.getTileCoordForCoordAndResolution(ol.extent.getCenter(extent), resolution);
 		url += tcoord.join('-');
-		console.log(url);
 		CordovApp.File.read(url, function(data) {
-			console.log('loading', data)
 			try{
 				data = JSON.parse(data);
-			} catch(e) { onError(null, 'JSON', 'Bad JSON response') }
+			} catch(e) { 
+				onError(null, 'JSON', 'Bad JSON response'); 
+				return;
+			}
 			onSuccess(data)
 		}, onError);
 	} else {

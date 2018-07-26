@@ -105,6 +105,21 @@
   font-weight: bold;
 }
 
+#guichet ul.cartes li.warn .fa-refresh {
+  background-color: #f90;
+}
+#guichet ul.cartes li.warn .info {
+  color: #f90;
+  font-weight: bold;
+}
+#guichet ul.cartes li.err .fa-refresh {
+  background-color: #900;
+}
+#guichet ul.cartes li.err .info {
+  color: #900;
+  font-weight: bold;
+}
+
 /* Dialog de cacha */
 [data-role="dialog"].guichet ul.layerselect {
   border-bottom: 3px solid #ccc;

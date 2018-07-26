@@ -5,7 +5,8 @@
 /**
  * @classdesc OpenLayers 3 Layer Switcher Control.
  * @require jQuery
- *
+ * @fires drawlist
+ * 
  * @constructor
  * @extends {ol.control.Control}
  * @param {Object=} options
@@ -14,7 +15,7 @@
  *	@param {boolean} mouseover show the panel on mouseover, default false
  *	@param {boolean} reordering allow layer reordering, default true
  *	@param {boolean} trash add a trash button to delete the layer, default false
- *	@param {function} oninfo callback on click on info button, if none no info button is shown
+ *	@param {function} oninfo callback on click on info button, if none no info button is shown DEPRECATED: use on(info) instead
  *	@param {boolean} extent add an extent button to zoom to the extent of the layer
  *	@param {function} onextent callback when click on extent, default fits view to extent
  *
@@ -108,18 +109,20 @@ ol.control.LayerSwitcher.prototype.displayInLayerSwitcher = function(layer) {
 ol.control.LayerSwitcher.prototype.setMap = function(map)
 {   ol.control.Control.prototype.setMap.call(this, map);
 	this.drawPanel();
-	if (this.map_)
-	{	this.map_.getLayerGroup().un('change', this.drawPanel, this);
-		this.map_.un('moveend', this.viewChange, this);
-		this.map_.un('change:size', this.overflow, this);
-		// console.log("remove");
+	if (this._listener) {
+		if (this._listener) ol.Observable.unByKey(this._listener.change);
+		if (this._listener) ol.Observable.unByKey(this._listener.moveend);
+		if (this._listener) ol.Observable.unByKey(this._listener.size);
 	}
+	this._listener = null;
 	this.map_ = map;
 	// Get change (new layer added or removed)
 	if (map) 
-	{	map.getLayerGroup().on('change', this.drawPanel, this);
-		map.on('moveend', this.viewChange, this);
-		map.on('change:size', this.overflow, this);
+	{	this._listener = {
+			change: map.getLayerGroup().on('change', this.drawPanel.bind(this)),
+			moveend: map.on('moveend', this.viewChange.bind(this)),
+			size: map.on('change:size', this.overflow.bind(this))
+		}
 	}
 };
 /** Add a custom header
@@ -199,7 +202,7 @@ ol.control.LayerSwitcher.prototype.viewChange = function(e)
 			{	var ex0 = l.getExtent();
 				if (ex0)
 				{	var ex = map.getView().calculateExtent(map.getSize());
-					if (!ol.extent.intersects(ex, ex0)) 
+					if (!ol.extent.intersects(ex, ex0))
 					{	$(this).addClass("ol-layer-hidden");
 					}
 					else $(this).removeClass("ol-layer-hidden");
@@ -476,13 +479,17 @@ ol.control.LayerSwitcher.prototype.drawList = function(ul, collection)
 	function onInfo(e) 
 	{	e.stopPropagation();
 		e.preventDefault(); 
-		self.oninfo($(this).closest('li').data("layer")); 
+		var l = $(this).closest('li').data("layer");
+		self.oninfo(l); 
+		self.dispatchEvent({ type: "info", layer: l });
 	};
 	function zoomExtent(e) 
 	{	e.stopPropagation();
 		e.preventDefault(); 
-		if (self.onextent) self.onextent($(this).closest('li').data("layer")); 
-		else self.map_.getView().fit ($(this).closest('li').data("layer").getExtent(), self.map_.getSize()); 
+		var l = $(this).closest('li').data("layer");
+		if (self.onextent) self.onextent(l); 
+		else self.map_.getView().fit (l.getExtent(), self.map_.getSize()); 
+		self.dispatchEvent({ type: "extent", layer: l });
 	};
 	function removeLayer(e) 
 	{	e.stopPropagation();
@@ -610,6 +617,8 @@ ol.control.LayerSwitcher.prototype.drawList = function(ul, collection)
 		else if (layer instanceof ol.layer.Tile) li.addClass('ol-layer-tile');
 		else if (layer instanceof ol.layer.Image) li.addClass('ol-layer-image');
 		else if (layer instanceof ol.layer.Heatmap) li.addClass('ol-layer-heatmap');
+		// Dispatch a dralist event to allow customisation
+		this.dispatchEvent({ type:'drawlist', layer:layer, li:li.get(0) });
 	}
 	if (ul==this.panel_) this.overflow();
 };

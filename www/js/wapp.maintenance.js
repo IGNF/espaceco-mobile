@@ -74,16 +74,26 @@ wapp.maintenance = function(nodelay) {
   });
 
   // Calcul du cache
-  function getCache(d, cache) {
+  function getCache(d, cache, name) {
+    name = name || d.name;
+    if (/^G\d*$/.test(name)) {
+      var n = parseInt(name.replace(/^G/,''));
+      var groupe = wapp.ripart.getGroupById(n);
+      if (groupe) name = groupe.nom;
+    }
     CordovApp.File.listDirectory("FILE/"+d.fullPath,
-      function(l2) {
-        cache[d.name] = { nb:0, size:0 };
-        for (var i=0, f; f=l2[i]; i++) {
-          CordovApp.File.info("FILE/"+f.fullPath, function(f){
-            cache[d.name].nb++;
-            cache[d.name].size += f.size;
-            show();
-          });
+      function(ldir) {
+        if (!cache[name]) cache[name] = { nb:0, size:0 };
+        for (var i=0, f; f=ldir[i]; i++) {
+          if (f.isFile) {
+            CordovApp.File.info("FILE/"+f.fullPath, function(f){
+              cache[name].nb++;
+              cache[name].size += f.size;
+              show();
+            });
+          } else {
+            getCache(f, cache, name);
+          }
         }
       }
     );
