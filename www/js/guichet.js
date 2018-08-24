@@ -489,6 +489,9 @@ wapp.initControls = function()
 		wapp.hidePage();
 		wapp.map.getView().setCenter(ol.extent.getCenter(e.search.getGeometry().getExtent()));
 	});
+	$('#search [data-role="onglet-li"][data-list="data"] .wapp-search').click(function(){
+		searchFeature.setInput('*',true); searchFeature.setInput('')
+	});
 	wapp.setSearchSource ();
 
 	// Scale line
@@ -581,9 +584,8 @@ wapp.initInteractions = function()
 	this.select = new ol.interaction.Select({
 		multi: true,
 		hitTolerance: 5,
-		filter: function(f,l) 
-		{	selLayer = l;
-			return (true);
+		filter: function(f,l) {	
+			return f.layer ? true: false;
 		},
 		style: this.redStyle()
 /*		
@@ -600,9 +602,8 @@ wapp.initInteractions = function()
 		}
 */
 	});
-	this.select.selectFeature = function(f, l)
-	{	this.getFeatures().clear();
-		selLayer = l;
+	this.select.selectFeature = function(f, l) {
+		this.getFeatures().clear();
 		if (f) this.getFeatures().push(f);
 		wapp.showSelect();
 	};
@@ -711,8 +712,11 @@ wapp.setGeolocationControl = function(map) {
 	});
 	map.addControl(geolocBar);
 	this.interactions.geolocation = geolocBar.getInteraction();
-	this.interactions.geolocation.on('change:active', function(){
+	this.interactions.geolocation.on('change:active', function(e){
 		wapp.help.show('main-geolocation');
+		if (!e.oldValue && wapp.map.getView().getZoom()<17) {
+			wapp.map.getView().setZoom(17);
+		}
 	});
 };
 
