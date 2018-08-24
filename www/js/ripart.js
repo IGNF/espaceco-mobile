@@ -106,8 +106,12 @@ var RIPart = function(options)
 		r.lon = Number(r.lon);
 		r.lat = Number(r.lat);
 		r.croquis = rem.find('CROQUIS');
-		if (options && options.croquis) r.croquis = r.croquis.html();
-		else r.croquis = (r.croquis.length>0);
+		if (options && options.croquis) {
+			r.sketch = '<CROQUIS>'
+				+ r.croquis.html().replace(/\n/g,'')
+				+'</CROQUIS>';
+		}
+		r.croquis = (r.croquis.length>0);
 		r.themes = [];
 		r.attText="";
 		rem.find("THEME").each(function()
@@ -489,7 +493,7 @@ var RIPart = function(options)
 		if (params.photo) post.photo = params.photo;
 		// Decode response
 		function decode(resp)
-		{	return getGeorem (resp.find("GEOREM"));
+		{	return getGeorem (resp.find("GEOREM"), { croquis: true });
 		}
 		// Send request
 		return sendRequest ("georem_post", post, decode, cback);

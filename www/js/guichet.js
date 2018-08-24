@@ -584,8 +584,9 @@ wapp.initInteractions = function()
 	this.select = new ol.interaction.Select({
 		multi: true,
 		hitTolerance: 5,
+		condition: ol.events.condition.click,
 		filter: function(f,l) {	
-			return f.layer ? true: false;
+			return (f.layer || f.get('georem'));
 		},
 		style: this.redStyle()
 /*		

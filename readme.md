@@ -74,11 +74,12 @@ Ceci nécessite d'ajouter les plugins suivant au projet :
 
 ```
 > cordova plugin add cordova-plugin-file
-> cordova plugin add cordova-plugin-file-transfer
-> cordova plugin add cordova-plugin-dialogs
-> cordova plugin add cordova-plugin-camera
-> cordova plugin add cordova-plugin-geolocation
-> cordova plugin add cordova-plugin-inappbrowser
+> cordova plugin add cordova-plugin-file-transfer --save
+> cordova plugin add cordova-plugin-dialogs --save
+> cordova plugin add cordova-plugin-camera --save
+> cordova plugin add cordova-plugin-geolocation --save
+> cordova plugin add cordova-plugin-inappbrowser --save
+> cordova plugin add cordova-plugin-network-information --save
 ```
 
 Plutôt que d'ajouter les plugins un par un, vous pouvez lancer la commande :

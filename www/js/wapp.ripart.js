@@ -256,8 +256,10 @@ RIPart.prototype.initialize = function(options)
 		]
 	});
 	this.selectOverlay.setMap(wapp.map);
-	this.selectInteraction = new ol.interaction.Select(
-	{	filter: function(f, l) 
+	this.selectInteraction = new ol.interaction.Select({
+		hitTolerance: 5,
+		condition: ol.events.condition.click,
+		filter: function(f, l) 
 		{ 	if (f.get('georem') || (!f.layer && !l)) return false;
 			return true; 
 		}
@@ -631,6 +633,8 @@ RIPart.prototype.updateLocalRem = function(i, options)
 				self.saveParam();
 				self.onUpdate();
 			}
+		},{
+			croquis: options.croquis!==false
 		});
 	}
 };
