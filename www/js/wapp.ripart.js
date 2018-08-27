@@ -366,14 +366,14 @@ RIPart.prototype.saveFormulaire = function(form)
 	}
 	georem.attText =  $('.attributes [data-input-role="info"]', this.formElement).text();
 
-	// Formatage utilisateur
-	var isok = this.formatGeorem.call (this, georem, form);
-
 	// Ajout des features
 	var features = this.selectOverlay.getSource().getFeatures();
 	if (features.length) 
 	{	georem.sketch = this.feature2sketch(features, wapp.map.getView().getProjection());
 	}
+
+	// Formatage utilisateur
+	var isok = this.formatGeorem.call (this, georem, form);
 
 	if (isNaN(georem.lon) || isNaN(georem.lat))
 	{	isok = false;
@@ -1058,11 +1058,15 @@ RIPart.prototype.isConnected = function()
 };
 
 /** Gestion de la page de signalement
-* @param {georem|undefined} b une remontee non deja envoyee
+* @param {georem|false|undefined} b une remontee non deja envoyee ou false vider la selection
 * @param {boolean} select autoriser la selection, default true
 */
-RIPart.prototype.showFormulaire = function(grem, select)
-{	var self = this;
+RIPart.prototype.showFormulaire = function(grem, select) {
+	if (grem===false) {
+		wapp.select.getFeatures().clear(); 
+		wapp.onSelect();
+	}
+	var self = this;
 	this.selectOverlay.getSource().clear();
 
 	// Callback 

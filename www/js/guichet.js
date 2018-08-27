@@ -559,9 +559,11 @@ wapp.setSearchSource = function(source, prop) {
 			ctrl.setSource(source);
 			ctrl.set('property', prop);
 		}
+		return true;
 	} else {
 		wapp.showOnglet('adress');
 		$('#search').addClass('noOnglet');
+		return false;
 	}
 };
 
@@ -769,29 +771,50 @@ wapp.initRipart = function()
 				wapp.select.setActive(false);
 			}, 
 			// Formatage du signalement / verification avant envoie
-			formatGeorem: function(georem, form)
-			{	if (!georem.comment) 
+			formatGeorem: function(georem, form) {
+				if (!georem.comment) 
 				{	wapp.alert ("Merci de laisser un commentaire...");
 					return false;
 				}
 				// Forcer la jointure avec un objet d'une couche vecteur
-				if (!georem.sketch) {
-					var proj = wapp.map.getView().getProjection();
-					var coord = ol.proj.fromLonLat([georem.lon,georem.lat], proj);
-					for (var i=0, l; l = wapp.vector[i]; i++) {
-						if (l.get('attach')) {
-							var coord = ol.proj.fromLonLat([georem.lon,georem.lat], proj);
-							var extent = ol.extent.buffer (ol.extent.boundingExtent([coord]), .1);
-							var f, features = l.getSource().getFeaturesInExtent(extent);
-							for (var k=0; f=features[k]; k++) {
-								var geom = f.getGeometry();
-								if (geom.intersectsCoordinate && geom.intersectsCoordinate(coord)) {
+				var proj = wapp.map.getView().getProjection();
+				var coord = ol.proj.fromLonLat([georem.lon,georem.lat], proj);
+				for (var i=0, l; l = wapp.vector[i]; i++) {
+					// Jointure ?
+					if (l.get('attach')) {
+						var coord = ol.proj.fromLonLat([georem.lon,georem.lat], proj);
+						var extent = ol.extent.buffer (ol.extent.boundingExtent([coord]), .1);
+						var f, features = l.getSource().getFeaturesInExtent(extent);
+						for (var k=0; f=features[k]; k++) {
+							var geom = f.getGeometry();
+							if (geom.intersectsCoordinate && geom.intersectsCoordinate(coord)) {
+								break;
+							}
+						}
+						if (!f) f = l.getSource().getClosestFeatureToCoordinate(coord);
+						if (f) {
+							// Verifie pas déjà joint
+							var features = wapp.ripart.selectOverlay.getSource().getFeatures();
+							var found = false;
+							for (var k=0; k<features.length; k++) {
+								var props = features[k].getProperties();
+								var eq = true;
+								for (p in props) if (p!=='geometry') {
+									if (/^undefined$|^null$/.test(props[p])){
+										eq = eq && /^undefined$|^null$/.test(f.get(p));
+									}
+									else {
+										eq = eq && (String(props[p])==f.get(p));
+									}
+								}
+								if (eq) {
+									found = true;
 									break;
 								}
 							}
-							if (!f) f = l.getSource().getClosestFeatureToCoordinate(coord);
-							if (f) {
-								georem.sketch = wapp.ripart.feature2sketch(f, proj);
+							if (!found) {
+								features.push(f);
+								georem.sketch = wapp.ripart.feature2sketch(features, proj);
 								break;
 							}
 						}
@@ -826,9 +849,21 @@ wapp.initRipart = function()
 		});
 	}
 
-	$("#fiche").on("showonglet hidepage", function(e)
-	{	self.ripart.cancelFormulaire();
-		if (!$(e.target).hasClass('signaler')) wapp.select.setActive(true);
+	// Affichage de la page
+	$("#fiche").on("showonglet hidepage", function(e) {
+		self.ripart.cancelFormulaire();
+		wapp.select.setActive(true);
+	});
+	$("#fiche").on("showonglet showpage", function(e) {
+		// Selection ?
+		if (wapp.select.getFeatures().item(0)) {
+			$('.sselect', wapp.ripart.formElement).show();
+		} else {
+			$('.sselect', wapp.ripart.formElement).hide();
+		}
+	});
+	$("#fiche").on("showonglet", function(e) {
+		wapp.showSelect();
 	});
 						 
 	// Set parameters

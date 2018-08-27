@@ -181,7 +181,7 @@ wapp.onSelect = function(e) {
 		wapp.showOnglet("info");
 	}
 	else if (nb===1) {
-		var f = e ? e.selected[0] : null;
+		var f = wapp.select.getFeatures().item(0);
 		$("#selection").html (f.get("nom")||"Afficher la sélection...");
 		wapp.showOnglet("info");
 	}

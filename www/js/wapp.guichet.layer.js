@@ -96,6 +96,14 @@ wapp.layerWFS = function(groupe, l) {
       wapp.ripart.saveParam();
       // Recherche sur la couche ?
       wapp.setSearchSource(this.getSource(), this.get('search'));
+      // Load source at center if once
+      if (this.getSource().get('once')) {
+        this.getSource().loaderFn_(
+          ol.extent.boundingExtent([wapp.map.getView().getCenter()]), 
+          1, 
+          wapp.map.getView().getProjection()
+        );
+      }
   }, vector);
   // Probleme au chargement
   vector.on("error", function(e){});
@@ -215,7 +223,7 @@ wapp.loadLayers = function (groupe) {
       else vector = wapp.layerWebpart(l);
       // Ajouter
       this.vector.push(vector);
-      testHiddden(vector)
+      testHiddden(vector);
       guichet.getLayers().push(vector);
 
       // Probleme au chargement

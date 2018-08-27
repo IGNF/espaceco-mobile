@@ -225,3 +225,10 @@ screen and (orientation:portrait) and (max-height:1023px) {
 	}
 
 }
+
+#fiche .signaler .big-button {
+  margin: .3em;
+}
+#fiche .signaler .changeGroupe {
+  margin: .5em 0 1em;
+}
