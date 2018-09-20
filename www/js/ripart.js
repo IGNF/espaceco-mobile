@@ -106,7 +106,7 @@ var RIPart = function(options)
 		r.lon = Number(r.lon);
 		r.lat = Number(r.lat);
 		r.croquis = rem.find('CROQUIS');
-		if (options && options.croquis) {
+		if (options && options.croquis && r.croquis.length) {
 			r.sketch = '<CROQUIS>'
 				+ r.croquis.html().replace(/\n/g,'')
 				+'</CROQUIS>';
