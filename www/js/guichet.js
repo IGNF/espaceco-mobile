@@ -798,7 +798,9 @@ wapp.initRipart = function()
 							var found = false;
 							for (var k=0; k<features.length; k++) {
 								var props = features[k].getProperties();
-								var eq = true;
+								// Propritete differente de geometry ?
+								var eq = (Object.entries(props).length > 1);
+								// Existant ?
 								for (p in props) if (p!=='geometry') {
 									if (/^undefined$|^null$/.test(props[p])){
 										eq = eq && /^undefined$|^null$/.test(f.get(p));
