@@ -61,9 +61,12 @@ wapp.layerWFS = function(groupe, l) {
         CordovApp.File.info(
           fileName, 
           function(file){
-            // Obsolete (plus d'un jour)
+            /* Obsolete (plus d'un jour)
             if ((new Date() - file.lastModified) > 24*3600*1000 ) {
-                options.error('obsolete');
+            */
+            // Obsolete (plus de 5 min)
+            if ((new Date() - file.lastModified) > 5*60*1000 ) {
+              options.error('obsolete');
             } else {
               // Lire le cache
               CordovApp.File.read(

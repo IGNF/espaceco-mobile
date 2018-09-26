@@ -381,7 +381,7 @@ CacheVector.prototype.addCache = function(name, layers) {
   if (!wapp.param.vectorCache) wapp.param.vectorCache = [];
   var id = 0;
   for (var i=0, c; c=wapp.param.vectorCache[i]; i++) {
-    id = Math.max(id, c.id);
+    id = Math.max(id, c.id||0);
   }
   var cache = {
     id: id+1,
@@ -434,7 +434,6 @@ CacheVector.prototype.addDialog = function() {
           var l = $(this).data('layer');
           if ($(this).hasClass('selected')) layers.push($.extend({},l));
         });
-        console.log(layers)
         self.addCache(name, layers);
       }
     }

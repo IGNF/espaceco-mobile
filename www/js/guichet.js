@@ -961,6 +961,7 @@ wapp.setDebugMode = function()
 	$('#options [data-role="header"]').on("click touchstart", function(e)
 	{	e.stopPropagation();
 		e.preventDefault();
+		console.log('debug-mode', cheat)
 		var t = new Date();
 		if (t-tcheat > 250) cheat = 0;
 		else cheat++;
@@ -969,6 +970,7 @@ wapp.setDebugMode = function()
 		{	wapp.notification ("Mode debug activé...",500);
 			cheat=0;
 			$(".debug").show();
+			$("div.debug").css('display', 'inline-block');
 		}
 	});
 	// Mode debug en qualif
