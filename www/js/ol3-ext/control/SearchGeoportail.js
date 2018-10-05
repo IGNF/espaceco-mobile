@@ -26,7 +26,7 @@ ol.control.SearchGeoportail = function(options) {
   options = options || {};
   options.className = options.className || 'IGNF';
   options.typing = options.typing || 500;
-  options.url = "http://wxs.ign.fr/"+options.apiKey+"/ols/apis/completion";
+  options.url = "https://wxs.ign.fr/"+options.apiKey+"/ols/apis/completion";
   ol.control.SearchJSON.call(this, options);
 	this.set("copy","<a href='https://www.geoportail.gouv.fr/' target='new'>&copy; IGN-Géoportail</a>");
   this.set('type', options.type || 'StreetAddress,PositionOfInterest');

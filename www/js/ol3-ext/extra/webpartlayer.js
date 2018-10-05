@@ -92,7 +92,7 @@ ol.layer.Vector.Webpart.prototype.createSource = function(options, source_option
 
 	// Style of the feature style
 	if (!options.style && ol.layer.Vector.Webpart.Style) 
-	{	this.setStyle (ol.layer.Vector.Webpart.Style.getFeatureStyleFn(featureType));
+	{	this.setStyle (ol.layer.Vector.Webpart.Style.getFeatureStyleFn(featureType, options.cacheUrl));
 	}
 
 	this.dispatchEvent({ type:"ready", source: vectorSource });

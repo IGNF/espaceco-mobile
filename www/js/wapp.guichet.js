@@ -76,6 +76,14 @@ wapp.initGuichets = function() {
  * @param {} groupe
  */
 wapp.showGuichetInfo = function (groupe){
+
+	/* VNF PATCH */
+	console.log('Hide offline',groupe.id_groupe);
+	if (groupe.id_groupe===200) $('#guichet [data-role="onglet-bt"] [data-list="offline"]').show();
+	else $('#guichet [data-role="onglet-bt"] [data-list="offline"]').hide();
+	wapp.showOnglet($('#guichet [data-role="onglet-bt"] [data-list="info"]'))
+	/**/
+
 	wapp.showPage('guichet');
 	var page = $('#guichet');
 	wapp.vectorCache.setCurrentGuichet(groupe);
@@ -150,7 +158,7 @@ wapp.getLogo = function (g, cback, scope) {
 */
 wapp.setGuichet = function(groupe) {
 	if (!groupe) groupe = {};
-	console.log("setGuichet")
+	console.log("setGuichet ",groupe)
 	// Nouveau guichet
 	this.ripart.param.guichet = groupe.id_groupe;
 	wapp.ripart.saveParam();
@@ -453,6 +461,7 @@ wapp.showSelect = function(options) {
 wapp.connect = function()
 {	wapp.ripart.connectDialog(
 	{	onConnect: function() {
+			wapp.notification("Connecté au service",1200);
 			wapp.initGuichets();
 		},
 		onError: function(error) {

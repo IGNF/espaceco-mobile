@@ -433,7 +433,7 @@ wapp.initControls = function()
 
 	// SearchGeoportail Control
 	var locCtrl = new ol.control.SearchGeoportail(
-		{	apiKey:apiKey, 
+		{	apiKey: apiKey, 
 			authentication: auth,
 			placeholder: "rechercher...",
 			target: $('#search [data-role="onglet-li"][data-list="adress"]').get(0)
@@ -876,7 +876,6 @@ wapp.initRipart = function()
 	this.ripart.checkUserInfo(
 		function ()
 		{	timer = (new Date())-timer;
-			wapp.waitLogo("Connecté au service...");
 			setTimeout (function () { wapp.wait(false); }, Math.max(0, 2000 - timer));
 			wapp.notification("Connecté au service",1200);
 			wapp.initGuichets();
@@ -1076,7 +1075,7 @@ wapp.refreshMap = function(layers) {
 				wapp.refreshMap(l.getLayers());
 			} 
 			// Geoportail layer
-			else if (l.getSource) {
+			else if (l.getSource && l.getSource()) {
 				if (l.getSource().setTileLoadFunction) {
 					// console.log(l.get('name'), l);
 					l.getSource().setTileLoadFunction(l.getSource().getTileLoadFunction())

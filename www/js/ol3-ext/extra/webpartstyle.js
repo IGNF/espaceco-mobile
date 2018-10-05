@@ -153,12 +153,35 @@ ol.layer.Vector.Webpart.Style.Text = function (fstyle) {
 	return new ol.style.Text(s);
 };
 
+/** Symbol cache
+ */
+ol.layer.Vector.Webpart.Style.symbolCache = null;
+
+/** Load symbol cache
+ */
+ol.layer.Vector.Webpart.Style.loadSymbolCache = function() {
+	if (typeof(CordovApp)!=='undefined' && !this.symbolCache) {
+		this.symbolCache = {}
+		CordovApp.File.listDirectory(
+			'FILE/cache/symbols', 
+			function(entries){
+				for (var i=0, e; e=entries[i]; i++) {
+					ol.layer.Vector.Webpart.Style.symbolCache[e.name] = e.nativeURL;
+				}
+			}
+		);
+	}
+};
+
 /** Get ol.style.function as defined in featureType
 * @param {featureType}
 * @return { ol.style.function | undefined }
 */
-ol.layer.Vector.Webpart.Style.getFeatureStyleFn = function(featureType)
-{	if (!featureType) featureType = {};
+ol.layer.Vector.Webpart.Style.getFeatureStyleFn = function(featureType, cache) {
+	// Chargement du cache des images
+	this.loadSymbolCache();
+	// Fonction de style
+	if (!featureType) featureType = {};
 	if (featureType.name && ol.layer.Vector.Webpart.Style[featureType.name])
 	{	return ol.layer.Vector.Webpart.Style[featureType.name](featureType);
 	}
@@ -203,13 +226,14 @@ ol.layer.Vector.Webpart.Style.getFeatureStyleFn = function(featureType)
 
 		var fstyle = ol.layer.Vector.Webpart.Style.formatFeatureStyle (style, feature);
 		// Gestion d'une bibliotheque de symboles
-		if (style && style.name && featureType.symbo_attribute)
-		{	fstyle.img = featureType.uri.replace(/gcms\/.*/,"")
-				+ "gcms/style/image/"
-				+ style.name
-				+ "/" + feature.get(featureType.symbo_attribute.name)
-				+"?width="+style.graphicWidth
-				+"&height="+style.graphicHeight;
+		if (style && style.name && featureType.symbo_attribute) {
+			fstyle.radius = 5;
+			fstyle.graphicName = "x";
+			fstyle.img = ol.layer.Vector.Webpart.Style.getSymbolURI(
+				featureType,
+				feature.get(featureType.symbo_attribute.name),
+				cache
+			)
 		}
 		return [	
 			new ol.style.Style (
@@ -220,6 +244,38 @@ ol.layer.Vector.Webpart.Style.getFeatureStyleFn = function(featureType)
 			})
 		];
 	}
+};
+
+/** Get image uri and save it if not allready saved 
+ * 
+ */
+ol.layer.Vector.Webpart.Style.getSymbolURI = function (featureType, name, cache) {
+	var img;
+	var style= featureType.style;
+	var cacheName = style.name+'_'+name+'_'+style.graphicWidth+'x'+style.graphicHeight;
+	if (cache) {
+		img = this.symbolCache[cacheName];
+	} else {
+		img = featureType.uri.replace(/gcms\/.*/,"")
+			+ "gcms/style/image/"
+			+ featureType.style.name
+			+ "/" + name
+			+"?width="+style.graphicWidth
+			+"&height="+style.graphicHeight;
+		// Save symbol if exist
+		if (wapp.isCordova && !this.symbolCache[cacheName]) {
+			CordovApp.File.dowloadFile(
+				img,
+				'FILE/cache/symbols/'+cacheName,
+				function (e){
+					// Update symbol cache
+					ol.layer.Vector.Webpart.Style.symbolCache[e.name] = e.nativeURL;
+				},
+				function(){}
+			);
+		}
+	}
+	return img;
 };
 
 
