@@ -120,7 +120,8 @@ ol.source.Vector.WFS.prototype.loaderFn_ = function(extent, resolution, projecti
 					console.log('error:', status)
 					// Try to load an older version
 					if (cacheError === 'obsolete') {
-						this.loadCache({
+						self.loadCache({
+							obsolete: true,
 							extent: extent, 
 							resolution: resolution, 
 							// Cache charge

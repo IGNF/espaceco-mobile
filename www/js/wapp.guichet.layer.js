@@ -65,7 +65,7 @@ wapp.layerWFS = function(groupe, l) {
             if ((new Date() - file.lastModified) > 24*3600*1000 ) {
             */
             // Obsolete (plus de 5 min)
-            if ((new Date() - file.lastModified) > 5*60*1000 ) {
+            if (!options.obsolete && (new Date() - file.lastModified) > 5*60*1000 ) {
               options.error('obsolete');
             } else {
               // Lire le cache
