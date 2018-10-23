@@ -54,7 +54,7 @@ ol.layer.Vector.WFS = function(options, cache) {
       // Error
       error: function(jqXHR, status, error) {
         // Unauthorized
-        if ((jqXHR.status===401 || jqXHR.status===500) && typeof(authenticationFn) === 'function') {
+        if (((jqXHR.status===0 && !options.username) || jqXHR.status===401 || jqXHR.status===500) && typeof(authenticationFn) === 'function') {
           authenticationFn(self, function(login, pwd){
             if (login) {
               options.username = login;

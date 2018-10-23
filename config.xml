@@ -61,6 +61,9 @@
     <plugin name="cordova-plugin-dialogs" spec="^2.0.1" />
     <plugin name="cordova-plugin-camera" spec="^4.0.3" />
     <plugin name="cordova-plugin-geolocation" spec="^4.0.1" />
+        <variable name="GEOLOCATION_USAGE_DESCRIPTION" value="pour localisaer vos signalements" />
+    </plugin>
+
     <plugin name="cordova-plugin-inappbrowser" spec="^3.0.0" />
     <plugin name="cordova-plugin-network-information" spec="^2.0.1" />
     <engine name="android" spec="^7.0.0" />
