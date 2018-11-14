@@ -273,7 +273,15 @@ RIPart.prototype.initialize = function(options)
 	}, this);
 	
 	// Enregistement d'une remontee
-	$('.formulaire .save', formulaire).click(function(){ self.saveFormulaire ($(this).closest(".formulaire")); });
+	$('.formulaire .save', formulaire).click(function(){ 
+		self.saveFormulaire ($('.formulaire', formulaire)); 
+	});
+	var check = $('.fa-check', formulaire.parent()).click(function(){ 
+		self.saveFormulaire ($('.formulaire', formulaire)); 
+	});
+	formulaire.parent().on('showonglet', function() {
+		check.hide();
+	});
 	this.onUpdate();
 
 	// Re-init
@@ -937,6 +945,8 @@ RIPart.prototype.checkUserInfo = function(success, fail, allways)
 			if (error.status===401) {
 				self.deconnect();
 				self.setProfil(null);
+			} else {
+				if (self.param.profil) self.setProfil(self.param.profil.id_groupe);
 			}
 			fail(error);
 		} else {
@@ -1062,6 +1072,9 @@ RIPart.prototype.isConnected = function()
 * @param {boolean} select autoriser la selection, default true
 */
 RIPart.prototype.showFormulaire = function(grem, select) {
+	// Show the chek in the menu
+	$('.fa-check', this.formElement.parent()).show();
+
 	if (grem===false) {
 		wapp.select.getFeatures().clear(); 
 		wapp.onSelect();
@@ -1153,8 +1166,9 @@ RIPart.prototype.showFormulaire = function(grem, select) {
 * @param {string} th theme par defaut
 * @param {string} atts attributs par defaut
 */
-RIPart.prototype.selectTheme = function(th, atts, prompt)
-{	if (!th) th = "";
+RIPart.prototype.selectTheme = function(th, atts, prompt) {
+	console.log('selectTheme',arguments) 
+	if (!th) th = "";
 	th = th.split("::");
 	var group = parseInt(th[0]);
 	th = th[1];
@@ -1213,13 +1227,14 @@ RIPart.prototype.formulaireAttribut = function(valdef, prompt)
 		}
 		for (var i=0, a; a = att[i]; i++)
 		{	var v = (valdef ? valdef[a.att] : a.val[0]);
+			console.log('valdef',valdef)
 			vals[a.att] = v;
-			switch (a.type)
-			{	case 'list':
+			switch (a.type) {
+				case 'list':
 					li = $("<li data-input='select'>").attr('data-param',a.att).appendTo(content);
 					$("<label>").text(a.att).appendTo(li);
-					for (var k=0; k<a.val.length; k++)
-					{	$("<div data-input-role='option' data-val='"+a.val[k]+"'>").html(a.val[k]||"<i>sans</i>").appendTo(li);
+					for (var k=0; k<a.val.length; k++) {
+						$("<div data-input-role='option' data-val='"+a.val[k]+"'>").html(a.val[k]||"<i>sans</i>").appendTo(li);
 					}
 					break;
 				case 'checkbox':
@@ -1318,11 +1333,11 @@ RIPart.prototype.photo = function()
 /** Add (or remove) a feature to the signalement
  * @param {ol.Feature | Array<ol.Feature> } features les features a ajouter
  */
-RIPart.prototype.addFeature = function(features)
-{	if (features)
-	{	if (!(features instanceof Array)) features = [features];
-		for (var i=0, f; f=features[i]; i++) 
-		{	if (f.layer == this.selectOverlay) this.selectOverlay.getSource().removeFeature(f);
+RIPart.prototype.addFeature = function(features) {
+	if (features) {
+		if (!(features instanceof Array)) features = [features];
+		for (var i=0, f; f=features[i]; i++) {
+			if (f.layer == this.selectOverlay) this.selectOverlay.getSource().removeFeature(f);
 			else this.selectOverlay.getSource().addFeature(f.clone());
 		}
 	}

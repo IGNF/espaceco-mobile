@@ -118,9 +118,10 @@ CordovApp.prototype.isMenu = function()
 };
 
 /** Show a page
-* @param {String|Array} id or array of ids of the page(s) to show
+* @param {String|Array} id_page id or array of ids of the page(s) to show
+* @param {String} onglet the list item to show
 */
-CordovApp.prototype.showPage = function(id_page)
+CordovApp.prototype.showPage = function(id_page, onglet)
 {	if (!id_page) return;
 	if (typeof(id_page) == "string") id_page=[id_page];
 	if (!id_page.length) return;
@@ -153,6 +154,7 @@ CordovApp.prototype.showPage = function(id_page)
 		self.trigger( { type:"showpage", page:id_page[i] } )
 			.show();
 		show (self);
+		if (onglet) wapp.showOnglet($('[data-role="onglet-bt"] [data-list="'+onglet+'"]', self))
 	}
 };
 

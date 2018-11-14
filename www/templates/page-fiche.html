@@ -11,8 +11,9 @@
 		<div data-list="signal">
 			<i class="fa fa-wifi fa-rotate-90"></i>Signaler
 		</div>
-		<i class="fa fa-close" style="font-size:1.5em; padding:0.75em 0.5em; float:right; cursor:pointer" onclick="wapp.hidePage();"></i>
+		<i class="fa fa-close" style="" onclick="wapp.hidePage();"></i>
 		<i class="fa fa-close fromRipart" style="font-size:1.5em; padding:0.75em 0.5em; float:right; cursor:pointer" onclick="wapp.showPage('signalements')"></i>
+		<i class="fa fa-check" style="font-size:1.5em; padding:0.75em 0.5em; float:right; cursor:pointer;" ></i>
 	</div>
 
 	<!-- Fiche -->
@@ -80,7 +81,7 @@
 				</li>
 			</ul>
 			<div style="width:100%; margin-top:0.5em;" >
-				<div data-role="dialogBt" class="del" onclick="wapp.delGeorem();">Supprimer</div>
+				<div data-role="dialogBt" class="del" onclick="wapp.delGeorem(true);">Supprimer</div>
 				<div data-attr="id" data-null="1" data-role="dialogBt" class="send" onclick="wapp.postGeorem();">Envoyer</div>
 				<div data-attr="id" data-null="1" data-role="dialogBt" class="modify" onclick="wapp.modifyGeorem();">Modifier</div>
 			</div>

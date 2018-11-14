@@ -11,6 +11,12 @@ ol.layer.Vector.WFS = function(options, cache) {
   var self = this;
   var secret = "WFS Espace Collaboratif IGN";
 
+  this.crypt = function(pwd) {
+    return CryptoJS.AES.encrypt(pwd, secret).toString();
+  };
+
+  if (!options.url) return;
+  
   var cachedir = options.url.replace(/^((http[s]?|ftp):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?$/,"$3").replace(/\./g,'_');
 	ol.layer.Vector.call(this,{ 
     title: options.nom,
@@ -42,7 +48,7 @@ ol.layer.Vector.WFS = function(options, cache) {
   var getCapabilities = function () {
     $.ajax({
       url: options.url,
-      username: options.username, // guichet-ign - guichet_ign$8
+      username: options.username, // G.Site - gestion10
       password: options.password ? CryptoJS.AES.decrypt(options.password, secret).toString(CryptoJS.enc.Utf8) : undefined, 
       timeout: 10000,
       data: {
@@ -53,6 +59,7 @@ ol.layer.Vector.WFS = function(options, cache) {
       success: createSource,
       // Error
       error: function(jqXHR, status, error) {
+        console.log(jqXHR.status)
         // Unauthorized
         if (((jqXHR.status===0 && !options.username) || jqXHR.status===401 || jqXHR.status===500) && typeof(authenticationFn) === 'function') {
           authenticationFn(self, function(login, pwd){

@@ -412,7 +412,8 @@ i.backArrowBt:before
 	width: 60%;
 	max-height: 98%;
 	max-height: Calc( 100% - 1em );
-	overflow: auto;
+	overflow-x: hidden;
+	overflow-y: auto;
 	z-index: 1100;
 	box-sizing:border-box;
 	box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.5);

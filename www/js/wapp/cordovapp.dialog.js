@@ -241,7 +241,7 @@ CordovApp.prototype.message = function (message, titre, boutons, callback, class
 {	_internalDialog.show(message||"...",
 	{	title: titre||_T("MESSAGE"),
 		callback: callback,
-		buttons: boutons,
+		buttons: boutons||{ cancel:'ok' },
 		classe: classe||"message"
 	});
 }

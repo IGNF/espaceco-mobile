@@ -201,16 +201,15 @@ var wapp = new CordovApp(
 
 /** Message d'attente avec affichage du logo du groupe
  */
-wapp.waitLogo = function(info, anim)
-{	if (this.isWaiting() && $("#wait").hasClass('splash'))
-	{	$("#wait p").text(info);
-	}
-	else
-	{	var div = $("<div>").append($("<p>").text(info));
+wapp.waitLogo = function(info, anim) {
+	if (this.isWaiting() && $("#wait").hasClass('splash')) {
+		$("#wait p").text(info);
+	} else {
+		var div = $("<div>").append($("<p>").text(info));
 		try {
 			var profil = JSON.parse(localStorage["WebApp@ripart"]).profil
-			this.getLogo(profil, function(logo)
-			{	$("<img>").attr('src', logo || "")
+			this.getLogo(profil, function(logo) {
+				$("<img>").attr('src', logo || "")
 					.prependTo(div);
 			});
 		} catch(e) {};
@@ -748,8 +747,7 @@ wapp.initRipart = function()
 			},
 			// Affichage du dialogue
 			onShow: function(form)
-			{	wapp.showPage('fiche');
-				wapp.showOnglet('signal');
+			{	wapp.showPage('fiche', 'signal');
 				var f = wapp.select.getFeatures().item(0);
 				if (f && f.get('georem'))
 				{	f = false;
@@ -858,7 +856,7 @@ wapp.initRipart = function()
 	});
 	$("#fiche").on("showonglet showpage", function(e) {
 		// Selection ?
-		if (wapp.select.getFeatures().item(0)) {
+		if (wapp.select.getFeatures().item(0) && !wapp.select.getFeatures().item(0).get('georem')) {
 			$('.sselect', wapp.ripart.formElement).show();
 		} else {
 			$('.sselect', wapp.ripart.formElement).hide();

@@ -62,8 +62,8 @@ wapp.initGuichets = function() {
 					wapp.showGuichetInfo($(this).parent().data('groupe'));
 				})
 				.appendTo(li);
-			wapp.getLogo (g, function(f)
-			{	$("<img>").attr("src",f).prependTo(this);
+			wapp.getLogo (g, function(f) {
+				$("<img>").attr("src",f).prependTo(this);
 			}, li);
 		}
 	}
@@ -79,7 +79,9 @@ wapp.showGuichetInfo = function (groupe){
 
 	/* VNF PATCH */
 	console.log('Hide offline',groupe.id_groupe);
-	if (groupe.id_groupe===200) $('#guichet [data-role="onglet-bt"] [data-list="offline"]').show();
+	if (groupe.id_groupe===200 || $('.debug').css('display')!=='none') {
+		$('#guichet [data-role="onglet-bt"] [data-list="offline"]').show();
+	}
 	else $('#guichet [data-role="onglet-bt"] [data-list="offline"]').hide();
 	wapp.showOnglet($('#guichet [data-role="onglet-bt"] [data-list="info"]'))
 	/**/
@@ -126,14 +128,38 @@ wapp.showGuichetInfo = function (groupe){
 	if (auth) {
 		$(".auth", page).off()
 			.click(function () {
+				// Remove credentials
+				var layer;
 				for (var k=0, l; l=groupe.layers[k]; k++) {
+					if (l.username) layer = l;
 					delete l.password;
 				}
+				var current = wapp.ripart.param.guichet;
 				if (wapp.ripart.param.guichet === groupe.id_groupe) wapp.setGuichet();
 				wapp.ripart.saveParam();
 				// Clear credentials
 				var win = window.open('logout.html','_blank','clearsessioncache=yes,hidden=yes');
 				setTimeout(function(){ win.close(); }, 100);
+
+				// Ask for new credentials
+				var content = CordovApp.template("dialog-authenticate");
+				$('span', content).text(layer.nom);
+				wapp.dialog.show (content, {
+				  title: "Connexion", 
+				  buttons: { submit:"OK", cancel:"Annuler" },
+				  callback: function(b) {
+					if (b=='submit') {
+						var cryp = new ol.layer.Vector.WFS();
+						for (var k=0, l; l=groupe.layers[k]; k++) {
+							if (l.username) {
+								l.username = $('.nom', content).val() || 'none';
+								l.password = cryp.crypt($('.pwd', content).val());
+							}
+						}
+						if (current === groupe.id_groupe) wapp.setGuichet(current);
+					} 
+				  }
+				});
 			})
 			.show();
 	}
@@ -228,14 +254,24 @@ wapp.modifyGeorem = function()
 };
 
 /** Supprimer le signalement courant
+ * @param {boolean} warning Ask before delete
 */
-wapp.delGeorem = function()
-{	var f = wapp.select.getFeatures().item(0);
-	var grem = f.get('georem');
-	if (grem)
-	{	wapp.select.getFeatures().clear();
-		wapp.ripart.delLocalRem (grem);
-		wapp.showSelect();
+wapp.delGeorem = function(warning) {
+	if (warning) {
+		wapp.message('Voulez-vous vraiment supprimer le signalement ?', 'Suppression', 
+			{ ok:'ok', cancel:'annuler' },
+			function(bt) {
+				if (bt==='ok') wapp.delGeorem();
+			});
+
+	} else {
+		var f = wapp.select.getFeatures().item(0);
+		var grem = f.get('georem');
+		if (grem)
+		{	wapp.select.getFeatures().clear();
+			wapp.ripart.delLocalRem (grem);
+			wapp.showSelect();
+		}
 	}
 }
 
@@ -446,7 +482,7 @@ wapp.showSelect = function(options) {
 			else $('[class!="hidden"]', th).first().click();
 		}
 	}
-	wapp.showPage("fiche");
+	wapp.showPage('fiche');
 	// Afficher le point si hors de l'ecran
 	if (f)
 	{	var e = this.map.getView().calculateExtent(this.map.getSize());
@@ -491,9 +527,9 @@ wapp.connect = function()
 
 /** Afficher le formulaire de signalement
 */
-wapp.showRipartForm = function()
-{	wapp.showOnglet("signal");
-	wapp.showPage("fiche");
+wapp.showRipartForm = function() {
+	//wapp.showOnglet("signal");
+	wapp.showPage('fiche', 'signal');
 };
 
 /** Affichage de la page de gestion des cartes
