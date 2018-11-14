@@ -184,7 +184,6 @@ wapp.getLogo = function (g, cback, scope) {
 */
 wapp.setGuichet = function(groupe) {
 	if (!groupe) groupe = {};
-	console.log("setGuichet ",groupe)
 	// Nouveau guichet
 	this.ripart.param.guichet = groupe.id_groupe;
 	wapp.ripart.saveParam();
