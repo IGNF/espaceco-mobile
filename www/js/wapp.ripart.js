@@ -1225,9 +1225,8 @@ RIPart.prototype.formulaireAttribut = function(valdef, prompt)
 				valdef[k] = l[1].replace(/"$/,"");
 			}
 		}
-		for (var i=0, a; a = att[i]; i++)
-		{	var v = (valdef ? valdef[a.att] : a.val[0]);
-			console.log('valdef',valdef)
+		for (var i=0, a; a = att[i]; i++) {
+			var v = (valdef ? valdef[a.att] : (att.defaultVal || a.val[0]));
 			vals[a.att] = v;
 			switch (a.type) {
 				case 'list':

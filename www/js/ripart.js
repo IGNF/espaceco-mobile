@@ -355,6 +355,7 @@ var RIPart = function(options)
 								nom: $(this).find('NOM').text(),
 								att: $(this).find('ATT').text(),
 								type: $(this).find('TYPE').text(),
+								defaultVal: $(this).find('DEFAULTVAL').text(),
 								val: []
 							};
 							$(this).find('VAL').each(function()
@@ -363,6 +364,7 @@ var RIPart = function(options)
 							switch(att.type)
 							{	case 'checkbox':
 									att.val = [(att.val[0] == 1)];
+									att.defaultVal = (att.defaultVal == 1);
 								break;
 								case 'list': 
 								case 'date': 
