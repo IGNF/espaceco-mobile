@@ -89,14 +89,13 @@ var CacheMap = function(map, layerGroup, options)
 	})();
 
 	// Chargement des cartes lorsque le cacheRoot est OK
-	if (!wapp.param.options.cacheRoot)
-	{	CordovApp.File.getDirectory(options.directory||'FILE', function(d)
-			{	wapp.param.options.cacheRoot = d.nativeURL;
-				initCacheMap()
-			},
-			initCacheMap);
-	}
-	else { 
+	if (cordova.platform==='ios' || !wapp.param.options.cacheRoot){
+		CordovApp.File.getDirectory(options.directory||'FILE', function(d){
+			wapp.param.options.cacheRoot = d.nativeURL;
+			initCacheMap()
+		},
+		initCacheMap);
+	} else { 
 		initCacheMap();
 	}
 
