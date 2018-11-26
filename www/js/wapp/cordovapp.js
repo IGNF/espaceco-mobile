@@ -156,7 +156,7 @@ var CordovApp = function(obj)
 			);
 
 			// Onglets
-			$("[data-role='onglet-bt'] div").on( 'click touchstart', function(e)
+			$("[data-role='onglet-bt'] div[data-list]").on( 'click touchstart', function(e)
 			{	if ($(this).data('list')=='close') CordovApp.prototype.hidePage();
 				else CordovApp.prototype.showOnglet(this);
 				e.preventDefault();

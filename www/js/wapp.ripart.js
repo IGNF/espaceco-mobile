@@ -276,11 +276,13 @@ RIPart.prototype.initialize = function(options)
 	$('.formulaire .save', formulaire).click(function(){ 
 		self.saveFormulaire ($('.formulaire', formulaire)); 
 	});
-	var check = $('.fa-check', formulaire.parent()).click(function(){ 
+	// Action buttons
+	$('.fa-check', wapp.getActionBt('fiche')).click(function() { 
+		console.log('click')
 		self.saveFormulaire ($('.formulaire', formulaire)); 
 	});
-	formulaire.parent().on('showonglet', function() {
-		check.hide();
+	$('#fiche').on('showpage showonglet', function() {
+		wapp.hideActionBt('fiche');
 	});
 	this.onUpdate();
 
@@ -1073,7 +1075,7 @@ RIPart.prototype.isConnected = function()
 */
 RIPart.prototype.showFormulaire = function(grem, select) {
 	// Show the chek in the menu
-	$('.fa-check', this.formElement.parent()).show();
+	setTimeout(function(){ wapp.showActionBt('fiche') });
 
 	if (grem===false) {
 		wapp.select.getFeatures().clear(); 
@@ -1281,8 +1283,8 @@ RIPart.prototype.formulaireAttribut = function(valdef, prompt)
 
 /** Cancel formulaire: showFormulaire (false)
 */
-RIPart.prototype.cancelFormulaire = function(b)
-{	this.formElement.removeClass('formulaire');
+RIPart.prototype.cancelFormulaire = function(b) {
+	this.formElement.removeClass('formulaire');
 	this.overlay.setVisible(false);
 	this.selectOverlay.setVisible(false);
 	this.selectInteraction.setActive(false);
@@ -1294,6 +1296,7 @@ RIPart.prototype.cancelFormulaire = function(b)
 	this.hasLocation = false;
 	$('body').removeClass("trackingGeorem fullscreenMap");
 	this.modifyInteraction.setActive(false);
+	wapp.hideActionBt('fiche');
 }
 
 /** Take a photo using the camera

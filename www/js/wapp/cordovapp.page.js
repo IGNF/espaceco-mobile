@@ -158,6 +158,27 @@ CordovApp.prototype.showPage = function(id_page, onglet)
 	}
 };
 
+/** Get action buttons in the header of the tab
+ * @param {String} id_page id of the page
+ */
+CordovApp.prototype.getActionBt = function(id_page) {
+	return  $('[data-role="action-bt"]', '#'+id_page);
+};
+
+/** Show action buttons in the header of the tab
+ * @param {String} id_page id of the page
+ */
+CordovApp.prototype.showActionBt = function(id_page) {
+	this.getActionBt(id_page).show();
+};
+
+/** Hide action buttons in the header of the tab
+ * @param {String} id_page id of the page
+ */
+CordovApp.prototype.hideActionBt = function(id_page) {
+	this.getActionBt(id_page).hide();
+};
+
 /** Hide the page
 * @param {String|null} id of the page to hide, if null hide all pages
 */
@@ -218,6 +239,7 @@ CordovApp.prototype.showOnglet = function(item)
 	$("div", $(item).parent()).removeClass('select');
 	var onglet = $(item).data("list");
 	$(item).addClass('select');
+	console.log('showonglet')
 	$("[data-role='onglet-li'][data-list="+onglet+"]", parent)
 		.trigger({ type:'showonglet' })
 		.show();

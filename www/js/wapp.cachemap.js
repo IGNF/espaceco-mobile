@@ -89,7 +89,7 @@ var CacheMap = function(map, layerGroup, options)
 	})();
 
 	// Chargement des cartes lorsque le cacheRoot est OK
-	if (cordova.platform==='ios' || !wapp.param.options.cacheRoot){
+	if (!wapp.param.options.cacheRoot || cordova.platform==='ios'){
 		CordovApp.File.getDirectory(options.directory||'FILE', function(d){
 			wapp.param.options.cacheRoot = d.nativeURL;
 			initCacheMap()
