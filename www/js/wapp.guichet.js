@@ -468,7 +468,7 @@ wapp.showSelect = function(options) {
 				}
 			}
 			// Objet WFS
-			else 
+			else if (f.layer.getFeatureType)
 			{	var prop = f.getProperties();
 				var geometryName = f.getGeometryName();
 				var att = f.layer.getFeatureType().attributes || {};

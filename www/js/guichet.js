@@ -1006,7 +1006,7 @@ wapp.saveGPS = function()
 		var filename = d+".gpx";
 
 		function write()
-		{	var path = "SD/"+ (cordova.platform === 'ios' ? "" : "GPX/");
+		{	var path = "SD/"+ (cordova.platformId === 'ios' ? "" : "GPX/");
 			CordovApp.File.write (path + filename, gpx, function()
 			{	wapp.message("La fichier GPX/"+filename+" a bien été enregistré","GPX")
 			}, function()

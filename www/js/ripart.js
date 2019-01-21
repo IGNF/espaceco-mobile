@@ -271,6 +271,7 @@ var RIPart = function(options)
 		// Decodage de la reponse
 		function decode(resp)
 		{	var r = {};
+		console.log('getUSer')
 			r.auteur =
 				{	nom: resp.find("AUTEUR NOM").text(),
 					statut: resp.find("AUTEUR STATUTXT").text()
@@ -315,26 +316,28 @@ var RIPart = function(options)
 						extent: $(this).find("EXTENT").text().split(","),
 						url: $(this).find("URL").text()
 					};
-					if (l.type==="WMS") {
-						for (var k=0; k<l.extent.length; k++) l.extent[k] = Number(l.extent[k]);
-						l.version = $(this).find("VERSION").text();
-						l.layer = $(this).find("LAYER").text();
-						l.format = $(this).find("FORMAT").text() || "image/png";
-						try {
-							l.getFeatureInfoMask = JSON.parse($(this).find("GETFEATUREINFOMASK").text());
-						} catch(e){};
+					if (l.nom) {
+						if (l.type==="WMS") {
+							for (var k=0; k<l.extent.length; k++) l.extent[k] = Number(l.extent[k]);
+							l.version = $(this).find("VERSION").text();
+							l.layer = $(this).find("LAYER").text();
+							l.format = $(this).find("FORMAT").text() || "image/png";
+							try {
+								l.getFeatureInfoMask = JSON.parse($(this).find("GETFEATUREINFOMASK").text());
+							} catch(e){};
+						}
+						if (l.type==='WFS') {
+							l.external = !(new RegExp('^'+ serviceHost)).test(l.url);
+							l.version = $(this).find("VERSION").text();
+							l.typename = $(this).find("TYPENAME").text();
+							l.format = $(this).find("FORMAT").text();
+							l.mask = $(this).find("GETFEATUREINFOMASK").text();
+							try {
+								l.mask = JSON.parse(l.mask);
+							} catch(e) { l.mask = false; }
+						}
+						g.layers.push(l);
 					}
-					if (l.type==='WFS') {
-						l.external = !(new RegExp('^'+ serviceHost)).test(l.url);
-						l.version = $(this).find("VERSION").text();
-						l.typename = $(this).find("TYPENAME").text();
-						l.format = $(this).find("FORMAT").text();
-						l.mask = $(this).find("GETFEATUREINFOMASK").text();
-						try {
-							l.mask = JSON.parse(l.mask);
-						} catch(e) { l.mask = false; }
-					}
-					g.layers.push(l);
 				});
 				var th={attributs: []}
 				var att, themes = [];
