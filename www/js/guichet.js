@@ -6,7 +6,7 @@
 */
 /** Web application pour l'acces a l'espace collaboratif depuis un mobile.
  * 
- * __Type:__ {@link CordovApp}
+ * {@link CordovApp}
  * @namespace
  */
 var wapp = new CordovApp(
@@ -353,6 +353,33 @@ wapp.initMap = function()
 				}
 			})
 		}),
+		new ol.layer.Vector({
+			title: 'Carroyage DFCI',
+			name: 'DFCI',
+			source: new ol.source.DFCI(),
+			renderMode:'image',
+			style: function(f) {
+				return [ 
+				new ol.style.Style({
+				  text: new ol.style.Text({
+					text: f.get('id'),
+					font: 'bold 9px sans-serif',
+					backgroundFill: new ol.style.Fill ({ color: "rgba(255,255,255,.6)"}),
+					fill: new ol.style.Fill({ color: '#f00'}),
+					overflow: true,
+					placement: 'point'
+				  }),
+				  fill: new ol.style.Fill({
+					color: [0,0,0,0]
+				  }),
+				  stroke: new ol.style.Stroke({
+					width: .75,
+					color: '#000'
+				  })
+				})
+			  ]
+			}
+		}),
 		// Layer pour l'affichage des couches du groupe
 		new ol.layer.Group({ title:"Mes couches", name: "groupe", displayInLayerSwitcher: false }),
 		// Layer pour l'affichage du guichet
@@ -361,26 +388,39 @@ wapp.initMap = function()
 
 	// The map
 	var pos = this.getPosition() || this.param.position || {};
-	var map = this.map = new ol.Map.Geoportail
-		({	target: 'map',
-			key: apiKey,
-			authentication: auth, 
-			// Improve user experience by loading tiles while animating. Will make
-			// animations stutter on mobile or slow devices.
-			//loadTilesWhileAnimating: true,
-			view: new ol.View
-			({	zoom: Math.min(18, pos.zoom || 5),
-				center: [pos.lon || 166326, pos.lat || 5992663]
-			}),
-			controls: ol.control.defaults({ attribution:false }),
-			interactions: ol.interaction.defaults(),
-			layers: layers
-		});
+	var map = this.map = new ol.Map.Geoportail({
+		target: 'map',
+		key: apiKey,
+		authentication: auth, 
+		// Improve user experience by loading tiles while animating. Will make
+		// animations stutter on mobile or slow devices.
+		//loadTilesWhileAnimating: true,
+		view: new ol.View ({
+			zoom: Math.min(18, pos.zoom || 5),
+			center: [pos.lon || 166326, pos.lat || 5992663]
+		}),
+		controls: ol.control.defaults({ attribution:false }),
+		interactions: ol.interaction.defaults(),
+		layers: layers
+	});
 
-	// Save position on move end (for iOS)
-	map.on('moveend', function(){
-		this.savePosition();
-	}, this);
+	// On iOS save information on moveend
+	if (window.cordova && cordova.platformId === 'ios') {
+		this.hasChanged = false;
+		// Save layers information
+		map.getLayerGroup().on('change', function(e) {
+			this.hasChanged = true;
+		}.bind(this));
+		// Save position on move end (for iOS)
+		map.on('moveend', function(){
+			if (this.hasChanged) {
+				this.hasChanged = false;
+				this.saveContext();
+			} else {
+				this.savePosition();
+			}
+		}, this);
+	}
 
 	// Prevent link to open 
 	ol.Attribution.uniqueAttributionKey = {};
@@ -1056,12 +1096,12 @@ wapp.redStyle = function()
  * Rafraichir la carte quand on recupere la connexion
  */
 wapp.online = function() {
-	console.log('ONLINE');
+	// console.log('ONLINE');
 	wapp.refreshMap();
 };
 
 /**
- * Refresh the map to relaod the tiles
+ * Refresh the map to reload the tiles
  * @param {ol.Collection<ol.layer>} layers, default refresh all layers
  */
 wapp.refreshMap = function(layers) {
