@@ -1,0 +1,176 @@
+/* The map */
+#map {
+  position:fixed;
+  top:0; left:0;
+  right:0; 
+  bottom: 4em;
+}
+
+#map .ol-attribution a {
+  text-decoration: none;
+  color: #000;
+  cursor: default;
+  pointer-events: none;
+}
+
+#map .ol-disable {
+  position: absolute;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  border:30px solid rgba(0,0,0,0.5);
+}
+#map .ol-disable:before,
+#map .ol-disable:after {
+  content: "";
+  background: #f00;
+  width: 20px;
+  height: 2px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  border: 1px solid #fff;
+}
+#map .ol-disable:after {
+  height: 20px;
+  width:2px;
+}
+
+/**
+  Tablette horizontale
+*/
+@media screen and (orientation:landscape) and (min-width:1024px) {
+
+  #fiche {
+    width:50%;
+  }
+
+  [data-page="fiche"] #map {
+    width:50%;
+    left:auto;
+  }
+  [data-page="fiche"] #map .menuCtrl,
+  [data-page="fiche"] #map .ol-zoom {
+    display: block;
+  }
+
+  #layers {
+    width: 50%;
+  }
+
+}
+
+/**
+  Tablette verticale
+*/
+@media screen and (orientation:portrait) and (min-height:1024px) {
+
+  #fiche {
+    height: 65%;
+    top: 35%;
+  }
+
+  [data-page="fiche"] #map {
+    height:35%;
+    bottom:auto;
+  }
+
+}
+
+/** GeodrawCtrl */
+#map .ol-geobar {
+  bottom: 1.5em;
+  right: 0.5em;
+  background: rgba(255,255,255,.8);
+}
+
+.ol-bar.ol-geobar .geolocBt button:before {
+  content: "\f124";
+  font-family: FontAwesome;
+  border: none;
+  -webkit-transform: none;
+  transform: none;
+  width: 100%;
+  height: 1em;
+  top: 0;
+  left: 0;
+  line-height: 1em;
+  position: relative;
+}
+.ol-bar.ol-geobar .geolocBt button:after {
+  content: none;
+}
+.ol-bar.ol-geobar .startBt button:before {
+  font-size: .85em;
+}
+.ol-control.ol-geobar .ol-control.ol-text-button button {
+  transform: scaleY(2.7);
+  font-size: .7em;
+  color: rgba(0, 60, 136, .75);
+  padding-bottom: .1em;
+}
+.ol-geobar .ol-active button {
+  animation: blink-animation 1s linear infinite;
+}
+@keyframes blink-animation {
+  0% {
+    background-color: rgba(0,60,136,.3);
+  }
+  70% {
+    background-color: rgba(0,60,136,.3);
+  }
+  71% {
+    background-color: rgba(0,60,136,0.9);
+  }
+  100% {
+    background-color: rgba(0,60,136,0.9);
+  }
+}
+
+/** Attribution */
+.ol-control.ol-attribution {
+  background-color: rgba(255, 255, 255, 0.6);
+  height: auto;
+  line-height: 0.4em;
+  padding: 0 0.25em;
+  left: 0;
+  right: auto;
+  border-radius: 0 4px 0;
+}
+
+.ol-scale-line {
+  bottom: 2em;
+}
+
+.menuCtrl {
+  top: 0.5em;
+  left: 0.5em;
+}
+.searchCtrl {
+  top: 2.5em;
+  left: 0.5em;
+}
+.ol-touch .searchCtrl {
+  top:3.5em;
+}
+.ol-search.searching:before {
+  top: 2.6em;
+}
+.ol-zoom {
+  left: auto;
+  top: 3em;
+  right: 0.5em;
+}
+.ol-rotate {
+  right: 0.5em;
+}
+
+.ol-control
+{	font-size:2em;
+}
+.ol-control .ol-control {
+	font-size: 1em;
+}
