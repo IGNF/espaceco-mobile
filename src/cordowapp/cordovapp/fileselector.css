@@ -1,0 +1,23 @@
+.file-selector
+{
+
+}
+
+.file-selector ul
+{	margin:0;
+	padding:0;
+	list-style: none;
+}
+
+.file-selector li
+{   -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-image: linear-gradient(#fff, #eee);
+    border-color: #ccc -moz-use-text-color -moz-use-text-color;
+    border-image: none;
+    border-style: solid none none;
+    border-width: 1px 0 0;
+}
+
