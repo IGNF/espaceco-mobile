@@ -166,19 +166,6 @@ wapp.showGuichetInfo = function (groupe){
 	else $(".auth", page).hide();
 };
 
-/** Recupere le logo d'un goupe
- * @param {any} g le groupe
- * @param {function} cback callback fonction qui renvoie le nom du fichier
- */
-wapp.getLogo = function (g, cback, scope) {	
-	CordovApp.File.getFile("TMP/logo/"+(g ? g.id_groupe : '_nologo_'), 
-		function(fileEntry) { 
-			cback.call(scope, fileEntry.toURL()); 
-		}, 
-		function() { 
-			cback.call(scope, g ? g.logo : null); 
-		});
-}
 
 /** Guichet en cours de modification
 */
@@ -204,26 +191,6 @@ wapp.getIdGuichet = function(){
 	return this.ripart.param.guichet;
 };
 
-/** Afficher la selection dans la barre et la fiche
-*/
-wapp.onSelect = function(e) {
-	var nb = wapp.select.getFeatures().getLength();
-	// wapp.ripart.cancelFormulaire();
-	if (nb>1) {
-		$("#selection").html (nb + ' objets sélectionnés...');
-		wapp.showOnglet("info");
-	}
-	else if (nb===1) {
-		var f = wapp.select.getFeatures().item(0);
-		$("#selection").html (f.get("nom")||"Afficher la sélection...");
-		wapp.showOnglet("info");
-	}
-	else
-	{	$("#selection").html ("");//("<i>"+$("#selection").data("placeholder")+"</i>");
-		//wapp.showOnglet("signal");
-	}
-	if (wapp.isPage("fiche")) wapp.showSelect();
-};
 
 /** Envoyer le signalements courant
 */
@@ -491,38 +458,7 @@ wapp.showSelect = function(options) {
 	}
 };
 
-/** Connexion RIpart
-*/
-wapp.connect = function()
-{	wapp.ripart.connectDialog(
-	{	onConnect: function() {
-			wapp.notification("Connecté au service",1200);
-			wapp.initGuichets();
-		},
-		onError: function(error) {
-			var msg = [];
-			wapp.initGuichets();
-		
-			switch (error.status)
-			{	case 401: 
-					msg = [ "Accès interdit" , "Utilisateur inconnu." ];
-					break;
-				case "no_profile":
-					msg = [ "Connexion", error.statusText ]
-					break;
-				default: 
-					msg = [ "Connexion", "Connexion impossible...<br/>Vérifiez votre connexion." ];
-					console.log(error)
-					break;
-			};
-			wapp.message (msg[1], msg[0], 
-				{ ok:"ok" },
-				function()
-				{	wapp.connect();
-				});
-		}
-	});
-};
+
 
 /** Afficher le formulaire de signalement
 */

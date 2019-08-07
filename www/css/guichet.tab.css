@@ -1,44 +1,4 @@
-/**
-	Tablette horizontale
-*/
-@media screen and (orientation:landscape) and (min-width:1024px) 
-{
 
-	#fiche
-	{	width:50%;
-	}
-
-	[data-page="fiche"] #map
-	{	width:50%;
-		left:auto;
-	}
-	[data-page="fiche"] #map .menuCtrl,
-	[data-page="fiche"] #map .ol-zoom
-	{	display: block;
-	}
-
-	#layers {
-		width: 50%;
-	}
-
-}
-
-/**
-	Tablette verticale
-*/
-@media screen and (orientation:portrait) and (min-height:1024px) {
-
-	#fiche
-	{	height: 65%;
-		top: 35%;
-	}
-
-	[data-page="fiche"] #map
-	{	height:35%;
-		bottom:auto;
-	}
-
-}
 
 /**
 	Smartphone

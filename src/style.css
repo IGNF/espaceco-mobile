@@ -1,3 +1,45 @@
+
+#signaler
+{	position: fixed;
+	bottom: 0.3em;
+	right: 0.5em;
+	background: orange;
+	border-radius: 50%;
+	box-shadow: 1px -1px 5px 1px rgba(0,0,0,0.5);
+	font-size: 2.75em;
+	padding: 0.2em;
+	width: 1.5em;
+	height: 1.5em;
+	text-align: center;
+	line-height: 1.2em;
+	transform: rotate(90deg);
+	color: #fff;
+}
+[data-page="fiche"] #signaler
+{	display: none;
+}
+
+#selection
+{	position:fixed;
+	left:0; right:0; 
+	bottom: 0;
+	height: 2em;
+	font-size: 2em;
+	padding: 0.5em 2.5em 0.5em 2em;
+	background: #fff;
+	white-space: nowrap;
+	cursor: pointer;
+	overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#selection:after
+{	content: "\f2c2";
+	font-family:"FontAwesome";
+	position:absolute;
+	left:0.5em;
+}
+
 /** Debug */
 div.debug,
 .debug
@@ -409,129 +451,6 @@ body.trackingGeorem #fiche .signaler .movePosition
 {	margin-top:0.5em;
 }
 
-/* signalements */
-#signalements .buttons
-{	text-align: right;
-}
-#signalements button
-{	display: inline-block;
-	margin: 0.5em 0 0 0.5em;
-}
-#signalements button i
-{	margin: auto;
-	display: block;
-}
-
-#georem li,
-#signalements li
-{	padding: 0.5em 0.5em 0.5em 2.5em;
-	position: relative;
-}
-#georem li span
-{	float:right;
-	font-size: 0.8em;
-	margin-left: 1em;
-}
-
-#signalements li .fa
-{	position: absolute;
-	right: 0.5em;
-	margin-top: -0.5em;
-	top: 50%;
-}
-#georem li::after,
-#signalements li::after
-{   content: "\276f"; 
-	display: block;
-	font-family: fontawesome;
-	font-size: 1.5em;
-	font-style: normal;
-	line-height: 1em;
-	margin-top: -0.5em;
-	position: absolute;
-	left: 0;
-	text-align: center;
-	top: 50%;
-	width: 1.8em;
-}
-
-#signalement li [data-attr="comment"]
-{	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-
-#signalements li .small
-{	font-size: 0.8em;
-	color: #369;
-}
-
-#georem li.submit::after,
-#signalements li.submit::after
-{	content: "\f003";
-}
-#georem li.pending::after,
-#georem li.pending0::after,
-#georem li.pending1::after,
-#signalements li.pending::after,
-#signalements li.pending0::after,
-#signalements li.pending1::after
-{	content: "\f017";
-	color: orange;
-}
-#georem li.valid::after,
-#georem li.valid0::after,
-#signalements li.valid::after,
-#signalements li.valid0::after
-{	content: "\f00c";
-	color: green;
-}
-#georem li.reject::after,
-#georem li.reject0::after,
-#signalements li.reject::after,
-#signalements li.reject0::after
-{	content: "\f00d";
-	color: red;
-}
-
-/** Georem */
-#georem 
-{	top: auto;
-	bottom: 0;
-	width: 50%;
-	box-shadow: 10px -10px 20px rgba(0, 0, 0, 0.5);
-	/* no animation */
-	opacity: 1!important;
-	transform: none;
-	-webkit-transform: none;
-}
-[data-page="georem"] #map 
-{	left: 50%;
-}
-
-@media screen and (orientation:portrait) {
-#georem 
-{	bottom: 0;
-	width: 100%;
-	height: 50%;
-}
-[data-page="georem"] #map 
-{	left: 0;
-	bottom:50%;
-}
-
-}
-
-#georem img
-{	max-width:90%;
-	width: 400px;
-	margin: 0.5em 0;
-}
-
-#georem [data-attr="comment"]
-{	border: 2px solid #999;
-	padding: 0.5em;
-}
 
 /** Dialog attributs*/
 [data-role="dialog"].attributes ul
