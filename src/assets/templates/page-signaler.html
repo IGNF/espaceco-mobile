@@ -1,0 +1,59 @@
+<div data-role="header">Signaler</div>
+<div data-role="content">
+  <div class="noconnect">
+    <p>
+      Merci de vous connecter afin de faire un signalement.
+    </p>
+  </div>
+
+  <div class="connect formulaire">
+    <div class="buttons">
+      <div data-role="dialogBt" class="cancel" >Annuler</div>
+      <div data-role="dialogBt" class="save" >Envoyer</div>
+    </div>
+        
+    <ul class="default">
+      <li class="position">
+        <label>Position :</label> 
+        <button class="movePosition button">
+          <i class="fa fa-map-marker"></i>&nbsp; déplacer...
+        </button>
+        <p>
+          <input type="text" class="lon" /> , <input type="text" class="lat" />
+        </p>
+      </li>
+
+      <li data-input="select" data-param="theme">
+        <label>Thème</label>
+      </li>
+
+      <li data-input="text">
+        <label><i class='fa fa-podcast'></i>Précision de localisation</label>
+        <div class="geolocation"></div>
+      </li>
+
+      <li class="attributes" data-input="custom">
+        <label><i class="fa fa-info-circle"></i>Renseignements</label>
+        <div data-input-role="info"></div>
+      </li>
+
+      <li class="photo">
+        <img onclick="wapp.ripart.photo();" />
+        <span class="fa-stack fa-lg" style="background:#ddd; border-radius:50%;" onclick="wapp.ripart.photo();">
+          <i class="fa fa-camera fa-stack-1x"></i>
+        </span>
+      </li>
+
+      <li>
+        Commentaire :
+        <textarea class="comment"></textarea>
+      </li>
+        
+    </ul>
+    <div class="buttons">
+      <div data-role="dialogBt" class="cancel" >Annuler</div>
+      <div data-role="dialogBt" class="save" >Envoyer</div>
+    </div>
+    <br/>
+  </div>
+</div>

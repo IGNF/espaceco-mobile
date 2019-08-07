@@ -1,0 +1,19 @@
+#layer [data-role="content"] {
+  text-align: center;
+}
+#layer button {
+  display: inline-block;
+  box-sizing: border-box;
+  font-size: 1em;
+  border: 3px solid #94c01a;
+  background: #fff;
+  padding: .5em .5em 0.3em;
+}
+#layer button img {
+  display: block;
+  margin: auto;
+  height: 100px;
+}
+#layer button.selected {
+  background-color: rgba(148,192,26,.25);
+}

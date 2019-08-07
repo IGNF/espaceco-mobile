@@ -1,0 +1,30 @@
+﻿<div data-role="header" data-back-button="true">Signalement</div>
+
+<div data-role="content">
+	
+	<div data-attr="date" style="float:right"></div>
+	<h2>Signalement <span data-attr="id" data-prefix="#"></span></h2>
+
+	<div>
+		<span data-attr="commune"></span>
+		<span data-attr="id_dep" data-prefix="(" data-suffix=")"></span>
+	</div>
+
+	<div data-attr="comment" data-br="1"></div>
+
+	<h3>Réponses :</h3>
+	<ul data-role="list" data-attr="rep" 
+		data-array="&lt;li class='%statut%' &gt; &lt;span&gt; %date% &lt;/span&gt; %titre% : %comment%  &lt;/li&gt;">
+		<li class='%statut%'><span>%date%</span> %titre% : %comment%  </li>
+	</ul>
+
+	<div style="text-align:center;">
+		<img class="photo" data-src="photo" />
+	</div>
+
+	<div style="width:100%; margin-top:0.5em;">
+		<div data-role="dialogBt" onclick="wapp.showPage('signalements');">Annuler</div>
+		<div data-role="dialogBt" class="del" onclick="wapp.ripart.delCurrentRem();">Supprimer</div>
+		<div data-role="dialogBt" class="send" onclick="wapp.ripart.postCurrentRem();">Envoyer</div>
+	</div>
+</div>
