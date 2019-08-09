@@ -4,7 +4,7 @@
   @author : Jean-Marc Viglino (ign.fr)
   @copyright: IGN 2012
 */
-import CordovApp from './cordovapp'
+import CordovApp from './CordovApp'
 
 /**
  * A set of usefull function to handle files with Cordova.   

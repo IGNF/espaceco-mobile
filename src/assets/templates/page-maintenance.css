@@ -52,10 +52,10 @@
 }
 
 #maintenance .clean {
+  display: none;
   clear: both;
   border-radius: 1em;
   margin: auto;
-  display: inherit;
   padding: 0.3em 1em;
 }
 

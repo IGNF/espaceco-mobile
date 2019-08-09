@@ -1,7 +1,7 @@
 /* global wapp, Camera */
 /* Get picture using Corrdova
 */
-import CordovApp from './cordovapp'
+import CordovApp from './CordovApp'
 
 /** Prendre une photo
  * @param {function} win (url, button)  callback (renvoie l'url du fichier)

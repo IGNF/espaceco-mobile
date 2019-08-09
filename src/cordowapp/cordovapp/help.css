@@ -12,6 +12,7 @@
   
   color: #fff;
   font-size:2em;
+  z-index: 1000;
 }
 #help.visible {
   opacity: 1;
@@ -115,51 +116,51 @@ screen and (max-height:600px) {
   content:none;
 }
 
-.help-arrow:before {
-    font-size: 5em;
+#help .help-arrow:before {
+  font-size: 5em;
   margin: 0;
   display: block;
 }
-.help-arrow.rotate-90:before {
+#help .help-arrow.rotate-90:before {
   transform: rotate(90deg);
   -webkit-transform: rotate(90deg);
 }
-.help-arrow.rotate-130:before {
+#help .help-arrow.rotate-130:before {
   transform: rotate(130deg);
   -webkit-transform: rotate(130deg);
   margin: 0.2em 0;
 }
-.help-arrow.rotate-145:before  {
+#help .help-arrow.rotate-145:before  {
   transform: rotate(145deg);
   -webkit-transform: rotate(145deg);
   margin: -0.3em 0;
 }
-.help-arrow.rotate-180:before {
+#help .help-arrow.rotate-180:before {
   transform: rotate(180deg);
   -webkit-transform: rotate(180deg);
 }
-.help-arrow.rotate-200:before {
+#help .help-arrow.rotate-200:before {
   transform: rotate(200deg);
   -webkit-transform: rotate(200deg);
   margin:-0.2em 0;
 }
-.help-arrow.rotate-245:before {
+#help .help-arrow.rotate-245:before {
   transform: rotate(245deg);
   -webkit-transform: rotate(245deg);
   margin:-0.2em 0;
 }
-.help-arrow.rotate-270:before {
+#help .help-arrow.rotate-270:before {
   transform: rotate(270deg);
   -webkit-transform: rotate(270deg);
 }
-.help-arrow.rotate-320:before {
+#help .help-arrow.rotate-320:before {
   transform: rotate(320deg);
   -webkit-transform: rotate(320deg);
   margin:-0.2em 0;
 }
 
 @media screen and (max-width: 600px) {
-  .help-arrow:before {
+  #help .help-arrow:before {
     font-size: 4em;
     margin: 0.1em 0;
   }

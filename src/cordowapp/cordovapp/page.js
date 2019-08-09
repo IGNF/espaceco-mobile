@@ -1,5 +1,5 @@
 /* global wapp */
-import CordovApp from './cordovapp'
+import CordovApp from './CordovApp'
 
 /**
  * jQuery object of the menu: $("[data-role='menu']")

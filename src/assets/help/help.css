@@ -1,0 +1,129 @@
+
+#help {
+  background-color: rgba(0,0,0,.5);
+  pointer-events:all;
+}
+#help [data-role="block"] {
+  background: none;
+}
+#help [data-role="block"]:before {
+  content:none;
+}
+
+#help ul {
+  margin:0; 
+  padding-left:1em; 
+  list-style-type:square;
+}
+
+#help .menu {
+  top:0;
+  left:2.5em;
+  text-align: center;
+}
+#help .menu-content {
+  top: 0;
+  left: 4em;
+  max-width: initial;
+}
+
+#help .gps {
+  bottom: 9.5em;
+    right: 1.5em;
+  text-align: left;
+  width: 15em;
+    max-width: 50%;
+}
+#help .gps .fa {
+    position: absolute;
+    left: -1em;
+    margin: .08em;
+}
+#help .locate {
+  bottom: 3.5em;
+  right: 4em;
+  text-align: center;
+}
+#help .signal {
+  bottom: 0em;
+  right: 3em;
+  text-align: right;
+  max-width: 13em;
+}
+#help .signal p {
+  margin: 0 4em 0 0;
+}
+
+#help .signaler-placer {
+  top: 9.5em;
+  transform: translateY(-100%);
+  -webkit-transform: translateY(-100%);
+  left: 3em;
+  max-width: 14em;
+}
+#help .signaler-photo
+{	top: 21em;
+  transform: translateY(-100%);
+  -webkit-transform: translateY(-100%);
+  left: 0em;
+  text-align: left;
+}
+
+@media screen and (min-width: 1024px) and (orientation: landscape) {
+  #help .signaler-placer {	
+  }
+  #help .signaler-photo {	
+  }
+}
+@media screen and (min-height: 1024px) and (orientation: portrait) {
+  #help .signaler-placer {
+    top: Calc(35% + 11em);
+  }
+  #help .signaler-photo {	
+    top: Calc(35% + 23em);
+  }
+}
+
+#help .placer-carte {
+  bottom: 50%;
+  right: 50%;
+  text-align: left;
+}
+@media screen and (min-width: 1024px) and (orientation: landscape) {
+  #help .placer-carte { 
+    right:25%;
+  }
+}
+@media screen and (min-height: 1024px) and (orientation: portrait) {
+  #help .placer-carte {
+    bottom:80%;
+  }
+}
+
+#help .center,
+#help .signalements {
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  width: 20em;
+  max-width: 100%;
+}
+
+/* cartes hors ligne */
+#help .cartes-nom {
+  top: 4em;
+  left: 3em;
+  max-width: 14em;
+}
+#help .cartes-boutons {
+  top: 10.5em;
+  right: 8em;
+  text-align: right;
+}
+
+#help .loadMap {
+  bottom: -.5em;
+  right: 6em;
+  text-align: left;
+}

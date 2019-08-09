@@ -5,16 +5,16 @@
  * Gestion des dialogues dans l'application (connexion, formulaire de saisie d'une remontee)
  * Connexion avec la carte et les elements de l'applicaiton
  */
-import _T from './i18n'
-import CordovApp from './Cordovapp'
-import RIPart from './ripart'
-import {help} from './cordovapp/help'
-import {dialog} from './cordovapp/dialog'
-import {selectDialog} from './cordovapp/dialog'
-import {selectInput} from './cordovapp/param'
-import {notification} from './cordovapp/dialog'
-import {getActionBt} from './cordovapp/page'
-import {showActionBt} from './cordovapp/page'
+import _T from '../i18n'
+import CordovApp from '../Cordovapp'
+import RIPart from './Ripart'
+import {help} from '../cordovapp/help'
+import {dialog} from '../cordovapp/dialog'
+import {selectDialog} from '../cordovapp/dialog'
+import {selectInput} from '../cordovapp/param'
+import {notification} from '../cordovapp/dialog'
+import {getActionBt} from '../cordovapp/page'
+import {showActionBt} from '../cordovapp/page'
 
 import ol_layer_Vector from 'ol/layer/Vector'
 import ol_source_Vector from 'ol/source/Vector'
@@ -315,13 +315,13 @@ RIPart.prototype.initialize = function(options) {
       return true; 
     }
   });
-  this.selectOverlay.getSource().on("addfeature", function(e)
-  {	e.feature.layer = this.selectOverlay;
-  }, this);
+  this.selectOverlay.getSource().on("addfeature", function(e){
+    e.feature.layer = this.selectOverlay;
+  }.bind(this));
   this.map.addInteraction(this.selectInteraction);
   this.selectInteraction.on('select', function (e){
     this.addFeature (e.selected[0]);
-  }, this);
+  }.bind(this));
   
   // Enregistement d'une remontee
   $('.formulaire .save', formulaire).click(function(){ 

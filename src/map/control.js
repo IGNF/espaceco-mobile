@@ -43,6 +43,8 @@ function centerMap(coord) {
   }
 };
 
+/** Initialize map controls
+ */
 export default function(wapp) {
   // SearchGeoportail Control
   var locCtrl = new ol_control_SearchGeoportail({
@@ -153,4 +155,32 @@ export default function(wapp) {
     });
   map.addControl(geoloc);
   */
+
+  /** Definir la source pour la recherche
+   * @param {ol.source.Vector} source
+   */
+  wapp.setSearchSource = function(source, prop) {
+    if (source && prop) {
+      var ctrl;
+      wapp.map.getControls().forEach(function (c) { 
+        if (c instanceof ol_control_SearchFeature) {
+          ctrl = c;
+        }
+      });
+      if (ctrl) {
+        $('#search').removeClass('noOnglet');
+        ctrl.setSource(source);
+        ctrl.set('property', prop);
+      }
+      return true;
+    } else {
+      // Pas de recherche > recherche adresse
+      wapp.showOnglet('adress');
+      $('#search').addClass('noOnglet');
+      return false;
+    }
+  };
+
+  wapp.setSearchSource();
+
 }

@@ -22,12 +22,9 @@ import ol_layer_Tile from 'ol/layer/Tile'
 
 import ol_control_SearchFeature from 'ol-ext/control/SearchFeature'
 
-
-import CacheMap from './map/cachemap'
-import CacheVector from './cordowapp/cachevector'
-import RIPart from './cordowapp/wapp.ripart'
-
-
+import CacheMap from './cordowapp/ol/cache/CacheMap'
+import CacheVector from './cordowapp/ol/cache/CacheVector'
+import RIPart from './cordowapp/ripart/RipartForm'
 
 import config from './config';
 
@@ -76,7 +73,6 @@ import config from './config';
 
     // Initialise les controls de la carte
     setControls(wapp);
-    wapp.setSearchSource ();
 
     // Ajout des interactions sur la carte
     setInteractions(wapp);
@@ -95,7 +91,6 @@ import config from './config';
         listMap: '#cartes [data-list="maps"] ul' 
       }
     );
-
 
     // Gestion du cache vecteur
     this.vectorCache = new CacheVector(wapp, {
@@ -349,30 +344,6 @@ wapp.initMap = function() {
   if (pos.lon || pos.lat) map.getView().setCenter([pos.lon, pos.lat]);
   map.getView().setZoom(Math.min(18, pos.zoom || 5));
   map.setTarget('map');
-};
-
-/** Definir la source pour la recherche
-  * @param {ol.source.Vector} source
-  */
-wapp.setSearchSource = function(source, prop) {
-  if (source && prop) {
-    var ctrl;
-    wapp.map.getControls().forEach(function (c) { 
-      if (c instanceof ol_control_SearchFeature) {
-        ctrl = c;
-      }
-    });
-    if (ctrl) {
-      $('#search').removeClass('noOnglet');
-      ctrl.setSource(source);
-      ctrl.set('property', prop);
-    }
-    return true;
-  } else {
-    wapp.showOnglet('adress');
-    $('#search').addClass('noOnglet');
-    return false;
-  }
 };
 
 /** Initialisation des signalements
@@ -770,7 +741,5 @@ wapp.connect = function() {
 		}
 	});
 };
-
-wapp.initGuichets = function(){}
 
 export default wapp

@@ -1,6 +1,6 @@
 ﻿/* global wapp, FileUploadOptions, FileTransfer, FileTransferError */
 import * as CryptoJS from 'crypto-js';
-import CordovApp from './Cordovapp'
+import CordovApp from '../Cordovapp'
 import ol_Feature from 'ol/Feature'
 import ol_geom_Point from 'ol/geom/Point'
 import ol_geom_LineString from 'ol/geom/LineString'

@@ -1,4 +1,5 @@
-import CordovApp from './cordovapp'
+import './help.css'
+import CordovApp from './CordovApp'
 
 /** Gestion de l'aide
 */
@@ -13,6 +14,12 @@ var step = 0;
 var _timeout;
 var _current = "";
 var _param = JSON.parse(localStorage['WebApp@help']||"{}");
+
+// Add associated css
+$('<link/>', {
+  rel: 'stylesheet', 
+  href: './help/help.css'
+}).appendTo('head');	
 
 /** Save app parameters (to localStorage)
 */
@@ -105,7 +112,6 @@ $(document).on("menu", function(e) {
 $( document ).ready(function() {
   showHelp("main");
 });
-
 
 export {help}
 export default CordovApp

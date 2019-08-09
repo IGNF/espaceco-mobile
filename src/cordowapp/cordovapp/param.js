@@ -6,7 +6,7 @@
   
   @require: JQuery
 */
-import CordovApp from './cordovapp'
+import CordovApp from './CordovApp'
 import {selectDialog} from './dialog'
 
 /** Transform date to ISODateString YYYY-MM-DD HH:MM:SS
