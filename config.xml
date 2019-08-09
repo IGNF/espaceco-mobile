@@ -65,7 +65,7 @@
     </plugin>
     <plugin name="cordova-plugin-inappbrowser" spec="^3.0.0" />
     <plugin name="cordova-plugin-network-information" spec="^2.0.1" />
-    <engine name="android" spec="^7.0.0" />
     <hook src="scripts/parcel.js" type="before_build" />
     <hook src="scripts/parcel.js" type="before_run" />
+    <engine name="android" spec="^7.0.0" />
 </widget>
