@@ -1,13 +1,13 @@
 import wapp from '../wapp'
-import CordovApp from '../cordowapp/Cordovapp'
+import CordovApp from 'cordovapp/CordovApp'
 
 import {all as ol_loadingstrategy_all} from 'ol/loadingstrategy'
-import ol_layer_Vector_WFS from '../cordowapp/ol/layer/WFS'
+import ol_layer_Vector_WFS from 'cordovapp/ol/layer/WFS'
 import {boundingExtent as ol_extent_boundingExtent} from 'ol/extent'
 import {transformExtent as ol_proj_transformExtent} from 'ol/proj'
 
 import ol_layer_Group from 'ol/layer/Group'
-import ol_layer_Vector_Webpart from '../cordowapp/ol/layer/Webpart'
+import ol_layer_Vector_Webpart from 'cordovapp/ol/layer/Webpart'
 
 /**
  * Creer un layer WFS externe

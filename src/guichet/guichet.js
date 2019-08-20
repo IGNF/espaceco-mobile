@@ -1,11 +1,11 @@
 ﻿/* Gestion des guichets
 */
 import {containsCoordinate as ol_extent_containsCoordinate} from 'ol/extent'
-import ol_layer_Vector_WFS from '../cordowapp/ol/layer/WFS'
-import ol_layer_Vector_Webpart from '../cordowapp/ol/layer/Webpart'
+import ol_layer_Vector_WFS from 'cordovapp/ol/layer/WFS'
+import ol_layer_Vector_Webpart from 'cordovapp/ol/layer/Webpart'
 
 import wapp from '../wapp'
-import CordovApp from '../cordowapp/Cordovapp'
+import CordovApp from 'cordovapp/Cordovapp'
 import './layer'
 
 /** Recherche des guichets de l'utilisateur

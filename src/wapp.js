@@ -1,4 +1,4 @@
-﻿import CordovApp from './cordowapp/Cordovapp'
+﻿import CordovApp from 'cordovapp/Cordovapp'
 import map from './map/map'
 import {layers} from './map/map'
 import setControls from './map/control'
@@ -22,9 +22,9 @@ import ol_layer_Tile from 'ol/layer/Tile'
 
 import ol_control_SearchFeature from 'ol-ext/control/SearchFeature'
 
-import CacheMap from './cordowapp/ol/cache/CacheMap'
-import CacheVector from './cordowapp/ol/cache/CacheVector'
-import RIPart from './cordowapp/ripart/RipartForm'
+import CacheMap from 'cordovapp/ol/cache/CacheMap'
+import CacheVector from 'cordovapp/ol/cache/CacheVector'
+import RIPart from 'cordovapp/ripart/RipartForm'
 
 import config from './config';
 
