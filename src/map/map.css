@@ -174,3 +174,8 @@
 .ol-control .ol-control {
 	font-size: 1em;
 }
+
+.ol-search.IGNF-parcelle.ol-collapsed-list ul.autocomplete-parcelle,
+.ol-search.IGNF-parcelle.ol-collapsed-list ul.autocomplete-page {
+  display: block!important;
+}
