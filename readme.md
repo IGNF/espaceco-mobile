@@ -1,6 +1,10 @@
 ﻿# Guichet mobile
 
 Application mobile pour les guichets
+[![](https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Google_Play_Store_badge_FR.svg/100px-Google_Play_Store_badge_FR.svg.png)](https://play.google.com/store/apps/details?id=fr.ign.guichet&hl=fr)
+[![](https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Available_on_the_App_Store_%28black%29_SVG.svg/100px-Available_on_the_App_Store_%28black%29_SVG.svg.png)](https://itunes.apple.com/us/app/espace-collaboratif-ign/id1245621439?l=fr)
+
+* [Redmine du projet](http://sd-redmine.ign.fr/projects/guichet_mobile/wiki)
 
 ## Principe
 
