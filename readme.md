@@ -51,7 +51,7 @@ $ npm install
 ````
 
 Au final, le répertoire doit contenir les dossiers suivant (hooks, platforms et plugins sont générés automatiquement et ne sont pas intégrés au git) :
-````
+````none
 ├[+].git
 ├─[+] hooks
 ├─[+] node_modules
