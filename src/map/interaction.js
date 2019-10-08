@@ -15,8 +15,6 @@ import ol_geom_MultiPoint from 'ol/geom/MultiPoint'
 import ol_geom_MultiPolygon from 'ol/geom/MultiPolygon'
 import ol_geom_Point from 'ol/geom/Point'
 import ol_geom_Polygon from 'ol/geom/Polygon'
-
-
 import ol_control_GeolocationBar from 'ol-ext/control/GeolocationBar'
 
 import {click as ol_events_condition_click} from 'ol/events/condition'
@@ -48,7 +46,7 @@ export default function(wapp) {
     hitTolerance: 5,
     condition: ol_events_condition_click,
     filter: function(f,l) {	
-      return (f.layer || f.get('georem'));
+      return (f.layer || f.get('georem') || f.get('ripart'));
     },
     style: redStyle
   });

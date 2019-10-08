@@ -163,6 +163,23 @@ wapp.layerWebpart = function(l, cacheUrl) {
   return vector;
 };
 
+/** Test and hide hidden layers
+ */
+wapp.testHiddenLayer = function(layer) {
+  var hiddenLayers = this.param.hidden || [];
+  for (var k=0; k<hiddenLayers.length; k++){
+    if (layer.get("name") == hiddenLayers[k]) {
+      layer.setVisible(false);
+      break;
+    }
+  }
+  if (layer.getLayers) {
+    layer.getLayers().forEach(function(l){
+      wapp.testHiddenLayer(l);
+    });
+  }
+};
+
 /** Chargement des layers d'un guichet
  * @param {} groupe
  */
@@ -180,21 +197,6 @@ wapp.loadLayers = function (groupe) {
 	guichet.set("displayInLayerSwitcher", true);
   guichet.set("title", 'Guichet: '+groupe.nom);
 
-  var hiddenLayers = this.param.hidden || [];
-  function testHiddden (layer) {
-    for (var k=0; k<hiddenLayers.length; k++){
-      if (layer.get("name") == hiddenLayers[k]) {
-      	layer.setVisible(false);
-        break;
-      }
-    }
-    if (layer.getLayers) {
-      layer.getLayers().forEach(function(l){
-        testHiddden(l);
-      });
-    }
-  };
-
   // Layers en cache
   var cache = wapp.vectorCache.getLayers(groupe);
   if (cache.length) {
@@ -204,11 +206,11 @@ wapp.loadLayers = function (groupe) {
       baseLayer: true 
     });
     guichet.set('openInLayerSwitcher', true);
-    testHiddden(c);
+    wapp.testHiddenLayer(c);
     var visible = c.getVisible();
     for (var i=0; i<cache.length; i++) {
       // Un seu lvisible
-      testHiddden(cache[i]);
+      wapp.testHiddenLayer(cache[i]);
       if (!visible) visible = cache[i].getVisible();
       else cache[i].setVisible(false);
       guichet.getLayers().push(cache[i]);
@@ -231,9 +233,10 @@ wapp.loadLayers = function (groupe) {
 			if (l.external) vector = wapp.layerWFS(groupe, l);
 			// Guichet
       else vector = wapp.layerWebpart(l);
+      console.log(l)
       // Ajouter
       this.vector.push(vector);
-      testHiddden(vector);
+      wapp.testHiddenLayer(vector);
       guichet.getLayers().push(vector);
 
       // Probleme au chargement

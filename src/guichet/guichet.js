@@ -76,7 +76,7 @@ wapp.showGuichetInfo = function (groupe){
 
   /* VNF PATCH */
   console.log('Hide offline',groupe.id_groupe);
-  if (groupe.id_groupe===200 || $('.debug').css('display')!=='none') {
+  if (groupe.id_groupe===200 || groupe.id_groupe===13 || $('.debug').css('display')!=='none') {
     $('#guichet [data-role="onglet-bt"] [data-list="offline"]').show();
   }
   else $('#guichet [data-role="onglet-bt"] [data-list="offline"]').hide();
@@ -382,12 +382,15 @@ wapp.showSelect = function(options) {
     this.select.getFeatures().push(f);
     $("#selection").html (f.get("nom")||"Afficher la sélection...");
     var prop = f.getProperties();
+    var georem = prop.georem || prop.ripart;
     // Georem
-    if (prop.georem) {
+    if (georem) {
       div.addClass("georem").removeClass("fiche");
-      if (prop.georem.sketch) prop.georem.nb = wapp.ripart.sketch2feature(prop.georem.sketch).length;
-      else prop.georem.nb = 0;
-      wapp.dataAttributes($(".georem", div), prop.georem);
+      if (georem.sketch) georem.nb = wapp.ripart.sketch2feature(georem.sketch).length;
+      else georem.nb = 0;
+      wapp.dataAttributes($(".georem", div), georem);
+      if (prop.ripart) $(".georem .del", div).hide();
+      else $(".georem .del", div).show();
     }
     // Objet utilisateur
     else {
