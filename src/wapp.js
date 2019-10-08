@@ -742,4 +742,11 @@ wapp.connect = function() {
 	});
 };
 
+wapp.selectGPS = function(){
+	navigator.geolocation.showSourcePicker('Sélectionner la source');
+	 console.log('select gps');
+};
+
+
+
 export default wapp
