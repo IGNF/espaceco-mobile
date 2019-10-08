@@ -25,6 +25,8 @@ import ol_control_SearchFeature from 'ol-ext/control/SearchFeature'
 import CacheMap from 'cordovapp/ol/cache/CacheMap'
 import CacheVector from 'cordovapp/ol/cache/CacheVector'
 import RIPart from 'cordovapp/ripart/RipartForm'
+import ol_source_RIPart from 'cordovapp/ol/source/RIPart'
+import {georemStyle} from 'cordovapp/ol/source/RIPart'
 
 import config from './config';
 
@@ -348,9 +350,18 @@ wapp.initMap = function() {
 
 /** Initialisation des signalements
 */
-wapp.initRipart = function()
-{	var self = this;
+wapp.initRipart = function() {
+  var self = this;
 
+  // Layer de signalements
+  var signalements = new ol_layer_Vector({
+    title: 'Signalements',
+    name: 'Signalements'
+  });
+  map.addLayer(signalements);
+  wapp.testHiddenLayer(signalements);
+
+  // RIPart
   this.ripart = new RIPart({
     url: this.param.options.qlf ? "https://qlf-collaboratif.ign.fr/collaboratif-develop/api/" : null,
     map: map,
@@ -480,7 +491,8 @@ wapp.initRipart = function()
   });
   $("#fiche").on("showonglet showpage", function(e) {
     // Selection ?
-    if (wapp.select.getFeatures().item(0) && !wapp.select.getFeatures().item(0).get('georem')) {
+    const sel = wapp.select.getFeatures().item(0);
+    if (sel && !sel.get('georem') && !sel.get('ripart')) {
       $('.sselect', wapp.ripart.formElement).show();
     } else {
       $('.sselect', wapp.ripart.formElement).hide();
@@ -525,6 +537,14 @@ wapp.initRipart = function()
       $(".warning_public", signalDiv).hide();
     }
   });
+
+  // Calque des signalements
+  wapp.ripart.signalements = signalements;
+  signalements.setSource(new ol_source_RIPart({
+    ripart: this.ripart
+  }));
+  signalements.setStyle(georemStyle);
+  console.log(signalements)
 };
 
 /** On a change de groupe 
@@ -715,7 +735,8 @@ wapp.connect = function() {
   wapp.ripart.connectDialog({
     onConnect: function() {
 			wapp.notification("Connecté au service",1200);
-			wapp.initGuichets();
+      wapp.initGuichets();
+      wapp.ripart.signalements.getSource().clear();
 		},
 		onError: function(error) {
 			var msg = [];
