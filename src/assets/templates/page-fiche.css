@@ -45,6 +45,9 @@
 	display: inline-block;
 	vertical-align: middle;
 } 
+#fiche .selection > div li > span[data-attr="comment"] {
+  white-space: pre-line;
+}
 
 #fiche .fiche input,
 #fiche .fiche [data-input-role].selected  {
