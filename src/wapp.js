@@ -20,7 +20,7 @@ import {buffer as ol_extent_buffer} from 'ol/extent'
 import ol_source_TileWMS from 'ol/source/TileWMS'
 import ol_layer_Tile from 'ol/layer/Tile'
 
-import ol_control_SearchFeature from 'ol-ext/control/SearchFeature'
+import ol_format_GPX from 'ol/format/GPX'
 
 import CacheMap from 'cordovapp/ol/cache/CacheMap'
 import CacheVector from 'cordovapp/ol/cache/CacheVector'
@@ -123,6 +123,22 @@ import config from './config';
       }
     });
 
+    // On iOS save information on moveend
+    if (wapp.getPlatformId() === 'ios') {
+      // Save layers information
+      setTimeout(function() {
+        map.getLayerGroup().on('change', function() {
+          wapp.saveContext();
+          console.log('saveContext')
+        });
+        // Save position on move end (for iOS)
+        map.on('moveend', function(){
+          wapp.savePosition();
+          console.log('savePosition')
+        });
+      }, 500);
+    }
+
     // Fin
 //		wapp.wait(false);
   },
@@ -199,7 +215,7 @@ import config from './config';
         else if (l.get('name')) hidden.push(l.get('name'));
         if (l.getLayers) saveVisibility(l.getLayers());
       });
-    };
+    }
     saveVisibility(wapp.map.getLayers());
     this.param['layers'] = layers;
     this.param['hidden'] = hidden;
@@ -243,7 +259,7 @@ wapp.waitLogo = function(info, anim) {
         $("<img>").attr('src', logo || "")
           .prependTo(div);
       });
-    } catch(e) {};
+    } catch(e) { /* ok */ }
     this.wait (div, { className:'splash', anim: anim });
   }
 };
@@ -284,24 +300,29 @@ wapp.initParams = function() {
   if (!this.param.options) this.param.options={};
   var options = this.param.options;
   // On change
+  var val;
   var inputs = this.paramInput = this.setParamInput("#options", options, function(e) {
     switch (e.name) {
-      case "rotmap":
+      case "rotmap": {
         wapp.rotateMap(e.val);
         break;
-      case "zoombt":
+      }
+      case "zoombt": {
         if (e.val===false) $("#map .ol-zoom").hide();
         else $("#map .ol-zoom").show();
         break;
-      case 'extended':
+      }
+      case 'extended': {
         $('body').attr('data-mode', options.extended?'extended':null);
         break;
-      case "searchbt":
+      }
+      case "searchbt": {
         if (e.val===false) $("#map .searchCtrl").hide();
         else $("#map .searchCtrl").show();
         break;
-      case "toleranceGPS":
-        var val = Number(e.val) || 100;
+      }
+      case "toleranceGPS": {
+        val = Number(e.val) || 100;
         if (val<0) val = -val;
         if (inputs && val != options.toleranceGPS) {
           options.toleranceGPS = val;
@@ -311,8 +332,9 @@ wapp.initParams = function() {
           wapp.interactions.geolocation.set('tolerance', val);
         }
         break;
-      case "minGPSAccuracy":
-        var val = Number(e.val) || 100;
+      }
+      case "minGPSAccuracy": {
+        val = Number(e.val) || 100;
         if (val<0) val = -val;
         if (inputs && val != options.minGPSAccuracy) {
           options.minGPSAccuracy = val;
@@ -322,7 +344,8 @@ wapp.initParams = function() {
           wapp.interactions.geolocation.set('minAccuracy', val);
         }
         break;
-      case "qlf":
+      }
+      case "qlf": {
         if (wapp.ripart) {
           var qlf = /qlf/.test(wapp.ripart.getServiceUrl());
           if (e.val != qlf) {
@@ -332,6 +355,7 @@ wapp.initParams = function() {
           }
         }
         break;
+      }
       default: break;
     }
   });
@@ -404,21 +428,20 @@ wapp.initRipart = function() {
       wapp.select.setActive(false);
     }, 
     // Formatage du signalement / verification avant envoie
-    formatGeorem: function(georem, form) {
+    formatGeorem: function(georem /*, form */) {
       if (!georem.comment) {
         wapp.alert ("Merci de laisser un commentaire...");
         return false;
       }
       // Forcer la jointure avec un objet d'une couche vecteur
       var proj = wapp.map.getView().getProjection();
-      var coord = ol_proj_fromLonLat([georem.lon,georem.lat], proj);
       for (var i=0, l; l = wapp.vector[i]; i++) {
         // Jointure ?
         if (l.get('attach')) {
           var coord = ol_proj_fromLonLat([georem.lon,georem.lat], proj);
           var extent = ol_extent_buffer (ol_extent_boundingExtent([coord]), .1);
-          var f, features = l.getSource().getFeaturesInExtent(extent);
-          for (var k=0; f=features[k]; k++) {
+          var k, f, features = l.getSource().getFeaturesInExtent(extent);
+          for (k=0; f=features[k]; k++) {
             var geom = f.getGeometry();
             if (geom.intersectsCoordinate && geom.intersectsCoordinate(coord)) {
               break;
@@ -426,15 +449,15 @@ wapp.initRipart = function() {
           }
           if (!f) f = l.getSource().getClosestFeatureToCoordinate(coord);
           if (f) {
-            // Verifie pas déjà joint
-            var features = wapp.ripart.selectOverlay.getSource().getFeatures();
+            // Verifie pas deja joint
+            var currentFeatures = wapp.ripart.selectOverlay.getSource().getFeatures();
             var found = false;
-            for (var k=0; k<features.length; k++) {
-              var props = features[k].getProperties();
+            for (k=0; k<currentFeatures.length; k++) {
+              var props = currentFeatures[k].getProperties();
               // Propritete differente de geometry ?
               var eq = (Object.entries(props).length > 1);
               // Existant ?
-              for (p in props) if (p!=='geometry') {
+              for (var p in props) if (p!=='geometry') {
                 if (/^undefined$|^null$/.test(props[p])){
                   eq = eq && /^undefined$|^null$/.test(f.get(p));
                 }
@@ -448,8 +471,8 @@ wapp.initRipart = function() {
               }
             }
             if (!found) {
-              features.push(f);
-              georem.sketch = wapp.ripart.feature2sketch(features, proj);
+              currentFeatures.push(f);
+              georem.sketch = wapp.ripart.feature2sketch(currentFeatures, proj);
               break;
             }
           }
@@ -485,11 +508,11 @@ wapp.initRipart = function() {
   }
 
   // Affichage de la page
-  $("#fiche").on("showonglet hidepage", function(e) {
+  $("#fiche").on("showonglet hidepage", function() {
     self.ripart.cancelFormulaire();
     wapp.select.setActive(true);
   });
-  $("#fiche").on("showonglet showpage", function(e) {
+  $("#fiche").on("showonglet showpage", function() {
     // Selection ?
     const sel = wapp.select.getFeatures().item(0);
     if (sel && !sel.get('georem') && !sel.get('ripart')) {
@@ -498,7 +521,7 @@ wapp.initRipart = function() {
       $('.sselect', wapp.ripart.formElement).hide();
     }
   });
-  $("#fiche").on("showonglet", function(e) {
+  $("#fiche").on("showonglet", function() {
     wapp.showSelect();
   });
             
@@ -523,7 +546,7 @@ wapp.initRipart = function() {
   );
 
   // Gerer la coherence
-  $("#fiche").on('showpage', function(e) {
+  $("#fiche").on('showpage', function() {
     var signalDiv = $(".signaler", this);
     if (wapp.ripart.param.groupes && wapp.ripart.param.groupes.length > 1) {
       $(".changeGroupe", signalDiv).show();
@@ -630,7 +653,8 @@ wapp.showLayers = function(vislayers, layers)
   }
 };
 
-/** Sauvegarder une trace GPS */
+/** Sauvegarder une trace GPS (selectionnee)
+ */
 wapp.saveGPS = function() {
   var f = wapp.select.getFeatures().item(0);
   if (f.getGeometry().getType()=="LineString") {
@@ -646,19 +670,20 @@ wapp.saveGPS = function() {
       +"-"+ ("00" + d.getDate()).slice(-2);
     var filename = d+".gpx";
 
-    function write() {
-      var path = "SD/"+ (cordova.platformId === 'ios' ? "" : "GPX/");
+    var write = function() {
+      var path = "SD/"+ (wapp.getPlatformId() === 'ios' ? "" : "GPX/");
       CordovApp.File.write (path + filename, gpx, function() {
         wapp.message("La fichier GPX/"+filename+" a bien été enregistré","GPX")
       }, function() {
         wapp.alert ("Impossible de créer le fichier");
       });
-    };
+    }
 
     // Verifier la non existence du fichier
     CordovApp.File.listDirectory("SD/GPX",
       function(files) {
         var nb = 0;
+        /* eslint-disable-next-line no-constant-condition */
         while (true) {
           for (var i=0; i<files.length; i++) {
             if (files[i].name===filename) {
@@ -753,7 +778,7 @@ wapp.connect = function() {
 					msg = [ "Connexion", "Connexion impossible...<br/>Vérifiez votre connexion." ];
 					console.log(error)
 					break;
-			};
+			}
 			wapp.message (msg[1], msg[0], 
 				{ ok:"ok" },
 				function() {

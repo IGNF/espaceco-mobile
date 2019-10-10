@@ -100,7 +100,7 @@ wapp.maintenance = function(nodelay) {
         }
       }
     );
-  };
+  }
   // Cache geoportail
   CordovApp.File.listDirectory("FILE/geoportail",
     function(l) {

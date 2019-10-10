@@ -41,7 +41,7 @@ function centerMap(coord) {
       }));
     }, i*1000);
   }
-};
+}
 
 /** Initialize map controls
  */
@@ -123,7 +123,7 @@ export default function(wapp) {
   map.addControl (new ol_control_Toggle({
     "className": "menuCtrl needsclick", 
     "html": "<i class='fa fa-bars'></i>",
-    "toggleFn": function(b){
+    "toggleFn": function(){
       wapp.toggleMenu();
     }
   }));

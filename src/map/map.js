@@ -19,10 +19,11 @@ import ol_source_DFCI from 'ol-ext/source/DFCI'
 import ol_source_Geoportail from 'ol-ext/source/Geoportail'
 
 import config from '../config'
+import {dialog} from 'cordovapp/cordovapp/dialog'
 
 // Layer pour l'affichage du cache
 var layerCache = new ol_layer_Group({ title:"Cartes hors-ligne", name: "cache", displayInLayerSwitcher: false })
-layerCache.on('change', function(e) {
+layerCache.on('change', function() {
   if (layerCache.getLayers().getLength) layerCache.set('displayInLayerSwitcher', true);
 });
 
@@ -112,27 +113,6 @@ var map = new ol_Map({
   layers: layers
 });
 
-// On iOS save information on moveend
-let hasChanged = false;
-if (window.cordova && cordova.platformId === 'ios') {
-  hasChanged = false;
-  // Save layers information
-  map.getLayerGroup().on('change', function(e) {
-    hasChanged = true;
-  });
-  // Save position on move end (for iOS)
-  map.on('moveend', function(){
-    if (hasChanged) {
-      hasChanged = false;
-      wapp.saveContext();
-      console.log('savecontext')
-    } else {
-      wapp.savePosition();
-      console.log('saveposition')
-    }
-  });
-}
-
 // Prevent link to open 
 /*
 ol.Attribution.uniqueAttributionKey = {};
@@ -145,7 +125,7 @@ map.formatAttribution = function()
 // Verifier qu'on a bien au moins un layer affiche
 function checkVisible(layers) {
   var visible = false;
-  if (!layers) layers = wapp.map.getLayers();
+  if (!layers) layers = map.getLayers();
   layers.forEach(function(l) {
     if (!(l instanceof ol_layer_Vector) && l.getVisible()) {
       if (l instanceof ol_layer_Group) {
@@ -155,10 +135,10 @@ function checkVisible(layers) {
     }
   });
   return visible;
-};
-$("#layers").on("hidepage", function() {
+}
+$('#layers').on('hidepage', function() {
   if (!checkVisible()) {
-    wapp.dialog.show (
+    dialog.show (
       "Toutes les couches sont masquées.<br/>"
       +"Il se peut que vous ayez des problèmes à vous repérer&nbsp;!", {
         title: "ATTENTION",
@@ -168,7 +148,6 @@ $("#layers").on("hidepage", function() {
       }
     );
   }
-
 });
 
 export { layers }

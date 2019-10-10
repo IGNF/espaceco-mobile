@@ -1,5 +1,6 @@
 import wapp from '../wapp'
 import CordovApp from 'cordovapp/CordovApp'
+import CordovAppFile from 'cordovapp/cordovapp/File'
 
 import {all as ol_loadingstrategy_all} from 'ol/loadingstrategy'
 import ol_layer_Vector_WFS from 'cordovapp/ol/layer/WFS'
@@ -39,19 +40,20 @@ wapp.layerWFS = function(groupe, l) {
       }
     });
   };
+
   // Gestion du cache
   var cache = {};
   if (l.once) {
     cache = {
       saveCache: function(response, extent, resolution) {
         var fileName = 'FILE/cache/'+this.getCacheFileName(extent, resolution); 
-        CordovApp.File.getDirectory('FILE/cache', 
+        CordovAppFile.getDirectory('FILE/cache', 
           function() {
-            CordovApp.File.write(
+            CordovAppFile.write(
               fileName, 
-              response,
-              options.success,
-              options.error
+              response
+              // options.success,
+              // options.error
             );
           }, 
           function(){},
@@ -65,7 +67,7 @@ wapp.layerWFS = function(groupe, l) {
           return;
         }
         var fileName = 'FILE/cache/'+this.getCacheFileName(options.extent, options.resolution);
-        CordovApp.File.info(
+        CordovAppFile.info(
           fileName, 
           function(file){
             /* Obsolete (plus d'un jour)
@@ -76,7 +78,7 @@ wapp.layerWFS = function(groupe, l) {
               options.error('obsolete');
             } else {
               // Lire le cache
-              CordovApp.File.read(
+              CordovAppFile.read(
                 fileName, 
                 options.success,
                 options.error
@@ -89,7 +91,7 @@ wapp.layerWFS = function(groupe, l) {
         );
       }
     };
-  };
+  }
   // Layer a charger
   vector = new ol_layer_Vector_WFS (l, cache);
   
@@ -116,7 +118,7 @@ wapp.layerWFS = function(groupe, l) {
       }
   }, vector);
   // Probleme au chargement
-  vector.on("error", function(e){});
+  vector.on("error", function(){});
 
   return vector;
 };
@@ -130,7 +132,7 @@ wapp.layerWebpart = function(l, cacheUrl) {
 
   var url = l.url.replace(/(.*)\?(.*)/,"$1");
   // var base = l.url.replace(/.*databasename=(.*)/,"$1");
-  var base = l.url.replace(/.*databasename=([^\&]*).*/,"$1");
+  var base = l.url.replace(/.*databasename=([^&]*).*/,"$1");
   var extent = [];
   for (var k=0; k<l.extent.length; k++) extent[k] = parseFloat(l.extent[k]);
   extent = ol_proj_transformExtent(extent, 'EPSG:4326', wapp.map.getView().getProjection());
@@ -184,8 +186,9 @@ wapp.testHiddenLayer = function(layer) {
  * @param {} groupe
  */
 wapp.loadLayers = function (groupe) {
-  	// Layer du guichet
+  // Layer du guichet
 	var guichet = wapp.map.getLayers().getArray().find((l) => l.get('name') ==='guichet')
+  var i;
 
   // Layers du guichet
 	this.vector = [];
@@ -208,7 +211,7 @@ wapp.loadLayers = function (groupe) {
     guichet.set('openInLayerSwitcher', true);
     wapp.testHiddenLayer(c);
     var visible = c.getVisible();
-    for (var i=0; i<cache.length; i++) {
+    for (i=0; i<cache.length; i++) {
       // Un seu lvisible
       wapp.testHiddenLayer(cache[i]);
       if (!visible) visible = cache[i].getVisible();
@@ -224,8 +227,9 @@ wapp.loadLayers = function (groupe) {
 	var loading = {};
 	// Reset source pour la recherche
 	wapp.setSearchSource ();
-	// Ajouter les layers du guichet
-	for (var i=0, l; l=groupe.layers[i]; i++) {
+  // Ajouter les layers du guichet
+  var l;
+	for (i=0; l=groupe.layers[i]; i++) {
     if (l.type=="WFS") {
       nb++;
 			var vector;
@@ -261,7 +265,7 @@ wapp.loadLayers = function (groupe) {
           e.feature.layer = this; 
         }.bind(this));
         // Ooops probleme d'overload
-        this.getSource().on('overload', function (e) {
+        this.getSource().on('overload', function () {
           wapp.notification("overloading...");
         });
 				// Notification de chargement
@@ -274,8 +278,8 @@ wapp.loadLayers = function (groupe) {
 					}
 					else wapp.notification();
 				});
-				  
-  			// Decompte
+        
+        // Decompte
 				nbLoad++;
 				if (nb==nbLoad) wapp.notification(nb+" couches ajoutées à la carte...");
 			});

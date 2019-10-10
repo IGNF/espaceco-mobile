@@ -273,21 +273,22 @@ function _addLine(th, ul, title, val, type) {
   var li = $("<li>").addClass(className).appendTo(ul);
   switch (type) {
     case 'JSON':
-    case 'JsonValue':
+    case 'JsonValue': {
       // Json decode
       var json;
       try { json = JSON.parse (val); }
-      catch(e){};
+      catch(e) { /* ok */ }
       // Array
       if (json instanceof Array && json.length) {
         var tab = $("<table>").appendTo(li);
         var tr = $("<tr>").appendTo(tab);
-        for (var k in json[0]) {
+        var i, k;
+        for (k in json[0]) {
           $("<td>").text(k.replace(/_/g,' ')).appendTo(tr);
         }
-        for (var i=0; i<json.length; i++) {
+        for (i=0; i<json.length; i++) {
           tr = $("<tr>").appendTo(tab);
-          for (var k in json[i]) {
+          for (k in json[i]) {
             $("<td>").text(json[i][k])
               .addClass(typeof(json[i][k]))
               .appendTo(tr);
@@ -295,15 +296,18 @@ function _addLine(th, ul, title, val, type) {
         }
         break;
       }
-    default:
+    }
+    // fallsthrough
+    default: {
       $("<label>")
         .text(label)
         .appendTo(li);
       $("<span>").text(val)
         .appendTo(li);
-    break;
+      break;
+    }
   }
-};
+}
 
 
 wapp.getGeomFr = function(g) {
@@ -349,15 +353,16 @@ wapp.showSelect = function(options) {
   else $("#fiche").removeClass("fromRipart");
 
   var div = $('#fiche .selection').removeClass("georem fiche trace multi");
+  var i, ul, th, att;
 
   // Pas de selection
   if (options.index===undefined && nb>1) {
     div.addClass("fiche");
     $(".fiche h3", div).html(nb+' objets sélectionnés :');
     $(".fiche img.guichet", div).hide();
-    var ul = $(".fiche ul", div).html('');
-    var th = $(".fiche .themes", div).html('');
-    var i = 0;
+    ul = $(".fiche ul", div).html('');
+    th = $(".fiche .themes", div).html('');
+    i = 0;
     this.select.getFeatures().forEach (function(f){
       $('<li>').html(wapp.getFeatureTitle(f))
         .data('index', i++)
@@ -391,13 +396,11 @@ wapp.showSelect = function(options) {
       wapp.dataAttributes($(".georem", div), georem);
       if (prop.ripart) $(".georem .del", div).hide();
       else $(".georem .del", div).show();
-    }
-    // Objet utilisateur
-    else {
+    } else {
+      // Objet utilisateur
       div.addClass("fiche");
       // Trace GPS
       if (f.layer.get('geolocation')) div.addClass("trace");
-      var prop = f.getProperties();
       $(".fiche h3", div).text('Couche : '+f.layer.get("title")||f.layer.get("name"));
       if (f.layer.get("logo")) {
         $(".fiche img.guichet", div).attr('src', f.layer.get("logo")).show();
@@ -405,39 +408,39 @@ wapp.showSelect = function(options) {
         $(".fiche img.guichet", div).hide();
       }
       var saveTheme =  $(".fiche .themes .selected", div).removeClass('selected').attr('class');
-      var ul = $(".fiche ul", div).html('');
-      var th = $(".fiche .themes", div).html("");
+      ul = $(".fiche ul", div).html('');
+      th = $(".fiche .themes", div).html("");
       // Trace GPS
-      if (f.layer.get('geolocation')) div.addClass("trace");
-      // Objet d'un guichet
-      else if (f.layer instanceof ol_layer_Vector_Webpart)
-      {	var ftype = f.layer.getSource().featureType_;
-        for (i in ftype.attributes) if (i!=ftype.geometryName && f.get(i))
-        {	var att = ftype.attributes[i];
-          switch (att.type)
-          {	case "Point":
+      if (f.layer.get('geolocation')) {
+        div.addClass("trace");
+      } else if (f.layer instanceof ol_layer_Vector_Webpart) {
+        // Objet d'un guichet
+        var ftype = f.layer.getSource().featureType_;
+        for (i in ftype.attributes) if (i!=ftype.geometryName && f.get(i)) {
+          att = ftype.attributes[i];
+          switch (att.type) {
+            case "Point":
             case "LineString":
             case "Polygon":
             case "MultiPolygon":
               break;
-            default:
-            {	_addLine(th, ul, att.title, f.get(i), att.type);
+            default: {
+              _addLine(th, ul, att.title, f.get(i), att.type);
+              break;
             }
           }
         }
-      }
-      // Objet WMS
-      else if (f.layer.get("getFeatureInfoMask"))
-      {	var visu = f.layer.get("getFeatureInfoMask").visu;
-        for (i in visu) 
-        {	_addLine(th, ul, visu[i].replace(/_/g,' '), f.get(i));
+      } else if (f.layer.get("getFeatureInfoMask")) {
+        // Objet WMS
+        var visu = f.layer.get("getFeatureInfoMask").visu;
+        for (i in visu) {
+          _addLine(th, ul, visu[i].replace(/_/g,' '), f.get(i));
         }
-      }
-      // Objet WFS
-      else if (f.layer.getFeatureType)
-      {	var prop = f.getProperties();
+      } else if (f.layer.getFeatureType) {
+        // Objet WFS
+        // var prop = f.getProperties();
         var geometryName = f.getGeometryName();
-        var att = f.layer.getFeatureType().attributes || {};
+        att = f.layer.getFeatureType().attributes || {};
         for (i in prop) if (i !== geometryName) {
           _addLine(th, ul, (att[i]?att[i].title:i).replace(/_/g,' '), f.get(i), att[i]?att[i].type:'string');
         }
@@ -469,8 +472,8 @@ wapp.showRipartForm = function() {
 /** Affichage de la page de gestion des cartes
 *	- Mise a jour des infos du guichet
 */
-$("#cartes").on("showpage", function(e)
-{	if (!wapp.vector) return;
+$("#cartes").on("showpage", function() {
+  if (!wapp.vector) return;
 
   console.log("TODO : cartes info");
   return;
@@ -503,9 +506,8 @@ $("#cartes").on("showpage", function(e)
 
 /** Mettre a jour la carte
 */
-$("#fiche").on("showpage hidepage", function(e)
-{	wapp.map.updateSize();
+$("#fiche").on("showpage hidepage", function() {
+  wapp.map.updateSize();
 });
-
 
 export default wapp

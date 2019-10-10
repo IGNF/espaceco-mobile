@@ -45,12 +45,12 @@ export default function(wapp) {
     multi: true,
     hitTolerance: 5,
     condition: ol_events_condition_click,
-    filter: function(f,l) {	
+    filter: function(f) {	
       return (f.layer || f.get('georem') || f.get('ripart'));
     },
     style: redStyle
   });
-  wapp.select.selectFeature = function(f, l) {
+  wapp.select.selectFeature = function(f) {
     this.getFeatures().clear();
     if (f) this.getFeatures().push(f);
     wapp.showSelect();
@@ -59,7 +59,7 @@ export default function(wapp) {
 
   /** Afficher la selection dans la barre et la fiche
    */
-  wapp.onSelect = function(e) {
+  wapp.onSelect = function() {
     var nb = wapp.select.getFeatures().getLength();
     // wapp.ripart.cancelFormulaire();
     if (nb>1) {
@@ -95,7 +95,7 @@ export default function(wapp) {
       success: function(resp) {
         var f = resp.features[0];
         if (f) {
-          var crs = resp.crs.properties.name.replace(/(.*)EPSG\:\:(\d*)$/, "$2");
+          var crs = resp.crs.properties.name.replace(/(.*)EPSG::(\d*)$/, "$2");
           var proj = ol_proj_get("EPSG:"+crs);
           if (proj) {
             let geom;
