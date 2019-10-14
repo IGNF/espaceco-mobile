@@ -338,7 +338,16 @@ wapp.getFeatureTitle = function(f) {
 */
 wapp.showSelect = function(options) {
   options = options || {};
-  var features = options.features || $.extend([],this.select.getFeatures().getArray())
+  let features = [];
+  const currentFeatures = options.features || $.extend([],this.select.getFeatures().getArray());
+  currentFeatures.forEach((f) => {
+    // Cluster ?
+    if (f.get('features')) {
+      features = features.concat(f.get('features'));
+    } else {
+      features.push(f);
+    }
+  });
   var nb = features.length;
 
   // Ne pas passer par le liste

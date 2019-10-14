@@ -28,6 +28,9 @@ import RIPart from 'cordovapp/ripart/RipartForm'
 import ol_source_RIPart from 'cordovapp/ol/source/RIPart'
 import {georemStyle} from 'cordovapp/ol/source/RIPart'
 
+import ol_layer_AnimatedCluster from 'ol-ext/layer/AnimatedCluster'
+import ol_source_Cluster from 'ol/source/Cluster'
+
 import config from './config';
 
 /** Web application pour l'acces a l'espace collaboratif depuis un mobile.
@@ -377,14 +380,6 @@ wapp.initMap = function() {
 wapp.initRipart = function() {
   var self = this;
 
-  // Layer de signalements
-  var signalements = new ol_layer_Vector({
-    title: 'Signalements',
-    name: 'Signalements'
-  });
-  map.addLayer(signalements);
-  wapp.testHiddenLayer(signalements);
-
   // RIPart
   this.ripart = new RIPart({
     url: this.param.options.qlf ? "https://qlf-collaboratif.ign.fr/collaboratif-develop/api/" : null,
@@ -562,11 +557,22 @@ wapp.initRipart = function() {
   });
 
   // Calque des signalements
-  wapp.ripart.signalements = signalements;
-  signalements.setSource(new ol_source_RIPart({
-    ripart: this.ripart
-  }));
+  var signalements = new ol_layer_AnimatedCluster({
+    title: 'Signalements',
+    name: 'Signalements',
+    maxResolution: 3000, // zoom 4
+    source: new ol_source_Cluster({
+      source: new ol_source_RIPart({
+        ripart: this.ripart
+      }),
+      attributions: 'IGN'
+    })
+  });
+  map.addLayer(signalements);
+  wapp.testHiddenLayer(signalements);
+
   signalements.setStyle(georemStyle);
+  wapp.ripart.signalements = signalements;
   console.log(signalements)
 };
 
