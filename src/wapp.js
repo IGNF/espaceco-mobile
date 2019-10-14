@@ -1,4 +1,5 @@
 ﻿import CordovApp from 'cordovapp/Cordovapp'
+import CordovAppFile from 'cordovapp/cordovapp/File'
 import map from './map/map'
 import {layers} from './map/map'
 import setControls from './map/control'
@@ -31,6 +32,8 @@ import {georemStyle} from 'cordovapp/ol/source/RIPart'
 import ol_layer_AnimatedCluster from 'ol-ext/layer/AnimatedCluster'
 import ol_source_Cluster from 'ol/source/Cluster'
 
+import getCacheFileName from 'cordovapp/cordovapp/File'
+
 import config from './config';
 
 /** Web application pour l'acces a l'espace collaboratif depuis un mobile.
@@ -61,7 +64,7 @@ import config from './config';
     }, false);
 
     // Version => cordova-plugin-app-version ???
-    $(".version").text(this.version);
+    $(".version").text(config.version);
     // Gestion de l'aide en ligne
     $("#help").click(wapp.help.hide);
 
@@ -105,6 +108,7 @@ import config from './config';
 
     // Brancher les signalements
     wapp.initRipart();
+    wapp.layerRipart();
 
     wapp.setDebugMode();
 
@@ -555,6 +559,38 @@ wapp.initRipart = function() {
       $(".warning_public", signalDiv).hide();
     }
   });
+};
+
+/** Calque des signalements 
+ * 
+ */
+wapp.layerRipart = function () {
+  const dir = 'FILE/cache-signalements/';
+  const cache = {
+    saveCache: function(response, tileCoord) {
+      var fileName = dir+tileCoord.join('-');
+      CordovAppFile.getDirectory(dir, 
+        function() {
+          getCacheFileName.write(
+            fileName, 
+            response
+            // options.success,
+            // options.error
+          );
+        }, 
+        function(){},
+        true
+      );
+    },
+    loadCache: function(options) {
+      var fileName = dir + options.tileCoord.join('-');
+      CordovAppFile.read(
+        fileName, 
+        options.success,
+        options.error
+      );
+    }
+  };
 
   // Calque des signalements
   var signalements = new ol_layer_AnimatedCluster({
@@ -564,7 +600,7 @@ wapp.initRipart = function() {
     source: new ol_source_Cluster({
       source: new ol_source_RIPart({
         ripart: this.ripart
-      }),
+      }, cache),
       attributions: 'IGN'
     })
   });
@@ -573,7 +609,6 @@ wapp.initRipart = function() {
 
   signalements.setStyle(georemStyle);
   wapp.ripart.signalements = signalements;
-  console.log(signalements)
 };
 
 /** On a change de groupe 
@@ -647,12 +682,12 @@ wapp.setDebugMode = function()
 };
 
 /** Affichage des layers
-*/
-wapp.showLayers = function(vislayers, layers)
-{	if (vislayers && vislayers.length) 
-  {	if (!layers) layers = this.map.getLayers().getArray();
-    for (var i=0; i<layers.length; i++)
-    {	if ($.inArray(layers[i].get('name'), vislayers)>=0) layers[i].setVisible(true);
+ */
+wapp.showLayers = function(vislayers, layers) {
+  if (vislayers && vislayers.length) {
+    if (!layers) layers = this.map.getLayers().getArray();
+    for (var i=0; i<layers.length; i++) {
+      if ($.inArray(layers[i].get('name'), vislayers)>=0) layers[i].setVisible(true);
       else layers[i].setVisible(false);
       if (layers[i].getLayers) this.showLayers(vislayers, layers[i].getLayers().getArray());
     }
@@ -707,17 +742,17 @@ wapp.saveGPS = function() {
 };
 
 /** Gestion du mode hors-connexion 
-  * Rafraichir la carte quand on recupere la connexion
-  */
+ * Rafraichir la carte quand on recupere la connexion
+ */
 wapp.online = function() {
   // console.log('ONLINE');
   wapp.refreshMap();
 };
 
 /**
-  * Refresh the map to reload the tiles
-  * @param {ol.Collection<ol.layer>} layers, default refresh all layers
-  */
+ * Refresh the map to reload the tiles
+ * @param {ol.Collection<ol.layer>} layers, default refresh all layers
+ */
 wapp.refreshMap = function(layers) {
   if (!layers) {
     wapp.refreshMap(wapp.map.getLayers())
@@ -732,9 +767,8 @@ wapp.refreshMap = function(layers) {
         if (l.getSource().setTileLoadFunction) {
           // console.log(l.get('name'), l);
           l.getSource().setTileLoadFunction(l.getSource().getTileLoadFunction())
-        }
-        // Webpart layer
-        else if (l.getSource().reload) {
+        } else if (l.getSource().reload) {
+          // Webpart layer
           l.getSource().reload();
         }
       }
@@ -743,6 +777,9 @@ wapp.refreshMap = function(layers) {
         // console.log("REFRESH", l);
       }
     });
+  }
+  if (wapp.ripart.signalements.getSource()) {
+    wapp.ripart.signalements.getSource().getSource().clear();
   }
 };
 
@@ -767,7 +804,7 @@ wapp.connect = function() {
     onConnect: function() {
 			wapp.notification("Connecté au service",1200);
       wapp.initGuichets();
-      wapp.ripart.signalements.getSource().clear();
+      wapp.ripart.signalements.getSource().getSource().clear();
 		},
 		onError: function(error) {
 			var msg = [];

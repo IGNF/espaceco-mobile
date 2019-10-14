@@ -70,11 +70,28 @@ wapp.maintenance = function(nodelay) {
     return;
   }
   
-  // Espcae libre
+  // Espace libre
   CordovApp.File.getFreeDiskSpace(function (s){
     freeDiskSpace = s;
     show();
   });
+
+  /* Calcul du cache */
+  // Add to cache
+  function addCache(ldir, cache, name) {
+    if (!cache[name]) cache[name] = { nb:0, size:0 };
+    for (var i=0, f; f=ldir[i]; i++) {
+      if (f.isFile) {
+        CordovApp.File.info("FILE/"+f.fullPath, function(f){
+          cache[name].nb++;
+          cache[name].size += f.size;
+          show();
+        });
+      } else {
+        getCache(f, cache, name);
+      }
+    }
+  }
 
   // Calcul du cache
   function getCache(d, cache, name) {
@@ -84,33 +101,23 @@ wapp.maintenance = function(nodelay) {
       var groupe = wapp.ripart.getGroupById(n);
       if (groupe) name = groupe.nom;
     }
-    CordovApp.File.listDirectory("FILE/"+d.fullPath,
-      function(ldir) {
-        if (!cache[name]) cache[name] = { nb:0, size:0 };
-        for (var i=0, f; f=ldir[i]; i++) {
-          if (f.isFile) {
-            CordovApp.File.info("FILE/"+f.fullPath, function(f){
-              cache[name].nb++;
-              cache[name].size += f.size;
-              show();
-            });
-          } else {
-            getCache(f, cache, name);
-          }
-        }
-      }
-    );
+    CordovApp.File.listDirectory('FILE/'+d.fullPath, (ldir) => addCache(ldir, cache, name));
   }
+
+  // Cache signalements
+  CordovApp.File.listDirectory('FILE/cache-signalements', (ldir) => addCache(ldir, cacheVecteur, 'Signalements'));
+  
   // Cache geoportail
-  CordovApp.File.listDirectory("FILE/geoportail",
+  CordovApp.File.listDirectory('FILE/geoportail',
     function(l) {
       for (var i=0, d; d=l[i]; i++) {
         getCache(d, cacheImage);
       }
     }
   );
+
   // Cache vecteur
-  CordovApp.File.listDirectory("FILE/cache",
+  CordovApp.File.listDirectory('FILE/cache',
     function(l) {
       for (var i=0, d; d=l[i]; i++) {
         getCache(d, cacheVecteur);
