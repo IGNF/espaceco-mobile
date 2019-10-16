@@ -186,6 +186,7 @@ export default function(wapp) {
   });
   wapp.overlays.gps = geodrawlayer;
   geodrawlayer.getSource().on('addfeature', function(e) { 
+    console.log('addFeature')
     e.feature.layer = geodrawlayer;
     wapp.help.show('main-trace'); 
   });
@@ -197,8 +198,8 @@ export default function(wapp) {
     source: geodrawlayer.getSource(),
     type: 'LineString',
     followTrack: 'auto',
-    tolerance: wapp.param.toleranceGPS||5,
-    minAccuracy: wapp.param.minGPSAccuracy||20
+    tolerance: wapp.param.options.toleranceGPS||5,
+    minAccuracy: wapp.param.options.minGPSAccuracy||20
   });
   map.addControl(geolocBar);
   wapp.interactions.geolocation = geolocBar.getInteraction();
