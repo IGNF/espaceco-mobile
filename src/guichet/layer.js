@@ -150,8 +150,10 @@ wapp.layerWebpart = function(l, cacheUrl) {
     // style: guichet.style,
     maxResolution: 40, // zoom 13
     checkSourceOptions: function (options, featureType) {
+      console.log(featureType)
+      console.log(featureType.tileZoomLevel, featureType.minZoomLevel-2)
       // Limiter la taille des tuilles en fonction du minZoom
-      options.tileZoom = Math.max(featureType.minZoomLevel-2, 4);
+      options.tileZoom = featureType.tileZoomLevel || Math.max(featureType.minZoomLevel-2, 4);
     }
   },{
     // preserved: select.getFeatures(),
