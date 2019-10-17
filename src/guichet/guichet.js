@@ -7,6 +7,7 @@ import ol_layer_Vector_Webpart from 'cordovapp/ol/layer/Webpart'
 import wapp from '../wapp'
 import CordovApp from 'cordovapp/Cordovapp'
 import './layer'
+import './edition'
 
 /** Recherche des guichets de l'utilisateur
 */
@@ -239,11 +240,11 @@ wapp.delGeorem = function(warning) {
 };
 
 /* Add attribute line to the selection list
-* @param {} th container
-* @param {} ul the list
-* @param {string} title
-* @param {string} val
-*/
+ * @param {} th container
+ * @param {} ul the list
+ * @param {string} title
+ * @param {string} val
+ */
 function _addLine(th, ul, title, val, type) {
   var theme, label;
   var index = title.indexOf('@');
@@ -406,10 +407,11 @@ wapp.showSelect = function(options) {
       if (prop.ripart) $(".georem .del", div).hide();
       else $(".georem .del", div).show();
     } else {
-      // Objet utilisateur
+      // Fiche de l'objet
       div.addClass("fiche");
       // Trace GPS
-      if (f.layer.get('geolocation')) div.addClass("trace");
+//      if (f.layer.get('geolocation')) div.addClass("trace");
+      // Layer de l'obejt
       $(".fiche h3", div).text('Couche : '+f.layer.get("title")||f.layer.get("name"));
       if (f.layer.get("logo")) {
         $(".fiche img.guichet", div).attr('src', f.layer.get("logo")).show();

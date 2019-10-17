@@ -124,6 +124,13 @@
   display: block;
 }
 
+#fiche .edit {
+  font-size: 1.5em;
+  float: left;
+  margin: -.1em .5em 0 0;
+  cursor: pointer;
+}
+
 #fiche .warning_public {
   text-align: center;
 	border: 5px solid #ccc;
