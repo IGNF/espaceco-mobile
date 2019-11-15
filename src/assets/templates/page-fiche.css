@@ -251,3 +251,10 @@ screen and (orientation:portrait) and (max-height:1023px) {
 #fiche .signaler .changeGroupe {
   margin: .5em 0 1em;
 }
+
+/** Edition */
+#fiche ul li input {
+	font-size: 1em;
+	border: 0;
+	border-bottom: 2px solid #f90;
+}

@@ -129,7 +129,6 @@ wapp.layerWFS = function(groupe, l) {
  */
 wapp.layerWebpart = function(l, cacheUrl) {
   var vector;
-
   var url = l.url.replace(/(.*)\?(.*)/,"$1");
   // var base = l.url.replace(/.*databasename=(.*)/,"$1");
   var base = l.url.replace(/.*databasename=([^&]*).*/,"$1");
@@ -150,13 +149,12 @@ wapp.layerWebpart = function(l, cacheUrl) {
     // style: guichet.style,
     maxResolution: 40, // zoom 13
     checkSourceOptions: function (options, featureType) {
-      console.log(featureType)
-      console.log(featureType.tileZoomLevel, featureType.minZoomLevel-2)
+      console.log(featureType.fullName, featureType.tileZoomLevel, '-', featureType.minZoomLevel-2)
       // Limiter la taille des tuilles en fonction du minZoom
       options.tileZoom = featureType.tileZoomLevel || Math.max(featureType.minZoomLevel-2, 4);
-    }
+    }.bind(this)
   },{
-    // preserved: select.getFeatures(),
+    preserved: this.select.getFeatures(),
     filter: (base=="bduni_metropole" ? {detruit:false} : {}),
     // Tile zoom to calculate tiles
     tileZoom: 13,
@@ -239,7 +237,7 @@ wapp.loadLayers = function (groupe) {
 			if (l.external) vector = wapp.layerWFS(groupe, l);
 			// Guichet
       else vector = wapp.layerWebpart(l);
-      console.log(l)
+
       // Ajouter
       this.vector.push(vector);
       wapp.testHiddenLayer(vector);

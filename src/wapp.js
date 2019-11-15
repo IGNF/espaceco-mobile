@@ -754,8 +754,10 @@ wapp.online = function() {
  * @param {ol.Collection<ol.layer>} layers, default refresh all layers
  */
 wapp.refreshMap = function(layers) {
+  // Refresh layers
   if (!layers) {
-    wapp.refreshMap(wapp.map.getLayers())
+    wapp.refreshMap(wapp.map.getLayers());
+    return;
   } else {
     layers.forEach(function(l) {
       // Group
@@ -778,6 +780,7 @@ wapp.refreshMap = function(layers) {
       }
     });
   }
+  // Refresh signalements
   if (wapp.ripart.signalements.getSource()) {
     wapp.ripart.signalements.getSource().getSource().clear();
   }
@@ -831,4 +834,10 @@ wapp.connect = function() {
 	});
 };
 
+/** Select external GPS
+ */
+wapp.selectGPS = function() {
+  navigator.geolocation.showSourcePicker('Sélectionner la source');
+};
+  
 export default wapp

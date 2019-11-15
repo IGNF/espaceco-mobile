@@ -398,6 +398,8 @@ wapp.showSelect = function(options) {
     $("#selection").html (f.get("nom")||"Afficher la sélection...");
     var prop = f.getProperties();
     var georem = prop.georem || prop.ripart;
+    // Hide edition
+    $('.edit').hide();
     // Georem
     if (georem) {
       div.addClass("georem").removeClass("fiche");
@@ -409,9 +411,7 @@ wapp.showSelect = function(options) {
     } else {
       // Fiche de l'objet
       div.addClass("fiche");
-      // Trace GPS
-//      if (f.layer.get('geolocation')) div.addClass("trace");
-      // Layer de l'obejt
+      // Layer de l'objet
       $(".fiche h3", div).text('Couche : '+f.layer.get("title")||f.layer.get("name"));
       if (f.layer.get("logo")) {
         $(".fiche img.guichet", div).attr('src', f.layer.get("logo")).show();
@@ -426,6 +426,7 @@ wapp.showSelect = function(options) {
         div.addClass("trace");
       } else if (f.layer instanceof ol_layer_Vector_Webpart) {
         // Objet d'un guichet
+        if (f.layer.get('cache')) $('.edit').show();
         var ftype = f.layer.getSource().featureType_;
         for (i in ftype.attributes) if (i!=ftype.geometryName && f.get(i)) {
           att = ftype.attributes[i];

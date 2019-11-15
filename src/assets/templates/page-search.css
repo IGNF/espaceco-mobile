@@ -40,6 +40,9 @@
 #search .ol-loading .autocomplete li
 {	color: #f90;
 }
+#search li.copy {
+  display: none;
+}
 
 @media screen and (max-height:800px) {
 	#search [data-role="onglet-li"] {

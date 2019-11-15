@@ -64,6 +64,14 @@
 			<div data-input-role="info">Ne pas gérer de cache vecteur (au prochain redémarrage).</div>
 		</li>
 
+		<li class="title">
+			GPS
+		</li>
+
+		<li class="ios android" data-input="button" onclick="wapp.selectGPS()">
+			<label>Source GPS</label>
+			<div data-input-role="info">Choisir un GPS externe (bluetooth).</div>
+		</li>
 		<li data-input="text" data-param="minGPSAccuracy" data-default=100>
 			<label style="display: block; width: Calc(100% + 1em);">
 				Précison GPS (m)&nbsp;: 
@@ -72,7 +80,7 @@
 			</label>
 			<div data-input-role="info">
 				Marge d'erreur au-dessus de laquelle les points GPS ne seront 
-				pas enregistrés dans la trace (en m).
+				pas enregistrés dans la trace (en&nbsp;m).
 			</div>
 		</li>
 		<li data-input="text" data-param="toleranceGPS" data-default=5>
@@ -82,7 +90,7 @@
 				<i class="clear-input"></i>
 			</label>
 			<div data-input-role="info">
-				Distance minimal entre deux points GPS sur la trace (en m).
+				Distance minimal entre deux points GPS sur la trace (en&nbsp;m).
 			</div>
 		</li>
 	  

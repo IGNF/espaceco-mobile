@@ -67,5 +67,6 @@
     <plugin name="cordova-plugin-network-information" spec="^2.0.1" />
     <hook src="scripts/parcel.js" type="before_build" />
     <hook src="scripts/parcel.js" type="before_run" />
+    <plugin name="cordova-plugin-bluetooth-geolocation" spec="https://github.com/heigeo/cordova-plugin-bluetooth-geolocation" />
     <engine name="android" spec="^7.0.0" />
 </widget>

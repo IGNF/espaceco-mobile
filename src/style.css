@@ -552,8 +552,7 @@ span[data-class="nb=1"] {
 }
 .dialog-savecache li {
 	padding: .5em;
-	border-bottom: 1px solid #ccc;
-	
+	border-bottom: 1px solid #ccc;	
 }
 
 /* Mode avance */
@@ -563,3 +562,4 @@ span[data-class="nb=1"] {
 [data-mode="extended"] .extended {
 	display: inline-block;
 }
+
