@@ -129,6 +129,7 @@
   float: left;
   margin: -.1em .5em 0 0;
   cursor: pointer;
+  display: block!important;
 }
 
 #fiche .warning_public {
@@ -253,8 +254,80 @@ screen and (orientation:portrait) and (max-height:1023px) {
 }
 
 /** Edition */
-#fiche ul li input {
-	font-size: 1em;
+#fiche ul li.edition {
+  position: relative;
+}
+#fiche ul li.edition input {
+  font-size: 1em;
 	border: 0;
-	border-bottom: 2px solid #f90;
+	border-bottom: 2px solid #999;
+}
+#fiche ul li.edition input:focus {
+	border-bottom-color: #f90;
+}
+#fiche ul li.edition input[type="checkbox"] {
+  border: 0;
+  width: auto;
+}
+#fiche ul li.edition.Boolean label {
+  width: 100%;
+  padding: .25em 0;
+  border-bottom: 2px solid #999;
+}
+#fiche ul li.edition.Boolean label span {
+  position: absolute;
+  width: 1em;
+  height: 1em;
+  border: 2px solid #999;
+  right: .5em;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  transform: translateY(-50%);
+  overflow: visible!important;
+}
+#fiche ul li.edition.Boolean label input:checked ~ span:after {
+  position: absolute;
+  content: "\f00c";
+  font-family: "FontAwesome";
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%,-50%);
+  overflow: visible;
+}
+#fiche ul li.edition input[readOnly] {
+  background-color: #ddd;
+  border-bottom-color: #999;
+}
+
+#fiche ul li.edition.Choice:after {
+  content: "\276f";
+  display: block;
+  font-size: 1.5em;
+  margin-top: -0.5em;
+  position: absolute;
+  right: 0.4em;
+  top: 50%;
+line-height: 1em;
+}
+#fiche ul li.edition.Choice input {
+  color: #333;
+}
+
+/* Error */
+#fiche ul li.edition.error input {
+  border-color: red;
+}
+#fiche ul li.edition .error {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+#fiche ul li.edition.error .error:before {
+  content: "\f071 ";
+  color: #f90;
+  font-family: FontAwesome;
+  position: absolute;
+  right: .2em;
+  top: 0;
 }
