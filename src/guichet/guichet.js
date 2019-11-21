@@ -428,7 +428,7 @@ wapp.showSelect = function(options) {
         // Objet d'un guichet
         if (f.layer.get('cache')) $('.edit').show();
         var ftype = f.layer.getSource().featureType_;
-        for (i in ftype.attributes) if (i!=ftype.geometryName && f.get(i)) {
+        for (i in ftype.attributes) if (i !== ftype.geometryName) {
           att = ftype.attributes[i];
           switch (att.type) {
             case "Point":
