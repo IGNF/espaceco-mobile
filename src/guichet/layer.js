@@ -127,14 +127,18 @@ wapp.layerWFS = function(groupe, l) {
  * Creer un layer Webpart
  * @param {} l layer options
  */
-wapp.layerWebpart = function(l, cacheUrl) {
+wapp.layerWebpart = function(l, cacheUrl, cacheExtent) {
   var vector;
   var url = l.url.replace(/(.*)\?(.*)/,"$1");
   // var base = l.url.replace(/.*databasename=(.*)/,"$1");
   var base = l.url.replace(/.*databasename=([^&]*).*/,"$1");
   var extent = [];
-  for (var k=0; k<l.extent.length; k++) extent[k] = parseFloat(l.extent[k]);
-  extent = ol_proj_transformExtent(extent, 'EPSG:4326', wapp.map.getView().getProjection());
+  if (cacheExtent) {
+    extent = cacheExtent
+  } else {
+    for (var k=0; k<l.extent.length; k++) extent[k] = parseFloat(l.extent[k]);
+    extent = ol_proj_transformExtent(extent, 'EPSG:4326', wapp.map.getView().getProjection());
+  }
   vector = new ol_layer_Vector_Webpart({
     url: url,
     //renderMode: 'image',
@@ -149,7 +153,7 @@ wapp.layerWebpart = function(l, cacheUrl) {
     // style: guichet.style,
     maxResolution: 40, // zoom 13
     checkSourceOptions: function (options, featureType) {
-      console.log(featureType.fullName, featureType.tileZoomLevel, '-', featureType.minZoomLevel-2)
+      // console.log(featureType.fullName, featureType.tileZoomLevel, '-', featureType.minZoomLevel-2)
       // Limiter la taille des tuilles en fonction du minZoom
       options.tileZoom = featureType.tileZoomLevel || Math.max(featureType.minZoomLevel-2, 4);
     }.bind(this)

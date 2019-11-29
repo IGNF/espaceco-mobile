@@ -23,7 +23,7 @@ window.geoportailConfig = {
 /** Config */
 export default {
   // App version
-  version: "2.0.0c",
+  version: "2.0.0d",
 
   // Geoportail APIkey
   apiKey: "2wd9sfsi5hews9yxcr95i6br",

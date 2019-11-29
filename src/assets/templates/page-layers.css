@@ -42,6 +42,19 @@
 	top: 0.5em;
 	z-index: 1;
 }
+
+#layerswitcher .ol-layerswitcher-buttons .nb {
+	background-color: #f90;
+	text-shadow: none;
+	border-radius: 50%;
+	font-size: .8em;
+	font-weight: bold;
+	padding: .2em 0 1.1em;
+	vertical-align: middle;
+	min-width: 1.3em;
+	margin-top: -1em;
+}
+
 #layerswitcher .ol-layerswitcher .panel li.dropover {
 	transform:scaleX(0.95);
 }

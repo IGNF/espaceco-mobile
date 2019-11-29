@@ -99,7 +99,7 @@ import config from './config';
         listMap: '#cartes [data-list="maps"] ul' 
       }
     );
-
+    
     // Gestion du cache vecteur
     this.vectorCache = new CacheVector(wapp, {
       page: "#guichet",
@@ -596,7 +596,7 @@ wapp.layerRipart = function () {
   var signalements = new ol_layer_AnimatedCluster({
     title: 'Signalements',
     name: 'Signalements',
-    maxResolution: 3000, // zoom 4
+    maxResolution: 600, // zoom 6
     source: new ol_source_Cluster({
       source: new ol_source_RIPart({
         ripart: this.ripart
@@ -763,15 +763,14 @@ wapp.refreshMap = function(layers) {
       // Group
       if (l.getLayers) {
         wapp.refreshMap(l.getLayers());
-      } 
-      // Geoportail layer
-      else if (l.getSource && l.getSource()) {
+      } else if (l.getSource && l.getSource()) {
+        // Geoportail layer
         if (l.getSource().setTileLoadFunction) {
           // console.log(l.get('name'), l);
           l.getSource().setTileLoadFunction(l.getSource().getTileLoadFunction())
         } else if (l.getSource().reload) {
-          // Webpart layer
-          l.getSource().reload();
+          // Reload Webpart layer (when no cache)
+          if (!l.get('cache')) l.getSource().reload();
         }
       }
       // Others

@@ -136,6 +136,11 @@ export default function(wapp) {
 
   // Guichet info
   lswitcher.on('drawlist', function(e) {
+    if (e.layer.get('cache')) {
+      $('<div>').addClass('nb')
+        .appendTo($('.ol-layerswitcher-buttons', e.li).first())
+        .html (e.layer.getSource().nbModifications());
+    }
     if (e.layer.get('name')==='guichet') {
       $('<div>').addClass('layerInfo')
         .appendTo($('.ol-layerswitcher-buttons', e.li).first())

@@ -104,6 +104,22 @@
   color: #369;
   font-weight: bold;
 }
+#guichet ul.cartes li {
+  position: relative;
+}
+#guichet ul.cartes .nb {
+  background-color: #f90;
+  color: #fff;
+  font-weight: bold;
+  top: 0;
+  left: 0;
+  position: absolute;
+  margin: 0;
+  border-radius: 50%;
+  text-align: center;
+  min-width: 1.5em;
+  z-index: 1;
+}
 
 #guichet ul.cartes li.warn .fa-refresh {
   background-color: #f90;
@@ -120,7 +136,7 @@
   font-weight: bold;
 }
 
-/* Dialog de cacha */
+/* Dialog de cache */
 [data-role="dialog"].guichet ul.layerselect {
   border-bottom: 3px solid #ccc;
   padding: .5em 0;

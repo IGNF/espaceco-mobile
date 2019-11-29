@@ -75,14 +75,18 @@ wapp.initGuichets = function() {
  */
 wapp.showGuichetInfo = function (groupe){
 
+  var hasOffline = false;
   /* VNF PATCH */
-  console.log('Hide offline',groupe.id_groupe);
-  if (groupe.id_groupe===200 || groupe.id_groupe===13 || $('.debug').css('display')!=='none') {
+  hasOffline = groupe.id_groupe===200 || groupe.id_groupe===13 || groupe.id_groupe===375 || $('.debug').css('display')!=='none';
+  console.log('Hide offline', groupe.id_groupe, hasOffline);
+  /**/
+  if (hasOffline) {
     $('#guichet [data-role="onglet-bt"] [data-list="offline"]').show();
   }
-  else $('#guichet [data-role="onglet-bt"] [data-list="offline"]').hide();
-  wapp.showOnglet($('#guichet [data-role="onglet-bt"] [data-list="info"]'))
-  /**/
+  else {
+    $('#guichet [data-role="onglet-bt"] [data-list="offline"]').hide();
+    wapp.showOnglet('guichet');
+  }
 
   wapp.showPage('guichet');
   var page = $('#guichet');
@@ -363,6 +367,7 @@ wapp.showSelect = function(options) {
   else $("#fiche").removeClass("fromRipart");
 
   var div = $('#fiche .selection').removeClass("georem fiche trace multi");
+  div.get(0).scrollTop = 0;
   var i, ul, th, att;
 
   // Pas de selection
@@ -426,6 +431,7 @@ wapp.showSelect = function(options) {
         div.addClass("trace");
       } else if (f.layer instanceof ol_layer_Vector_Webpart) {
         // Objet d'un guichet
+        console.log(f)
         if (f.layer.get('cache')) $('.edit').show();
         var ftype = f.layer.getSource().featureType_;
         for (i in ftype.attributes) if (i !== ftype.geometryName) {

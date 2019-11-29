@@ -40,7 +40,7 @@ function _addLine (ul, feature, ftype) {
       });
       ['keyup','change','input'].forEach((e) => {
         input.addEventListener(e, () => {
-          if (input.value.length > ftype.max_length) {
+          if (ftype.max_length && input.value.length > ftype.max_length) {
             li.classList.add('error');
             error = 'Chaine trop longue ('+ftype.max_length+' caractères maxi.)...';
           } else {
@@ -95,7 +95,7 @@ function _addLine (ul, feature, ftype) {
     }
     // DateTime
     case 'DateTime': {
-      let val = feature.get(att);
+      let val = feature.get(att) || '';
       if (!/T/.test(val)) val = val.replace(' ','T');
       ol_ext_element.create('INPUT', {
         value: val,
@@ -168,9 +168,12 @@ wapp.editFeature = function() {
   
   // Formulaire
   var i;
-  for (i in ftype.attributes) if (i !== ftype.geometryName) {
-    editProperties[i] = _addLine(ul, feature, ftype.attributes[i]);
+  for (i in ftype.attributes) {
+    if (i !== ftype.geometryName && i !== ftype.idName) {
+      editProperties[i] = _addLine(ul, feature, ftype.attributes[i]);
+    }
   }
+  console.log('EDITION')
   // Buttons
   const li = ol_ext_element.create('LI', {
     parent: ul

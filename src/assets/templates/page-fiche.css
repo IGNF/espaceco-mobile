@@ -129,7 +129,7 @@
   float: left;
   margin: -.1em .5em 0 0;
   cursor: pointer;
-  display: block!important;
+  display: block;
 }
 
 #fiche .warning_public {
