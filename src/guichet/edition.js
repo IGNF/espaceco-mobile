@@ -190,37 +190,38 @@ wapp.editFeature = function() {
     html: 'enregistrer',
     'data-role': 'dialogBt',
     click: () => {
-      console.log(editProperties)
       for (let k in editProperties) {
         if (editProperties[k]) {
           const input = editProperties[k].querySelector('input');
+          let val;
           switch (ftype.attributes[k].type) {
             case 'Boolean': {
-              feature.set(k, input.checked);
+              val = input.checked;
               break;
             }
             case 'Integer': {
-              feature.set(k, parseInt(input.value));
+              val = parseInt(input.value) || null;
               break;
             }
             case 'Double': {
-              feature.set(k, parseFloat(input.value));
+              val = parseFloat(input.value) || null;
               break;
             }
             case 'DateTime': {
-              console.log(feature.get(k))
-              if (!/T/.test(feature.get(k))) feature.set(k, input.value.replace('T',' '));
-              else feature.set(k, input.value);
+              if (!/T/.test(feature.get(k))) val = input.value.replace('T',' ');
+              else val = input.value;
               break;
             }
             default: {
-              feature.set(k, input.value);
+              val = input.value;
               break;
             }
           }
+          if (feature.get(k) !== val) feature.set(k, val);
         }
       }
       wapp.showSelect();
+console.log(feature.layer.getSource())
     },
     parent: li
   });
