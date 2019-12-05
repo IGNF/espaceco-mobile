@@ -186,12 +186,20 @@ wapp.testHiddenLayer = function(layer) {
   }
 };
 
+/** Recherche des layers du guichet courant
+ */
+wapp.getLayerGuichet = function(pos) {
+  const l = this.map.getLayers().getArray().find((l) => l.get('name') ==='guichet');
+  if (pos) return l[pos];
+  else return l;
+};
+
 /** Chargement des layers d'un guichet
  * @param {} groupe
  */
 wapp.loadLayers = function (groupe) {
   // Layer du guichet
-	var guichet = wapp.map.getLayers().getArray().find((l) => l.get('name') ==='guichet')
+	var guichet = wapp.getLayerGuichet();
   var i;
 
   // Layers du guichet
@@ -216,13 +224,19 @@ wapp.loadLayers = function (groupe) {
     wapp.testHiddenLayer(c);
     var visible = c.getVisible();
     for (i=0; i<cache.length; i++) {
-      // Un seu lvisible
+      // Un seul visible
       wapp.testHiddenLayer(cache[i]);
       if (!visible) visible = cache[i].getVisible();
       else cache[i].setVisible(false);
       guichet.getLayers().push(cache[i]);
     }
     guichet.getLayers().push(c);
+    // Clear selection on visibility change
+    guichet.getLayers().forEach((l) => {
+      l.on('change:visible', () => {
+        wapp.select.getFeatures().clear();
+      });
+    });
     guichet = c;
   }
 
@@ -291,8 +305,8 @@ wapp.loadLayers = function (groupe) {
   }
   
 	// Mettre les signalements en haut de la pile de calque
-	if (nb) 
-	{	wapp.map.removeLayer(wapp.ripart.layer);
+	if (nb) {
+    wapp.map.removeLayer(wapp.ripart.layer);
 		wapp.map.addLayer(wapp.ripart.layer);
 		wapp.notification("Chargement des guichets...");
 	}

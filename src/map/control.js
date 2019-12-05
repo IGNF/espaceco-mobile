@@ -148,6 +148,13 @@ export default function(wapp) {
           wapp.showGuichetInfo(wapp.ripart.getGuichet());
         });
     }
+    if (e.layer.get('vectorCache')) {
+      $('<div>').addClass('layerSynchro')
+        .appendTo($('.ol-layerswitcher-buttons', e.li).first())
+        .click(() => {
+          wapp.vectorCache.saveLayer(e.layer.getLayers().getArray().slice(), e.layer.get('vectorCache'))
+        });
+    }
   });
 
   map.addControl (lswitcher);

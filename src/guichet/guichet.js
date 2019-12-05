@@ -172,6 +172,9 @@ wapp.showGuichetInfo = function (groupe){
 /** Guichet en cours de modification
 */
 wapp.setGuichet = function(groupe) {
+  if (typeof(groupe)==='number') {
+    groupe = wapp.ripart.getGroupById(groupe);
+  }
   if (!groupe) groupe = {};
   // Nouveau guichet
   this.ripart.param.guichet = groupe.id_groupe;
