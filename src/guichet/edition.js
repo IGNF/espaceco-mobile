@@ -200,11 +200,13 @@ wapp.editFeature = function() {
               break;
             }
             case 'Integer': {
-              val = parseInt(input.value) || null;
+              val = parseInt(input.value);
+              if (isNaN(val)) val = null;
               break;
             }
             case 'Double': {
-              val = parseFloat(input.value) || null;
+              val = parseFloat(input.value);
+              if (isNaN(val)) val = null;
               break;
             }
             case 'DateTime': {
@@ -217,11 +219,10 @@ wapp.editFeature = function() {
               break;
             }
           }
-          if (feature.get(k) !== val) feature.set(k, val);
+          feature.set(k, val);
         }
       }
       wapp.showSelect();
-console.log(feature.layer.getSource())
     },
     parent: li
   });
