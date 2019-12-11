@@ -35,6 +35,7 @@ import ol_source_Cluster from 'ol/source/Cluster'
 import getCacheFileName from 'cordovapp/cordovapp/File'
 
 import config from './config';
+import { wappStorage } from 'cordovapp/cordovapp/CordovApp'
 
 /** Web application pour l'acces a l'espace collaboratif depuis un mobile.
  * 
@@ -77,7 +78,7 @@ import config from './config';
     // Layers de l'application
     wapp.initMap();
     // Affichage des layers
-    wapp.showLayers(this.param.layers);
+    wapp.showLayers();
 
     // Initialise les controls de la carte
     setControls(wapp);
@@ -199,15 +200,14 @@ import config from './config';
       lat: Math.round(pos[1]*100)/100, 
       zoom:zoom 
     };
-    localStorage['WebApp@position'] = JSON.stringify(position);
+    wappStorage('position', position);
   },
 
   /** Get the saved position
    * @return {ol.coordinate|null} the saved position or null if none
    */
   getPosition: function() {
-    if (localStorage['WebApp@position']) return JSON.parse(localStorage['WebApp@position']);
-    else return null;
+    return wappStorage('position') || null;
   },
 
   /** Save current position 
@@ -261,7 +261,7 @@ wapp.waitLogo = function(info, anim) {
   } else {
     var div = $("<div>").append($("<p>").text(info));
     try {
-      var profil = JSON.parse(localStorage["WebApp@ripart"]).profil
+      var profil = wappStorage('ripart').profil;
       this.getLogo(profil, function(logo) {
         $("<img>").attr('src', logo || "")
           .prependTo(div);
@@ -356,8 +356,12 @@ wapp.initParams = function() {
         if (wapp.ripart) {
           var qlf = /qlf/.test(wapp.ripart.getServiceUrl());
           if (e.val != qlf) {
-            if (e.val) wapp.ripart.setServiceUrl("https://qlf-collaboratif.ign.fr/collaboratif-develop/api/");
-            else wapp.ripart.setServiceUrl("https://espacecollaboratif.ign.fr/api/");
+            if (e.val) {
+              //wapp.ripart.setServiceUrl("https://qlf-collaboratif.ign.fr/collaboratif-develop/api/");
+              wapp.ripart.setServiceUrl("https://qlf-collaboratif.ign.fr/collaboratif-2.3/api/");
+            } else {
+              wapp.ripart.setServiceUrl("https://espacecollaboratif.ign.fr/api/");
+            }
             wapp.ripart.deconnect();
           }
         }
@@ -396,36 +400,6 @@ wapp.initRipart = function() {
       source: new ol_source_Vector(),
       name: "Mes signalements"
     }),
-    // Selection d'un signalement
-    onSelect: function(georem, add) {
-      var f = wapp.ripart.getFeature(georem);
-      wapp.select.getFeatures().clear();
-      wapp.select.selectFeature(f, wapp.ripart.layer);
-      wapp.showOnglet("info");
-      wapp.showSelect({ ripart: !add });
-    },
-    // Affichage du dialogue
-    onShow: function(form) { 
-      wapp.showPage('fiche', 'signal');
-      var f = wapp.select.getFeatures().item(0);
-      if (f && f.get('georem')) {
-        f = false;
-      }
-      wapp.select.getFeatures().clear();
-      wapp.ripart.addFeature(f);
-      var p = f ? ol_extent_getCenter(f.getGeometry().getExtent()) : wapp.map.getView().getCenter();
-      p = ol_proj_transform(p, wapp.map.getView().getProjection(),'EPSG:4326');
-      $("input.lon", form).val(p[0].toFixed(8));
-      $("input.lat", form).val(p[1].toFixed(8));
-      // Pas d'objets a ajouter ?
-      if (f || wapp.vector.length || wapp.overlays.gps.getSource().getFeatures().length) {
-        $(".addfeatures", wapp.ripart.formElement).show();
-      } else {
-        $(".addfeatures", wapp.ripart.formElement).hide();
-      }
-      // Ne plus selectionner
-      wapp.select.setActive(false);
-    }, 
     // Formatage du signalement / verification avant envoie
     formatGeorem: function(georem /*, form */) {
       if (!georem.comment) {
@@ -495,7 +469,39 @@ wapp.initRipart = function() {
   });
 
   wapp.ripart.on("changegroup", function(e){ wapp.changeGroup(e); });
+
+  // Selection d'un signalement
+  wapp.ripart.on('select', (e) => {
+    var f = wapp.ripart.getFeature(e.georem);
+    wapp.select.getFeatures().clear();
+    wapp.select.selectFeature(f, wapp.ripart.layer);
+    wapp.showOnglet("info");
+    wapp.showSelect({ ripart: !e.add });
+  });
     
+  // Affichage du dialogue 
+  wapp.ripart.on('show', (e) => { 
+    wapp.showPage('fiche', 'signal');
+    var f = wapp.select.getFeatures().item(0);
+    if (f && f.get('georem')) {
+      f = false;
+    }
+    wapp.select.getFeatures().clear();
+    wapp.ripart.addFeature(f);
+    var p = f ? ol_extent_getCenter(f.getGeometry().getExtent()) : wapp.map.getView().getCenter();
+    p = ol_proj_transform(p, wapp.map.getView().getProjection(),'EPSG:4326');
+    $("input.lon", e.form).val(p[0].toFixed(8));
+    $("input.lat", e.form).val(p[1].toFixed(8));
+    // Pas d'objets a ajouter ?
+    if (f || wapp.vector.length || wapp.overlays.gps.getSource().getFeatures().length) {
+      $(".addfeatures", wapp.ripart.formElement).show();
+    } else {
+      $(".addfeatures", wapp.ripart.formElement).hide();
+    }
+    // Ne plus selectionner
+    wapp.select.setActive(false);
+  });
+
   // Patience
   wapp.waitLogo ("Connexion...");
   
@@ -683,15 +689,11 @@ wapp.setDebugMode = function()
 
 /** Affichage des layers
  */
-wapp.showLayers = function(vislayers, layers) {
-  if (vislayers && vislayers.length) {
-    if (!layers) layers = this.map.getLayers().getArray();
-    for (var i=0; i<layers.length; i++) {
-      if ($.inArray(layers[i].get('name'), vislayers)>=0) layers[i].setVisible(true);
-      else layers[i].setVisible(false);
-      if (layers[i].getLayers) this.showLayers(vislayers, layers[i].getLayers().getArray());
-    }
-  }
+wapp.showLayers = function(layers) {
+  if (!layers) layers = this.map.getLayers().getArray();
+  layers.forEach((l) => {
+    wapp.testHiddenLayer(l);
+  });
 };
 
 /** Sauvegarder une trace GPS (selectionnee)

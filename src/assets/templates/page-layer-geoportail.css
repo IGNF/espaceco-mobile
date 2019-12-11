@@ -1,0 +1,41 @@
+.layerswitcher .panel li {
+  border: 1px solid #ccc;
+  box-shadow: 5px 5px 5px rgba(0,0,0,.5);
+  margin: 0 0 1em;
+  padding: .5em;
+}
+.layerswitcher .panel li.ol-header {
+  display: none;
+}
+
+.layerswitcher [type="checkbox"] + label:before{
+  font-family: "FontAwesome";
+  content: "\f070";
+  background: none;
+  border: 0;
+  color: #369;
+  font-size: 1.2em;
+  top: 0;
+  left: 0;
+}
+.layerswitcher [type="checkbox"]:checked + label:before {
+  content: "\f06e";
+}
+.layerswitcher [type="checkbox"]:checked + label:after {
+  content:none;
+}
+
+.layerswitcher .layerInfo {
+  text-shadow: none;
+  margin-left: .5em;
+}
+.layerswitcher .layerSynchro {
+  width: 1.6em;
+  height: 1.6em;
+  padding:.3em;
+}
+.layerswitcher .layerSynchro:before {
+  content: "\f021";
+  font-family: "FontAwesome";
+  text-shadow: none;
+}

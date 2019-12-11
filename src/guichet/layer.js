@@ -172,13 +172,10 @@ wapp.layerWebpart = function(l, cacheUrl, cacheExtent) {
 /** Test and hide hidden layers
  */
 wapp.testHiddenLayer = function(layer) {
-  var hiddenLayers = this.param.hidden || [];
-  for (var k=0; k<hiddenLayers.length; k++){
-    if (layer.get("name") == hiddenLayers[k]) {
-      layer.setVisible(false);
-      break;
-    }
-  }
+  // First time use default
+  if (!this.param.hidden) return;
+  // Test
+  layer.setVisible(this.param.hidden.indexOf(layer.get("name")) < 0);
   if (layer.getLayers) {
     layer.getLayers().forEach(function(l){
       wapp.testHiddenLayer(l);

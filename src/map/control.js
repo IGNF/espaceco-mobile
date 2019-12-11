@@ -20,6 +20,7 @@ import ol_style_Circle from 'ol/style/Circle'
 import ol_style_Stroke from 'ol/style/Stroke'
 import {ol_featureAnimation_Zoom} from 'ol-ext/featureanimation/Zoom'
 import {easeOut as ol_easing_easeOut} from 'ol/easing'
+import ol_layer_Geoportail from 'ol-ext/layer/Geoportail'
 
 // Center and pulse at coord
 function centerMap(coord) {
@@ -128,6 +129,22 @@ export default function(wapp) {
     }
   }));
 
+
+  //
+  var geoportailSwitcher = new ol_control_LayerSwitcher({ 
+    target: $("#layer-geoportail .layerswitcher").get(0), 
+    reordering: false,
+    displayInLayerSwitcher: (l) => {
+      return (
+        (l.get('name') === 'Fond de plan' || l instanceof ol_layer_Geoportail)
+        && l.get('displayInLayerSwitcher') !== false
+      );
+    }
+  });
+  
+  map.addControl (geoportailSwitcher);
+
+/* OLD VERSION */
   // Layer switcher
   var lswitcher = new ol_control_LayerSwitcher({ 
     target:$("#layerswitcher").get(0), 
@@ -158,6 +175,7 @@ export default function(wapp) {
   });
 
   map.addControl (lswitcher);
+/* END OLD */
 
   /*
   // Geolocation Control
