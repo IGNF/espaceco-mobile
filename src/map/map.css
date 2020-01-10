@@ -179,3 +179,10 @@
 .ol-search.IGNF-parcelle.ol-collapsed-list ul.autocomplete-page {
   display: block!important;
 }
+
+.ol-control.switcher {
+  top: .5em;
+  right: .5em;
+  left: auto;
+}
+

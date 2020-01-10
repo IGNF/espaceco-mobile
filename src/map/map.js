@@ -22,7 +22,7 @@ import config from '../config'
 import {dialog} from 'cordovapp/cordovapp/dialog'
 
 // Layer pour l'affichage du cache
-var layerCache = new ol_layer_Group({ title:"Cartes hors-ligne", name: "cache", displayInLayerSwitcher: false })
+var layerCache = new ol_layer_Group({ title: 'Cartes hors-ligne', name: 'cache', openInLayerSwitcher: true, displayInLayerSwitcher: false })
 layerCache.on('change', function() {
   if (layerCache.getLayers().getLength) layerCache.set('displayInLayerSwitcher', true);
 });
@@ -31,24 +31,24 @@ layerCache.on('change', function() {
 var layers = [
   // Fonds de plan
   new ol_layer_Group({
-    name:"Fond de plan",
+    name: 'Fond de plan',
     openInLayerSwitcher: true,
     layers: [
-      new ol_layer_Geoportail("GEOGRAPHICALGRIDSYSTEMS.MAPS", { baseLayer: true, hidpi: false, visible: true }, { gppKey: config.apiKey, authentication: config.auth }),
-      new	ol_layer_Geoportail("GEOGRAPHICALGRIDSYSTEMS.PLANIGN", { baseLayer: true, hidpi: false, visible: false }, { gppKey: config.apiKey, authentication: config.auth }),
-      new	ol_layer_Geoportail("ORTHOIMAGERY.ORTHOPHOTOS", { baseLayer: true, hidpi: false, visible: false}, { gppKey: config.apiKey, authentication: config.auth })
+      new ol_layer_Geoportail('GEOGRAPHICALGRIDSYSTEMS.MAPS', { baseLayer: true, hidpi: false, visible: true }, { gppKey: config.apiKey, authentication: config.auth }),
+      new	ol_layer_Geoportail('GEOGRAPHICALGRIDSYSTEMS.PLANIGN', { baseLayer: true, hidpi: false, visible: false }, { gppKey: config.apiKey, authentication: config.auth }),
+      new	ol_layer_Geoportail('ORTHOIMAGERY.ORTHOPHOTOS', { baseLayer: true, hidpi: false, visible: false}, { gppKey: config.apiKey, authentication: config.auth })
     ]
   }),
   // Layer pour l'affichage du cache
   layerCache,
   // Layer pour l'affichage des couches de l'utilisateur
-  new ol_layer_Group({ title:"Mes couches", name: "layerGroup", displayInLayerSwitcher: false }),
+  new ol_layer_Group({ title:'Mes couches', name: 'layerGroup', displayInLayerSwitcher: false }),
   // Overlays
-  new ol_layer_Geoportail("ELEVATION.ELEVATIONGRIDCOVERAGE.SHADOW", { gppKey: config.apiKey, hidpi: false, visible: false }, { gppKey: config.apiKey, authentication: config.auth }),
+  new ol_layer_Geoportail('ELEVATION.ELEVATIONGRIDCOVERAGE.SHADOW', { gppKey: config.apiKey, hidpi: false, visible: false }, { gppKey: config.apiKey, authentication: config.auth }),
 //		new ol_layer_Geoportail("BUILDINGS.BUILDINGS", { gppKey: config.apiKey, hidpi: false, visible: false }, { gppKey: config.apiKey, authentication: config.auth }),
-  new ol_layer_Geoportail("CADASTRALPARCELS.PARCELS", { gppKey: config.apiKey, hidpi: false, visible: false }, { gppKey: config.apiKey, authentication: config.auth }),
+  new ol_layer_Geoportail('CADASTRALPARCELS.PARCELS', { gppKey: config.apiKey, hidpi: false, visible: false }, { gppKey: config.apiKey, authentication: config.auth }),
 //		new ol_layer_Geoportail("TRANSPORTNETWORKS.ROADS", { gppKey: config.apiKey, hidpi: false, visible: false }, { gppKey: config.apiKey, authentication: config.auth }),
-  new ol_layer_Geoportail("GEOGRAPHICALGRIDSYSTEMS.MAPS.BDUNI.J1", { gppKey: config.apiKey, hidpi: false, visible: false }, { gppKey: config.apiKey, authentication: config.auth }),
+  new ol_layer_Geoportail('GEOGRAPHICALGRIDSYSTEMS.MAPS.BDUNI.J1', { gppKey: config.apiKey, hidpi: false, visible: false }, { gppKey: config.apiKey, authentication: config.auth }),
   // Couche INSPIRE adresse
   new ol_layer_Tile ({
     "name": "Adresses",
@@ -71,6 +71,7 @@ var layers = [
   new ol_layer_Vector({
     title: 'Carroyage DFCI',
     name: 'DFCI',
+    desc: 'Le « carroyage DFCI » est un système de maillage géographique utilisé en France par les acteurs de la Défense des Forêts Contre les Incendies (DFCI).',
     source: new ol_source_DFCI(),
     renderMode:'image',
     visible: false,
@@ -97,9 +98,9 @@ var layers = [
     }
   }),
   // Layer pour l'affichage des couches du groupe
-  new ol_layer_Group({ title:"Mes couches", name: "groupe", displayInLayerSwitcher: false }),
+  new ol_layer_Group({ title:'Mes couches', name: 'groupe', displayInLayerSwitcher: false }),
   // Layer pour l'affichage du guichet
-  new ol_layer_Group({ title:"Mon guichet", name: "guichet", visible: true })
+  new ol_layer_Group({ title:'Mon guichet', name: 'guichet', visible: true })
 ];
 
 // The map
@@ -136,7 +137,8 @@ function checkVisible(layers) {
   });
   return visible;
 }
-$('#layers').on('hidepage', function() {
+
+$('#layer-geoportail').on('hidepage', function() {
   if (!checkVisible()) {
     dialog.show (
       "Toutes les couches sont masquées.<br/>"

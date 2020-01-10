@@ -21,6 +21,7 @@ import ol_style_Stroke from 'ol/style/Stroke'
 import {ol_featureAnimation_Zoom} from 'ol-ext/featureanimation/Zoom'
 import {easeOut as ol_easing_easeOut} from 'ol/easing'
 import ol_layer_Geoportail from 'ol-ext/layer/Geoportail'
+import ol_ext_element from 'ol-ext/util/element'
 
 // Center and pulse at coord
 function centerMap(coord) {
@@ -130,19 +131,123 @@ export default function(wapp) {
   }));
 
 
-  //
-  var geoportailSwitcher = new ol_control_LayerSwitcher({ 
+  // Selecteur fond geoportail
+  const geoportailSwitcher = new ol_control_LayerSwitcher({ 
     target: $("#layer-geoportail .layerswitcher").get(0), 
-    reordering: false,
+    reordering: true,
     displayInLayerSwitcher: (l) => {
       return (
-        (l.get('name') === 'Fond de plan' || l instanceof ol_layer_Geoportail)
-        && l.get('displayInLayerSwitcher') !== false
+        (/DFCI|cache|Fond\ de\ plan/.test(l.get('name')) || l instanceof ol_layer_Geoportail)
+        && 
+        l.get('displayInLayerSwitcher') !== false
       );
+    }
+  });
+  geoportailSwitcher.on('drawlist', (e) => {
+    const div = ol_ext_element.create('DIV', {
+      className: 'icn-bar',
+      parent: e.li
+    });
+    // Gestion du cache geoportail
+    if (e.layer.get('name') === 'cache') {
+      e.li.className += ' cache';
+      // Add
+      ol_ext_element.create('I', {
+        className: 'fa fa-plus-circle',
+        click: () => {
+          wapp.cache.addCacheMap();
+        },
+        parent: div
+      });
+      // Info sur la carte
+      ol_ext_element.create('I', {
+        className: 'fa fa-info-circle',
+        click: () => {
+          var content = CordovApp.template('dialog-infocache');
+          wapp.dialog.show (content, {
+            buttons: { ok:'ok' }
+          });
+        },
+        parent: div
+      });
+    } else if (e.layer.get('cacheMap')) {
+      // Carte en cache
+      const smap = e.layer.get('cacheMap');
+      ol_ext_element.create('P', {
+        html: smap.date,
+        parent: div
+      });
+      // Refresh
+      ol_ext_element.create('I', {
+        className: 'fa fa-refresh',
+        click: () => {
+          wapp.cache.refreshCacheMap(smap);
+        },
+        parent: div
+      });
+      // Download
+      ol_ext_element.create('I', {
+        className: 'fa fa-cloud-download',
+        click: () => {
+          wapp.cache.loadCacheMap(smap);
+        },
+        parent: div
+      });
+      // Options
+      ol_ext_element.create('I', {
+        className: 'fa fa-gear',
+        click: () => {
+          wapp.prompt('Nom de la carte', smap.nom, (name) => {
+            if (name) {
+              smap.nom = name;
+              e.layer.set('title', name);
+            }
+          });
+        },
+        parent: div
+      });
+      // Suppr
+      ol_ext_element.create('I', {
+        className: 'fa fa-trash',
+        click: () => {
+          wapp.cache.removeCacheMap(smap);
+        },
+        parent: div
+      });
+      // Info sur la carte
+      ol_ext_element.create('I', {
+        className: 'fa fa-info-circle',
+        click: () => {
+          var content = CordovApp.template('dialog-infomap');
+          wapp.dataAttributes(content, smap)
+          wapp.dialog.show (content, {
+            title: e.layer.get('title'),
+            buttons: { ok:'ok' }
+          });
+        },
+        parent: div
+      });
+    } else if (e.layer.get('desc')) {
+      // Description
+      ol_ext_element.create('I', {
+        className: 'fa fa-info-circle',
+        click: () => {
+          wapp.message(e.layer.get('desc'), '<i class="fa fa-info-circle fa-2x"></i> '+e.layer.get('title'));
+        },
+        parent: div
+      });
     }
   });
   
   map.addControl (geoportailSwitcher);
+
+  map.addControl (new ol_control_Toggle({
+    className: 'switcher',
+    html: '<i class="fa tools-layerstack"></i>',
+    onToggle: () => {
+      wapp.togglePage('couches');
+    }
+  }));
 
 /* OLD VERSION */
   // Layer switcher

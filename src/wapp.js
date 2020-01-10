@@ -215,17 +215,21 @@ import { wappStorage } from 'cordovapp/cordovapp/CordovApp'
   */
   saveContext: function() {
     this.savePosition();
-    var layers=[], hidden=[]; 
+    var visible = {};
     function saveVisibility(lays) {
       lays.forEach(function(l) {
-        if (l.getVisible() && l.get('name')) layers.push(l.get('name'));
-        else if (l.get('name')) hidden.push(l.get('name'));
+        if (l.get('name')) {
+          visible[l.get('name')] = l.getVisible();
+        }
         if (l.getLayers) saveVisibility(l.getLayers());
       });
     }
     saveVisibility(wapp.map.getLayers());
-    this.param['layers'] = layers;
-    this.param['hidden'] = hidden;
+    // Old_Struct
+    delete this.param.layers;
+    delete this.param.hidden;
+    // end Old_Struct
+    this.param.visibleLayers = visible;
     this.saveParam();
   },
 
