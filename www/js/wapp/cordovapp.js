@@ -129,6 +129,8 @@ var CordovApp = function(obj)
 
 		// Close splashscreen (if any)
 		if (navigator.splashscreen) navigator.splashscreen.hide();
+
+		self.checkInfo();
 	};
 
 

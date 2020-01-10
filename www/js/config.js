@@ -9,7 +9,7 @@ apiKey = "2wd9sfsi5hews9yxcr95i6br";
 auth = 'Z3VpY2hldDpFc3BhY2VDMDgwNjk=';
 
 // App version
-CordovApp.prototype.version = "1.1.11a";
+CordovApp.prototype.version = "1.1.12";
 
 // Autoconfig GPP
 geoportailConfig.capabilities['default']=

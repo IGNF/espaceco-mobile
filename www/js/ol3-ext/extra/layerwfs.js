@@ -153,6 +153,15 @@ ol.style.Style.WFS = function(options) {
   // Style function on feature properties
 	return function(feature, resolution) {
 
+    /*
+    var prop = feature.getProperties();
+    for (var p in prop) {
+      if (/symb__/.test(p)) {
+        feature.set(p.replace('symb__', 'symb@'), feature.get(p));
+      }
+    }
+    */
+
     if (feature.wfsStyle) return feature.wfsStyle;
     // Calculate style
     if (feature.get(attr('symb@sColor'))) {

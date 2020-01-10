@@ -36,6 +36,7 @@ ol.inherits(ol.control.SearchFeature, ol.control.Search);
 *	@api
 */
 ol.control.SearchFeature.prototype.getTitle = function (f) {
+  if (!f || !f.get) return '';
   return f.get(this.get('property')||'name');
 };
 /** Return the string to search in
