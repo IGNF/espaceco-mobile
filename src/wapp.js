@@ -633,12 +633,17 @@ wapp.changeGroup = function (e) {
   // Verifier les layers disponibles
   if (e.group) {
     var layers = e.group.layers;
-    for (var i=0, l; l = layers[i]; i++) {
+    layers.forEach((l) => {
       if (l.type=="WMS") {
         var extent = l.extent;
         extent = ol_proj_transformExtent(extent, "EPSG:4326", "EPSG:3857");
+        console.log(l);
         var wmsParam = {
           "title": l.nom,
+          'name': 'groupe_'+ l.layer,
+          visible: wapp.param.visibleLayers['groupe_'+ l.layer],
+          description: l.description,
+          query: !!l.getFeatureInfoMask,
           "logo": e.group.logo,
           "extent": extent[0] ? extent : undefined,
           "minResolution": new ol_View({ zoom: l.maxzoom }).getResolution(),
@@ -656,9 +661,13 @@ wapp.changeGroup = function (e) {
             "attributions": [e.group.nom]
           })
         };
-        lgroup.getLayers().push( new ol_layer_Tile (wmsParam) );
+        const layer = new ol_layer_Tile (wmsParam);
+        layer.on('change:visible', (e) => {
+          wapp.saveContext();
+        });
+        lgroup.getLayers().push( layer );
       }
-    }
+    });
     lgroup.set('title', e.group.nom);
   }
   // Afficher ?

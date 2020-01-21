@@ -130,6 +130,47 @@ export default function(wapp) {
     }
   }));
 
+  // Selecteur Carte utilisateur
+  $('#layer-carte').on('showpage', () => {
+    var lgroup = wapp.map.getLayers().getArray().find((l) => { return l.get('name') === 'groupe' });
+    console.log(lgroup)
+    if (lgroup.getLayers().getLength()) {
+      $('#layer-carte').addClass('hascarte');
+    } else {
+      $('#layer-carte').removeClass('hascarte');
+    }
+  });
+  const userlayerSwitcher = new ol_control_LayerSwitcher({ 
+    target: $("#layer-carte .layerswitcher").get(0), 
+    reordering: true,
+    displayInLayerSwitcher: (l) => {
+      return (
+        (l.get('name')==='groupe' || /^groupe_/.test(l.get('name')))
+        && 
+        l.get('displayInLayerSwitcher') !== false
+      );
+    }
+  });
+  userlayerSwitcher.on('drawlist', (e) => {
+    const div = ol_ext_element.create('DIV', {
+      className: 'icn-bar',
+      parent: e.li
+    });
+    // Info sur la carte
+    ol_ext_element.create('I', {
+      className: 'fa fa-info-circle',
+      click: () => {
+        var content = CordovApp.template('dialog-infocarte');
+        wapp.dataAttributes(content, e.layer.getProperties());
+        console.log( e.layer.getProperties())
+        wapp.dialog.show (content, {
+          buttons: { ok:'ok' }
+        });
+      },
+      parent: div
+    });
+  });
+  map.addControl (userlayerSwitcher);
 
   // Selecteur fond geoportail
   const geoportailSwitcher = new ol_control_LayerSwitcher({ 
@@ -152,19 +193,23 @@ export default function(wapp) {
     if (e.layer.get('name') === 'cache') {
       e.li.className += ' cache';
       // Add
-      ol_ext_element.create('I', {
-        className: 'fa fa-plus-circle',
-        click: () => {
-          wapp.cache.addCacheMap();
-        },
-        parent: div
-      });
+      if (wapp.ripart.param.offline) {
+        ol_ext_element.create('I', {
+          className: 'fa fa-plus-circle',
+          click: () => {
+            wapp.cache.addCacheMap();
+          },
+          parent: div
+        });
+      }
       // Info sur la carte
       ol_ext_element.create('I', {
         className: 'fa fa-info-circle',
         click: () => {
           var content = CordovApp.template('dialog-infocache');
+          content.addClass(wapp.ripart.param.offline ? 'offline' : 'online');
           wapp.dialog.show (content, {
+            title: 'Mode hors-ligne',
             buttons: { ok:'ok' }
           });
         },
@@ -241,6 +286,7 @@ export default function(wapp) {
   
   map.addControl (geoportailSwitcher);
 
+  // Acces aux couches
   map.addControl (new ol_control_Toggle({
     className: 'switcher',
     html: '<i class="fa tools-layerstack"></i>',

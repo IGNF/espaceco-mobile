@@ -9,7 +9,6 @@
     </author>
     <content src="index.html" />
     <icon src="www/img/logo.png" />
-    <preference name="AppendUserAgent" value="/Esp@ceC08069" />
     <preference name="BackupWebStorage" value="none" />
     <allow-navigation href="*://*.ign.fr/*" />
     <access origin="*" />
@@ -52,21 +51,6 @@
     <platform name="windows">
         <preference name="windows-target-version" value="10.0" />
     </platform>
-    <plugin name="cordova-plugin-camera" spec="^2.4.1">
-        <variable name="CAMERA_USAGE_DESCRIPTION" value="pour illustrer vos contributions" />
-        <variable name="PHOTOLIBRARY_USAGE_DESCRIPTION" value="pour illustrer vos contributions" />
-    </plugin>
-    <plugin name="cordova-plugin-whitelist" spec="1" />
-    <plugin name="cordova-plugin-file-transfer" spec="^1.7.1" />
-    <plugin name="cordova-plugin-dialogs" spec="^2.0.1" />
-    <plugin name="cordova-plugin-camera" spec="^4.0.3" />
-    <plugin name="cordova-plugin-geolocation" spec="^4.0.1">
-        <variable name="GEOLOCATION_USAGE_DESCRIPTION" value="pour localiser vos signalements" />
-    </plugin>
-    <plugin name="cordova-plugin-inappbrowser" spec="^3.0.0" />
-    <plugin name="cordova-plugin-network-information" spec="^2.0.1" />
     <hook src="scripts/parcel.js" type="before_build" />
     <hook src="scripts/parcel.js" type="before_run" />
-    <plugin name="cordova-plugin-bluetooth-geolocation" spec="https://github.com/heigeo/cordova-plugin-bluetooth-geolocation" />
-    <engine name="android" spec="^7.0.0" />
 </widget>

@@ -126,6 +126,12 @@ div.debug,
 	background: #fff;
 }
 
+/** FontaAwesome */
+.fa-fleft {
+	float: left;
+	margin-right: .5em;
+}
+
 /** Boutton */
 .button
 {	background-color: #369;

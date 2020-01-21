@@ -98,7 +98,7 @@ var layers = [
     }
   }),
   // Layer pour l'affichage des couches du groupe
-  new ol_layer_Group({ title:'Mes couches', name: 'groupe', displayInLayerSwitcher: false }),
+  new ol_layer_Group({ title:'Mes couches', name: 'groupe', displayInLayerSwitcher: false, openInLayerSwitcher: true }),
   // Layer pour l'affichage du guichet
   new ol_layer_Group({ title:'Mon guichet', name: 'guichet', visible: true })
 ];

@@ -1,32 +1,32 @@
-#layer-geoportail .icn-bar {
+.ol-layerswitcher .panel li > div.icn-bar {
   display: block;
   text-align: right;
   background-color: #eee;
   margin: 0 -.5em -.5em;
   clear: both;
 }
-#layer-geoportail .icn-bar > i {
+.ol-layerswitcher .icn-bar > i {
   position: relative;
   width: 2em;
   display: inline-block;
   text-align: center;
   padding: .25em 0;
 }
-#layer-geoportail .icn-bar p {
+.ol-layerswitcher .icn-bar p {
   position: absolute;
   margin: 0;
-  max-width: calc(100% - 8em);
+  max-width: calc(100% - 10em);
   overflow: hidden;
   white-space: nowrap;
 }
-#layer-geoportail .ol-layerswitcher .panel {
+.ol-layerswitcher .panel {
   font-size: 1em;
 }
-#layer-geoportail .ol-layerswitcher .li-content {
+.ol-layerswitcher .li-content {
   font-size: 1.2em;
   width: calc(100% - 2em);
 }
-#layer-geoportail .ol-layerswitcher .layerup {
+.ol-layerswitcher .layerup {
   background-color: transparent;
   color: #333;
   opacity: 1
@@ -147,5 +147,13 @@
 }
 .ol-layerswitcher .panel ul {
   overflow: visible;
+  padding: 0;
 }
 
+/* Dialog */
+[data-page="layer-geoportail"] [data-role="dialog"] .offline .online {
+  display: none;
+}
+[data-page="layer-geoportail"] [data-role="dialog"] .online .offline {
+  display: none;
+}
