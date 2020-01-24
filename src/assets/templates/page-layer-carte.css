@@ -1,20 +1,3 @@
-#layer-carte .ol-layer-group {
-  border: 0;
-  margin: 0;
-  padding: 0;
-  box-shadow: none;
-}
-#layer-carte .ol-layerswitcher > ul {
-  margin:0;
-  padding: 0;
-}
-#layer-carte .ol-layerswitcher > ul > li > * {
-  display: none;
-}
-#layer-carte .ol-layerswitcher > ul ul {
-  display: block;
-}
-
 #layer-carte.hascarte .nocarte {
   display: none;
 }

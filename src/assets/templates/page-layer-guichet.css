@@ -1,0 +1,40 @@
+#layer-guichet .guichet {
+  text-align: right;
+}
+#layer-guichet .guichet img {
+  display: inline-block;
+  vertical-align: middle;
+  max-width: 5em;
+  max-height: 3em;
+  margin-left: .5em;
+}
+#layer-guichet .guichet h3 {
+  margin: 0;
+  display: inline-block;
+}
+#layer-guichet .guichet .button {
+  margin: .5em .3em;
+}
+
+#layer-guichet .guichet .toggle {
+  display: none;
+}
+#layer-guichet .guichet.offline .toggle {
+  display: inline;
+}
+
+#layer-guichet .layerswitcher .ol-layer-group > .ol-layerswitcher-buttons,
+#layer-guichet .layerswitcher .ol-layer-group {
+  display: none;
+}
+#layer-guichet .layerswitcher .ol-layer-group.visible {
+  display: block;
+}
+
+#layer-guichet .layerswitcher .ol-layer-group > .li-content label {
+  padding: 0;
+}
+#layer-guichet .layerswitcher .ol-layer-group > .li-content label::before,
+#layer-guichet .layerswitcher .ol-layer-group > .li-content label::after {
+  content: none;
+}

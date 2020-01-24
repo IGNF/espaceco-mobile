@@ -73,7 +73,9 @@ wapp.initGuichets = function() {
 /** Afficher les infos du guichet
  * @param {} groupe
  */
-wapp.showGuichetInfo = function (groupe){
+wapp.showGuichetInfo = function (groupe) {
+
+console.log('[DEPRECATED: showInfoGuichet');
 
   var hasOffline = false;
   /* VNF PATCH */
@@ -168,7 +170,6 @@ wapp.showGuichetInfo = function (groupe){
   else $(".auth", page).hide();
 };
 
-
 /** Guichet en cours de modification
 */
 wapp.setGuichet = function(groupe) {
@@ -182,12 +183,45 @@ wapp.setGuichet = function(groupe) {
   wapp.select.getFeatures().clear();
   wapp.onSelect();
   // Mettre a jour la liste
+console.log('[DEPRECATED] setGuichet');
   $('#cartes [data-list="guichets"] ul.guichet li').each(function() {
     if ($(this).data('groupe')===groupe) $(this).addClass('selected');
     else $(this).removeClass('selected');
   });
+  // Mettre a jour le guichet
+  wapp.setInfoGuichet(groupe);
+  // Charger les couches
   wapp.loadLayers(groupe);
 };
+
+
+/** Affichage des infos du guichet
+ */
+wapp.setInfoGuichet = function(groupe) {
+  var content = document.querySelector('#layer-guichet .guichet');
+  console.log(groupe);
+  var hasOffline = false;
+
+  /* VNF PATCH */
+  hasOffline = groupe.id_groupe===200 || groupe.id_groupe===13 || groupe.id_groupe===375 || $('.debug').css('display')!=='none';
+  console.log('Hide offline', groupe.id_groupe, hasOffline);
+  /**/
+  if (hasOffline) {
+    content.classList.add('offline');
+  } else {
+    content.classList.remove('offline');
+  }
+
+  // Affichage du groupe
+  wapp.vectorCache.setCurrentGuichet(groupe);
+  $('img', content).hide();
+  wapp.getLogo(groupe, function(src) {
+    $('img', content).attr('src',src).show();
+  });
+  $('h3', content).text(groupe.nom);
+
+};
+
 
 /**
  * Guichet en cours
@@ -195,7 +229,6 @@ wapp.setGuichet = function(groupe) {
 wapp.getIdGuichet = function(){
   return this.ripart.param.guichet;
 };
-
 
 /** Envoyer le signalements courant
 */

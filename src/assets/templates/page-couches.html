@@ -1,22 +1,21 @@
 <div data-role="header" data-back-button="true">Mes couches</div>
-<div data-role="content">
+<div data-role="content" class="couches">
 
   <div class="couche">
-    <h2 onclick="wapp.showPage('signalements');">
+    <h2 onclick="wapp.showPage('layer-signalement');">
       <i class="fa fa-eye"></i> Signalements
     </h2>
     <div class="icn-bar">
-      <i class="fa fa-eye" onclick="wapp.showPage('signalements');">
       </i><i class="fa fa-filter">
-      </i><i class="fa fa-send">
+      </i><i class="fa fa-send" onclick="wapp.ripart.postLocalRems();">
         <div class="georemsCount tag"><span></span></div>
-      </i><i class="fa fa-gear">
-      </i><i class="fa fa-info-circle">
+      </i><i class="fa fa-gear" onclick="wapp.showPage('signalements');">
+      </i><i class="fa fa-info-circle" onclick="wapp.showDialog('dialog-info-signalements');">
       </i>
   </div></div>
 
-  <div class="couche" onclick="wapp.showPage('layer-guichet');">
-    <h2>
+  <div class="couche">
+    <h2 onclick="wapp.showPage('layer-guichet');">
       <i class="fa fa-eye"></i> Guichet
     </h2>
     <div class="icn-bar">
@@ -24,19 +23,19 @@
       </i><i class="fa fa-cloud-download">
       </i><i class="fa fa-refresh">
       </i><i class="fa fa-gear">
-      </i><i class="fa fa-info-circle">
+      </i><i class="fa fa-info-circle"  onclick="wapp.showDialog('dialog-info-guichets');">
       </i>
   </div></div>
 
-  <div class="couche" onclick="wapp.showPage('layer-carte');">
-    <h2>
+  <div class="couche">
+    <h2 onclick="wapp.showPage('layer-carte');">
       <i class="fa fa-eye"></i> Mes cartes
     </h2>
     <div class="icn-bar">
       <i class="fa fa-search">
       </i><i class="fa fa-cloud-download">
       </i><i class="fa fa-gear">
-      </i><i class="fa fa-info-circle">
+      </i><i class="fa fa-info-circle" onclick="wapp.showDialog('dialog-info-cartes');">
       </i>
   </div></div>
   
@@ -46,7 +45,7 @@
     </h2>
     <div class="icn-bar">
       <i class="fa fa-gear">
-      </i><i class="fa fa-info-circle">
+      </i><i class="fa fa-info-circle" onclick="wapp.showDialog('dialog-info-geoportail');">
       </i>
   </div></div>
 

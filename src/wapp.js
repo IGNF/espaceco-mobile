@@ -392,6 +392,22 @@ wapp.initMap = function() {
 wapp.initRipart = function() {
   var self = this;
 
+  var layer = new ol_layer_Vector({
+    source: new ol_source_Vector(),
+    name: "Mes signalements"
+  });
+  // Gestion vivibilite
+  $('#layer-signalement .signalements .fa-eye').get(0).addEventListener('click', (e) => {
+    layer.set('visible', !layer.get('visible'));
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    e.preventDefault();
+  }, true);
+  layer.on('change:visible', () => {
+    if (layer.get('visible')) $('#layer-signalement .signalements .fa-eye').removeClass('fa-eye-slash');
+    else $('#layer-signalement .signalements .fa-eye').addClass('fa-eye-slash');
+  });
+
   // RIPart
   this.ripart = new RIPart({
     url: this.param.options.qlf ? "https://qlf-collaboratif.ign.fr/collaboratif-develop/api/" : null,
@@ -400,10 +416,7 @@ wapp.initRipart = function() {
     countElement: '.georemsCount span',
     listElement: '#signalements [data-role="content"]',
     formElement: '#fiche .signaler',
-    layer: new ol_layer_Vector({
-      source: new ol_source_Vector(),
-      name: "Mes signalements"
-    }),
+    layer: layer,
     // Formatage du signalement / verification avant envoie
     formatGeorem: function(georem /*, form */) {
       if (!georem.comment) {
@@ -615,6 +628,15 @@ wapp.layerRipart = function () {
     })
   });
   map.addLayer(signalements);
+  // Gestion visibilite
+  wapp.toggleRipart = function() {
+    signalements.set('visible', !signalements.get('visible'));
+  };
+  signalements.on('change:visible', () => {
+    if (signalements.get('visible')) $('#layer-signalement .ripart .fa-eye').removeClass('fa-eye-slash');
+    else $('#layer-signalement .ripart .fa-eye').addClass('fa-eye-slash');
+  });
+
   wapp.testHiddenLayer(signalements);
 
   signalements.setStyle(georemStyle);

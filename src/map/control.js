@@ -130,10 +130,103 @@ export default function(wapp) {
     }
   }));
 
+  // Selecteur Guichets
+  const guichetlayerSwitcher = new ol_control_LayerSwitcher({ 
+    target: document.querySelector('#layer-guichet .layerswitcher.online'), 
+    reordering: true,
+    layerGroup: wapp.getLayerGuichet()
+  });
+  map.addControl (guichetlayerSwitcher);
+  guichetlayerSwitcher.on('drawlist', (e) => {
+    var layer = e.layer;
+    if (wapp.getIdGuichet() + '-0' === layer.get('name')) {
+      e.li.classList.add('online');
+    } else {
+      e.li.classList.add('offline');
+    }
+    e.li.classList.add('visible');
+    if (layer.getLayers) {
+      // Force expend
+      layer.set('openInLayerSwitcher', true);
+      // Hide 
+      if (!e.layer.getVisible()) e.li.classList.remove('visible');
+    }
+    console.log(layer)
+    // Boutons
+    const div = ol_ext_element.create('DIV', {
+      className: 'icn-bar',
+      parent: e.li
+    });
+    // VectorCache
+    if (layer.get('cache')) {
+      ol_ext_element.create('I', {
+        className: 'fa fa-pencil',
+        click: () => {
+          console.log(layer)
+        },
+        parent: div
+      });
+      ol_ext_element.create('I', {
+        className: 'fa fa-refresh',
+        click: () => {
+          console.log(layer)
+        },
+        parent: div
+      });
+      ol_ext_element.create('I', {
+        className: 'fa fa-cloud-download',
+        click: () => {
+          console.log(layer)
+        },
+        parent: div
+      });
+      ol_ext_element.create('I', {
+        className: 'fa fa-gear',
+        click: () => {
+          console.log(layer)
+        },
+        parent: div
+      });
+    }
+    // Info sur la carte
+    ol_ext_element.create('I', {
+      className: 'fa fa-info-circle',
+      click: () => {
+        console.log(layer)
+      },
+      parent: div
+    });
+  });
+  // Gestion de la visibilite
+  var toggle = document.querySelector('#layer-guichet .guichet .toggle input');
+  toggle.addEventListener('change', () => {
+    var layer = wapp.getLayerGuichet();
+    if (layer.getLayers) {
+      if (toggle.checked) {
+        layer.getLayers().item(1).setVisible(false);
+        layer.getLayers().item(0).setVisible(true);
+      } else {
+        layer.getLayers().item(1).setVisible(true);
+        layer.getLayers().item(0).setVisible(false);
+      }
+    }
+  });
+  wapp.getLayerGuichet().on('change', () => {
+    setTimeout(() => {
+      var layer = wapp.getLayerGuichet();
+      if (layer.getLayers) {
+        var layers = layer.getLayers();
+        if (!layers.item(0).getVisible() && !layers.item(1).getVisible()) {
+          layers.item(1).setVisible(true);
+        }
+        toggle.checked = layers.item(0).getVisible();
+      }
+    }, 0);
+  });
+
   // Selecteur Carte utilisateur
   $('#layer-carte').on('showpage', () => {
     var lgroup = wapp.map.getLayers().getArray().find((l) => { return l.get('name') === 'groupe' });
-    console.log(lgroup)
     if (lgroup.getLayers().getLength()) {
       $('#layer-carte').addClass('hascarte');
     } else {
@@ -143,13 +236,7 @@ export default function(wapp) {
   const userlayerSwitcher = new ol_control_LayerSwitcher({ 
     target: $("#layer-carte .layerswitcher").get(0), 
     reordering: true,
-    displayInLayerSwitcher: (l) => {
-      return (
-        (l.get('name')==='groupe' || /^groupe_/.test(l.get('name')))
-        && 
-        l.get('displayInLayerSwitcher') !== false
-      );
-    }
+    layerGroup: wapp.map.getLayers().getArray().find((l) => { return l.get('name') === 'groupe' })
   });
   userlayerSwitcher.on('drawlist', (e) => {
     const div = ol_ext_element.create('DIV', {
@@ -264,7 +351,18 @@ export default function(wapp) {
         className: 'fa fa-info-circle',
         click: () => {
           var content = CordovApp.template('dialog-infomap');
-          wapp.dataAttributes(content, smap)
+          var layerName = new ol_layer_Geoportail(smap.layer).get('name')
+          var att = $.extend({ name: layerName }, smap);
+          wapp.dataAttributes(content, att);
+          $('.centermap', content).get(0).addEventListener('click', () => {
+            wapp.map.getView().fit(smap.extent, wapp.map.getSize());
+            wapp.hidePage();
+            wapp.dialog.close();
+          });
+          $('.loadmap', content).get(0).addEventListener('click', () => {
+            wapp.cache.loadCacheMap(smap);
+            wapp.dialog.close();
+          });
           wapp.dialog.show (content, {
             title: e.layer.get('title'),
             buttons: { ok:'ok' }
