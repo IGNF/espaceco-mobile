@@ -191,3 +191,10 @@
   left: auto;
 }
 
+[data-role="dialog"].layerInfo img {
+  width: 128px;
+  height: 128px;
+  box-shadow: 1px 1px 5px;
+  float: left;
+  margin-right: .5em;
+}
