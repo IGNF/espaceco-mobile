@@ -155,7 +155,7 @@ wapp.layerWebpart = function(l, cacheUrl, cacheExtent) {
     checkSourceOptions: function (options, featureType) {
       // console.log(featureType.fullName, featureType.tileZoomLevel, '-', featureType.minZoomLevel-2)
       // Limiter la taille des tuilles en fonction du minZoom
-      options.tileZoom = featureType.tileZoomLevel || Math.max(featureType.minZoomLevel-2, 4);
+      options.tileZoom = featureType.tileZoomLevel; //|| Math.max(featureType.minZoomLevel-2, 4);
     }.bind(this)
   },{
     preserved: this.select.getFeatures(),
@@ -175,7 +175,7 @@ wapp.testHiddenLayer = function(layer) {
   // First time use default
   if (!this.param.visibleLayers) return;
   // Test
-  layer.setVisible(this.param.visibleLayers[layer.get("name")]);
+  layer.setVisible(this.param.visibleLayers[layer.get("name")] !== false);
   if (layer.getLayers) {
     layer.getLayers().forEach(function(l){
       wapp.testHiddenLayer(l);
@@ -212,95 +212,78 @@ wapp.loadLayers = function (groupe) {
   // Layers en cache
   var cache = wapp.vectorCache.getLayers(groupe);
   if (cache.length) {
-    var c = new ol_layer_Group({ 
-      title: guichet.get('title')+' (en ligne)', 
-      name: groupe.id_groupe+'-0',
-      baseLayer: true 
+    cache[0].getLayers().forEach((l) => {
+      guichet.getLayers().push(l);
+      wapp.testHiddenLayer(l);
     });
-    guichet.set('openInLayerSwitcher', true);
-    wapp.testHiddenLayer(c);
-    var visible = c.getVisible();
-    for (i=0; i<cache.length; i++) {
-      // Un seul visible
-      wapp.testHiddenLayer(cache[i]);
-      if (!visible) visible = cache[i].getVisible();
-      else cache[i].setVisible(false);
-      guichet.getLayers().push(cache[i]);
-    }
-    guichet.getLayers().push(c);
-    // Clear selection on visibility change
-    guichet.getLayers().forEach((l) => {
-      l.on('change:visible', () => {
-        wapp.select.getFeatures().clear();
-      });
-    });
-    guichet = c;
-  }
+  } else {
+    // Chargement des guichets en ligne
+    var nb=0, nbLoad=0;
+    var loading = {};
 
-  // Chargement
-	var nb=0, nbLoad=0;
-	var loading = {};
-	// Reset source pour la recherche
-	wapp.setSearchSource ();
-  // Ajouter les layers du guichet
-  var l;
-	for (i=0; l=groupe.layers[i]; i++) {
-    if (l.type=="WFS") {
-      nb++;
-			var vector;
-			// WFS externe
-			if (l.external) vector = wapp.layerWFS(groupe, l);
-			// Guichet
-      else vector = wapp.layerWebpart(l);
+    // Ajouter les layers du guichet
+    var l;
+    for (i=0; l=groupe.layers[i]; i++) {
+      if (l.type=="WFS") {
+        nb++;
+        var vector;
+        // WFS externe
+        if (l.external) vector = wapp.layerWFS(groupe, l);
+        // Guichet
+        else vector = wapp.layerWebpart(l);
 
-      // Ajouter
-      this.vector.push(vector);
-      wapp.testHiddenLayer(vector);
-      guichet.getLayers().push(vector);
+        // Ajouter
+        this.vector.push(vector);
+        wapp.testHiddenLayer(vector);
+        guichet.getLayers().push(vector);
 
-      // Probleme au chargement
-      vector.on("error", function(e){
-        if (e.status===401) {
-          wapp.message ("Impossible de charger la couche <i>"
-              +(this.get('name')||this.get('title'))
-              +"</i>.<i class='error'><br/>"+e.status+" - "+e.error+"</i>",
-            "Connexion", { ok:"ok" });
-        } else {
-          wapp.alert ("Impossible de charger la couche <i>"
-              +(this.get('name')||this.get('title'))
-              +"</i>.<i class='error'><br/>"+e.status+" - "+e.error+"</i>");
-        }
-        return;
-      });
-
-      // Chargement OK > gerer load / overload
-      vector.on("ready", function(){
-        // Marquer le layer sur l'objet
-        this.getSource().on('addfeature', function (e) {
-          e.feature.layer = this; 
-        }.bind(this));
-        // Ooops probleme d'overload
-        this.getSource().on('overload', function () {
-          wapp.notification("overloading...");
+        // Probleme au chargement
+        vector.on("error", function(e){
+          if (e.status===401) {
+            wapp.message ("Impossible de charger la couche <i>"
+                +(this.get('name')||this.get('title'))
+                +"</i>.<i class='error'><br/>"+e.status+" - "+e.error+"</i>",
+              "Connexion", { ok:"ok" });
+          } else {
+            wapp.alert ("Impossible de charger la couche <i>"
+                +(this.get('name')||this.get('title'))
+                +"</i>.<i class='error'><br/>"+e.status+" - "+e.error+"</i>");
+          }
+          return;
         });
-				// Notification de chargement
-				this.getSource().on(['loadstart', 'loadend'], function (e) {
-					loading[e.target.getFeatureType().fullName] = e.remains;
-					var remains=0;
-					for (var i in loading) remains += loading[i];
-					if (remains) {
-						wapp.notification("<i class='blinking'>chargement...</i>", 5000, true);
-					}
-					else wapp.notification();
-				});
-        
-        // Decompte
-				nbLoad++;
-				if (nb==nbLoad) wapp.notification(nb+" couches ajoutées à la carte...");
-			});
-		}
+
+        // Chargement OK > gerer load / overload
+        vector.on("ready", function(){
+          // Marquer le layer sur l'objet
+          this.getSource().on('addfeature', function (e) {
+            e.feature.layer = this; 
+          }.bind(this));
+          // Ooops probleme d'overload
+          this.getSource().on('overload', function () {
+            wapp.notification("overloading...");
+          });
+          // Notification de chargement
+          this.getSource().on(['loadstart', 'loadend'], function (e) {
+            loading[e.target.getFeatureType().fullName] = e.remains;
+            var remains=0;
+            for (var i in loading) remains += loading[i];
+            if (remains) {
+              wapp.notification("<i class='blinking'>chargement...</i>", 5000, true);
+            }
+            else wapp.notification();
+          });
+          
+          // Decompte
+          nbLoad++;
+          if (nb==nbLoad) wapp.notification(nb+" couches ajoutées à la carte...");
+        });
+      }
+    }
   }
   
+  // Reset source pour la recherche
+  wapp.setSearchSource ();
+
 	// Mettre les signalements en haut de la pile de calque
 	if (nb) {
     wapp.map.removeLayer(wapp.ripart.layer);

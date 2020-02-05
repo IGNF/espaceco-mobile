@@ -5,9 +5,14 @@ import ol_ext_element from 'ol-ext/util/element'
  * @param {CordovApp} wapp
  */
 export default function(wapp) {
-  /// Layer switcher
+  const oldiv = $('#layer-guichet .guichet');
+
+  wapp.getLayerGuichet().on('change', () => {
+    oldiv.removeClass('offline');
+  });
+  // Layer switcher
   const guichetlayerSwitcher = new ol_control_LayerSwitcher({ 
-    target: document.querySelector('#layer-guichet .layerswitcher.online'), 
+    target: document.querySelector('#layer-guichet .layerswitcher'), 
     reordering: true,
     layerGroup: wapp.getLayerGuichet()
   });
@@ -15,18 +20,6 @@ export default function(wapp) {
   // Affichage des layers et boutons
   guichetlayerSwitcher.on('drawlist', (e) => {
     var layer = e.layer;
-    if (wapp.getIdGuichet() + '-0' === layer.get('name')) {
-      e.li.classList.add('online');
-    } else if (wapp.getIdGuichet() + '-1' === layer.get('name')) {
-      e.li.classList.add('offline');
-    }
-    e.li.classList.add('visible');
-    if (layer.getLayers) {
-      // Force expend
-      layer.set('openInLayerSwitcher', true);
-      // Hide 
-      if (!e.layer.getVisible()) e.li.classList.remove('visible');
-    }
     // Boutons
     const div = ol_ext_element.create('DIV', {
       className: 'icn-bar',
@@ -34,6 +27,7 @@ export default function(wapp) {
     });
     // VectorCache
     if (layer.get('cache')) {
+      oldiv.addClass('offline')
       ol_ext_element.create('I', {
         className: 'fa fa-pencil',
         click: () => {
@@ -62,7 +56,18 @@ export default function(wapp) {
         },
         parent: div
       });
+    } else if (layer.getFeatureType().tileZoomLevel) {
+      // Couche editable
+      oldiv.addClass('offline')
+      ol_ext_element.create('I', {
+        className: 'fa fa-pencil',
+        click: () => {
+          wapp.message(CordovApp.template('dialog-infoedit'), 'Edition');
+        },
+        parent: div
+      });
     }
+
     // Info sur la carte
     ol_ext_element.create('I', {
       className: 'fa fa-info-circle',
@@ -72,36 +77,17 @@ export default function(wapp) {
       parent: div
     });
   });
-  
-  // Gestion de la visibilite
-  var toggle = document.querySelector('#layer-guichet .guichet .toggle input');
-  toggle.addEventListener('change', () => {
+/*  
+  wapp.getLayerGuichet().on('change', () => {
     var layer = wapp.getLayerGuichet();
-    if (layer.getLayers) {
-      if (toggle.checked) {
-        layer.getLayers().item(1).setVisible(false);
-        layer.getLayers().item(0).setVisible(true);
+    if (layer.getLayers && layer.getLayers().item(0)) {
+      if (layer.getLayers().item(0).get('cache')) {
+        $('#layer-guichet .guichet').addClass('offline');
       } else {
-        layer.getLayers().item(1).setVisible(true);
-        layer.getLayers().item(0).setVisible(false);
+        $('#layer-guichet .guichet').removeClass('offline');
       }
     }
   });
-  wapp.getLayerGuichet().on('change', () => {
-    setTimeout(() => {
-      var layer = wapp.getLayerGuichet();
-      if (layer.getLayers) {
-        var layers = layer.getLayers();
-        // Check has layer cache
-        if (layers.item(0) && wapp.getIdGuichet() + '-0' === layers.item(0).get('name')) {
-          if (!layers.item(0).getVisible() && !layers.item(1).getVisible()) {
-            layers.item(1).setVisible(true);
-          }
-          toggle.checked = layers.item(0).getVisible();
-        }
-      }
-    }, 0);
-  });
-  
+*/
   return guichetlayerSwitcher;
 };
