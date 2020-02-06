@@ -833,7 +833,8 @@ wapp.getLogo = function (g, cback, scope) {
 		}, 
 		function() { 
 			cback.call(scope, g ? g.logo : null); 
-		});
+    }
+  );
 };
 
 /** Connexion RIpart

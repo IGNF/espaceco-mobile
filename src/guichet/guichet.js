@@ -381,6 +381,7 @@ wapp.setGuichet = function(groupe) {
   wapp.ripart.saveParam();
   wapp.select.getFeatures().clear();
   wapp.onSelect();
+  wapp.guichet = groupe;
 
   // Mettre a jour la liste
   $('#guichets li').each(function() {

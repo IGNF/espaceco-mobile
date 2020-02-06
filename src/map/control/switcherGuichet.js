@@ -7,9 +7,6 @@ import ol_ext_element from 'ol-ext/util/element'
 export default function(wapp) {
   const oldiv = $('#layer-guichet .guichet');
 
-  wapp.getLayerGuichet().on('change', () => {
-    oldiv.removeClass('offline');
-  });
   // Layer switcher
   const guichetlayerSwitcher = new ol_control_LayerSwitcher({ 
     target: document.querySelector('#layer-guichet .layerswitcher'), 
@@ -19,6 +16,12 @@ export default function(wapp) {
 
   // Affichage des layers et boutons
   guichetlayerSwitcher.on('drawlist', (e) => {
+    // Reset if first one
+    if (!e.li.previousSibling) {
+      oldiv.removeClass('offline');
+    }
+
+    //
     var layer = e.layer;
     // Boutons
     const div = ol_ext_element.create('DIV', {
@@ -56,7 +59,15 @@ export default function(wapp) {
         },
         parent: div
       });
-    } else if (layer.getFeatureType().tileZoomLevel) {
+    } else if (layer.getFeatureType().readOnly) {
+      ol_ext_element.create('I', {
+        className: 'fa fa-lock',
+        click: () => {
+          //wapp.message(CordovApp.template('dialog-infoedit'), 'Edition');
+        },
+        parent: div
+      });
+    } else if (!layer.getFeatureType().readOnly && layer.getFeatureType().tileZoomLevel) {
       // Couche editable
       oldiv.addClass('offline')
       ol_ext_element.create('I', {
@@ -72,22 +83,18 @@ export default function(wapp) {
     ol_ext_element.create('I', {
       className: 'fa fa-info-circle',
       click: () => {
-        console.log(layer)
+        const content = CordovApp.template("dialog-infocouche");
+        wapp.dataAttributes(content, e.layer.getFeatureType());
+        wapp.dialog.show(content, { className: 'dialog-infocouche' });
+        $('img', content).hide();
+        console.log('LOGO', e.layer.getFeatureType())
+        wapp.getLogo (wapp.guichet, (f) => {
+          $('img', content).attr('src',f).show();
+        });  
       },
       parent: div
     });
   });
-/*  
-  wapp.getLayerGuichet().on('change', () => {
-    var layer = wapp.getLayerGuichet();
-    if (layer.getLayers && layer.getLayers().item(0)) {
-      if (layer.getLayers().item(0).get('cache')) {
-        $('#layer-guichet .guichet').addClass('offline');
-      } else {
-        $('#layer-guichet .guichet').removeClass('offline');
-      }
-    }
-  });
-*/
+
   return guichetlayerSwitcher;
 };
