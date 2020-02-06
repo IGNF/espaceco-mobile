@@ -16,10 +16,10 @@
   margin: .5em .3em;
 }
 
-#layer-guichet .guichet .toggle {
+#layer-guichet .guichet .toggle-right {
   display: none;
 }
-#layer-guichet .guichet.offline .toggle {
+#layer-guichet .guichet.offline .toggle-right {
   display: inline;
 }
 
@@ -37,4 +37,15 @@
 #layer-guichet .layerswitcher .ol-layer-group > .li-content label::before,
 #layer-guichet .layerswitcher .ol-layer-group > .li-content label::after {
   content: none;
+}
+
+/* Dialogue */
+[data-role="dialog"].dialog-infocouche img {
+  float: right;
+  max-height: 3em;
+  max-width: 4em;
+}
+[data-role="dialog"].dialog-infocouche h2 {
+  width: calc(100% - 3em);
+  overflow: hidden;
 }
