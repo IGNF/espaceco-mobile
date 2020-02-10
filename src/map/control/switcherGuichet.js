@@ -14,11 +14,35 @@ export default function(wapp) {
     layerGroup: wapp.getLayerGuichet()
   });
 
+  // Mode edition
+  const edit = oldiv.get(0).querySelector('.edition');
+  edit.addEventListener('click', (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!wapp.getCache(wapp.guichet).cache) {
+      wapp.vectorCache.addDialog(() => {
+        //wapp.vectorCache.loadCache(wapp.getCache(wapp.guichet).cache);
+        wapp.loadCache()
+      });
+    } else {
+      wapp.message(
+        'Voulez-vous supprimer les données en cache ?<br/><i>Les saisies en cours seront perdues...</i>',
+        'Supprimer',
+        { ok: 'ok', cancel: 'Annuler' },
+        (button) => {
+          if (button==='ok') wapp.vectorCache.removeCache(wapp.getCache(wapp.guichet).cache);
+        }
+      );
+      
+    }
+  });
+
   // Affichage des layers et boutons
   guichetlayerSwitcher.on('drawlist', (e) => {
     // Reset if first one
-    if (!e.li.previousSibling) {
+    if (!e.li.previousSibling.previousSibling) {
       oldiv.removeClass('offline');
+      $('input', edit).prop('checked', (wapp.getCache(wapp.guichet).cache));
     }
 
     //
@@ -48,7 +72,8 @@ export default function(wapp) {
       ol_ext_element.create('I', {
         className: 'fa fa-cloud-download',
         click: () => {
-          console.log(layer)
+          //wapp.vectorCache.loadCache(wapp.getCache(wapp.guichet).cache);
+          wapp.loadCache();
         },
         parent: div
       });
@@ -77,6 +102,16 @@ export default function(wapp) {
         },
         parent: div
       });
+      if (wapp.getCache(wapp.guichet).cache) {
+        ol_ext_element.create('I', {
+          className: 'fa fa-cloud-download',
+          click: () => {
+            //wapp.vectorCache.loadCache(wapp.getCache(wapp.guichet).cache);
+            wapp.loadCache();
+          },
+          parent: div
+        });  
+      }
     }
 
     // Info sur la carte
@@ -84,12 +119,19 @@ export default function(wapp) {
       className: 'fa fa-info-circle',
       click: () => {
         const content = CordovApp.template("dialog-infocouche");
-        wapp.dataAttributes(content, e.layer.getFeatureType());
+        if (e.layer.getFeatureType()) {
+          wapp.dataAttributes(content, e.layer.getFeatureType());
+        } else {
+          wapp.dataAttributes(content, { 
+            warning: true,
+            title: 'Information disponible', 
+            description: 'Impossible de se connecter au serveur...' 
+          });
+        }
         wapp.dialog.show(content, { className: 'dialog-infocouche' });
         $('img', content).hide();
-        console.log('LOGO', e.layer.getFeatureType())
         wapp.getLogo (wapp.guichet, (f) => {
-          $('img', content).attr('src',f).show();
+          if (f) $('img', content).attr('src',f).show();
         });  
       },
       parent: div

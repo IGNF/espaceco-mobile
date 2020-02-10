@@ -50,3 +50,10 @@
   min-width: 1.3em;
   height: 1.3em;
 }
+
+.couches .couche.online > .icn-bar > .fa-search,
+.couches .couche.online > .icn-bar > .fa-cloud-download,
+.couches .couche.online > .icn-bar > .fa-refresh,
+.couches .couche.online > .icn-bar > .fa-gear {
+  display: none;
+}

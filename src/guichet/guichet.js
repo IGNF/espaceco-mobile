@@ -12,33 +12,42 @@ import './edition'
 let template = null;
 
 /** Recherche des layers offline du groupe
- * 
+ * @param {*} groupe
  */
 wapp.getCache = function (groupe) {
   const info = {
     auth: false,
     cache: null
   }
-  const cache = wapp.param.vectorCache;
-  groupe.layers.forEach((l) => {
-    if (l.type==='WFS') {
-      // Has authentication ?
-      info.auth = info.auth || l.username;
-      // Hors ligne ?
-      cache.forEach(c => {
-        if (c.id_guichet === groupe.id_groupe) {
-          info.cache = c;
-        }
-      });
-    }
-  });
+  if (groupe && groupe.layers) {
+    const cache = wapp.param.vectorCache;
+    groupe.layers.forEach((l) => {
+      if (l.type==='WFS') {
+        // Has authentication ?
+        info.auth = info.auth || l.username;
+        // Hors ligne ?
+        cache.forEach(c => {
+          if (c.id_guichet === groupe.id_groupe) {
+            info.cache = c;
+          }
+        });
+      }
+    });
+  }
   return info;
-}
+};
 
 /** Show guichet information dialogue
  * @param {*} groupe
  */
 wapp.dialogInfoGuichet = function (groupe) {
+  if (!groupe) {
+    groupe = wapp.guichet;
+  }
+  if (!groupe.layers) {
+    wapp.showDialog('dialog-info-guichets');
+    return;
+  }
 
   const infoCache = wapp.getCache(groupe);
 
@@ -129,6 +138,8 @@ wapp.dialogInfoGuichet = function (groupe) {
 };
 
 wapp.initGuichet2 = function() {
+
+  console.log('initGuichet2')
   // Reset list
   var ul = $('#guichets [data-role="content"] ul');
   if (!template) template = $('[data-role="template"]', ul).html();
@@ -372,6 +383,9 @@ console.log('[DEPRECATED: showInfoGuichet');
 /** Guichet en cours de modification
 */
 wapp.setGuichet = function(groupe) {
+
+console.log('setGuichet')
+
   if (typeof(groupe)==='number') {
     groupe = wapp.ripart.getGroupById(groupe);
   }
@@ -388,6 +402,15 @@ wapp.setGuichet = function(groupe) {
     if ($(this).data('groupe')===groupe) $(this).addClass('selected');
     else $(this).removeClass('selected');
   });
+
+  // Mettre a jour la page des couches
+  const gdiv = $('#couches .couches .couche.guichet');
+  $('.name', gdiv).text(wapp.guichet.nom);
+  if (wapp.getCache(wapp.guichet).cache) {
+    gdiv.removeClass('online');
+  } else {
+    gdiv.addClass('online');
+  }
 
 console.log('[DEPRECATED] setGuichet');
   $('#cartes [data-list="guichets"] ul.guichet li').each(function() {
@@ -766,10 +789,21 @@ $("#cartes").on("showpage", function() {
 */
 });
 
+/** OUverture de la page de chargement du cache */
+wapp.loadCache = function () {
+  const hasCache = wapp.getCache(wapp.guichet);
+  if (hasCache && hasCache.cache) {
+    wapp.vectorCache.loadCache(hasCache.cache);
+  }
+};
+
 /** Mettre a jour la carte
 */
 $("#fiche").on("showpage hidepage", function() {
   wapp.map.updateSize();
 });
+
+
+
 
 export default wapp

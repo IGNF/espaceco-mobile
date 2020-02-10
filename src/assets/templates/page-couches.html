@@ -14,16 +14,16 @@
       </i>
   </div></div>
 
-  <div class="couche">
+  <div class="couche guichet">
     <h2 onclick="wapp.showPage('layer-guichet');">
-      <i class="fa fa-eye"></i> Guichet
+      <i class="fa fa-eye"></i> Guichet <span class="name"></span>
     </h2>
     <div class="icn-bar">
       <i class="fa fa-search">
-      </i><i class="fa fa-cloud-download">
+      </i><i class="fa fa-cloud-download" onclick="wapp.loadCache();">
       </i><i class="fa fa-refresh">
       </i><i class="fa fa-gear">
-      </i><i class="fa fa-info-circle"  onclick="wapp.showDialog('dialog-info-guichets');">
+      </i><i class="fa fa-info-circle" onclick="wapp.dialogInfoGuichet();">
       </i>
   </div></div>
 
