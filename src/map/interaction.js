@@ -45,8 +45,8 @@ export default function(wapp) {
     multi: true,
     hitTolerance: 5,
     condition: ol_events_condition_click,
-    filter: function(f) {	
-      return (f.layer || f.get('georem') || f.get('ripart') || f.get('features'));
+    filter: function(f, layer) {	
+      return (layer.get('edit')!==false && (f.layer || f.get('georem') || f.get('ripart') || f.get('features')));
     },
     style: redStyle
   });

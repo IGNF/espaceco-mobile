@@ -37,12 +37,16 @@ export default function(wapp) {
     }
   });
 
+  // Editions en cours
+  let nbEdit = 0;
   // Affichage des layers et boutons
   guichetlayerSwitcher.on('drawlist', (e) => {
     // Reset if first one
     if (!e.li.previousSibling.previousSibling) {
       oldiv.removeClass('offline');
       $('input', edit).prop('checked', (wapp.getCache(wapp.guichet).cache));
+      // Edition en cours
+      nbEdit = 0;
     }
 
     //
@@ -55,20 +59,34 @@ export default function(wapp) {
     // VectorCache
     if (layer.get('cache')) {
       oldiv.addClass('offline')
-      ol_ext_element.create('I', {
-        className: 'fa fa-pencil',
+      const edit = ol_ext_element.create('I', {
+        className: 'fa',
         click: () => {
-          console.log(layer)
+          layer.set('edit', layer.get('edit')===false);
         },
         parent: div
       });
-      ol_ext_element.create('I', {
+      if (layer.get('edit') === false) {
+        edit.classList.add('fa-lock');
+      } else {
+        edit.classList.add('fa-pencil');
+      }
+      const refresh = ol_ext_element.create('I', {
         className: 'fa fa-refresh',
         click: () => {
-          console.log(layer)
+          wapp.updateCache();
         },
         parent: div
       });
+      const nb = layer.getSource().nbModifications();
+      nbEdit += nb;
+      $('#couches .fa-refresh .tag').text(nbEdit);
+      ol_ext_element.create('DIV', {
+        className: 'tag',
+        html: '<span>'+nb+'</span>',
+        parent: refresh
+      });
+
       ol_ext_element.create('I', {
         className: 'fa fa-cloud-download',
         click: () => {
@@ -95,13 +113,19 @@ export default function(wapp) {
     } else if (!layer.getFeatureType().readOnly && layer.getFeatureType().tileZoomLevel) {
       // Couche editable
       oldiv.addClass('offline')
-      ol_ext_element.create('I', {
-        className: 'fa fa-pencil',
+      const edit = ol_ext_element.create('I', {
+        className: 'fa',
         click: () => {
-          wapp.message(CordovApp.template('dialog-infoedit'), 'Edition');
+          layer.set('edit', layer.get('edit')===false);
         },
         parent: div
       });
+      if (layer.get('edit') === false) {
+        edit.classList.add('fa-lock');
+      } else {
+        edit.classList.add('fa-pencil');
+      }
+
       if (wapp.getCache(wapp.guichet).cache) {
         ol_ext_element.create('I', {
           className: 'fa fa-cloud-download',

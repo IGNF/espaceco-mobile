@@ -789,12 +789,33 @@ $("#cartes").on("showpage", function() {
 */
 });
 
-/** OUverture de la page de chargement du cache */
+/** Ouverture de la page de chargement du cache 
+ */
 wapp.loadCache = function () {
   const hasCache = wapp.getCache(wapp.guichet);
   if (hasCache && hasCache.cache) {
     wapp.vectorCache.loadCache(hasCache.cache);
   }
+};
+
+/** Mise a jour du cache courant
+ */
+wapp.updateCache = function(layer) {
+  wapp.message(
+    'Mettre a jour les données du guichet.<br/><i>Cette opération peut être longue</i>',
+    'Mise à jour', 
+    { ok:'Mettre à jour', cancel:'annuler' },
+    (b) => {
+      if (b==='ok') {
+        const hasCache = wapp.getCache(wapp.guichet);
+        if (hasCache) {
+          //wapp.vectorCache.updateCache(hasCache.cache)
+          const layers = wapp.getLayerGuichet().getLayers().getArray().slice();
+          wapp.vectorCache.saveLayer (layers, hasCache.cache);
+        }
+      }
+    }
+  );
 };
 
 /** Mettre a jour la carte

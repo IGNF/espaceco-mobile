@@ -32,7 +32,7 @@
   background-color: #369;
   color: #fff;
 }
-.couches .couche > .icn-bar > i .tag {
+.icn-bar > i .tag {
   background-color: #d00;
   border: 0;
   border-radius: 50%;
@@ -45,8 +45,8 @@
   padding: 2px;
   position: absolute;
   text-align: center;
-  top: -1em;
-  right: 1em;
+  top: -.8em;
+  right: 1.2em;
   min-width: 1.3em;
   height: 1.3em;
 }
