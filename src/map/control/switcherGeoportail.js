@@ -58,8 +58,8 @@ function setActionCacheMap (wapp, layer, div) {
     className: 'fa fa-info-circle',
     click: () => {
       var content = CordovApp.template('dialog-infomap');
-      var layerName = new ol_layer_Geoportail(smap.layer).get('name')
-      var att = $.extend({ name: layerName }, smap);
+      var title = new ol_layer_Geoportail(smap.layer).get('title')
+      var att = $.extend({ name: title }, smap);
       wapp.dataAttributes(content, att);
       $('.centermap', content).get(0).addEventListener('click', () => {
         wapp.map.getView().fit(smap.extent, wapp.map.getSize());

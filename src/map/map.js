@@ -152,5 +152,6 @@ $('#layer-geoportail').on('hidepage', function() {
   }
 });
 
+
 export { layers }
 export default map;

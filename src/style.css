@@ -12,7 +12,6 @@
   height: 1.5em;
   text-align: center;
   line-height: 1.2em;
-  transform: rotate(90deg);
   color: #fff;
 }
 [data-page="fiche"] #signaler {

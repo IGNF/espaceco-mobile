@@ -4,7 +4,6 @@ import './codes'
 import './maintenance'
 import CordovApp from 'cordovapp/CordovApp';
 
-
 // global var
 window.wapp = wapp;
 window.CordovApp = CordovApp;
