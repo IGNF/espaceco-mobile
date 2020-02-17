@@ -90,12 +90,19 @@ var geoportalOverlays = [
     }
   })
 ];
+// Set default display
+geoportalLayers.forEach((l) => {
+  l.set('defaultLayer', l.get('displayInLayerSwitcher'))
+});
+geoportalOverlays.forEach((l) => {
+  l.set('defaultLayer', l.get('displayInLayerSwitcher'))
+});
 
 // Layers (set hdpi:false to enable tile cache)
 var layers = [
   // Fonds de plan
   new ol_layer_Group({
-    title: 'Fonds de plan', 
+    title: 'Fonds Géoportail', 
     name: 'GEOPORTAL_LAYERS',
     openInLayerSwitcher: true,
     layers: geoportalLayers

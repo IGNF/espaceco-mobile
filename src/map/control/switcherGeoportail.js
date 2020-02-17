@@ -157,7 +157,6 @@ export default function(wapp) {
               msg.insertBefore(img, msg.childNodes[0]);
             };
             const loader = e.layer.getSource().getTileLoadFunction();
-            console.log('LOADER')
             loader({ 
               getImage: function() { return img; }}, 
               e.layer.getPreview()[0]

@@ -148,13 +148,13 @@ wapp.initGuichet2 = function() {
       } else {
         if (l instanceof ol_layer_Geoportail && !/^cache_/.test(l.get('name'))) {
           geopotalLayers[l.get('name')] = l;
-          l.set('displayInLayerSwitcher', false);
+          l.set('displayInLayerSwitcher', l.get('defaultLayer'));
         }
       }
     });
   }
   getGeopotalLayers(wapp.map.getLayers());
-  console.log(geopotalLayers);
+  
 
   console.log('initGuichet2')
   // Reset list
