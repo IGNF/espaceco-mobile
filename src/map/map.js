@@ -27,44 +27,36 @@ layerCache.on('change', function() {
   if (layerCache.getLayers().getLength) layerCache.set('displayInLayerSwitcher', true);
 });
 
-// Layers (set hdpi:false to enable tile cache)
-var layers = [
-  // Fonds de plan
-  new ol_layer_Group({
-    name: 'Fond de plan',
-    openInLayerSwitcher: true,
-    layers: [
-      new ol_layer_Geoportail('GEOGRAPHICALGRIDSYSTEMS.MAPS', { baseLayer: true, hidpi: false, visible: true }, { gppKey: config.apiKey, authentication: config.auth }),
-      new	ol_layer_Geoportail('GEOGRAPHICALGRIDSYSTEMS.PLANIGN', { baseLayer: true, hidpi: false, visible: false }, { gppKey: config.apiKey, authentication: config.auth }),
-      new	ol_layer_Geoportail('ORTHOIMAGERY.ORTHOPHOTOS', { baseLayer: true, hidpi: false, visible: false}, { gppKey: config.apiKey, authentication: config.auth })
-    ]
-  }),
-  // Layer pour l'affichage du cache
-  layerCache,
-  // Layer pour l'affichage des couches de l'utilisateur
-  new ol_layer_Group({ title:'Mes couches', name: 'layerGroup', displayInLayerSwitcher: false }),
-  // Overlays
-  new ol_layer_Geoportail('ELEVATION.ELEVATIONGRIDCOVERAGE.SHADOW', { gppKey: config.apiKey, hidpi: false, visible: false }, { gppKey: config.apiKey, authentication: config.auth }),
-//		new ol_layer_Geoportail("BUILDINGS.BUILDINGS", { gppKey: config.apiKey, hidpi: false, visible: false }, { gppKey: config.apiKey, authentication: config.auth }),
-  new ol_layer_Geoportail('CADASTRALPARCELS.PARCELS', { gppKey: config.apiKey, hidpi: false, visible: false }, { gppKey: config.apiKey, authentication: config.auth }),
-//		new ol_layer_Geoportail("TRANSPORTNETWORKS.ROADS", { gppKey: config.apiKey, hidpi: false, visible: false }, { gppKey: config.apiKey, authentication: config.auth }),
-  new ol_layer_Geoportail('GEOGRAPHICALGRIDSYSTEMS.MAPS.BDUNI.J1', { gppKey: config.apiKey, hidpi: false, visible: false }, { gppKey: config.apiKey, authentication: config.auth }),
+// Layers geoportail
+var geoportalLayers = [
+  new ol_layer_Geoportail('GEOGRAPHICALGRIDSYSTEMS.MAPS', { hidpi: false, visible: true }, { gppKey: config.apiKey, authentication: config.auth }),
+  new	ol_layer_Geoportail('GEOGRAPHICALGRIDSYSTEMS.PLANIGN', { hidpi: false, visible: false }, { gppKey: config.apiKey, authentication: config.auth }),
+  new	ol_layer_Geoportail('ORTHOIMAGERY.ORTHOPHOTOS', { hidpi: false, visible: false}, { gppKey: config.apiKey, authentication: config.auth }),
+  new ol_layer_Geoportail('GEOGRAPHICALGRIDSYSTEMS.MAPS.BDUNI.J1', { gppKey: config.apiKey, hidpi: false, visible: false }, { gppKey: config.apiKey, authentication: config.auth })
+];
+var geoportalOverlays = [
+  new ol_layer_Geoportail('ELEVATION.ELEVATIONGRIDCOVERAGE.SHADOW', { gppKey: config.apiKey, hidpi: false, visible: false, displayInLayerSwitcher: true }, { gppKey: config.apiKey, authentication: config.auth }),
+	new ol_layer_Geoportail("BUILDINGS.BUILDINGS", { gppKey: config.apiKey, hidpi: false, visible: false, displayInLayerSwitcher: false }, { gppKey: config.apiKey, authentication: config.auth }),
+  new ol_layer_Geoportail('CADASTRALPARCELS.PARCELS', { gppKey: config.apiKey, hidpi: false, visible: false, displayInLayerSwitcher: true }, { gppKey: config.apiKey, authentication: config.auth }),
+	new ol_layer_Geoportail("TRANSPORTNETWORKS.ROADS", { gppKey: config.apiKey, hidpi: false, visible: false, displayInLayerSwitcher: false }, { gppKey: config.apiKey, authentication: config.auth }),
   // Couche INSPIRE adresse
   new ol_layer_Tile ({
-    "name": "Adresses",
-    "extent": [ -7030196.346030043, -2438399.008686918, 6215711.586687296, 6645292.597727471 ],
-    "minResolution": 0,
-    "maxResolution": 4,
-    "visible": false,
-    "source": new ol_source_TileWMS({
-      "url": "http://wxs.ign.fr/"+config.apiKey+"/inspire/v/wms",
-      "projection": "EPSG:3857",
-      "crossOrigin": "anonymous",
-      "tileLoadFunction": ol_source_Geoportail.tileLoadFunctionWithAuthentication(config.auth, "image/png"),
-      "params": {
-        "LAYERS": "AD.Address",
-        "FORMAT": "image/png",
-        "VERSION": "1.3.0"
+    title: 'Adresses',
+    name: 'ADRESSES',
+    desc: 'Localisation des propriétés fondée sur les identifiants des adresses, habituellement le nom de la rue, le numéro de la maison et le code postal.',
+    extent: [ -7030196.346030043, -2438399.008686918, 6215711.586687296, 6645292.597727471 ],
+    minResolution: 0,
+    maxResolution: 4,
+    visible: false,
+    source: new ol_source_TileWMS({
+      url: 'http://wxs.ign.fr/'+config.apiKey+'/inspire/v/wms',
+      projection: 'EPSG:3857',
+      crossOrigin: 'anonymous',
+      tileLoadFunction: ol_source_Geoportail.tileLoadFunctionWithAuthentication(config.auth, 'image/png'),
+      params: {
+        LAYERS: 'AD.Address',
+        FORMAT: 'image/png',
+        VERSION: '1.3.0'
       }
     })
   }),
@@ -96,6 +88,26 @@ var layers = [
       })
       ]
     }
+  })
+];
+
+// Layers (set hdpi:false to enable tile cache)
+var layers = [
+  // Fonds de plan
+  new ol_layer_Group({
+    title: 'Fonds de plan', 
+    name: 'GEOPORTAL_LAYERS',
+    openInLayerSwitcher: true,
+    layers: geoportalLayers
+  }),
+  // Layer pour l'affichage du cache
+  layerCache,
+  // Overlays
+  new ol_layer_Group({
+    title: 'Couches Géoportail', 
+    name: 'GEOPORTAL_OVERLAYS',
+    openInLayerSwitcher: true,
+    layers: geoportalOverlays
   }),
   // Layer pour l'affichage des couches du groupe
   new ol_layer_Group({ title:'Mes couches', name: 'groupe', displayInLayerSwitcher: false, openInLayerSwitcher: true }),

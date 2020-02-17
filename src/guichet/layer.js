@@ -175,7 +175,7 @@ wapp.testHiddenLayer = function(layer) {
   // First time use default
   if (!this.param.visibleLayers) return;
   // Test
-  layer.setVisible(this.param.visibleLayers[layer.get("name")] !== false);
+  layer.setVisible(layer.get('displayInLayerSwitcher') !== false && this.param.visibleLayers[layer.get("name")] !== false);
   if (layer.getLayers) {
     layer.getLayers().forEach(function(l){
       wapp.testHiddenLayer(l);

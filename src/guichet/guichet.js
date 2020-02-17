@@ -8,6 +8,7 @@ import wapp from '../wapp'
 import CordovApp from 'cordovapp/Cordovapp'
 import './layer'
 import './edition'
+import ol_layer_Geoportail from 'ol-ext/layer/Geoportail'
 
 let template = null;
 
@@ -138,6 +139,22 @@ wapp.dialogInfoGuichet = function (groupe) {
 };
 
 wapp.initGuichet2 = function() {
+  // Layers geoportail
+  const geopotalLayers = {};
+  function getGeopotalLayers(layers) {
+    layers.forEach((l) => {
+      if (l.getLayers) {
+        getGeopotalLayers(l.getLayers());
+      } else {
+        if (l instanceof ol_layer_Geoportail && !/^cache_/.test(l.get('name'))) {
+          geopotalLayers[l.get('name')] = l;
+          l.set('displayInLayerSwitcher', false);
+        }
+      }
+    });
+  }
+  getGeopotalLayers(wapp.map.getLayers());
+  console.log(geopotalLayers);
 
   console.log('initGuichet2')
   // Reset list
@@ -161,7 +178,20 @@ wapp.initGuichet2 = function() {
     // Affichage si WFS
     var couches = "";
     g.layers.forEach((layer) => {
-      if (layer.type=="WFS") couches += (couches?", ":"")+layer.nom;
+      switch (layer.type) {
+        case 'WFS': {
+          couches += (couches?", ":"")+layer.nom;
+          break;
+        }
+        case 'GeoPortail': {
+          const l = geopotalLayers[layer.nom]
+          if (l) {
+            l.set('displayInLayerSwitcher', true);
+          }
+          break;
+        }
+        default: break;
+      }
     });
     if (couches) {
       var li = $('<li>').html(template)

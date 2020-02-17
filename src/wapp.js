@@ -219,7 +219,7 @@ import { wappStorage } from 'cordovapp/cordovapp/CordovApp'
     function saveVisibility(lays) {
       lays.forEach(function(l) {
         if (l.get('name')) {
-          visible[l.get('name')] = l.getVisible();
+          visible[l.get('name')] = ( l.getVisible() && l.get('displayInLayerSwitcher')!==false );
         }
         if (l.getLayers) saveVisibility(l.getLayers());
       });

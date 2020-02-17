@@ -120,7 +120,7 @@ export default function(wapp) {
     reordering: true,
     displayInLayerSwitcher: (l) => {
       return (
-        (/DFCI|cache|Fond\ de\ plan/.test(l.get('name')) || l instanceof ol_layer_Geoportail)
+        (/DFCI|cache|GEOPORTAL_LAYERS|GEOPORTAL_OVERLAYS|ADRESSES/.test(l.get('name')) || l instanceof ol_layer_Geoportail)
         && 
         l.get('displayInLayerSwitcher') !== false
       );
@@ -157,7 +157,11 @@ export default function(wapp) {
               msg.insertBefore(img, msg.childNodes[0]);
             };
             const loader = e.layer.getSource().getTileLoadFunction();
-            loader({ getImage: function() { return img; }}, e.layer.getPreview()[0]);
+            console.log('LOADER')
+            loader({ 
+              getImage: function() { return img; }}, 
+              e.layer.getPreview()[0]
+            );
           }
         },
         parent: div
