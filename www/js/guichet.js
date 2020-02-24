@@ -356,6 +356,7 @@ wapp.initMap = function()
 		new ol.layer.Vector({
 			title: 'Carroyage DFCI',
 			name: 'DFCI',
+			visible: false,
 			source: new ol.source.DFCI(),
 			renderMode:'image',
 			style: function(f) {

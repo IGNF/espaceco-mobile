@@ -1228,7 +1228,7 @@ RIPart.prototype.formulaireAttribut = function(valdef, prompt)
 			}
 		}
 		for (var i=0, a; a = att[i]; i++) {
-			var v = (valdef ? valdef[a.att] : (att.defaultVal || a.val[0]));
+			var v = (valdef ? valdef[a.att] : (att[i].defaultVal || a.val[0]));
 			vals[a.att] = v;
 			switch (a.type) {
 				case 'list':
