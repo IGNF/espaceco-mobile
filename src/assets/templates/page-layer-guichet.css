@@ -49,3 +49,12 @@
   width: calc(100% - 3em);
   overflow: hidden;
 }
+[data-role="dialog"].dialog-infocouche .fa {
+  margin-top: -.25em;
+}
+[data-role="dialog"].dialog-infocouche .readonly .edit {
+  display: none;
+}
+[data-role="dialog"].dialog-infocouche .edit .noedit {
+  display: none;
+}

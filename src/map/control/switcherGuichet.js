@@ -68,6 +68,8 @@ export default function(wapp) {
       });
       if (layer.get('edit') === false) {
         edit.classList.add('fa-lock');
+      } else if (layer.getFeatureType().readOnly) {
+        edit.classList.add('fa-unlock-alt');
       } else {
         edit.classList.add('fa-pencil');
       }
@@ -78,14 +80,16 @@ export default function(wapp) {
         },
         parent: div
       });
-      const nb = layer.getSource().nbModifications();
-      nbEdit += nb;
-      $('#couches .fa-refresh .tag').text(nbEdit);
-      ol_ext_element.create('DIV', {
-        className: 'tag',
-        html: '<span>'+nb+'</span>',
-        parent: refresh
-      });
+      if (!layer.getFeatureType().readOnly) {
+        const nb = layer.getSource().nbModifications();
+        nbEdit += nb;
+        $('#couches .fa-refresh .tag').text(nbEdit);
+        ol_ext_element.create('DIV', {
+          className: 'tag',
+          html: '<span>'+nb+'</span>',
+          parent: refresh
+        });
+      }
 
       ol_ext_element.create('I', {
         className: 'fa fa-cloud-download',
@@ -96,20 +100,25 @@ export default function(wapp) {
         parent: div
       });
       ol_ext_element.create('I', {
-        className: 'fa fa-gear',
+        className: 'fa fa-gear fa-disable',
         click: () => {
           console.log(layer)
         },
         parent: div
       });
     } else if (layer.getFeatureType().readOnly) {
-      ol_ext_element.create('I', {
-        className: 'fa fa-lock',
+      var select = ol_ext_element.create('I', {
+        className: 'fa',
         click: () => {
-          //wapp.message(CordovApp.template('dialog-infoedit'), 'Edition');
+          layer.set('edit', layer.get('edit')===false);
         },
         parent: div
       });
+      if (layer.get('edit') === false) {
+        select.classList.add('fa-lock');
+      } else {
+        select.classList.add('fa-unlock-alt');
+      }
     } else if (!layer.getFeatureType().readOnly && layer.getFeatureType().tileZoomLevel) {
       // Couche editable
       oldiv.addClass('offline')
@@ -144,11 +153,12 @@ export default function(wapp) {
       click: () => {
         const content = CordovApp.template("dialog-infocouche");
         if (e.layer.getFeatureType()) {
+          content.addClass(e.layer.getFeatureType().readOnly ? 'readonly':'edit');
           wapp.dataAttributes(content, e.layer.getFeatureType());
         } else {
           wapp.dataAttributes(content, { 
             warning: true,
-            title: 'Information disponible', 
+            title: 'Information indisponible', 
             description: 'Impossible de se connecter au serveur...' 
           });
         }

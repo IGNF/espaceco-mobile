@@ -22,7 +22,7 @@ import config from '../config'
 import {dialog} from 'cordovapp/cordovapp/dialog'
 
 // Layer pour l'affichage du cache
-var layerCache = new ol_layer_Group({ title: 'Cartes hors-ligne', name: 'cache', openInLayerSwitcher: true, displayInLayerSwitcher: false })
+var layerCache = new ol_layer_Group({ title: 'Cartes hors-ligne', name: 'cache', openInLayerSwitcher: true, displayInLayerSwitcher: true })
 layerCache.on('change', function() {
   if (layerCache.getLayers().getLength) layerCache.set('displayInLayerSwitcher', true);
 });

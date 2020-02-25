@@ -361,8 +361,8 @@ wapp.initParams = function() {
           var qlf = /qlf/.test(wapp.ripart.getServiceUrl());
           if (e.val != qlf) {
             if (e.val) {
-              //wapp.ripart.setServiceUrl("https://qlf-collaboratif.ign.fr/collaboratif-develop/api/");
-              wapp.ripart.setServiceUrl("https://qlf-collaboratif.ign.fr/collaboratif-2.3/api/");
+              wapp.ripart.setServiceUrl("https://qlf-collaboratif.ign.fr/collaboratif-develop/api/");
+              //wapp.ripart.setServiceUrl("https://qlf-collaboratif.ign.fr/collaboratif-2.3/api/");
             } else {
               wapp.ripart.setServiceUrl("https://espacecollaboratif.ign.fr/api/");
             }
@@ -698,19 +698,19 @@ wapp.changeGroup = function (e) {
 
 /** Gestion des parametres caches et du mode debug
 */
-wapp.setDebugMode = function()
-{	var cheat = 0;
+wapp.setDebugMode = function() {
+  var cheat = 0;
   var tcheat = new Date();
-  $('#options [data-role="header"]').on("click touchstart", function(e)
-  {	e.stopPropagation();
+  $('#options [data-role="header"]').on("click touchstart", function(e) {
+    e.stopPropagation();
     e.preventDefault();
     console.log('debug-mode', cheat)
     var t = new Date();
     if (t-tcheat > 250) cheat = 0;
     else cheat++;
     tcheat = t;
-    if (cheat>10 || wapp.param.options.qlf)
-    {	wapp.notification ("Mode debug activé...",500);
+    if (cheat>10 || wapp.param.options.qlf) {
+      wapp.notification ("Mode debug activé...",500);
       cheat=0;
       $(".debug").show();
       $("div.debug").css('display', 'inline-block');

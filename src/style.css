@@ -567,3 +567,7 @@ span[data-class="nb=1"] {
 [data-mode="extended"] .extended {
   display: inline-block;
 }
+
+.fa-disable {
+  opacity: .5;
+}

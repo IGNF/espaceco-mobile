@@ -414,7 +414,7 @@ console.log('[DEPRECATED: showInfoGuichet');
 */
 wapp.setGuichet = function(groupe) {
 
-console.log('setGuichet')
+console.log('setGuichet', groupe)
 
   if (typeof(groupe)==='number') {
     groupe = wapp.ripart.getGroupById(groupe);
@@ -452,6 +452,8 @@ console.log('[DEPRECATED] setGuichet');
   wapp.setInfoGuichet(groupe);
   // Charger les couches
   wapp.loadLayers(groupe);
+  // Afficher
+  wapp.getLayerGuichet().setVisible(true);
 };
 
 
@@ -729,7 +731,9 @@ wapp.showSelect = function(options) {
       } else if (f.layer instanceof ol_layer_Vector_Webpart) {
         // Objet d'un guichet
         console.log(f)
-        if (f.layer.get('cache')) $('.edit').show();
+        if (f.layer.get('cache') && !f.layer.getFeatureType().readOnly) {
+          $('.edit').show();
+        }
         var ftype = f.layer.getSource().featureType_;
         for (i in ftype.attributes) if (i !== ftype.geometryName) {
           att = ftype.attributes[i];
@@ -825,6 +829,15 @@ wapp.loadCache = function () {
   const hasCache = wapp.getCache(wapp.guichet);
   if (hasCache && hasCache.cache) {
     wapp.vectorCache.loadCache(hasCache.cache);
+  }
+};
+
+/** Centrer sur le cache vecteur
+ */
+wapp.centerCache = function () {
+  const hasCache = wapp.getCache(wapp.guichet);
+  if (hasCache && hasCache.cache) {
+    wapp.map.getView().fit(wapp.getCache(wapp.guichet).cache.extent);
   }
 };
 

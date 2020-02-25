@@ -6,7 +6,7 @@
       <i class="fa fa-eye"></i> Signalements
     </h2>
     <div class="icn-bar">
-      </i><i class="fa fa-filter">
+      </i><i class="fa fa-filter fa-disable">
       </i><i class="fa fa-send" onclick="wapp.ripart.postLocalRems();">
         <div class="georemsCount tag"><span></span></div>
       </i><i class="fa fa-gear" onclick="wapp.showPage('signalements');">
@@ -19,11 +19,11 @@
       <i class="fa fa-eye"></i> Guichet <span class="name"></span>
     </h2>
     <div class="icn-bar">
-      <i class="fa fa-search">
+      <i class="fa fa-search fa-disable">
       </i><i class="fa fa-cloud-download" onclick="wapp.loadCache();">
       </i><i class="fa fa-refresh" onclick="wapp.updateCache();">
         <div class="tag"><span></span></div>
-      </i><i class="fa fa-gear">
+      </i><i class="fa fa-gear" onclick="wapp.centerCache(); wapp.hidePage();">
       </i><i class="fa fa-info-circle" onclick="wapp.dialogInfoGuichet();">
       </i>
   </div></div>
@@ -33,9 +33,9 @@
       <i class="fa fa-eye"></i> Mes cartes
     </h2>
     <div class="icn-bar">
-      <i class="fa fa-search">
+      <i class="fa fa-search fa-disable">
       </i><i class="fa fa-cloud-download">
-      </i><i class="fa fa-gear">
+      </i><i class="fa fa-gear fa-disable">
       </i><i class="fa fa-info-circle" onclick="wapp.showDialog('dialog-info-cartes');">
       </i>
   </div></div>
@@ -45,7 +45,7 @@
       <i class="fa fa-eye"></i> Fonds de cartes
     </h2>
     <div class="icn-bar">
-      <i class="fa fa-gear">
+      <i class="fa fa-gear fa-disable">
       </i><i class="fa fa-info-circle" onclick="wapp.showDialog('dialog-info-geoportail');">
       </i>
   </div></div>
