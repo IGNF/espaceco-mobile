@@ -154,9 +154,8 @@ wapp.initGuichet2 = function() {
     });
   }
   getGeopotalLayers(wapp.map.getLayers());
-  
 
-  console.log('initGuichet2')
+console.log('initGuichet2')
   // Reset list
   var ul = $('#guichets [data-role="content"] ul');
   if (!template) template = $('[data-role="template"]', ul).html();
@@ -259,6 +258,7 @@ console.log('[DEPRECATED] initguichet')
     return;
   }
   this.initGuichet2();
+
   // Recherche des groupes
   var groupes = wapp.ripart.param.groupes;
   var current = {};
@@ -413,13 +413,22 @@ console.log('[DEPRECATED: showInfoGuichet');
 /** Guichet en cours de modification
 */
 wapp.setGuichet = function(groupe) {
-
 console.log('setGuichet', groupe)
 
   if (typeof(groupe)==='number') {
     groupe = wapp.ripart.getGroupById(groupe);
   }
-  if (!groupe) groupe = {};
+  if (!groupe) groupe = { };
+
+  // Check if has groupe
+  if (wapp.ripart.param && wapp.ripart.param.groupes) {
+    if (wapp.ripart.param.groupes.length) document.body.setAttribute('data-guichet', groupe.id_groupe || 'none' );
+    else document.body.removeAttribute('data-guichet');
+  } else {
+    document.body.removeAttribute('data-guichet');
+  }
+  
+  
   // Nouveau guichet
   this.ripart.param.guichet = groupe.id_groupe;
   wapp.ripart.saveParam();
@@ -435,7 +444,7 @@ console.log('setGuichet', groupe)
 
   // Mettre a jour la page des couches
   const gdiv = $('#couches .couches .couche.guichet');
-  $('.name', gdiv).text(wapp.guichet.nom);
+  $('.name', gdiv).text(wapp.guichet.nom || '');
   if (wapp.getCache(wapp.guichet).cache) {
     gdiv.removeClass('online');
   } else {
@@ -478,10 +487,10 @@ wapp.setInfoGuichet = function(groupe) {
   wapp.vectorCache.setCurrentGuichet(groupe);
 
   // Display info
-  $('h3', content).text(groupe.nom);
+  $('h3', content).text(groupe.nom || '');
   $('img', content).hide();
   wapp.getLogo(groupe, function(src) {
-    $('img', content).attr('src',src).show();
+    if (src) $('img', content).attr('src',src).show();
   });
 };
 
@@ -868,7 +877,16 @@ $("#fiche").on("showpage hidepage", function() {
   wapp.map.updateSize();
 });
 
-
-
+/** Affichage de la page du guichet
+ */
+wapp.showGuichet= function() {
+  if (!wapp.ripart.param.groupes) {
+    wapp.alert(CordovApp.template('dialog-noconnect'));
+  } else if (wapp.ripart.param.groupes.length) {
+    wapp.showPage('layer-guichet');
+  } else {
+    wapp.alert(CordovApp.template('dialog-noguichet'));
+  }
+}
 
 export default wapp

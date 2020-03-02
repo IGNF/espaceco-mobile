@@ -1,37 +1,42 @@
 ﻿<div class="header">
-	<img src="img/header-background.png" />
-	<div class="img">
-		<img class="logo back" src="img/logo.png"/>
-		<img class="logo" src="img/ign.png" />
-	</div>
-	<p class="userinfo"></p>
+  <img src="img/header-background.png" />
+  <div class="img">
+    <img class="logo back" src="img/logo.png"/>
+    <img class="logo" src="img/ign.png" />
+  </div>
+  <p class="userinfo"></p>
 </div>
 <ul>
-	<li class="search" onclick='wapp.showPage("search"); $("#search input").focus();'>
-		<i class="fa fa-search"></i> Rechercher
-	</li>
-	<li onclick="wapp.showPage('couches');" >
-		<i class="fa tools-layerstack"></i> Mes Couches
-	</li>
-	<li onclick="wapp.showPage('layers');">
-		<i class="fa tools-layers"></i> Couches
-	</li>
-	<li onclick="wapp.showPage('cartes');" >
-		<i class="fa fa-map"></i> Mes cartes
-	</li>
-	<li onclick="wapp.showPage('signalements');">
-		<i class="fa fa-map-marker"></i> Signalements
-		<button class="georemsCount"><span></span></button>
-	</li>
-	<li onclick="wapp.showPage('options');">
-		<i class="fa fa-list-ul"></i> Paramètres
-	</li>
-	<li onclick="wapp.showPage('apropos');">
-		<i class="fa fa-info-circle"></i> A propos...
-	</li>
+  <li class="search" onclick='wapp.showPage("search"); $("#search input").focus();'>
+    <i class="fa fa-search"></i> Rechercher
+  </li>
+  <li onclick="wapp.showPage('couches');" >
+    <i class="fa tools-layerstack"></i> Mes Couches
+  </li>
+  <li onclick="wapp.showGuichet();">
+    <i class="fa fa-pencil-square-o"></i> Mon Guichet
+  </li>
 <!--
-	<li onclick="wapp.quit();">
-		<i class="fa fa-power-off"></i> Quitter
-	</li>
+  <li onclick="wapp.showPage('layers');">
+    <i class="fa tools-layers"></i> Couches
+  </li>
+  <li onclick="wapp.showPage('cartes');" >
+    <i class="fa fa-map"></i> Mes cartes
+  </li>
+-->
+  <li onclick="wapp.showPage('signalements');">
+    <i class="fa fa-map-marker"></i> Signalements
+    <button class="georemsCount"><span></span></button>
+  </li>
+  <li onclick="wapp.showPage('options');">
+    <i class="fa fa-list-ul"></i> Paramètres
+  </li>
+  <li onclick="wapp.showPage('apropos');">
+    <i class="fa fa-info-circle"></i> A propos...
+  </li>
+<!--
+  <li onclick="wapp.quit();">
+    <i class="fa fa-power-off"></i> Quitter
+  </li>
 -->
 </ul>

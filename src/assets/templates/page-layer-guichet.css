@@ -39,6 +39,18 @@
   content: none;
 }
 
+/* No guichets */
+[data-guichet="none"] #layer-guichet .guichet {
+  display: none;
+}
+#layer-guichet .noguichet {
+  display: none;
+}
+[data-guichet="none"] #layer-guichet .noguichet {
+  display: block;
+  text-align: right;
+}
+
 /* Dialogue */
 [data-role="dialog"].dialog-infocouche img {
   float: right;
