@@ -4,10 +4,10 @@ import ol_layer_Geoportail from 'ol-ext/layer/Geoportail'
 import 'ol-ext/layer/GetPreview'
 
 /**
- * Action sur les cartes en cache
+ * Ajout des actions pour les cartes en cache dans leur barre d'icone
  * @param {CordovApp} wapp 
- * @param {*} smap
- * @param {Element} div 
+ * @param {ol.layer} layer 
+ * @param {Element} div Barre d'icone (icn-bar) 
  */
 function setActionCacheMap (wapp, layer, div) {
   // Carte en cache
@@ -79,9 +79,10 @@ function setActionCacheMap (wapp, layer, div) {
   });
 }
 
-/** Action sur le Layer contenant les caches
+/** Ajout des actions pour le Layer contenant les caches dans leur barre d'icone
  * @param {CordovApp} wapp
- * @param {Element} div 
+ * @param {ol.layer.Group} layer 
+ * @param {Element} div Barre d'icone (icn-bar) 
  */
 function setActionCache(wapp, layer, div) {
   div.parentNode.className += ' cache';
@@ -111,10 +112,11 @@ function setActionCache(wapp, layer, div) {
 }
 
 /**
- * Geoportail layer switcher
+ * Layer switcher pour les couches Geoportail
  * @param {CordovApp} wapp 
  */
 export default function(wapp) {
+  // Affichage du layerswitcher
   const geoportailSwitcher = new ol_control_LayerSwitcher({ 
     target: $("#layer-geoportail .layerswitcher").get(0), 
     reordering: true,
@@ -125,6 +127,24 @@ export default function(wapp) {
         l.get('displayInLayerSwitcher') !== false
       );
     }
+  });
+
+  // Gestion de l'affichage des layers groupe si tous les layers contenant sont masques
+  function checkVisibility (e)  {
+    const layer = e.target;
+    if (layer.getLayers) {
+      var visible = false;
+      layer.getLayers().forEach((l) => {
+        if (l.getVisible()) visible = true;
+      });
+      layer.setVisible(visible);
+    }
+  }
+  // Gestion de la visibilite des fonds geoportail
+  wapp.layers.forEach((l) => {
+    if (/GEOPORTAL_LAYERS|GEOPORTAL_OVERLAYS/.test(l.get('name'))) {
+      l.on('change', checkVisibility);
+    } 
   });
 
   // Affichage des actions des couches
