@@ -173,4 +173,4 @@ export default function(wapp) {
   });
 
   return guichetlayerSwitcher;
-};
+}

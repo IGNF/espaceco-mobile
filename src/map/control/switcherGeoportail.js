@@ -77,7 +77,7 @@ function setActionCacheMap (wapp, layer, div) {
     },
     parent: div
   });
-};
+}
 
 /** Action sur le Layer contenant les caches
  * @param {CordovApp} wapp
@@ -108,7 +108,7 @@ function setActionCache(wapp, layer, div) {
     },
     parent: div
   });
-};
+}
 
 /**
  * Geoportail layer switcher
@@ -169,4 +169,4 @@ export default function(wapp) {
   });
 
   return geoportailSwitcher;
-};
+}

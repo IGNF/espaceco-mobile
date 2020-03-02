@@ -35,7 +35,7 @@ function centerMap(coord) {
       }));
     }, i*1000);
   }
-};
+}
 
 export default function() {
 // SearchGeoportail Control
