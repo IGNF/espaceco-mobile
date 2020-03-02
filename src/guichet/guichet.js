@@ -505,8 +505,9 @@ wapp.postGeorem = function() {
       wapp.select.selectFeature(f, wapp.ripart.layer);
       wapp.wait(false)
     },
-    error: function() {
+    error: function(e, msg) {
       wapp.select.selectFeature(f, wapp.ripart.layer);
+      wapp.alert(msg);
     }
   });
 };
