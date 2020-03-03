@@ -7,5 +7,6 @@ node_modules-copie
 platforms
 plugins
 res
+www
 # OS X
 .DS_Store

@@ -358,7 +358,17 @@ wapp.initParams = function() {
       }
       case "qlf": {
         if (wapp.ripart) {
-          var qlf = /qlf/.test(wapp.ripart.getServiceUrl());
+         if (wapp.ripart.isService(e.val)) {
+          wapp.ripart.setServiceUrl(e.val);
+          wapp.ripart.deconnect();
+          if (e.val) {
+            console.warn('QUALIF:', e.val);
+          }
+         }
+
+/*
+         var qlf = /qlf/.test(wapp.ripart.getServiceUrl());
+          console.log(e.val, qlf)
           if (e.val != qlf) {
             if (e.val) {
               wapp.ripart.setServiceUrl("https://qlf-collaboratif.ign.fr/collaboratif-develop/api/");
@@ -368,6 +378,7 @@ wapp.initParams = function() {
             }
             wapp.ripart.deconnect();
           }
+*/
         }
         break;
       }
@@ -410,7 +421,7 @@ wapp.initRipart = function() {
 
   // RIPart
   this.ripart = new RIPart({
-    url: this.param.options.qlf ? "https://qlf-collaboratif.ign.fr/collaboratif-develop/api/" : null,
+    url: this.param.options.qlf || 'https://espacecollaboratif.ign.fr/api/',
     map: map,
     infoElement: '#options .connect [data-input-role="info"] span.connected',
     countElement: '.georemsCount span',
