@@ -291,7 +291,7 @@ wapp.initParams = function()
 					if (wapp.ripart)
 					{	var qlf = /qlf/.test(wapp.ripart.getServiceUrl());
 						if (e.val != qlf) 
-						{	if (e.val) wapp.ripart.setServiceUrl("https://qlf-collaboratif.ign.fr/collaboratif-develop/api/");
+						{	if (e.val) wapp.ripart.setServiceUrl("https://qlf-collaboratif.ign.fr/collaboratif-2.4/api/");
 							else wapp.ripart.setServiceUrl("https://espacecollaboratif.ign.fr/api/");
 							wapp.ripart.deconnect();
 						}
