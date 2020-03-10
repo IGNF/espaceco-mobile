@@ -60,17 +60,27 @@ div.debug,
 }
 
 /** Legende */
-#legend ul {
+[data-role=dialog].legend {
+  width: 40em;
+  max-width: 90%;
+  font-size: 1.7em;
+}
+@media screen and (max-width: 700px) {
+  [data-role=dialog].legend {
+    font-size: 1.5em;
+  }  
+}
+.legend ul {
   margin: 0;
   padding:0;
   list-style: none;
 }
-#legend li {
+.legend li {
   min-height: 3em;
   border-bottom: 1px solid #ccc;
   padding: 0.5em 0 0.5em 4em;
 }
-#legend .symb {
+.legend .symb {
   width: 2em;
   font-size: 1.8em;
   display: inline-block;
@@ -79,17 +89,17 @@ div.debug,
   position: absolute;
   left: 0.25em;
 }
-#legend .symb .marker {
+.legend .symb .marker {
   border-radius: 50%;
   width: 30px;
   height: 30px;
   display: inline-block;
   background: #999;
   position: relative;
-  top: -10px;
+  top: -5px;
   font-size: 30px;
 }
-#legend .symb .marker:after {
+.legend .symb .marker:after {
   content: "";
   background: #fff;
   width: 15px;
@@ -99,7 +109,7 @@ div.debug,
   left: 8px;
   border-radius: 50%;
 }
-#legend .symb .marker:before {
+.legend .symb .marker:before {
   content: "";
   width: 0;
   height: 0;
@@ -570,4 +580,10 @@ span[data-class="nb=1"] {
 
 .fa-disable {
   opacity: .5;
+}
+
+/** Info dans un dialog */
+[data-role=dialog] .info {
+  font-size: .9em;
+  color: #369;
 }

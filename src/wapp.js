@@ -887,5 +887,15 @@ wapp.connect = function() {
 wapp.selectGPS = function() {
   navigator.geolocation.showSourcePicker('Sélectionner la source');
 };
-  
+
+/** Afficher la legende
+ */
+wapp.showLegend = function() {
+  wapp.dialog.show( CordovApp.template('dialog-legend'), { 
+    className: 'legend', 
+    anim: !wapp.hasDialog(), 
+    closeBox: true 
+  })
+};
+
 export default wapp
