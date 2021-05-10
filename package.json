@@ -1,6 +1,6 @@
 {
   "name": "guichet-mobile",
-  "version": "1.1.8",
+  "version": "2.1.0",
   "description": "Espace collaboratif mobile",
   "main": "index.html",
   "directories": {},
@@ -19,10 +19,13 @@
     "url": "http://sd-redmine.ign.fr/projects/guichet_mobile"
   },
   "homepage": "http://gitlab.dockerforge.ign.fr/express/guichet-mobile",
+  "ign-dependencies": {
+    "cordovapp": "git+http://gitlab.dockerforge.ign.fr/express/cordovapp.git"
+  },
   "dependencies": {
     "cordova-android": "^8.1.0",
     "cordova-plugin-androidx-adapter": "^1.1.0",
-    "cordova-plugin-bluetooth-geolocation": "git+https://github.com/heigeo/cordova-plugin-bluetooth-geolocation.git",
+    "cordova-plugin-bluetooth-geolocation": "git+https://github.com/viglino/cordova-plugin-bluetooth-geolocation.git",
     "cordova-plugin-bluetooth-serial": "^0.4.7",
     "cordova-plugin-camera": "^4.1.0",
     "cordova-plugin-dialogs": "^2.0.2",
@@ -30,15 +33,17 @@
     "cordova-plugin-file-transfer": "^1.7.1",
     "cordova-plugin-geolocation": "^4.0.2",
     "cordova-plugin-inappbrowser": "^3.2.0",
+    "cordova-plugin-insomnia": "git+https://github.com/EddyVerbruggen/Insomnia-PhoneGap-Plugin.git",
     "cordova-plugin-listpicker": "^2.2.2",
     "cordova-plugin-network-information": "^2.0.2",
     "cordova-plugin-whitelist": "^1.3.4",
-    "cordovapp": "git+http://gitlab.dockerforge.ign.fr/express/cordovapp.git",
     "crypto-js": "^3.1.9-1",
     "jquery": "^3.4.1",
     "mongo-parse": "^2.1.0",
+    "npx": "^10.2.2",
     "ol": "^5.3.3",
-    "ol-ext": "^3.1.9",
+    "ol-ext": "^3.1.18",
+    "papaparse": "^5.3.0",
     "proj4": "^2.5.0",
     "webfontloader": "^1.6.28"
   },
@@ -74,12 +79,14 @@
       "cordova-plugin-inappbrowser": {},
       "cordova-plugin-camera": {
         "CAMERA_USAGE_DESCRIPTION": "pour illustrer vos contributions",
-        "PHOTOLIBRARY_USAGE_DESCRIPTION": "pour illustrer vos contributions"
+        "PHOTOLIBRARY_USAGE_DESCRIPTION": "pour illustrer vos contributions",
+        "ANDROID_SUPPORT_V4_VERSION": "27.+"
       },
       "cordova-plugin-androidx-adapter": {},
       "cordova-plugin-network-information": {},
       "cordova-plugin-bluetooth-geolocation": {},
-      "cordova-plugin-whitelist": {}
+      "cordova-plugin-whitelist": {},
+      "cordova-plugin-insomnia": {}
     }
   }
 }

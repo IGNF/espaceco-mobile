@@ -1,0 +1,12 @@
+﻿#loadGuichet .info {
+  position: absolute;
+  bottom: 2.7em;
+  font-size: .8em;
+  color: #fff;
+  text-align: center;
+  pointer-events: none;
+  left: 0;
+  padding: 0 .5em;
+  width: 100%;
+}
+

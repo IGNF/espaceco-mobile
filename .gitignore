@@ -1,6 +1,8 @@
 .cache
 .dist
 .vscode
+.idea
+.VSCodeCounter
 hooks
 node_modules
 node_modules-copie
@@ -8,5 +10,6 @@ platforms
 plugins
 res
 www
+cordovapp-*
 # OS X
 .DS_Store

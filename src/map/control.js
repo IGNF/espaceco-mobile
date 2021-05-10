@@ -1,17 +1,17 @@
+import Geolocation from 'ol/Geolocation'
 import ol_control_Attribution from 'ol/control/Attribution'
 import ol_control_CanvasScaleLine from 'ol-ext/control/CanvasScaleLine'
 import ol_control_Disable from 'ol-ext/control/Disable'
 
-import ol_control_LayerSwitcher from 'ol-ext/control/LayerSwitcher'
 import ol_control_Toggle from 'ol-ext/control/Toggle'
 
 import map from './map'
-
 
 import searchControl from './control/searchControl'
 import switcherGuichet from "./control/switcherGuichet"
 import switcherUserLayer from "./control/switcherUserLayer"
 import switcherGeoportail from './control/switcherGeoportail'
+import ol_control_Button from 'ol-ext/control/Button'
 
 /** Initialize map controls
  */
@@ -57,7 +57,7 @@ export default function(wapp) {
     }
   }));
 
-/* OLD VERSION */
+/* OLD VERSION * /
 console.log('[DEPRECATED] LayerSwitcher')
   // Layer switcher
   var lswitcher = new ol_control_LayerSwitcher({ 
@@ -91,13 +91,35 @@ console.log('[DEPRECATED] LayerSwitcher')
   map.addControl (lswitcher);
 /* END OLD */
 
-  /*
-  // Geolocation Control
-  var geoloc = window.geoloc = new ol.control.Geolocate();
-  geoloc.on("geolocate", function(e) 
-    {	centerMap(e.position);
+  /* Center on GPS */
+  const geolocation = new Geolocation({
+    trackingOptions: {
+      maximumAge: 10000,
+      enableHighAccuracy: true,
+      timeout: 600000
+    },
+    projection: map.getView().getProjection()
+  });
+  geolocation.on('change', (e) => {
+    console.log(e)
+    map.getView().animate({
+      center: geolocation.getPosition(),
+      zoom: Math.max(16, Math.min(19, map.getView().getZoom()))
     });
-  map.addControl(geoloc);
-  */
+    geolocation.setTracking(false);
+  })
 
+  const centerGPS = new ol_control_Button({
+    className: 'centergps',
+    html: "<i class='fa tools-locate'></i>",
+    handleClick: () => {
+      wapp.interactions.geolocation.setFollowTrack('auto');
+      wapp.interactions.ripartGeolocation.setFollowTrack('auto');
+      if (!wapp.interactions.geolocation.getActive() && !wapp.interactions.ripartGeolocation.getActive()) {
+        geolocation.setTracking(true);
+      }
+    }
+  });
+  map.addControl(centerGPS);
+  /**/
 }

@@ -1,3 +1,9 @@
+#layer-signalement h3 .fa {
+  font-size: 1.7em;
+  vertical-align: middle;
+  margin-top: -.2em;
+}
+
 [data-role="dialog"].signalements .big-button {
   margin: 1em .3em 0;
 }

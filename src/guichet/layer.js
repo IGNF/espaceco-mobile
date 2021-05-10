@@ -1,14 +1,13 @@
 import wapp from '../wapp'
-import CordovApp from 'cordovapp/CordovApp'
-import CordovAppFile from 'cordovapp/cordovapp/File'
+import CordovApp from '../../cordovapp/CordovApp'
+import CordovAppFile from '../../cordovapp/cordovapp/File'
 
 import {all as ol_loadingstrategy_all} from 'ol/loadingstrategy'
-import ol_layer_Vector_WFS from 'cordovapp/ol/layer/WFS'
+import ol_layer_Vector_WFS from '../../cordovapp/ol/layer/WFS'
 import {boundingExtent as ol_extent_boundingExtent} from 'ol/extent'
 import {transformExtent as ol_proj_transformExtent} from 'ol/proj'
 
-import ol_layer_Group from 'ol/layer/Group'
-import ol_layer_Vector_Webpart from 'cordovapp/ol/layer/Webpart'
+import ol_layer_Vector_Webpart from '../../cordovapp/ol/layer/Webpart'
 
 /**
  * Creer un layer WFS externe
@@ -139,6 +138,8 @@ wapp.layerWebpart = function(l, cacheUrl, cacheExtent) {
     for (var k=0; k<l.extent.length; k++) extent[k] = parseFloat(l.extent[k]);
     extent = ol_proj_transformExtent(extent, 'EPSG:4326', wapp.map.getView().getProjection());
   }
+  // Format CSV sur develop...
+  l.format = (/collaboratif-develop/.test(l.url)) ? 'CSV' : 'JSON';
   vector = new ol_layer_Vector_Webpart({
     url: url,
     //renderMode: 'image',
@@ -150,16 +151,20 @@ wapp.layerWebpart = function(l, cacheUrl, cacheExtent) {
     extent: extent,
     username: wapp.ripart.getUser(),
     password: wapp.ripart.getUser(true),
+    options: l,
     // style: guichet.style,
     maxResolution: 40, // zoom 13
     checkSourceOptions: function (options, featureType) {
       // console.log(featureType.fullName, featureType.tileZoomLevel, '-', featureType.minZoomLevel-2)
       // Limiter la taille des tuilles en fonction du minZoom
       options.tileZoom = featureType.tileZoomLevel; //|| Math.max(featureType.minZoomLevel-2, 4);
+      // Update tile zoom
+      l.tilezoom = featureType.tileZoomLevel;
     }.bind(this)
   },{
     preserved: this.select.getFeatures(),
     filter: (base=="bduni_metropole" ? {detruit:false} : {}),
+    outputFormat: l.format,
     // Tile zoom to calculate tiles
     tileZoom: 13,
     maxFeatures: 5000,
@@ -175,11 +180,24 @@ wapp.testHiddenLayer = function(layer) {
   // First time use default
   if (!this.param.visibleLayers) return;
   // Test
-  layer.setVisible(layer.get('displayInLayerSwitcher') !== false && this.param.visibleLayers[layer.get("name")] !== false);
   if (layer.getLayers) {
     layer.getLayers().forEach(function(l){
       wapp.testHiddenLayer(l);
     });
+  }
+  if (this.param.noEditLayers && this.param.noEditLayers[layer.get('name')]) {
+    layer.set('edit', false);
+  }
+  if (layer.get('title') === 'extent') {
+    layer.setVisible(true);
+  } else {
+    if (layer.get('displayInLayerSwitcher') !== false 
+    && this.param.visibleLayers[layer.get('name')] !== false) {
+      layer.setVisible(true);
+      layer.setOpacity(this.param.visibleLayers[layer.get('name')] || 1);
+    } else {
+      layer.setVisible(false);
+    }
   }
 };
 
@@ -196,7 +214,7 @@ wapp.getLayerGuichet = function(pos) {
  */
 wapp.loadLayers = function (groupe) {
   // Layer du guichet
-	var guichet = wapp.getLayerGuichet();
+  var guichet = wapp.getLayerGuichet();
   var i;
 
   // Layers du guichet
@@ -206,88 +224,113 @@ wapp.loadLayers = function (groupe) {
     guichet.set("displayInLayerSwitcher", false);
 		return;
 	}
-	guichet.set("displayInLayerSwitcher", true);
+  guichet.set("displayInLayerSwitcher", true);
   guichet.set("title", 'Guichet: '+groupe.nom);
 
   // Layers en cache
-  var cache = wapp.vectorCache.getLayers(groupe);
+  var layers = [];
+  var groupLayers = [];
+  var cacheLayers = [];
+  var cache = wapp.vectorCache.getLayers(groupe, cacheLayers);
   if (cache.length) {
-    cache[0].getLayers().forEach((l) => {
-      guichet.getLayers().push(l);
-      wapp.testHiddenLayer(l);
+    console.log('CACHE')
+    layers = cache[0].getLayers().getArray();
+    // Recherche des layers en ligne (pas dans le cache)
+    groupe.layers.forEach((l) => {
+      var found = false;
+      for (let i=0, c; c=cacheLayers[i]; i++) {
+        if (c.nom === l.nom && c.url === l.url) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) groupLayers.push(l);
     });
   } else {
-    // Chargement des guichets en ligne
-    var nb=0, nbLoad=0;
-    var loading = {};
+    groupLayers = groupe.layers
+  }
+  // Chargement des guichets en ligne
+  var nb=0, nbLoad=0;
+  var loading = {};
 
-    // Ajouter les layers du guichet
-    var l;
-    for (i=0; l=groupe.layers[i]; i++) {
-      if (l.type=="WFS") {
-        nb++;
-        var vector;
-        // WFS externe
-        if (l.external) vector = wapp.layerWFS(groupe, l);
-        // Guichet
-        else vector = wapp.layerWebpart(l);
+  // Ajouter les layers du guichet
+  var l;
+  for (i=0; l=groupLayers[i]; i++) {
+    if (l.type=="WFS") {
+      nb++;
+      var vector;
+      // WFS externe
+      if (l.external) vector = wapp.layerWFS(groupe, l);
+      // Guichet
+      else vector = wapp.layerWebpart(l);
 
-        // Ajouter
-        this.vector.push(vector);
-        wapp.testHiddenLayer(vector);
-        guichet.getLayers().push(vector);
+      // Ajouter
+      this.vector.push(vector);
+      layers.push(vector);
 
-        // Probleme au chargement
-        vector.on("error", function(e){
-          if (e.status===401) {
-            wapp.message ("Impossible de charger la couche <i>"
-                +(this.get('name')||this.get('title'))
-                +"</i>.<i class='error'><br/>"+e.status+" - "+e.error+"</i>",
-              "Connexion", { ok:"ok" });
-          } else {
-            wapp.alert ("Impossible de charger la couche <i>"
-                +(this.get('name')||this.get('title'))
-                +"</i>.<i class='error'><br/>"+e.status+" - "+e.error+"</i>");
+      // Probleme au chargement
+      vector.on("error", function(e){
+        if (e.status===401) {
+          wapp.message ("Impossible de charger la couche <i>"
+              +(this.get('name')||this.get('title'))
+              +"</i>.<i class='error'><br/>"+e.status+" - "+e.error+"</i>",
+            "Connexion", { ok:"ok" });
+        } else {
+          wapp.alert ("Impossible de charger la couche <i>"
+              +(this.get('name')||this.get('title'))
+              +"</i>.<i class='error'><br/>"+e.status+" - "+e.error+"</i>");
+        }
+        return;
+      });
+
+      // Chargement OK > gerer load / overload
+      vector.on("ready", function(){
+        // Marquer le layer sur l'objet
+        this.getSource().on('addfeature', function (e) {
+          e.feature.layer = this; 
+        }.bind(this));
+        // Ooops probleme d'overload
+        this.getSource().on('overload', function () {
+          wapp.notification("overloading...");
+        });
+        // Notification de chargement
+        this.getSource().on(['loadstart', 'loadend'], function (e) {
+          loading[e.target.getFeatureType().fullName] = e.remains;
+          var remains=0;
+          for (var i in loading) remains += loading[i];
+          if (remains) {
+            wapp.notification("<i class='blinking'>chargement...</i>", 5000, true);
           }
-          return;
+          else wapp.notification();
         });
-
-        // Chargement OK > gerer load / overload
-        vector.on("ready", function(){
-          // Marquer le layer sur l'objet
-          this.getSource().on('addfeature', function (e) {
-            e.feature.layer = this; 
-          }.bind(this));
-          // Ooops probleme d'overload
-          this.getSource().on('overload', function () {
-            wapp.notification("overloading...");
-          });
-          // Notification de chargement
-          this.getSource().on(['loadstart', 'loadend'], function (e) {
-            loading[e.target.getFeatureType().fullName] = e.remains;
-            var remains=0;
-            for (var i in loading) remains += loading[i];
-            if (remains) {
-              wapp.notification("<i class='blinking'>chargement...</i>", 5000, true);
-            }
-            else wapp.notification();
-          });
-          
-          // Decompte
-          nbLoad++;
-          if (nb==nbLoad) wapp.notification(nb+" couches ajoutées à la carte...");
-        });
-      }
+        
+        // Decompte
+        nbLoad++;
+        if (nb==nbLoad) wapp.notification(nb+" couches ajoutées à la carte...");
+      });
     }
   }
+
+  // Sort layers 
+  const keys = Object.keys(wapp.param.visibleLayers);
+  layers.sort((a,b) => keys.indexOf(a.get('name')) - keys.indexOf(b.get('name')));
+  // Add sorted layers
+  layers.forEach((l) => {
+    // Check visibility
+    l.setVisible(wapp.param.visibleLayers[l.get('name')]);
+    guichet.getLayers().push(l);
+    wapp.testHiddenLayer(l);
+  });
   
   // Reset source pour la recherche
   wapp.setSearchSource ();
 
 	// Mettre les signalements en haut de la pile de calque
 	if (nb) {
+    /*
     wapp.map.removeLayer(wapp.ripart.layer);
-		wapp.map.addLayer(wapp.ripart.layer);
+    wapp.map.addLayer(wapp.ripart.layer);
+    */
 		wapp.notification("Chargement des guichets...");
 	}
 };

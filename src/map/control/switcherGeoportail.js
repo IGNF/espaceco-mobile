@@ -1,7 +1,11 @@
+import CordovApp from '../../../cordovapp/CordovApp'
 import ol_control_LayerSwitcher from 'ol-ext/control/LayerSwitcher'
 import ol_ext_element from 'ol-ext/util/element'
 import ol_layer_Geoportail from 'ol-ext/layer/Geoportail'
 import 'ol-ext/layer/GetPreview'
+
+
+let geoportailSwitcher;
 
 /**
  * Ajout des actions pour les cartes en cache dans leur barre d'icone
@@ -40,6 +44,7 @@ function setActionCacheMap (wapp, layer, div) {
         if (name) {
           smap.nom = name;
           layer.set('title', name);
+          geoportailSwitcher.drawPanel();
         }
       });
     },
@@ -66,10 +71,6 @@ function setActionCacheMap (wapp, layer, div) {
         wapp.hidePage();
         wapp.dialog.close();
       });
-      $('.loadmap', content).get(0).addEventListener('click', () => {
-        wapp.cache.loadCacheMap(smap);
-        wapp.dialog.close();
-      });
       wapp.dialog.show (content, {
         title: layer.get('title'),
         buttons: { ok:'ok' }
@@ -91,7 +92,8 @@ function setActionCache(wapp, layer, div) {
     ol_ext_element.create('I', {
       className: 'fa fa-plus-circle',
       click: () => {
-        wapp.cache.addCacheMap();
+        wapp.cache.addCacheMap(wapp.param.options.mode === 'expert');
+        layer.set('openInLayerSwitcher', true);
       },
       parent: div
     });
@@ -116,35 +118,64 @@ function setActionCache(wapp, layer, div) {
  * @param {CordovApp} wapp 
  */
 export default function(wapp) {
+  const layer = wapp.map.getLayers().getArray().find((l) => { return l.get('name') === 'geoportailGroup' });
+
   // Affichage du layerswitcher
-  const geoportailSwitcher = new ol_control_LayerSwitcher({ 
+  geoportailSwitcher = new ol_control_LayerSwitcher({ 
     target: $("#layer-geoportail .layerswitcher").get(0), 
     reordering: true,
-    displayInLayerSwitcher: (l) => {
-      return (
-        (/DFCI|cache|GEOPORTAL_LAYERS|GEOPORTAL_OVERLAYS|ADRESSES/.test(l.get('name')) || l instanceof ol_layer_Geoportail)
-        && 
-        l.get('displayInLayerSwitcher') !== false
-      );
-    }
+    layerGroup: layer
   });
+  geoportailSwitcher.on('layer:visible', () => {
+    let vis = false;
+    layer.getLayers().forEach((l)=> {
+      vis = vis || l.getVisible();
+    })
+    layer.setVisible(vis);
+  })
+
+  // Show / hide layer
+  const eye = $('#couches .geoportailmap .fa-eye').on('click', (e) => {
+    e.stopPropagation();
+    layer.setVisible(!layer.getVisible());
+  });
+  const eye2 = $('#layer-geoportail h3 .fa-eye').on('click', () => {
+    layer.setVisible(!layer.getVisible());
+  });
+  const setVisibility = function() {
+    if (layer.getVisible()) {
+      eye.removeClass('fa-eye-slash');
+      eye2.removeClass('fa-eye-slash');
+    } else {
+      eye.addClass('fa-eye-slash');
+      eye2.addClass('fa-eye-slash');
+    }
+  };
+  layer.on('change:visible', setVisibility);
+  setVisibility();
 
   // Gestion de l'affichage des layers groupe si tous les layers contenant sont masques
-  function checkVisibility (e)  {
-    const layer = e.target;
+  function checkVisibility (layer)  {
     if (layer.getLayers) {
       var visible = false;
       layer.getLayers().forEach((l) => {
-        if (l.getVisible()) visible = true;
+        if (l.getVisible() && l.get('name')!=='Emprises') visible = true;
       });
       layer.setVisible(visible);
     }
   }
-  // Gestion de la visibilite des fonds geoportail
-  wapp.layers.forEach((l) => {
-    if (/GEOPORTAL_LAYERS|GEOPORTAL_OVERLAYS/.test(l.get('name'))) {
-      l.on('change', checkVisibility);
-    } 
+  // Gestion de la visibilite des fonds geoportail en fonction des fonds contenu dans le layer
+  layer.getLayers().forEach((layer) => {
+    layer.getLayers().forEach((l) => {
+      l.on('change:visible', () => {
+        checkVisibility(layer);
+      });
+    });
+    layer.getLayers().on('add', (e) => {
+      e.element.on('change:visible', () => {
+        checkVisibility(layer);
+      });
+    });
   });
 
   // Affichage des actions des couches
@@ -158,6 +189,7 @@ export default function(wapp) {
       setActionCache(wapp, e.layer, div);
     } else if (e.layer.get('cacheMap')) {
       setActionCacheMap(wapp, e.layer, div);
+      e.layer.on('change', () => geoportailSwitcher.drawPanel());
     } else if (e.layer.get('desc')) {
       // Description
       ol_ext_element.create('I', {

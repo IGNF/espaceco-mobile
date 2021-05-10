@@ -136,21 +136,3 @@
   font-weight: bold;
 }
 
-/* Dialog de cache */
-[data-role="dialog"].guichet ul.layerselect {
-  border-bottom: 3px solid #ccc;
-  padding: .5em 0;
-}
-[data-role="dialog"].guichet ul.layerselect li {
-  position: relative;
-  padding: .2em 1.5em .2em 0;
-}
-[data-role="dialog"].guichet ul.layerselect li.selected:before {
-  content: "\f00c";
-  font-family: Fontawesome;
-  position: absolute;
-  right: 0;
-  top: 50%;
-  -webkit-transform: translateY(-50%);
-  transform: translateY(-50%);
-}

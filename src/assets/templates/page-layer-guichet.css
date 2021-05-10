@@ -1,5 +1,14 @@
-#layer-guichet .guichet {
-  text-align: right;
+#layer-guichet .guichet > * {
+  float: right;
+  clear: both;
+}
+#layer-guichet .layerswitcher {
+  clear: both;
+}
+#layer-guichet .guichet > h3,
+#layer-guichet .guichet > i {
+  float: none;
+  vertical-align: middle;
 }
 #layer-guichet .guichet img {
   display: inline-block;
@@ -9,7 +18,6 @@
   margin-left: .5em;
 }
 #layer-guichet .guichet h3 {
-  margin: 0;
   display: inline-block;
 }
 #layer-guichet .guichet .button {
@@ -56,12 +64,13 @@
   float: right;
   max-height: 3em;
   max-width: 4em;
+  margin-top: -.6em;
 }
 [data-role="dialog"].dialog-infocouche h2 {
   width: calc(100% - 3em);
   overflow: hidden;
 }
-[data-role="dialog"].dialog-infocouche .fa {
+[data-role="dialog"].dialog-infocouche .edit .fa {
   margin-top: -.25em;
 }
 [data-role="dialog"].dialog-infocouche .readonly .edit {
@@ -69,4 +78,34 @@
 }
 [data-role="dialog"].dialog-infocouche .edit .noedit {
   display: none;
+}
+
+/* Dialog de cache */
+[data-role="dialog"].guichet .switcher {
+  float: right;
+}
+[data-role="dialog"].guichet .switcher span {
+  color: #369;
+}
+
+[data-role="dialog"].guichet ul.layerselect {
+  border: 3px solid #ccc;
+  border-width: 1px 0 3px;
+  padding: 0;
+}
+[data-role="dialog"].guichet input[type=text] {
+  margin: .3em 0 0;
+}
+[data-role="dialog"].guichet ul.layerselect li {
+  position: relative;
+  padding: .2em 1.5em .2em 0;
+}
+[data-role="dialog"].guichet ul.layerselect li.selected:before {
+  content: "\f00c";
+  font-family: Fontawesome;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  transform: translateY(-50%);
 }

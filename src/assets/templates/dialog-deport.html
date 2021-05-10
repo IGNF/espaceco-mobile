@@ -1,0 +1,16 @@
+﻿<ul class="deport">
+  <li class="car XY">
+    <label class="checkbox-left"><input type="checkbox" /><span>Déport planimétrique :</span></label>
+    <i class="fa fa-arrows-h" onclick="$(this).next().val(parseFloat($(this).next().val()||0)*-1)"></i>
+    <input type="number" min="-Infinity" step=".01" />
+  </li>
+  <li class="Z">
+    <label class="checkbox-left"><input type="checkbox" /><span>Déport altimétrique :</span></label>
+    <i class="fa fa-arrows-v" onclick="$(this).next().val(parseFloat($(this).next().val()||0)*-1)"></i>
+    <input type="number" min="-Infinity" step=".01" />
+  </li>
+  <li class="tolerance">
+    <label>Intervalle entre points (m) :</span></label>
+    <input type="number" min="-Infinity" step=".1" />
+  </li>
+</ul>

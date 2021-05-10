@@ -166,15 +166,15 @@
 }
 .ol-zoom {
   left: auto;
-  top: 3em;
-  right: 0.5em;
+  top: 6.5em;
+  left: 0.5em;
 }
 .ol-rotate {
   right: 0.5em;
 }
 
-.ol-control
-{	font-size:2em;
+.ol-control {
+  font-size:2em;
 }
 .ol-control .ol-control {
 	font-size: 1em;
@@ -197,4 +197,52 @@
   box-shadow: 1px 1px 5px;
   float: left;
   margin-right: .5em;
+}
+
+#map .ol-rotate {
+  border-radius: 50%;
+  top: .25em;
+  right: 2.5em;
+  font-size: 2.5em;
+}
+#map .ol-rotate button {
+  color: transparent;
+  border-radius: 50%;
+}
+#map .ol-rotate span {
+  font-size: 1em;
+}
+#map .ol-rotate button .ol-compass:before,
+#map .ol-rotate button .ol-compass:after {
+  position: absolute;
+  content: "";
+  width: 0;
+  height: 0;
+  border: .55em solid rgba(255,255,255,.5);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%) scaleX(.35) rotate(45deg);
+}
+#map .ol-rotate button .ol-compass:after {
+  border-width: .4em;
+  border-color: #800 #fff #fff #800;
+  opacity: .8;
+}
+#map .ol-rotate:hover button .ol-compass:after {
+  opacity: 1;
+}
+
+#layer-geoportail .ol-layer-group.cache {
+  display: none;
+}
+.offline #layer-geoportail .ol-layer-group.cache {
+  display: block;
+}
+
+.ol-button.centergps {
+  right: .5em;
+  top: 3.5em;
+}
+.ol-bar.ol-geobar.centerTrack .ol-bar {
+  display: none;
 }

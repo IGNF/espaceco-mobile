@@ -1,3 +1,4 @@
+/*global wapp*/
 import ol_control_Button from 'ol-ext/control/Button'  
 import ol_control_SearchFeature from 'ol-ext/control/SearchFeature'
 import ol_control_SearchGeoportail from 'ol-ext/control/SearchGeoportail'

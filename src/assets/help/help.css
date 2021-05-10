@@ -13,8 +13,16 @@
 #help ul {
   margin:0; 
   padding-left:1em; 
-  list-style-type:square;
+  list-style:none;
+  padding: 0 .5em;
 }
+#help ul .fa {
+  width: 1.3em;
+  text-align: center;
+  font-size: 1.2em;
+  margin: .2em 0 0;
+}
+
 
 #help .menu {
   top:0;
@@ -22,22 +30,22 @@
   text-align: center;
 }
 #help .menu-content {
-  top: 0;
-  left: 4em;
+  top: 2em;
+  left: 3em;
   max-width: initial;
 }
 
 #help .gps {
   bottom: 9.5em;
-    right: 1.5em;
+  right: 1.5em;
   text-align: left;
   width: 15em;
-    max-width: 50%;
+  max-width: 50%;
 }
 #help .gps .fa {
-    position: absolute;
-    left: -1em;
-    margin: .08em;
+  position: absolute;
+  left: -1em;
+  margin: .08em;
 }
 #help .locate {
   bottom: 3.5em;
@@ -126,4 +134,10 @@
   bottom: -.5em;
   right: 6em;
   text-align: left;
+}
+
+#help .guichet-edition {
+  top: 11em;
+  right: 1em;
+  max-width: 100%;
 }

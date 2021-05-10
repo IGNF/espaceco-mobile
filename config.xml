@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="fr.ign.guichet" version="2.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="fr.ign.guichet" version="2.1.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Espace collaboratif IGN</name>
     <description>
       La solution IGN pour saisir et partager des signalements issus du terrain.
     </description>
     <author email="sai-mobile@ign.fr" href="http://www.ign.fr">
-        Jean-Marc Viglino (c) IGN.fr - 2016-2017
+        Jean-Marc Viglino (c) IGN.fr - 2016-2020
     </author>
     <content src="index.html" />
     <icon src="www/img/logo.png" />

@@ -1,0 +1,456 @@
+import wapp from '../wapp'
+
+import {containsCoordinate as ol_extent_containsCoordinate} from 'ol/extent'
+import {getCenter as ol_extent_getCenter} from 'ol/extent'
+import ol_layer_Vector_Webpart from '../../cordovapp/ol/layer/Webpart'
+import RIPart from '../../cordovapp/ripart/Ripart'
+import { Feature } from 'ol';
+
+/** Get title */
+function getFeatureTitle(f) {
+  var prop = f.getProperties();
+  if (prop.georem) {
+    return ('Signalement'+(prop.georem.id?'#'+prop.georem.id:''));
+  }
+  for (var i in prop) {
+    if (/name|nom|label/.test(i)) {
+      return prop[i] + 
+      ' <i>('+wapp.getGeomFr(f.getGeometry())+')</i>';
+    }
+  }
+  return '<i>sans nom</i>';
+}
+
+/* Add attribute line to the selection list
+ * @param {Element} th container
+ * @param {Elemen} ul the list
+ * @param {string} title
+ * @param {string} val
+ */
+function _addLine(th, ul, title, val, options) {
+  options = options || {};
+  var theme, label;
+  var index = title.indexOf('@');
+  if (index > -1) {
+    theme = title.substring(0, index);
+    label = title.substring(index+1);
+  } else {
+    theme = "hidden";
+    label = title;
+  }
+  // Hidden themes
+  if (theme==='symb') return;
+  // Add new theme
+  var className = theme.replace(/ /g,'_');
+  if (theme && !$('.'+className, th).length) {
+    $('<div>').addClass(className)
+      .text(theme)
+      .click(function(){
+        $('div', th).removeClass('selected');
+        $('.'+className, th).addClass('selected');
+        $('li', ul).hide();
+        $('.'+className, ul).show();
+      })
+      .appendTo(th);
+  }
+  // Add line
+  var li = $("<li>").addClass(className).appendTo(ul);
+  if (options.feature && options.feature._updates && options.feature._updates[options.attribute.name]) {
+    li.addClass('updated');
+  }
+  switch (options) {
+    case 'JSON':
+    case 'JsonValue': {
+      // Json decode
+      var json;
+      try { json = JSON.parse (val); }
+      catch(e) { /* ok */ }
+      // Array
+      if (json instanceof Array && json.length) {
+        var tab = $("<table>").appendTo(li);
+        var tr = $("<tr>").appendTo(tab);
+        var i, k;
+        for (k in json[0]) {
+          $("<td>").text(k.replace(/_/g,' ')).appendTo(tr);
+        }
+        for (i=0; i<json.length; i++) {
+          tr = $("<tr>").appendTo(tab);
+          for (k in json[i]) {
+            $("<td>").text(json[i][k])
+              .addClass(typeof(json[i][k]))
+              .appendTo(tr);
+          }
+        }
+        break;
+      }
+    }
+    // fallsthrough
+    default: {
+      $("<label>")
+        .text(label)
+        .appendTo(li);
+      if (options.attribute && options.attribute.listOfValues && !options.attribute.listOfValues.forEach) {
+        var v = val;
+        for (let i in options.attribute.listOfValues) {
+          if (options.attribute.listOfValues[i]===val) v = i; 
+        }
+        val = v;
+      }
+      //const sp = 
+      $("<span>").text(val)
+        .appendTo(li);
+/*
+      // Gestion de l'edition sur place
+      if (options.edit) {
+        let edit = new EditionInput(options.attribute, '');
+        if (edit.input) {
+          switch (edit.type) {
+            case 'DateTime':
+            case 'YearMonth':
+            case 'Date': {
+              ol_ext_element.create('INPUT', {
+                className: 'editDate',
+                value: edit.type==='DateTime' ? val.replace(' ','T') : val,
+                on: {
+                  'change': (e) => {
+                    val = e.target.value;
+                    if (edit.type==='DateTime' && !/T/.test(options.feature.set(options.attribute.name))) {
+                      val = val.replace('T',' ');
+                    }
+                    sp.text(val);
+                    options.feature.set(options.attribute.name, val);
+                  }
+                },
+                type: edit.type==='DateTime' ? 'datetime-local' : edit.type==='Date' ? 'date' : 'month',
+                parent: li.get(0)
+              });
+              ol_ext_element.create('I', {
+                className: 'fa fa-calendar',
+                style: { 'pointer-event': 'none' },
+                parent: li.get(0)
+              });
+              break;
+            }
+            default: {
+              const icon = ol_ext_element.create('I', {
+                className: 'fa fa-pencil',
+                click: () => {
+                  edit = new EditionInput(options.attribute, val);
+                  edit.prompt((resp) => {
+                    if (edit.type==='Boolean') {
+                      icon.className = 'fa checkbox ' + (resp ? 'check' : 'uncheck');
+                    }
+                    val = resp;
+                    sp.text(val);
+                    options.feature.set(options.attribute.name, val);
+                  });
+                },
+                parent: li.get(0)
+              });
+              if (edit.type==='Boolean') {
+                icon.className = 'fa checkbox ' + (val ? 'check' : 'uncheck');
+              }
+              break;
+            }
+          }
+        }
+      }
+*/
+      break;
+    }
+  }
+}
+
+/** Show a georem
+ * @param {Element} div current Element
+ * @param {*} georem
+ * @param {boolean} newOne if false add a delete button
+ */
+function showGeorem(div, georem, newOne) {
+  div.addClass("georem").removeClass("fiche");
+  if (georem.sketch) georem.nb = wapp.ripart.sketch2feature(georem.sketch).length;
+  else georem.nb = 0;
+  if (!georem.statut) georem.statut = ' ';
+  const georemDiv = $(".georem", div);
+  // Show attributes
+  wapp.dataAttributes(georemDiv, georem);
+  // Set response statut code > text
+  for (let k in wapp.codes.statut) {
+    $('.'+k+' span', div).text(wapp.codes.statut[k]);
+  }
+  // Reply
+  const replyBt = $('button.response', georemDiv).off();
+  if (/W/.test(georem.autorisation)) {
+    var isok;
+    switch (georem.statut) {
+      case 'submit':
+      case 'pending':
+      case 'pending0':
+      case 'pending1': {
+        isok = true;
+        break;
+      }
+      default: {
+        isok = false;
+        break;
+      }
+    }
+    if (isok) {
+      replyBt.show();
+      if (georem.responses) replyBt.addClass('disabled');
+      else replyBt.removeClass('disabled');
+      replyBt.click(() => {
+        if (georem.responses) {
+          wapp.alert (
+            '<i class="fa fa-warning fa-fleft fa-2x"></i>Envoyez cette réponse avant d\'en créer ne nouvelle.',
+            'Une réponse en attente...'
+          );
+        }
+        wapp.ripart.addLocalRep(georem, {
+          cback: () => {
+            showGeorem(div, georem, newOne);
+          }
+        });
+      });
+    } else {
+      replyBt.hide();
+    }
+    // Local responses
+    const resp = wapp.ripart.getLocalReps(georem);
+    const ul = $('.localRep', div);
+    const tmp = $('[data-role="template"]', ul);
+    ul.html('').append(tmp);
+    resp.forEach((r) => {
+      const li = $("<li>").html(tmp.html()).appendTo(ul);
+      if (!isok || r.error) li.addClass('error');
+      $('.statut', li).addClass(r.statut).text(RIPart.status[r.statut] || 'Réponse');
+      $('.comment', li).text(r.comment);
+      $('.sendrep', li).click(() => {
+        wapp.wait('Envoi en cours...')
+        wapp.ripart.postLocalRep(georem, r, {
+          cback: (georem, error) => {
+            showGeorem(div, georem, newOne);
+            wapp.wait(false);
+            if (error) {
+              var msg = "Impossible d'envoyer la réponse.<br/>";
+              if (error.status==0) {
+                msg = $('<div>').html(msg+"Vérifiez votre connexion ou réessayez lorsque vous serez à nouveau connecté au réseau.");
+              } else {
+                msg = $('<div>').html(msg+"Réponse incorrecte...");
+              }
+              $("<i>").addClass('error')
+                .html("<br/>Erreur : "+error.status+" - "+error.statusText+"</i>")
+                .appendTo(msg);
+              wapp.alert(msg);
+            }
+          }
+        });
+      });
+      $('.delrep', li).click(() => {
+        wapp.ripart.delLocalRep(georem, r, {
+          cback: () => {
+            showGeorem(div, georem, newOne);
+          }
+        });
+      })
+    });
+  } else {
+    replyBt.hide();
+  }
+  if (newOne) $(".georem .del", div).hide();
+  else $(".georem .del", div).show();
+}
+
+/** Objet d'un guichet 
+ * @param {Element} ul
+ * @param {ol.Feature} f
+ * @param {Element} th theme element
+ */
+function showFeature(ul, f, th) {
+  // Objet d'un guichet
+  const isEdit = !wapp.isCordova || (f.layer.get('cache') && !f.layer.getFeatureType().readOnly);
+  if (isEdit) {
+    $('.edit', ul.parent()).show();
+  }
+  ul.parent().removeClass('edition');
+  var ftype = f.layer.getSource().featureType_;
+  for (let i in ftype.attributes) if (i !== ftype.geometryName) {
+    let att = ftype.attributes[i];
+    switch (att.type) {
+      case "Point":
+      case "LineString":
+      case "Polygon":
+      case "MultiPolygon":
+        break;
+      default: {
+        _addLine(
+          th, ul, 
+          att.title, 
+          f.get(i), {
+            feature: f, 
+            attribute: att,
+            edit: (isEdit && i !== ftype.idName && !att.readOnly)
+          }
+        );
+        break;
+      }
+    }
+  }
+}
+
+/** Objet WMS 
+ * @param {Element} ul
+ * @param {ol.Feature} f
+ * @param {Element} th theme element
+ */
+function showWMSFeature(ul, f, th) {
+  // Objet WMS
+  var visu = f.layer.get("getFeatureInfoMask").visu;
+  for (let i in visu) {
+    _addLine(th, ul, visu[i].replace(/_/g,' '), f.get(i));
+  }
+}
+
+/** Objet WFS 
+ * @param {Element} ul
+ * @param {ol.Feature} f
+ * @param {Element} th theme element
+ */
+function showWFSFeature(ul, f, th) {
+  const prop = f.getProperties();
+  const geometryName = f.getGeometryName();
+  const att = f.layer.getFeatureType().attributes || {};
+  for (let i in prop) if (i !== geometryName) {
+    _addLine(th, ul, (att[i]?att[i].title:i).replace(/_/g,' '), f.get(i), att[i]?att[i].type:'string');
+  }
+}
+
+/** Afficher la fiche
+ * @param {any}  options
+ *	@param {bool} options.ripart true si vient de la page de remontees 
+ *	@param {int} options.index position dans le liste de selection
+ */
+wapp.showSelect = function(options) {
+  options = options || {};
+  let features = [];
+  const currentFeatures = options.features || $.extend([],this.select.getFeatures().getArray());
+  currentFeatures.forEach((f) => {
+    // Cluster ?
+    if (f.get('features')) {
+      features = features.concat(f.get('features'));
+    } else {
+      if (f.layer !== wapp.ripart.croquis) features.push(f);
+    }
+  });
+  var nb = features.length;
+
+  // Ne pas passer par le liste
+  options.index = options.index || 0;
+
+  // Current feature
+  if (options.index && options.index>=nb) options.index = 0;
+  if (options.index && options.index<0) options.index = nb-1;
+  var f = features[options.index || 0];
+
+  if (options.ripart) $("#fiche").addClass("fromRipart");
+  else $("#fiche").removeClass("fromRipart");
+
+  var div = $('#fiche .selection').removeClass("georem fiche trace multi");
+  div.get(0).scrollTop = 0;
+  var i, ul, th;
+
+  // Pas de selection
+  if (options.index===undefined && nb>1) {
+    div.addClass("fiche");
+    $(".fiche h3", div).html(nb+' objets sélectionnés :');
+    $(".fiche img.guichet", div).hide();
+    ul = $(".fiche ul", div).html('');
+    th = $(".fiche .themes", div).html('');
+    i = 0;
+    this.select.getFeatures().forEach (function(f){
+      $('<li>').html(getFeatureTitle(f))
+        .data('index', i++)
+        .click(function(){
+          wapp.showSelect({ index: $(this).data('index'), features: features });
+        })
+        .appendTo(ul);
+    });
+  } else if (f) {
+    if (nb>1) {
+      div.addClass('multi');
+      $('.multi span', div).html(((options.index||0)+1)+'/'+nb);
+    }
+    $(".next", div).off().click(function(){
+      wapp.showSelect({ index: (options.index||0)+1, features: features });
+    });
+    $(".prev", div).off().click(function(){
+      wapp.showSelect({ index: (options.index||0)-1, features: features });
+    });
+
+    this.select.getFeatures().clear();
+    this.select.getFeatures().push(f);
+    $('#selection').html (f.get('nom') || f.get('nature') || 'Afficher la sélection...');
+    var prop = f.getProperties();
+    var georem = prop.georem || prop.ripart;
+    // Hide edition
+    $('.edit').hide();
+    // Georem
+    if (georem) {
+      // Croquis ?
+      if (georem instanceof Feature) {
+        showGeorem(div, georem.get('georem'), prop.ripart);
+      } else {
+        showGeorem(div, georem, prop.ripart);
+      }
+    } else {
+      // Fiche de l'objet
+      div.addClass("fiche");
+      // Layer de l'objet
+      $(".fiche h3", div).text(f.layer.get("title")||f.layer.get("name"));
+      if (f.layer.get("logo")) {
+        $(".fiche img.guichet", div).attr('src', f.layer.get("logo")).show();
+      } else {
+        $(".fiche img.guichet", div).hide();
+      }
+      var saveTheme =  $(".fiche .themes .selected", div).removeClass('selected').attr('class');
+      ul = $(".fiche ul", div).html('');
+      th = $(".fiche .themes", div).html("");
+
+      // Trace GPS
+      if (f.layer.get('geolocation')) {
+        div.addClass("trace");
+      } else 
+      // GUICHET
+      if (f.layer instanceof ol_layer_Vector_Webpart) {
+        showFeature(ul, f, th);
+      } else 
+      // WMS
+      if (f.layer.get("getFeatureInfoMask")) {
+        showWMSFeature(ul, f, th);
+      } else 
+      // WFS
+      if (f.layer.getFeatureType) {
+        showWFSFeature(ul, f, th);
+      }
+
+      // select first theme
+      if (saveTheme && $("."+saveTheme, th).length) $("."+saveTheme, th).click();
+      else $('[class!="hidden"]', th).first().click();
+    }
+  }
+  if ($('.fiche .themes [class!="hidden"]', div).length > 0) {
+    div.addClass('themes');
+  } else {
+    div.removeClass('themes');
+  }
+  wapp.showPage('fiche');
+  
+  // Centrer sur le point si hors de l'ecran
+  if (f) {
+    var e = this.map.getView().calculateExtent(this.map.getSize());
+    const pt = f.getGeometry().getClosestPoint(ol_extent_getCenter(e));
+    if (!ol_extent_containsCoordinate(e, pt)) {
+      this.map.getView().setCenter(pt);
+    }
+  }
+};

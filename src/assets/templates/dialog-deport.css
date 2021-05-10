@@ -1,0 +1,17 @@
+﻿.deport i {
+  float: right;
+  background-color: #666;
+  color: #fff;
+  width: 1em;
+  height: 1em;
+  text-align: center;
+  padding: .2em;
+  border-radius: .2em;
+  box-sizing: content-box;
+  margin-top: -.15em;
+}
+
+.deport label.checkbox-left {
+  margin-bottom: .5em;
+  display: inline-block;
+}

@@ -1,12 +1,12 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8" />
+  <meta charset="utf-8" />
 
   <meta name="format-detection" content="telephone=no" />
-    <meta name="msapplication-tap-highlight" content="no" />
-    <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
-    <!meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+  <meta name="msapplication-tap-highlight" content="no" />
+  <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
+  <!meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
   <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1" />
   <title>Mon guichet</title>
 </head>
@@ -15,6 +15,7 @@
   <div id="map" class="needsclick"></div>
   <div id="selection" onclick="wapp.showSelect();" data-placeholder="Signaler !"></div>
   <i id="signaler" onclick="wapp.showRipartForm();" class="fa fa-map-marker" title="Signaler..."></i>
+  <i id="signalerGPS" onclick="wapp.directGPS();" class="fa fa-map-marker expert" title="Signaler GPS..."></i>
 
   <!-- info -->
   <div id="info" ></div>
@@ -51,15 +52,23 @@
   <div id="layer-geoportail" data-role="page" data-template="layer-geoportail"></div>
   <div id="layer-signalement" data-role="page" data-template="layer-signalement"></div>
 
-  <!-- Layers -->
+<!-- Layers 
   <div id="layers" data-role="page" data-template="layers"></div>
+-->
 
-  <!-- Cartes -->
+  <!-- Layers -->
+  <div id="filter" data-role="page" data-template="filter"></div>
+
+  <!-- Cartes: DEPRECATED -- >
   <div id="cartes" data-role="page" data-template="cartes"></div>
-  <!-- Guichet -->
+  <!-- Guichet: DEPRECATED -- >
   <div id="guichet" data-role="page" data-template="guichet"></div>
+  
   <!-- Liste des guichets -->
   <div id="guichets" data-role="page" data-template="guichets"></div>
+
+  <!-- Liste des conflits -->
+  <div id="conflicts" data-role="page" data-template="conflicts"></div>
 
   <!-- Fiche -->
   <div id="fiche" data-role="page" data-template="fiche" data-direction="up"></div>
@@ -69,6 +78,9 @@
   -->
   <!-- Signalements -->
   <div id="signalements" data-role="page" data-template="signalements"></div>
+
+  <!-- Signalements GPS -->
+  <div id="georemGPS" data-role="page" data-direction="up" data-template="georemGPS" ></div>
 
   <script type="text/javascript" src="index.js" charset="UTF-8"></script>
 </body>

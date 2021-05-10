@@ -1,5 +1,9 @@
+[data-role='page'] {
+  z-index: 1;
+}
 
-#signaler {
+#signaler,
+#signalerGPS {
   position: fixed;
   bottom: 0.3em;
   right: 0.5em;
@@ -14,8 +18,36 @@
   line-height: 1.2em;
   color: #fff;
 }
-[data-page="fiche"] #signaler {
+[data-page="fiche"] #signaler,
+[data-page="fiche"] #signalerGPS {
   display: none;
+}
+
+#signalerGPS {
+  right: 2.5em;
+}
+#signalerGPS:before {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: .8em;
+  text-align: right;
+  width: 100%;
+  line-height: 1em;
+  padding: .14em .32em;
+  box-sizing: border-box;
+}
+#signalerGPS:after {
+  content: "";
+  position: absolute;
+  width: .11em;
+  height: .11em;
+  border-radius: 50%;
+  left: 50%;
+  top: 50%;
+  margin: .05em -.05em;
+  background-color: #fff;
+  box-shadow: 0.2em 0, -0.18em 0.08em, -0.3em 0.24em, -0.18em 0.35em, -0.02em 0.43em, .1em 0.56em;
 }
 
 #selection {
@@ -140,6 +172,9 @@ div.debug,
   float: left;
   margin-right: .5em;
 }
+.fa.fa-lg0 {
+  font-size: 1.5em;
+}
 
 /** Boutton */
 .button {
@@ -186,7 +221,7 @@ div.debug,
 #wait.splash > i {
   position:absolute;
 }
-#wait.splash > div {
+#wait.splash .message {
   margin:0;
   text-align: center;
   min-height: 3em;
@@ -268,8 +303,8 @@ div.debug,
 
 [data-page="loadGuichet"] #map:after,
 [data-page="loadMap"] #map:after {
-  border: 40px solid rgba(0, 0, 0, 0.5);
-  border-bottom-width: 60px;
+  border: 20px solid rgba(0, 0, 0, 0.5);
+  border-bottom-width: 80px;
   position: absolute;
   pointer-events: none;
   content: "";
@@ -287,6 +322,11 @@ div.debug,
   text-align: center;
   z-index: 1;
   pointer-events: none;
+  margin: 1em -.5em
+}
+[data-page="loadMap"] p.tileCount small {
+  font-size: .75em;
+  display: block;
 }
 [data-page="loadMap"] p.error,
 [data-page="loadMap"] .noTile p.tileCount {
@@ -296,12 +336,18 @@ div.debug,
   display: block;
 }
 [data-page="loadGuichet"] #signaler,
+[data-page="loadGuichet"] #signalerGPS,
 [data-page="loadGuichet"] #map .ol-control,
 [data-page="loadMap"] #signaler,
+[data-page="loadMap"] #signalerGPS,
 [data-page="loadMap"] #map .ol-control {
   display: none;
 }
 
+[data-page="loadGuichet"] #map .ol-control.centergps,
+[data-page="loadMap"] #map .ol-control.centergps {
+  display: block;
+}
 
 /* Template pour la creation*/
 [data-role="template"] {
@@ -316,7 +362,6 @@ div.debug,
   font-weight: normal;
   margin-top: -0.55em;
 }
-
 
 /** Date error */
 .date-error .fa-refresh {
@@ -466,8 +511,31 @@ body.trackingGeorem #fiche .signaler .movePosition {
   margin-top:0.5em;
 }
 
+#fiche [data-list=signal] .gps,
+#fiche .gps [data-list=signal] .position,
+#fiche .gps [data-list=signal] .addfeatures,
+#fiche .gps [data-list=signal] .addCroquis,
+#fiche .gps [data-list=signal] .photo,
+#fiche .gps .fa-check,
+#fiche .gps [data-list=signal] .save {
+  display: none!important;
+}
+
+#fiche .gps [data-list=signal] .gps {
+  display: inline-block!important;
+}
 
 /** Dialog attributs*/
+[data-role="dialog"].attributes .buttons{
+  position: sticky;
+  bottom: -1em;
+  left: -1em;
+  background: #fff;
+  width: calc(100% + 2em);
+  height: 3.1em;
+  padding: 0;
+  margin: -1em;
+}
 [data-role="dialog"].attributes ul {
   margin:0;
   padding:0;
@@ -508,31 +576,6 @@ body.trackingGeorem #fiche .signaler .movePosition {
   padding-left: 3em;
 }
 
-#fiche .signaler .attributes div {
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  width: 100%;
-  display: block;
-}
-
-#fiche [data-list="1"] {
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  width: 100%;
-  display: block;
-  cursor: pointer;
-  padding-right: 1em;
-}
-#fiche [data-list="1"].list:after {
-  content: "\2771";
-    position: absolute;
-    right: 0.5em;
-    transform: translateY(-0.3em);
-    font-size: 1.5em;
-}
-
 /* Operation */
 .operation[data-date] {
   display:none;
@@ -571,11 +614,10 @@ span[data-class="nb=1"] {
 }
 
 /* Mode avance */
-.extended {
-  display: none;
-}
-[data-mode="extended"] .extended {
-  display: inline-block;
+[data-mode="debutant"] .confirme,
+[data-mode="confirme"] .expert,
+[data-mode="debutant"] .expert {
+  display: none!important;
 }
 
 .fa-disable {

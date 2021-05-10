@@ -159,6 +159,13 @@ Pour déboguer une webview dans chrome rendez-vous sur : [chrome://inspect/](chr
 
 NB: le contenu des canvas (donc des cartes Openlayers) n'est pas visible sur la console du debuggeur.
 
+## Geolocalisation Bluetooth
+
+Ajouter les permissions au fichier `plugin.xml` du plugin bluetooth-serial ???
+```xml
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+```
 
 ## Publication
 

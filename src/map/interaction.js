@@ -17,6 +17,16 @@ import ol_geom_Point from 'ol/geom/Point'
 import ol_geom_Polygon from 'ol/geom/Polygon'
 import ol_control_GeolocationBar from 'ol-ext/control/GeolocationBar'
 
+import ol_Geolocation from 'ol/Geolocation'
+
+/* HACK recuperer la position */
+var changeGPS = ol_Geolocation.prototype.positionChange_;
+ol_Geolocation.prototype.positionChange_ = function(position) {
+  this._position = position
+  changeGPS.call(this, position);
+}
+/* FIN HACK */
+
 import {click as ol_events_condition_click} from 'ol/events/condition'
 import {get as ol_proj_get} from 'ol/proj'
 
@@ -38,15 +48,15 @@ const redStyle = [
 
 /* Set interactions */
 export default function(wapp) {
-  wapp.interactions = {};
+  if (!wapp.interactions) wapp.interactions = {};
   wapp.overlays = {};
   //	Selection
   wapp.select = new ol_interaction_Select({
     multi: true,
     hitTolerance: 5,
     condition: ol_events_condition_click,
-    filter: function(f, layer) {	
-      return (layer.get('edit')!==false && (f.layer || f.get('georem') || f.get('ripart') || f.get('features')));
+    filter: function(f, layer) {
+      return (layer && layer.get('edit')!==false && (f.layer || f.get('georem') || f.get('ripart') || f.get('features')));
     },
     style: redStyle
   });
@@ -55,6 +65,15 @@ export default function(wapp) {
     if (f) this.getFeatures().push(f);
     wapp.showSelect();
   };
+  // If croquis, select feature
+  wapp.select.on('select', (e) => {
+    e.selected.forEach((f) => {
+      if (f.layer === wapp.ripart.croquis 
+        && wapp.select.getFeatures().getArray().indexOf(f.get('georem')) < 0) {
+        wapp.select.getFeatures().push(f.get('georem'));
+      }
+    })
+  });
   map.addInteraction(wapp.select);
 
   /** Afficher la selection dans la barre et la fiche
@@ -68,7 +87,7 @@ export default function(wapp) {
     }
     else if (nb===1) {
       var f = wapp.select.getFeatures().item(0);
-      $("#selection").html (f.get("nom")||"Afficher la sélection...");
+      $('#selection').html (f.get('nom') || f.get('nature') || 'Afficher la sélection...');
       wapp.showOnglet("info");
     }
     else
@@ -186,7 +205,6 @@ export default function(wapp) {
   });
   wapp.overlays.gps = geodrawlayer;
   geodrawlayer.getSource().on('addfeature', function(e) { 
-    console.log('addFeature')
     e.feature.layer = geodrawlayer;
     wapp.help.show('main-trace'); 
   });
@@ -198,15 +216,39 @@ export default function(wapp) {
     source: geodrawlayer.getSource(),
     type: 'LineString',
     followTrack: 'auto',
-    tolerance: wapp.param.options.toleranceGPS||5,
-    minAccuracy: wapp.param.options.minGPSAccuracy||20
+    tolerance: wapp.param.options.toleranceGPS || 0,
+    minAccuracy: wapp.param.options.minGPSAccuracy || 20
   });
+  geolocBar.getInteraction().getPosition = function(loc) {
+    var pos = loc.getPosition();
+    pos.push (Math.round((loc.getAltitude()||0)*100)/100);
+    pos.push (Math.round((new Date()).getTime()/1000));
+    if (loc._position.nmea) pos.push (loc._position.nmea.geoidal);
+    return pos;  
+  }
   map.addControl(geolocBar);
-  wapp.interactions.geolocation = geolocBar.getInteraction();
+  const geolocation = wapp.interactions.geolocation = geolocBar.getInteraction();
+  // Prevent from falling asleep when geolocating
+  if (window.plugins && window.plugins.insomnia) {
+    wapp.interactions.geolocation.on('change:active', (e) => {
+      if (e.target.getActive()) window.plugins.insomnia.keepAwake();
+      else window.plugins.insomnia.allowSleepAgain();
+    });
+  }
   wapp.interactions.geolocation.on('change:active', function(e){
     wapp.help.show('main-geolocation');
     if (!e.oldValue && wapp.map.getView().getZoom()<17) {
       wapp.map.getView().setZoom(17);
+    }
+  });
+  wapp.interactions.geolocation.on('drawend', function(e){
+    // Save GPS track (with nmea info)
+    if (geolocation.path_[0] && geolocation.path_[0][4]!==undefined) {
+      const nmea = [];
+      geolocation.path_.forEach((c) => {
+        nmea.push([c[3], c[4]]);
+      })
+      e.feature.set('nmea', nmea);
     }
   });
 }

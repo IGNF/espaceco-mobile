@@ -1,0 +1,101 @@
+#conflicts ul {
+  margin: .5em -.5em;
+  padding: 0;
+  list-style: none;
+  clear: both;
+  border-top: 1px solid #ccc;
+  overflow: hidden;
+}
+#conflicts li {
+  position: relative;
+  background-color: #fff;
+  border: 0;
+  border-bottom: 1px solid #ccc;
+  padding: .5em;
+  overflow: hidden;
+} 
+#conflicts [data-role="content"] li {
+  padding-left: 2em;
+}
+#conflicts [data-role="content"] li:before {
+  font-family: 'FontAwesome';
+  position: absolute;
+  font-size: 1.5em;
+  margin: 0 .25em;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+#conflicts [data-role="content"] li.signal:before {
+  content: "\f041";
+}
+#conflicts [data-role="content"] li.suppr:before {
+  content: "\f014";
+}
+#conflicts [data-role="content"] li.force:before {
+  content: "\f0e3";
+}
+
+#conflicts [data-role="content"] li:after {
+  content: "\276f";
+  display: block;
+  font-size: 1.5em;
+  position: absolute;
+  right: .5em;
+  top: 50%;
+  line-height: 1em;
+  -webkit-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
+#conflicts .object {
+  position: absolute;
+  font-size: 1.2em;
+  top: 2.5em;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  overflow: auto;
+  padding: 0.5em;
+  background: #fff;
+  left: 100%;
+  transition: .3s;
+  opacity: 0;
+  pointer-events: none;
+}
+#conflicts .object.visible {
+  left: 0;
+  opacity: 1;
+  pointer-events: initial;
+}
+#conflicts .object .fa-eye {
+  font-size: 2em;
+  position: absolute;
+  top: 1em;
+  right: 1em;
+}
+#conflicts .object.showall .fa-eye:before {
+  content: "\f06e";
+}
+#conflicts .object .fa-eye:before {
+  content: "\f070";
+}
+
+#conflicts .object li {
+  border-left: 1em solid transparent;
+}
+#conflicts .object li.same {
+  display: none;
+}
+#conflicts .object.showall li.same {
+  display: block;
+}
+#conflicts .object li.equal {
+  background-color: rgba(0,128,0,.3);
+}
+#conflicts .object li.different {
+  background-color: rgba(128,0,0,.3);
+}
+#conflicts .object li.update {
+  border-color: #800;
+}

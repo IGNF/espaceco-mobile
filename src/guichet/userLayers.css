@@ -1,0 +1,95 @@
+.dialogWMS {
+  font-size: 1.5em;
+}
+.ol-wmscapabilities .ol-select-list {
+  width: calc(100% - 110px);
+  min-width: auto;
+}
+.ol-wmscapabilities .ol-url button {
+  position: absolute;
+  right: 1em;
+  width: auto;
+}
+.ol-wmscapabilities .ol-url input {
+  width: 100%;
+  min-width: unset;
+  border: 0;
+  border-bottom: 3px solid #ccc;
+  font-size: 1em;
+  padding-right: 1.5em;
+}
+
+.dialogWMS .ol-searching > div{
+  opacity: .5;
+  min-height: 4em;
+}
+.dialogWMS .ol-searching .ol-url:after{
+  content: "";
+  width: .7em;
+  height: .7em;
+  background-color: currentColor;
+  position: absolute;
+  top: 7em;
+  border-radius: 50%;
+  display: block;
+  left: calc(50% - .35em);
+  box-shadow: 0 1em currentColor, 0 -1em currentColor, 1em 0 currentColor, -1em 0 currentColor;
+  animation:ol-wmscapabilities-rotate 2s linear infinite;
+}
+@-webkit-keyframes ol-wmscapabilities-rotate { 
+  100% { -webkit-transform:rotate(360deg); transform:rotate(360deg); } 
+}
+@keyframes ol-wmscapabilities-rotate { 
+  100% { -webkit-transform:rotate(360deg); transform:rotate(360deg); } 
+}
+
+
+.ol-wmscapabilities .ol-searching .ol-url:after {
+  top: 7em;
+}
+
+.ol-wmscapabilities ul.ol-wmsform {
+  padding: 0;
+  list-style: none;
+}
+.ol-wmscapabilities .ol-wmsform label {
+  width: 7.5em;
+}
+.ol-wmscapabilities .ol-wmsform select {
+  width: calc(100% - 8.5em);
+  border-top: 0;
+}
+.ol-wmscapabilities .ol-wmsform li:nth-child(4):before {
+  position: absolute;
+  right: 1.2em;
+  content: "\276f";
+}
+.ol-wmscapabilities .ol-wmsform li:nth-child(9) {
+  display: none;
+}
+.ol-wmscapabilities .ol-wmsform input {
+  border: 0;
+  border-bottom: 3px solid #ccc;
+  width: calc(100% - 8.5em);
+  font-size: 1em;
+}
+.ol-wmscapabilities input:focus {
+  border-color: orange;
+}
+
+.ol-wmscapabilities .ol-select-list {
+  padding: 0 .5em;
+}
+.ol-wmscapabilities .ol-select-list .ol-info {
+  font-style: italic;
+}
+
+.ol-wmscapabilities .ol-preview {
+  position: relative;
+}
+.ol-wmscapabilities .ol-preview:before {
+  content: "\276f";
+  position: absolute;
+  left: -1.5em;
+  top: 0;
+}

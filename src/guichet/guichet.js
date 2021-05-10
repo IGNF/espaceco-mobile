@@ -1,14 +1,14 @@
 ﻿/* Gestion des guichets
 */
-import {containsCoordinate as ol_extent_containsCoordinate} from 'ol/extent'
-import ol_layer_Vector_WFS from 'cordovapp/ol/layer/WFS'
-import ol_layer_Vector_Webpart from 'cordovapp/ol/layer/Webpart'
+import ol_layer_Vector_WFS from '../../cordovapp/ol/layer/WFS'
 
 import wapp from '../wapp'
-import CordovApp from 'cordovapp/Cordovapp'
+import CordovApp from '../../cordovapp/Cordovapp'
+import setGeoportailLayers from '../map/layer/geoportail'
 import './layer'
 import './edition'
-import ol_layer_Geoportail from 'ol-ext/layer/Geoportail'
+import './conflict'
+import './fiche'
 
 let template = null;
 
@@ -138,39 +138,35 @@ wapp.dialogInfoGuichet = function (groupe) {
   }
 };
 
-wapp.initGuichet2 = function() {
-  // Layers geoportail
-  const geopotalLayers = {};
-  function getGeopotalLayers(layers) {
-    layers.forEach((l) => {
-      if (l.getLayers) {
-        getGeopotalLayers(l.getLayers());
-      } else {
-        if (l instanceof ol_layer_Geoportail && !/^cache_/.test(l.get('name'))) {
-          geopotalLayers[l.get('name')] = l;
-          l.set('displayInLayerSwitcher', l.get('defaultLayer'));
-        }
-      }
-    });
-  }
-  getGeopotalLayers(wapp.map.getLayers());
-
-console.log('initGuichet2')
+/** Recherche des guichets de l'utilisateur
+ */
+wapp.initGuichets = function() {
   // Reset list
   var ul = $('#guichets [data-role="content"] ul');
   if (!template) template = $('[data-role="template"]', ul).html();
   ul.html("");
   if (!this.ripart.isConnected()) {
     wapp.setGuichet();
+    setGeoportailLayers();
     return;
   }
   // Recherche des groupes
   var groupes = wapp.ripart.param.groupes;
-  var current = {};
+  const geoportailLayers = {};
+  var current;
   groupes.forEach((g) => {
     // Chargement des logos
     if (g.logo) {
-      CordovApp.File.dowloadFile(g.logo, "TMP/logo/"+g.id_groupe);
+      CordovApp.File.dowloadFile(
+        g.logo, 
+        "TMP/logo/"+g.id_groupe,
+        undefined,
+        undefined, {
+          headers: {
+            'Authorization': 'Basic '+ wapp.ripart.getHash()
+          }
+        }
+      );
     }
     // Guichet courant
     if (this.ripart.param.guichet == g.id_groupe) current = g;
@@ -183,10 +179,7 @@ console.log('initGuichet2')
           break;
         }
         case 'GeoPortail': {
-          const l = geopotalLayers[layer.nom]
-          if (l) {
-            l.set('displayInLayerSwitcher', true);
-          }
+          geoportailLayers[layer.nom] = layer;
           break;
         }
         default: break;
@@ -199,7 +192,8 @@ console.log('initGuichet2')
       li.click(() => {
         if (!li.hasClass('selected')) {
           wapp.setGuichet(li.data('groupe'));
-          wapp.hidePage();
+          //wapp.hidePage();
+          wapp.showPage('layer-guichet')
         } else {
           wapp.setGuichet();
           // Faire clignoter
@@ -221,10 +215,14 @@ console.log('initGuichet2')
     }
   });
 
+  setGeoportailLayers(geoportailLayers);
+
   if ($("li", ul).length) {
     $('#guichets [data-role="content"]').removeClass('nomap');
+    $('body').addClass('guichet');
   } else {
     $('#guichets [data-role="content"]').addClass('nomap');
+    $('body').removeClass('guichet');
   }
 
   // Update on show
@@ -243,12 +241,13 @@ console.log('initGuichet2')
   });
 
 console.log('[TODO] set guichet')
-//  wapp.setGuichet(current);
+  wapp.setGuichet(current);
 };
 
-/** Recherche des guichets de l'utilisateur
-*/
+/*
 wapp.initGuichets = function() {
+  this.initGuichet2();
+  return;
 console.log('[DEPRECATED] initguichet')
   // Reset list
   var ul = $('#cartes [data-list="guichets"] ul.guichet');
@@ -257,11 +256,10 @@ console.log('[DEPRECATED] initguichet')
     wapp.setGuichet();
     return;
   }
-  this.initGuichet2();
 
   // Recherche des groupes
   var groupes = wapp.ripart.param.groupes;
-  var current = {};
+  var current;
   for (var i=0, g; g = groupes[i]; i++) {
     // Chargement des logos
     if (g.logo) {
@@ -312,16 +310,17 @@ console.log('[DEPRECATED] initguichet')
 
 /** Afficher les infos du guichet
  * @param {} groupe
- */
+ * /
 wapp.showGuichetInfo = function (groupe) {
 
 console.log('[DEPRECATED: showInfoGuichet');
 
   var hasOffline = false;
-  /* VNF PATCH */
+  // START VNF PATCH
   hasOffline = groupe.id_groupe===200 || groupe.id_groupe===13 || groupe.id_groupe===375 || $('.debug').css('display')!=='none';
   console.log('Hide offline', groupe.id_groupe, hasOffline);
-  /**/
+  // END VNF PATCH
+
   if (hasOffline) {
     $('#guichet [data-role="onglet-bt"] [data-list="offline"]').show();
   }
@@ -451,11 +450,13 @@ console.log('setGuichet', groupe)
     gdiv.addClass('online');
   }
 
+/*
 console.log('[DEPRECATED] setGuichet');
   $('#cartes [data-list="guichets"] ul.guichet li').each(function() {
     if ($(this).data('groupe')===groupe) $(this).addClass('selected');
     else $(this).removeClass('selected');
   });
+*/
 
   // Mettre a jour le guichet
   wapp.setInfoGuichet(groupe);
@@ -526,6 +527,9 @@ wapp.postGeorem = function() {
 wapp.modifyGeorem = function() {
   var f = wapp.select.getFeatures().item(0);
   var grem = f.get('georem');
+  // Get feature if  croquis
+  if (f.layer === wapp.ripart.croquis) grem = grem.get('georem');
+console.log('modify', f, grem)
   wapp.select.selectFeature();
   if (grem) wapp.ripart.showFormulaire (grem);
 };
@@ -534,16 +538,16 @@ wapp.modifyGeorem = function() {
  * @param {boolean} warning Ask before delete
  */
 wapp.delGeorem = function(warning) {
+  var f = wapp.select.getFeatures().item(0);
+  var grem = f.get('georem');
   if (warning) {
-    wapp.message('Voulez-vous vraiment supprimer le signalement ?', 'Suppression', 
+    const hasResp = grem.responses ? '<br/><i class="fa fa-warning"></i> Ce signalement contient des réponses non envoyées...' : '';
+    wapp.message('Voulez-vous vraiment supprimer le signalement ?'+hasResp, 'Suppression', 
       { ok:'ok', cancel:'annuler' },
       function(bt) {
         if (bt==='ok') wapp.delGeorem();
       });
-
   } else {
-    var f = wapp.select.getFeatures().item(0);
-    var grem = f.get('georem');
     if (grem) {
       wapp.select.getFeatures().clear();
       wapp.ripart.delLocalRem (grem);
@@ -552,78 +556,9 @@ wapp.delGeorem = function(warning) {
   }
 };
 
-/* Add attribute line to the selection list
- * @param {} th container
- * @param {} ul the list
- * @param {string} title
- * @param {string} val
+/** Format geom string
+ * @param {ol.geom}
  */
-function _addLine(th, ul, title, val, type) {
-  var theme, label;
-  var index = title.indexOf('@');
-  if (index > -1) {
-    theme = title.substring(0, index);
-    label = title.substring(index+1);
-  } else {
-    theme = "hidden";
-    label = title;
-  }
-  // Hidden themes
-  if (theme==='symb') return;
-  // Add new theme
-  var className = theme.replace(/ /g,'_');
-  if (theme && !$('.'+className, th).length) {
-    $('<div>').addClass(className)
-      .text(theme)
-      .click(function(){
-        $('div', th).removeClass('selected');
-        $('.'+className, th).addClass('selected');
-        $('li', ul).hide();
-        $('.'+className, ul).show();
-      })
-      .appendTo(th);
-  }
-  // Add line
-  var li = $("<li>").addClass(className).appendTo(ul);
-  switch (type) {
-    case 'JSON':
-    case 'JsonValue': {
-      // Json decode
-      var json;
-      try { json = JSON.parse (val); }
-      catch(e) { /* ok */ }
-      // Array
-      if (json instanceof Array && json.length) {
-        var tab = $("<table>").appendTo(li);
-        var tr = $("<tr>").appendTo(tab);
-        var i, k;
-        for (k in json[0]) {
-          $("<td>").text(k.replace(/_/g,' ')).appendTo(tr);
-        }
-        for (i=0; i<json.length; i++) {
-          tr = $("<tr>").appendTo(tab);
-          for (k in json[i]) {
-            $("<td>").text(json[i][k])
-              .addClass(typeof(json[i][k]))
-              .appendTo(tr);
-          }
-        }
-        break;
-      }
-    }
-    // fallsthrough
-    default: {
-      $("<label>")
-        .text(label)
-        .appendTo(li);
-      $("<span>").text(val)
-        .appendTo(li);
-      break;
-    }
-  }
-}
-
-
 wapp.getGeomFr = function(g) {
   switch (g.getType()) {
     case 'LineString': return 'Ligne';
@@ -631,165 +566,6 @@ wapp.getGeomFr = function(g) {
     default: return g.getType();
   }
 }
-wapp.getFeatureTitle = function(f) {
-  var prop = f.getProperties();
-  if (prop.georem) {
-    return ('Signalement'+(prop.georem.id?'#'+prop.georem.id:''));
-  }
-  for (var i in prop) {
-    if (/name|nom|label/.test(i)) {
-      return prop[i] + 
-      ' <i>('+wapp.getGeomFr(f.getGeometry())+')</i>';
-    }
-  }
-  return '<i>sans nom</i>';
-};
-
-/** Afficher la fiche
-* @param {any}  options
-*	@param {bool} options.ripart true si vient de la page de remontees 
-*	@param {int} options.index position dans le liste de selection
-*/
-wapp.showSelect = function(options) {
-  options = options || {};
-  let features = [];
-  const currentFeatures = options.features || $.extend([],this.select.getFeatures().getArray());
-  currentFeatures.forEach((f) => {
-    // Cluster ?
-    if (f.get('features')) {
-      features = features.concat(f.get('features'));
-    } else {
-      features.push(f);
-    }
-  });
-  var nb = features.length;
-
-  // Ne pas passer par le liste
-  options.index = options.index || 0;
-
-  // Current feature
-  if (options.index && options.index>=nb) options.index = 0;
-  if (options.index && options.index<0) options.index = nb-1;
-  var f = features[options.index || 0];
-
-  if (options.ripart) $("#fiche").addClass("fromRipart");
-  else $("#fiche").removeClass("fromRipart");
-
-  var div = $('#fiche .selection').removeClass("georem fiche trace multi");
-  div.get(0).scrollTop = 0;
-  var i, ul, th, att;
-
-  // Pas de selection
-  if (options.index===undefined && nb>1) {
-    div.addClass("fiche");
-    $(".fiche h3", div).html(nb+' objets sélectionnés :');
-    $(".fiche img.guichet", div).hide();
-    ul = $(".fiche ul", div).html('');
-    th = $(".fiche .themes", div).html('');
-    i = 0;
-    this.select.getFeatures().forEach (function(f){
-      $('<li>').html(wapp.getFeatureTitle(f))
-        .data('index', i++)
-        .click(function(){
-          wapp.showSelect({ index: $(this).data('index'), features: features });
-        })
-        .appendTo(ul);
-    });
-  } else if (f) {
-    if (nb>1) {
-      div.addClass('multi');
-      $('.multi span', div).html(((options.index||0)+1)+'/'+nb);
-    }
-    $(".next", div).off().click(function(){
-      wapp.showSelect({ index: (options.index||0)+1, features: features });
-    });
-    $(".prev", div).off().click(function(){
-      wapp.showSelect({ index: (options.index||0)-1, features: features });
-    });
-
-    this.select.getFeatures().clear();
-    this.select.getFeatures().push(f);
-    $("#selection").html (f.get("nom")||"Afficher la sélection...");
-    var prop = f.getProperties();
-    var georem = prop.georem || prop.ripart;
-    // Hide edition
-    $('.edit').hide();
-    // Georem
-    if (georem) {
-      div.addClass("georem").removeClass("fiche");
-      if (georem.sketch) georem.nb = wapp.ripart.sketch2feature(georem.sketch).length;
-      else georem.nb = 0;
-      wapp.dataAttributes($(".georem", div), georem);
-      if (prop.ripart) $(".georem .del", div).hide();
-      else $(".georem .del", div).show();
-    } else {
-      // Fiche de l'objet
-      div.addClass("fiche");
-      // Layer de l'objet
-      $(".fiche h3", div).text('Couche : '+f.layer.get("title")||f.layer.get("name"));
-      if (f.layer.get("logo")) {
-        $(".fiche img.guichet", div).attr('src', f.layer.get("logo")).show();
-      } else {
-        $(".fiche img.guichet", div).hide();
-      }
-      var saveTheme =  $(".fiche .themes .selected", div).removeClass('selected').attr('class');
-      ul = $(".fiche ul", div).html('');
-      th = $(".fiche .themes", div).html("");
-      // Trace GPS
-      if (f.layer.get('geolocation')) {
-        div.addClass("trace");
-      } else if (f.layer instanceof ol_layer_Vector_Webpart) {
-        // Objet d'un guichet
-        console.log(f)
-        if (f.layer.get('cache') && !f.layer.getFeatureType().readOnly) {
-          $('.edit').show();
-        }
-        var ftype = f.layer.getSource().featureType_;
-        for (i in ftype.attributes) if (i !== ftype.geometryName) {
-          att = ftype.attributes[i];
-          switch (att.type) {
-            case "Point":
-            case "LineString":
-            case "Polygon":
-            case "MultiPolygon":
-              break;
-            default: {
-              _addLine(th, ul, att.title, f.get(i), att.type);
-              break;
-            }
-          }
-        }
-      } else if (f.layer.get("getFeatureInfoMask")) {
-        // Objet WMS
-        var visu = f.layer.get("getFeatureInfoMask").visu;
-        for (i in visu) {
-          _addLine(th, ul, visu[i].replace(/_/g,' '), f.get(i));
-        }
-      } else if (f.layer.getFeatureType) {
-        // Objet WFS
-        // var prop = f.getProperties();
-        var geometryName = f.getGeometryName();
-        att = f.layer.getFeatureType().attributes || {};
-        for (i in prop) if (i !== geometryName) {
-          _addLine(th, ul, (att[i]?att[i].title:i).replace(/_/g,' '), f.get(i), att[i]?att[i].type:'string');
-        }
-      }
-      // select first theme
-      if (saveTheme && $("."+saveTheme, th).length) $("."+saveTheme, th).click();
-      else $('[class!="hidden"]', th).first().click();
-    }
-  }
-  wapp.showPage('fiche');
-  // Afficher le point si hors de l'ecran
-  if (f)
-  {	var e = this.map.getView().calculateExtent(this.map.getSize());
-    if (!ol_extent_containsCoordinate(e, f.getGeometry().getFirstCoordinate()))
-    {	this.map.getView().setCenter(f.getGeometry().getFirstCoordinate());
-    }
-  }
-};
-
-
 
 /** Afficher le formulaire de signalement
 */
@@ -835,10 +611,10 @@ $("#cartes").on("showpage", function() {
 
 /** Ouverture de la page de chargement du cache 
  */
-wapp.loadCache = function () {
+wapp.loadCache = function (cancel) {
   const hasCache = wapp.getCache(wapp.guichet);
   if (hasCache && hasCache.cache) {
-    wapp.vectorCache.loadCache(hasCache.cache);
+    wapp.vectorCache.loadCache(hasCache.cache, cancel);
   }
 };
 
@@ -863,7 +639,8 @@ wapp.updateCache = function(layer) {
         const hasCache = wapp.getCache(wapp.guichet);
         if (hasCache) {
           //wapp.vectorCache.updateCache(hasCache.cache)
-          const layers = wapp.getLayerGuichet().getLayers().getArray().slice();
+          const layers = layer ? [layer] : wapp.getLayerGuichet().getLayers().getArray().slice();
+          wapp.saveContext();
           wapp.vectorCache.saveLayer (layers, hasCache.cache);
         }
       }

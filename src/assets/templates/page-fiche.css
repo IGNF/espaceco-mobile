@@ -20,13 +20,77 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  border-bottom: 1px solid #ccc;
-	clear: both;
+  clear: both;
+	border-top: 1px solid #ccc;
+}
+#fiche .selection.fiche > div ul {
+  position: absolute;
+  top: 2.2em;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+#fiche .selection.fiche > div.edition ul {
+  bottom: 2.5em;
+}
+#fiche .selection.multi > div ul {
+  top: 4em;
+}
+#fiche .selection.multi.themes > div ul {
+  top: 5em;
+}
+#fiche .selection.themes > div ul {
+  top: 3.4em;
 }
 #fiche .selection > div ul li {
+  position: relative;
   background-color: #fff;
 	border: 0;
-	border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  padding: 0 .5em;
+}
+#fiche .selection > div ul li.updated {
+  background-color: rgba(0,0,255,.1);
+}
+
+#fiche .selection > div ul li.buttons {
+  min-height: 3em;
+  background: none;
+  border-bottom: 0;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  padding: .5em;
+}
+
+#fiche .selection > div ul li .fa {
+  position: absolute;
+  right: .5em;
+  top: 50%;
+  transform: translateY(-50%);
+}
+#fiche .selection > div ul li .fa.checkbox {
+  width: 1.2em;
+  height: 1.2em;
+  border: .1em solid currentColor;
+  background-color: #ccc;
+}
+#fiche .selection > div ul li .fa.checkbox.check:before {
+  content: "";
+  width: 1em;
+  height: .5em;
+  transform: rotate(-45deg);
+  border: .1em solid currentColor;
+  border-width: 0 0 .2em .2em;
+  position: absolute;
+  top: -.06em;
+  left: .15em;
+}
+#fiche .selection > div ul li .fa-calendar {
+  pointer-events: none;
 }
 #fiche .selection > div label {
   display: inline-block;
@@ -39,6 +103,16 @@
 }
 #fiche .fiche label:after {
   content: "\A0:";
+}
+#fiche .fiche label.checkbox-right:after {
+  content: none;
+}
+#fiche .fiche label.checkbox-right {
+  position: absolute;
+  right: 0;
+  width: 2em;
+  top: 50%;
+  transform: translateY(-50%);
 }
 #fiche .selection > div li > span {
   width: 70%;
@@ -106,7 +180,7 @@
 #fiche .selection .multi {
   display: none;
   background: #ddd;
-  margin: -.5em -.5em 1em;
+  margin: -.5em -.5em .5em;
   line-height: 1.6em;
   text-align: center;
 }
@@ -126,10 +200,24 @@
 
 #fiche .edit {
   font-size: 1.5em;
-  float: left;
+  float: right;
   margin: -.1em .5em 0 0;
   cursor: pointer;
   display: block;
+}
+
+#fiche .fiche input.editDate {
+  position: absolute;
+  width: 0;
+  height: 100%;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  overflow: hidden;
+  border: 0;
+  opacity: .1;
+  padding: 0 1em;
+  font-size: 1em;
 }
 
 #fiche .warning_public {
@@ -143,6 +231,10 @@
 
 #fiche .fiche .themes {
   background: transparent;
+  margin-top: -.5em;
+  white-space: nowrap;
+  width: 100%;
+  overflow-x: auto;
 }
 #fiche .fiche .themes > div.hidden {
   display: none;
@@ -163,7 +255,10 @@
 }
 
 #fiche h3 {
-  margin: 0.5em 0;
+  margin: 0 0 .5em 0;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 #fiche .fiche img.guichet {
@@ -190,6 +285,7 @@
   color: #369;
 }
 #fiche .fiche ul tr td.number {
+  /* */
 }
 
 @media screen and (orientation:landscape) and (min-width:1024px), 
@@ -199,6 +295,14 @@ screen and (max-width:640px) {
   #fiche .selection > div input,
   #fiche .selection > div [data-input-role].selected {
     width:100%;
+  }
+  #fiche ul li.edition.Boolean label {
+    padding: .8em 0;
+  }
+  #fiche ul li.edition.Boolean label span {
+    right: 1em;
+    left: auto!important;
+    width: 1em!important;
   }
 }
 
@@ -269,31 +373,32 @@ screen and (orientation:portrait) and (max-height:1023px) {
   border: 0;
   width: auto;
 }
-#fiche ul li.edition.Boolean label {
-  width: 100%;
-  padding: .25em 0;
-  border-bottom: 2px solid #999;
-}
+
 #fiche ul li.edition.Boolean label span {
   position: absolute;
-  width: 1em;
+  width: 70%;
   height: 1em;
-  border: 2px solid #999;
-  right: .5em;
+  left: 30%;
   top: 50%;
-  -webkit-transform: translateY(-50%);
   transform: translateY(-50%);
   overflow: visible!important;
 }
-#fiche ul li.edition.Boolean label input:checked ~ span:after {
+#fiche ul li.edition.Boolean label input ~ span:after {
   position: absolute;
-  content: "\f00c";
+  content: "";
   font-family: "FontAwesome";
   top: 50%;
-  left: 50%;
-  -webkit-transform: translate(-50%, -50%);
-  transform: translate(-50%,-50%);
+  left: 0;
+  transform: translateY(-50%);
   overflow: visible;
+  width: 1em;
+  height: 1em;
+  line-height: 1em;
+  border: 2px solid #999;
+
+}
+#fiche ul li.edition.Boolean label input:checked ~ span:after {
+  content: "\f00c";
 }
 #fiche ul li.edition input[readOnly] {
   background-color: #ddd;
@@ -314,26 +419,52 @@ line-height: 1em;
   color: #333;
 }
 
+
+[data-role="dialog"].edition .edit {
+  position: relative;
+}
+[data-role="dialog"].edition .edit input {
+  border-style: solid;
+  border-color: #ccc;
+  border-width: 0 0 3px;
+  padding: 0 1em 0 0;
+  color: #666;
+  font-size: 1em;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 /* Error */
+[data-role="dialog"].edition .error input,
 #fiche ul li.edition.error input {
   border-color: red;
 }
-#fiche ul li.edition .error {
-  display: none;
-  position: absolute;
-  top: 0;
-  right: 0;
-}
-#fiche ul li.edition .error:before {
-  content: "\f071 ";
-  color: #f90;
-  font-family: FontAwesome;
-  position: absolute;
-  right: .2em;
-  top: 0;
-}
-#fiche ul li.edition.error .error {
+
+#fiche .signaler .attributes div {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  width: 100%;
   display: block;
+}
+
+#fiche [data-list="1"] {
+  position: relative;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  width: 100%;
+  display: block;
+  cursor: pointer;
+  padding-right: 1em;
+}
+#fiche [data-list="1"].list:after {
+  content: "\2771";
+  position: absolute;
+  right: 0.5em;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.5em;
 }
 
 /* Dialog */
@@ -341,4 +472,138 @@ ul li.obligatoire label:after {
   content:'*';
   color: orange;
   padding-left: .2em;
+}
+
+/* reponses */
+#fiche .selection .responses {
+  clear: both;
+}
+#fiche .selection .responses p {
+  margin: 0 -.5em;
+  border-bottom: 1px solid #ccc;
+  padding: 0 .5em;
+}
+#fiche .selection .responses button.response {
+  border: 0;
+  background-color: #369;
+  color: #fff;
+  margin: .5em 0;
+  padding: .2em 1em;
+}
+#fiche .selection .responses button.response.disabled {
+  background-color: #aaa;
+}
+#fiche .selection .responses i.fa {
+  position: unset;
+  display: inline-block;
+  top: auto;
+  right: auto;
+  transform: none;
+}
+
+#fiche .selection > div .responses ul li {
+  position: relative;
+  border: 1px solid #369;
+  padding: .5em;
+}
+#fiche .selection > div .responses ul li.error {
+  color: unset;
+  font-weight: unset;
+  border-color: #800;
+  background-color: #fff5f5;
+}
+#fiche .responses li.error p.date {
+  background-color: #800;
+}
+#fiche .responses li.error:before {
+  content: "\f071";
+  font-family: fontawesome;
+  color: #fff;
+  position: absolute;
+  top: 0;
+  right: .2em;
+}
+
+#fiche .responses li p.date {
+  background: #369;
+  color: #fff;
+  padding: 0 .5em;
+  margin: -.5em -.5em 0;
+}
+
+#fiche .responses .buttons {
+  display: block;
+  text-align: right;
+  width: 100%;
+  margin: 0;
+}
+#fiche .responses .buttons > * {
+  float: none;
+  display: inline-block;
+  margin: 0;  
+}
+/* Dialog response */
+[data-role=dialog].responseRIPart textarea {
+  font-size: 1em;
+  min-width: 100%;
+  max-width: 100%;
+  height: 7em;
+  display: block;
+}
+[data-role=dialog].responseRIPart span {
+  position: relative;
+  display: block;
+  width: 100%;
+  border: 2px solid #ccc;
+  padding: .5em 2em .5em .5em;
+  height: 2.4em;
+}
+[data-role=dialog].responseRIPart span:after {
+  position: absolute;
+  content: '\2771';
+  right: .5em;
+  top: 0;
+  font-size: 1.5em;
+  vertical-align: middle;
+}
+
+@media (max-height:400px) {
+  #fiche .selection.fiche > div.edition h3 {
+    display: none;
+  }
+  #fiche .selection.fiche > div.fiche ul {
+    top: 2em;
+  }
+  #fiche .selection.fiche > div.fiche .multi {
+    margin-bottom: .1em;
+  }
+  #fiche .selection.fiche.multi > div.fiche ul {
+    top: 3.3em;
+  }
+  #fiche [data-role="onglet-bt"] {
+    height: 3em;
+    overflow: hidden;
+  }
+  #fiche [data-role="onglet-bt"] i {
+    margin: -.15em 0 1em;
+  }
+  #fiche [data-role="onglet-li"] {
+    top: 2em;
+  }
+  #fiche .fiche h3 {
+    margin: 0;
+  }
+  #fiche .fiche .themes {
+    margin-top: 0;
+  }
+  #fiche .selection.fiche.themes > div.fiche ul {
+    top: 3.2em;
+  }
+  #fiche .selection.fiche.multi.themes > div.fiche ul {
+    top: 4.5em;
+  }
+  #fiche .selection.fiche > div.edition ul {
+    top: .1em!important;
+    bottom: 2em;
+  }
 }

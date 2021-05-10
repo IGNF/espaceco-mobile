@@ -1,6 +1,17 @@
 #layer-carte.hascarte .nocarte {
   display: none;
 }
+#layer-carte h3 {
+  display: none;
+}
+#layer-carte.hascarte h3 {
+  display: block;
+}
+#layer-carte h3 .fa {
+  font-size: 1.7em;
+  vertical-align: middle;
+  margin-top: -.2em;
+}
 
 [data-page="layer-carte"] [data-role="dialog"] img {
   max-height: 5em;

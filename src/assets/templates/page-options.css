@@ -19,3 +19,7 @@
   margin-top: 0.5em;
   padding: 0.3em 1em;
 }
+
+input[type="number"]:invalid {
+  border-color: #ccc;
+}

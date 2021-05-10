@@ -1,0 +1,210 @@
+/* GPS */
+#georemGPS {
+  top: auto;
+  bottom: 0;
+  text-align: center;
+  font-size: 4em;
+  padding: 1.5em 0;
+  height: auto;
+  transition: .2s;
+}
+
+#georemGPS i {
+  border: .1em solid #888;
+  border-radius: 50%;
+  width: 1.7em;
+  height: 1.7em;
+  padding: .25em 0;
+  text-align: center;
+}
+#georemGPS i.fa-arrows {
+  position: relative;
+}
+#georemGPS i.fa-arrows:before {
+  font-size: .6em;
+  position: absolute;
+  left: .3em;
+  top: 1em;
+}
+#georemGPS i.fa-arrows:after {
+  content: "";
+  width: .5em;
+  height: .25em;
+  box-shadow: inset 0 0 0 0.08em, 0 1em 0 -0.2em;
+  display: block;
+  position: absolute;
+  top: -.8em;
+  right: .3em;
+  border-top: 1em solid transparent;
+  border-radius: .08em;
+}
+
+#georemGPS i.fa-circle {
+  color: #800;
+}
+#georemGPS i.fa-check {
+  color: #ccc;
+}
+#georemGPS i.caret {
+  position: absolute;
+  right: -.3em;
+  top: 0;
+  border: 0;
+  padding: 0;
+}
+#georemGPS i.fa-volume-up {
+  position: absolute;
+  left: .2em;
+  top: .2em;
+  border: 0;
+  padding: 0;
+  width: auto;
+  height: auto;
+}
+#georemGPS i.fa-volume-up.off:after {
+  content: "";
+  position: absolute;
+  width: .15em;
+  height: 1.2em;
+  background-color: currentColor;
+  top: -.1em;
+  left: 50%;
+  transform: translateX(-50%) rotate(-30deg);
+}
+#georemGPS i.caret:before {
+  content: "\f0d7";
+}
+#georemGPS.small i.caret:before {
+  content: "\f0d8";
+}
+
+/* car */
+#georemGPS i.fa-car,
+#georemGPS i.fa-male {
+  margin-left: .5em;
+}
+#georemGPS i.fa-car {
+  display: none;
+}
+#georemGPS.car i.fa-male {
+  display: none;
+}
+#georemGPS.car i.fa-car {
+  display: inline-block;
+}
+
+/* track */
+#georemGPS i.fa-pause {
+  display: none;
+}
+#georemGPS.track i.fa-circle {
+  display: none;
+}
+#georemGPS.track i.fa-pause {
+  display: inline-block;
+}
+#georemGPS.track i.fa-check  {
+  color: #080;
+}
+
+/* small */
+#georemGPS.small {
+  font-size: 1.5em;
+  padding: .5em 0;
+}
+
+#georemGPS p.theme,
+#georemGPS p.info {
+  position: absolute;
+  font-size: .7em;
+  top: 0;
+  left: 0;
+  margin: 0;
+  width: 100%;
+  padding: .3em 2em;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+#georemGPS p.info {
+  top: auto;
+  bottom: 0;
+  width: auto;
+  padding: 0 .5em;
+}
+#georemGPS p.info .fa {
+  border: 0;
+  vertical-align: middle;
+}
+#georemGPS p.info .satellite {
+  position: relative;
+  background: currentColor;
+  width: .5em;
+  height: .5em;
+  display: inline-block;
+  padding: 0;
+  vertical-align: middle;
+  margin: .2em .6em;
+  transform: rotate(-20deg);
+}
+#georemGPS p.info .satellite:before,
+#georemGPS p.info .satellite:after {
+  content: "";
+  position: absolute;
+  width: .3em;
+  height: 1em;
+  left: .3em;
+  top: 50%;
+  transform: translateY(-50%) skewY(-30deg);
+  border: .1em solid currentColor;
+  background-color: #fff;
+}
+#georemGPS p.info .satellite:before {
+  left: -.3em;
+  background: transparent;
+}
+
+#georemGPS.small p {
+  display: none!important;
+}
+
+@media screen and (max-width: 600px) {
+  #georemGPS {
+    font-size: 3em;
+  }
+}
+@media screen and (max-width: 500px) {
+  #georemGPS {
+    font-size: 2.5em;
+  }
+}
+@media screen and (max-width: 370px) {
+  #georemGPS {
+    font-size: 2em;
+  }
+}
+
+[data-role=dialog] ul.deport {
+  list-style: none;
+  padding: 0;
+}
+[data-role=dialog] ul.deport li {
+  margin: 1em 0;
+}
+
+/* Hide buttons */
+body[data-page="georemGPS"] #signaler,
+body[data-page="georemGPS"] #signalerGPS,
+body[data-page="georemGPS"] #map .ol-control {
+  display: none;
+}
+body[data-page="georemGPS"] #map .ol-control.centergps {
+  display: block;
+  top: 1.5em;
+}
+
+/* Notifications */
+body[data-page="georemGPS"] [data-role="notification"] {
+  bottom: auto;
+  top: 1em;
+}

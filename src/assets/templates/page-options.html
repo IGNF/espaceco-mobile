@@ -54,12 +54,21 @@
       <div data-input-role="info">Afficher le status de l'application et le contenu téléchargé.</div>
     </li>
 
+<!--
     <li data-input="check" data-param="extended" data-default=false>
       <label>Mode avancé</label>
       <div data-input-role="info">Afficher plus de fonctionnalités.</div>
     </li>
+-->
 
-    <li class="extended" data-input="check" data-param="nocache" data-default=false>
+    <li data-input="select" data-param="mode" data-default=false>
+      <label>Mode d'affichage des menus</label>
+      <div data-input-role="option" data-val="debutant" data-default="true">débutant</div>
+      <div data-input-role="option" data-val="confirme" data-default="true">confirmé</div>
+      <div data-input-role="option" data-val="expert" data-default="true">expert</div>
+    </li>
+
+    <li class="expert" data-input="check" data-param="nocache" data-default=false>
       <label>No cache</label>
       <div data-input-role="info">Ne pas gérer de cache vecteur (au prochain redémarrage).</div>
     </li>
@@ -68,9 +77,9 @@
       GPS
     </li>
 
-    <li class="ios android" data-input="button" onclick="wapp.selectGPS()">
-      <label>Source GPS</label>
-      <div data-input-role="info">Choisir un GPS externe (bluetooth).</div>
+    <li class="sourcegps ios android" data-input="custom" onclick="wapp.selectGPS()">
+      <label>Choisir la source GPS</label>
+      <div data-input-role="info">GPS interne</div>
     </li>
     <li data-input="text" data-param="minGPSAccuracy" data-default=100>
       <label style="display: block; width: Calc(100% + 1em);">
@@ -98,12 +107,9 @@
       DEBUG
     </li>
 
-    <li data-input="select" data-param="qlf" class="debug">
+    <li data-input="custom" class="debug" data-param="qlf" onclick="wapp.setQualif()">
       <label>Serveur utilisé dans l'application</label>
-      <div data-input-role="option" data-val="" data-default="true">Espace Co</div>
-      <div data-input-role="option" data-val="https://qlf-collaboratif.ign.fr/collaboratif-develop/api/">Collaboratif-develop</div>
-      <div data-input-role="option" data-val="https://qlf-collaboratif.ign.fr/collaboratif-2.3/api/">Collaboratif-2.3</div>
-      <div data-input-role="option" data-val="https://qlf-collaboratif.ign.fr/collaboratif-2.4/api/">Collaboratif-2.4</div>
+      <div class="qlf" data-input-role="info">Espace Co</div>
     </li>
   </ul>
 </div>

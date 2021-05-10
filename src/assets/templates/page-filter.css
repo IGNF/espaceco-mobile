@@ -1,0 +1,110 @@
+#filter label {
+  display: block;
+  padding: .5em;
+}
+#filter label[class^="toggle-"] {
+  font-weight: bold;
+}
+#filter label span {
+  display: block;
+}
+#filter .button {
+  width: calc(100% - 2em);
+  margin: 2em auto 0;
+  display: block;
+  padding: .8em;
+  max-width: 20em;
+}
+#filter input[type="date"] {
+  border: 0;
+  padding: .3em 1em .3em 2.5em;
+  border-radius: .1em;
+  background-color: #fff;
+  box-shadow: 0.1em 0.1em 0.2em 0.1em rgba(0,0,0,.3);
+  margin: .2em 1em;
+  width: calc(100% - 2em);
+}
+#filter i.fa-calendar {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 1.2em;
+  font-size: 1.3em;
+}
+
+#filter .theme > div {
+  margin: 0 0 0 1em;
+}
+#filter .disable {
+  opacity: .5;
+  pointer-events: none;
+}
+
+#filter .status button {
+  display: block;
+  border-radius: 1em;
+  padding: .3em 1em;
+  margin: .5em;
+  border: .1em solid #369;
+  background-color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: calc(100% - 1em);
+  text-align: left;
+}
+#filter .status button i {
+  display: inline-block;
+  vertical-align: middle;
+  width: .6em;
+  height: .6em;
+  margin-right: .5em;
+  border-radius: 50%;
+  background-color: #999;
+}
+#filter .status button i.submit {
+  background-color: #369;
+}
+#filter .status button i.pending,
+#filter .status button i.pending0,
+#filter .status button i.pending1,
+#filter .status button i.pending2 {
+  background-color: #f80;
+}
+#filter .status button i.valid,
+#filter .status button i.valid0 {
+  background-color: #0c0;
+}
+#filter .status button i.reject,
+#filter .status button i.reject0 {
+  background-color: #f00;
+}
+#filter .status button.valid,
+#filter .status button.valid0,
+#filter .status button.reject,
+#filter .status button.reject0 {
+  display: none;
+}
+
+#filter .status button.selected {
+  background-color: #09c;
+  color: #fff;
+}
+
+/**
+  Tablette horizontale
+*/
+@media screen and (orientation:landscape) and (min-width:1024px) {
+  #filter {
+    width: 50%;
+  }
+}
+/**
+  Tablette verticale
+*/
+@media screen and (orientation:portrait) and (min-height:1024px) {
+  #filter {
+    height: 50%;
+    top: 50%;
+  }
+}

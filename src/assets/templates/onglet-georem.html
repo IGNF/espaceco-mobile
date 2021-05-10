@@ -1,0 +1,116 @@
+﻿<div class='multi'>
+  <button class='prev' style="float:left">&#x2770</button>
+  <span></span>
+  <button class='next' style="float:right">&#x2771</button>
+</div>
+<h3>Signalement :</h3>
+<ul>
+  <li>
+    <label>
+      Identifiant :
+    </label><span data-attr="id" data-prefix="#"></span>
+  </li>
+  <li>
+    <label>
+      Statut :
+    </label><span data-code="statut"></span>
+  </li>
+  <li>
+    <label>
+      Position :
+    </label><span>
+      <span data-attr="lon"></span>, <span data-attr="lat"></span>
+    </span>
+  </li>
+  <li>
+    <label>
+      Date :
+    </label><span data-attr="date" ></span>
+  </li>
+  <li>
+    <label>
+      Auteur :
+    </label><span data-attr="auteur" ></span>
+  </li>
+  <li>
+    <label>
+      Thèmes :
+    </label><span>
+      <span data-attr="themes" data-array="1" data-sep=", ">
+        <span>%nom% (%groupe%)</span>
+      </span>
+      <span data-attr="theme">
+      </span>
+    </span>
+  </li>
+  <li>
+    <label>
+      Attributs :
+    </label><span data-attr="attText" data-list="1"></span>
+  </li>
+  <li>
+    <label>
+      Commune :
+    </label><span data-attr="commune"></span>
+  </li>
+  <li>
+    <label>
+      Département :
+    </label><span data-attr="id_dep"></span>
+  </li>
+  <li>
+    <label>
+      Commentaire :
+    </label><span data-attr="comment"></span>
+  </li>
+  <li data-class="nb">
+    <label>
+      Croquis
+      <i class="fa tools-copypoly"></i> :
+    </label><span>
+      <span data-attr="nb"></span>
+      objet<span data-class="nb">s</span> attaché<span data-class="nb">s</span>
+    </span>
+  </li>
+  <li>
+    <img class="photo" data-src="photo" style="max-width:100%;" />
+  </li>
+</ul>
+<div class="buttons" >
+  <div data-role="dialogBt" class="del" onclick="wapp.delGeorem(true);">Supprimer</div>
+  <div data-attr="id" data-null="1" data-role="dialogBt" class="send" onclick="wapp.postGeorem();">Envoyer</div>
+  <div data-attr="id" data-null="1" data-role="dialogBt" class="modify" onclick="wapp.modifyGeorem();">Modifier</div>
+</div>
+<div class="responses" data-attr="rep" data-nnull="1">
+  <h3>Réponses :</h3>
+  <ul class="localRep">
+    <li data-role="template">
+      <p class="date statut"></p>
+      <p class="comment"></p>
+      <div class="buttons">
+        <div class="sendrep" data-role="dialogBt">Envoyer</div>
+        <div class="delrep" data-role="dialogBt">Supprimer</div>
+      </div>
+    </li>
+  </ul>
+  <button class="response"><i class="fa fa-reply"></i> Répondre à ce signalement...</button>
+  <ul data-attr="rep" data-array="1">
+    <li>
+      <p class="date">
+        <i class="fa fa-comment"></i>
+        %date%
+      </p>
+      <p>
+        <label>Auteur :</label><span>%auteur%</span>
+      </p>
+      <p class="%statut%">
+        <label>Statut :</label><span>%statut%</span>
+      </p>
+      <p>
+        <label>Commentaire :</label>
+        %titre% 
+        %comment%
+      </p>
+    </li>
+  </ul>
+</div>
