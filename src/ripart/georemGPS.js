@@ -1,11 +1,11 @@
-import CordovApp from '../../cordovapp/CordovApp';
-import { wappStorage } from '../../cordovapp/cordovapp/CordovApp'
-import RIPart from '../../cordovapp/ripart/RipartForm'
+import CordovApp from 'cordovapp/CordovApp';
+import { wappStorage } from 'cordovapp/cordovapp/CordovApp'
+import RIPart from 'cordovapp/ripart/RipartForm'
 import wapp from '../wapp'
 import map from '../map/map'
 import GeolocationDraw from 'ol-ext/interaction/GeolocationDraw'
 import { toLonLat } from 'ol/proj';
-import Audio from '../../cordovapp/media/Audio'
+import Audio from 'cordovapp/media/Audio'
 
 const bip = new Audio({ source: './sound/bip.mp3' });
 const bip2 = new Audio({ source: './sound/bip2.mp3' });

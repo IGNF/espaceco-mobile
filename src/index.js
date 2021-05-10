@@ -5,7 +5,7 @@ import './ripart/georemGPS'
 import './codes'
 import './maintenance'
 import './apiTemplate'
-import CordovApp from '../cordovapp/CordovApp';
+import CordovApp from 'cordovapp/CordovApp';
 
 // global var
 window.wapp = wapp;

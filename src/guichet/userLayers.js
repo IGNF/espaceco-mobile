@@ -1,5 +1,5 @@
 import './userLayers.css'
-import Cordovapp from '../../cordovapp/cordovapp/CordovApp'
+import Cordovapp from 'cordovapp/cordovapp/CordovApp'
 
 import WMSCapabilities from 'ol-ext/control/WMSCapabilities'
 import ol_ext_element from 'ol-ext/util/element';

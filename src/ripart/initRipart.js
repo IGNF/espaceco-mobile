@@ -1,4 +1,4 @@
-import RIPart from '../../cordovapp/ripart/RipartForm'
+import RIPart from 'cordovapp/ripart/RipartForm'
 import map from '../map/map'
 
 import ol_layer_Vector from 'ol/layer/Vector'

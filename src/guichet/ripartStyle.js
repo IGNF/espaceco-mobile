@@ -1,6 +1,6 @@
-import {georemStyle} from '../../cordovapp/ol/source/RIPart'
+import {georemStyle} from 'cordovapp/ol/source/RIPart'
 import ol_ext_element from 'ol-ext/util/element'
-import RIPart from '../../cordovapp/ripart/Ripart'
+import RIPart from 'cordovapp/ripart/Ripart'
 import Style from 'ol/style/Style';
 
 // Current application

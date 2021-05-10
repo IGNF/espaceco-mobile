@@ -1,5 +1,5 @@
 import wapp from './wapp'
-import CordovApp from '../cordovapp/CordovApp'
+import CordovApp from 'cordovapp/CordovApp'
 
 /**
  * Affichage de la maitenance

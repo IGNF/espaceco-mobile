@@ -9,7 +9,7 @@ import ol_layer_Group from 'ol/layer/Group'
 import ol_layer_Vector from 'ol/layer/Vector'
 
 import { geoportailLayer, geoportailOverlay } from './layer/geoportail'
-import {dialog} from '../../cordovapp/cordovapp/dialog'
+import {dialog} from 'cordovapp/cordovapp/dialog'
 
 // Layer pour l'affichage du cache
 var layerCache = new ol_layer_Group({ title: 'Cartes hors-ligne', name: 'cache', openInLayerSwitcher: false, displayInLayerSwitcher: true })

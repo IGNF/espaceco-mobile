@@ -1,9 +1,9 @@
 ﻿/* Gestion des guichets
 */
-import ol_layer_Vector_WFS from '../../cordovapp/ol/layer/WFS'
+import ol_layer_Vector_WFS from 'cordovapp/ol/layer/WFS'
 
 import wapp from '../wapp'
-import CordovApp from '../../cordovapp/Cordovapp'
+import CordovApp from 'cordovapp/Cordovapp'
 import setGeoportailLayers from '../map/layer/geoportail'
 import './layer'
 import './edition'

@@ -1,6 +1,6 @@
 import ol_ext_element from 'ol-ext/util/element'
 import EditionError from './EditionError'
-import { dialog, selectDialog } from '../../cordovapp/cordovapp/dialog'
+import { dialog, selectDialog } from 'cordovapp/cordovapp/dialog'
 
 /** Listen change event
  * @param {Element} input

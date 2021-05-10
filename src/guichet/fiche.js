@@ -2,8 +2,8 @@ import wapp from '../wapp'
 
 import {containsCoordinate as ol_extent_containsCoordinate} from 'ol/extent'
 import {getCenter as ol_extent_getCenter} from 'ol/extent'
-import ol_layer_Vector_Webpart from '../../cordovapp/ol/layer/Webpart'
-import RIPart from '../../cordovapp/ripart/Ripart'
+import ol_layer_Vector_Webpart from 'cordovapp/ol/layer/Webpart'
+import RIPart from 'cordovapp/ripart/Ripart'
 import { Feature } from 'ol';
 
 /** Get title */

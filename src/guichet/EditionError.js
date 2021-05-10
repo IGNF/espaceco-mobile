@@ -2,7 +2,7 @@
 import './EditionError.css'
 
 import ol_ext_element from 'ol-ext/util/element'
-import {alertDlg} from '../../cordovapp/cordovapp/dialog'
+import {alertDlg} from 'cordovapp/cordovapp/dialog'
 
 /** Gestion des erreurs et contraintes de saisie
  * @constructor

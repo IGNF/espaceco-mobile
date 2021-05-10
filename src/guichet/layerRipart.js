@@ -1,6 +1,6 @@
-import ol_source_RIPart from '../../cordovapp/ol/source/RIPart'
-import CordovFile from '../../cordovapp/cordovapp/File'
-import getCacheFileName from '../../cordovapp/cordovapp/File'
+import ol_source_RIPart from 'cordovapp/ol/source/RIPart'
+import CordovFile from 'cordovapp/cordovapp/File'
+import getCacheFileName from 'cordovapp/cordovapp/File'
 import ripartStyle, { filterFeature } from './ripartStyle'
 
 import ol_layer_AnimatedCluster from 'ol-ext/layer/AnimatedCluster'

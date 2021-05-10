@@ -1,7 +1,7 @@
 /*global bluetoothSerial*/
 /** Fonctionnalites utilisees dans les templates */
 import wapp from './wapp'
-import CordovApp from '../cordovapp/CordovApp'
+import CordovApp from 'cordovapp/CordovApp'
 
 /** Select external GPS
  */

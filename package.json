@@ -19,9 +19,6 @@
     "url": "http://sd-redmine.ign.fr/projects/guichet_mobile"
   },
   "homepage": "http://gitlab.dockerforge.ign.fr/express/guichet-mobile",
-  "ign-dependencies": {
-    "cordovapp": "git+http://gitlab.dockerforge.ign.fr/express/cordovapp.git"
-  },
   "dependencies": {
     "cordova-android": "^8.1.0",
     "cordova-plugin-androidx-adapter": "^1.1.0",
@@ -43,6 +40,7 @@
     "npx": "^10.2.2",
     "ol": "^5.3.3",
     "ol-ext": "^3.1.18",
+    "cordovapp": "git+http://gitlab.dockerforge.ign.fr/express/cordovapp.git",
     "papaparse": "^5.3.0",
     "proj4": "^2.5.0",
     "webfontloader": "^1.6.28"

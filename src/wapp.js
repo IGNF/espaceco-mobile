@@ -1,4 +1,4 @@
-﻿import CordovApp from '../cordovapp/Cordovapp'
+﻿import CordovApp from 'cordovapp/Cordovapp'
 import map from './map/map'
 import { layerCache } from './map/map'
 import {layers} from './map/map'
@@ -19,11 +19,11 @@ import ol_layer_Tile from 'ol/layer/Tile'
 
 import ol_format_GPX from 'ol/format/GPX'
 
-import CacheMap from '../cordovapp/ol/cache/CacheMap'
-import CacheVector from '../cordovapp/ol/cache/CacheVector'
+import CacheMap from 'cordovapp/ol/cache/CacheMap'
+import CacheVector from 'cordovapp/ol/cache/CacheVector'
 
 import config from './config';
-import { wappStorage } from '../cordovapp/cordovapp/CordovApp'
+import { wappStorage } from 'cordovapp/cordovapp/CordovApp'
 
 /** Web application pour l'acces a l'espace collaboratif depuis un mobile.
  * 

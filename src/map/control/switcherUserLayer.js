@@ -1,4 +1,4 @@
-import CordovApp from '../../../cordovapp/CordovApp'
+import CordovApp from 'cordovapp/CordovApp'
 import ol_control_LayerSwitcher from 'ol-ext/control/LayerSwitcher'
 import ol_ext_element from 'ol-ext/util/element'
 import { removeUserLayer } from '../../guichet/userLayers';
