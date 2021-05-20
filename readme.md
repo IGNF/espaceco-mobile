@@ -137,17 +137,17 @@ NB: les plugins Cordova (accès aux fichiers, aux photos, etc.) ne sont pas acce
 
 Utilisez la commande suivante pour compiler l'application :
 ````
-$ cordova build
+$ npx cordova build
 ````
 L'empaquetage se fait sans les sourcemaps et en minifiant le code. Si vous ne voulez pas minifier le code (mode **debug**), ajoutez `--dev` :
 ````
-$ cordova build --dev
+$ npx cordova build --dev
 ````
 
 Utilisez la commande suivante pour lancer l'application sur un smartphone (avec `--dev` pour ne pas minifier):
 
 ````
-$ cordova run
+$ npx cordova run
 ````
 
 NB: bien que non minifié le code reste empaqueté (les fichiers sourcemap ne sont pas accessible sur le mobile).
@@ -176,7 +176,7 @@ Compiler l'APK en mode release en utilisant le keystore disponible avec le proje
 cordova build android --buildConfig=build.json --release
 ````
 Le fichier `build.json` demande un mot de passe disponible dans le projet [android-keystore](http://gitlab.dockerforge.ign.fr/jmviglino/android-keystore).    
-L'apk resultante est disponible dans le répertoire `./platforms/android/app/build/outputs/apk/release/` de l'application.
+L'apk résultante est disponible dans le répertoire `./platforms/android/app/build/outputs/apk/release/` de l'application.
 
 La publication se fait sur la [console du playstore](https://play.google.com/apps/publish)
 
@@ -184,7 +184,7 @@ La publication se fait sur la [console du playstore](https://play.google.com/app
 
 NB: fr.ign.guichet ayant été refusé par Apple l'ID de l'application iOS est : `fr.ign.collaboratif`
 
-La publication se fait sur la [iTunes connect](https://itunesconnect.apple.com/).
+La publication se fait sur la [AppleStore connect](https://appstoreconnect.apple.com/apps).
 Il est nécessaire d'avoir un [compte développeur](https://developer.apple.com/account/) associé au compte IGN - Institut national de l'information géographique et forestière.
 
 NB: A l'installation du plugin camera, il faut ajouter les variables nécessaires pour éviter un retour négatif d'iTunes.
