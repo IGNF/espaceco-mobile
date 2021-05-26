@@ -1,7 +1,7 @@
 ﻿/** Config */
 export default {
   // App version
-  version: "2.2.0o",
+  version: "2.2.0p",
 
   // Geoportail APIkey
   apiKey: "2wd9sfsi5hews9yxcr95i6br",

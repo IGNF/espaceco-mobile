@@ -347,6 +347,7 @@ div.debug,
 [data-page="loadGuichet"] #map .ol-control.centergps,
 [data-page="loadMap"] #map .ol-control.centergps {
   display: block;
+  right: 1em;
 }
 
 /* Template pour la creation*/

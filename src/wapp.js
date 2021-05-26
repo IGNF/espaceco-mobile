@@ -104,6 +104,7 @@ import { wappStorage } from 'cordovapp/cordovapp/CordovApp'
       .on('showpage', () => {
         visibleGuichet = wapp.getLayerGuichet().getVisible();
         wapp.getLayerGuichet().setVisible(false);
+        wapp.saveContext();
       })
       .on('hidepage', () => {
         wapp.getLayerGuichet().setVisible(visibleGuichet);
@@ -114,6 +115,7 @@ import { wappStorage } from 'cordovapp/cordovapp/CordovApp'
       .on('showpage', function(){
         visibleGuichet = wapp.getLayerGuichet().getVisible();
         wapp.getLayerGuichet().setVisible(false);
+        wapp.saveContext();
       })
       .on('hidepage', function(){
         wapp.getLayerGuichet().setVisible(visibleGuichet);

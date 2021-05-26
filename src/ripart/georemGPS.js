@@ -306,7 +306,7 @@ function stopTracking(force, again) {
       (b) => {
         if (b==='ok') {
           page.removeClass('track');
-          stopTracking(true, again);
+          stopTracking(true, true);
         }
       }
     );
@@ -315,10 +315,15 @@ function stopTracking(force, again) {
   geolocation.setActive(false);
   wapp.select.setActive(true);
   page.removeClass('track');
-  wapp.hidePage();
-  if (again) {
+  if (!again) {
+    page.removeClass('track');
+    wapp.hidePage();
+  }
+  /*
+  else {
     wapp.directGPS();
   }
+  */
 }
 
 /** Saisie direct GPS (sans dialogue) */
