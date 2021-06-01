@@ -101,7 +101,6 @@ console.log('[DEPRECATED] LayerSwitcher')
     projection: map.getView().getProjection()
   });
   geolocation.on('change', (e) => {
-    console.log(e)
     map.getView().animate({
       center: geolocation.getPosition(),
       zoom: Math.max(16, Math.min(19, map.getView().getZoom()))
@@ -109,15 +108,51 @@ console.log('[DEPRECATED] LayerSwitcher')
     geolocation.setTracking(false);
   })
 
+  // Control center GPS
+  let recenter = false;
+  let ctime = 0, locTime = 0; 
+  let init = false;
+  function centerLocation(geoloc) {
+    geoloc.on('tracking', () => {
+      if (recenter && geoloc.get('followTrack') !== 'auto') {
+        if (!locTime) {
+          locTime = (new Date()).getTime();
+        } else if ((new Date()).getTime()-locTime > 10000) {
+          geoloc.setFollowTrack('auto');
+          locTime = 0;
+        }
+      }
+    });
+    // Reset on move end
+    wapp.map.on('moveend', () => {
+      if (geoloc.getActive() && geoloc.get('followTrack') !== 'auto') {
+        locTime = (new Date()).getTime();
+      }
+    })
+  }
   const centerGPS = new ol_control_Button({
     className: 'centergps',
     html: "<i class='fa tools-locate'></i>",
     handleClick: () => {
+      if (!init) {
+        centerLocation(wapp.interactions.geolocation);
+        centerLocation(wapp.interactions.ripartGeolocation);
+        init = true;
+      }
+      var d = (new Date()).getTime();
+      if (d-ctime < 500) {
+        centerGPS.element.classList.add('center');
+        recenter = true;
+      } else {
+        recenter = false;
+        centerGPS.element.classList.remove('center');
+      }
       wapp.interactions.geolocation.setFollowTrack('auto');
       wapp.interactions.ripartGeolocation.setFollowTrack('auto');
       if (!wapp.interactions.geolocation.getActive() && !wapp.interactions.ripartGeolocation.getActive()) {
         geolocation.setTracking(true);
       }
+      ctime = d;
     }
   });
   map.addControl(centerGPS);

@@ -2,6 +2,7 @@
 /** Fonctionnalites utilisees dans les templates */
 import wapp from './wapp'
 import CordovApp from 'cordovapp/CordovApp'
+import { transform } from 'ol/proj';
 
 /** Select external GPS
  */
@@ -63,10 +64,29 @@ wapp.filterGeorem = function() {
   wapp.showPage('filter');
 };
 
-/** Toggle layer Guichet */
+/** Toggle layer Guichet
+ */
 wapp.toggleLayerGuichet = function (elt) {
   const guichet = wapp.getLayerGuichet()
   guichet.setVisible(!guichet.getVisible());
   if (guichet.getVisible()) $('i', elt).removeClass('fa-eye-slash');
   else $('i', elt).addClass('fa-eye-slash');
+}
+
+/** Goto location using external app
+ */
+wapp.goto = function() {
+  let where = wapp.map.getView().getCenter();
+  // Center on selection
+  const feature = wapp.select.getFeatures().item(0);
+  if (feature) {
+    if (!feature.getGeometry().intersectsCoordinate(where)) {
+      where = feature.getGeometry().getClosestPoint(where);
+    }
+  }
+  // Get LonLat
+  where = transform(where, wapp.map.getView().getProjection(), 'EPSG:4326');
+  // Goto
+  if (wapp.getPlatformId()==='ios') cordova.InAppBrowser.open('maps://?q='+where[1]+','+where[0], '_system');
+  else window.open('geo://0,0?q='+where[1]+','+where[0], '_system');
 }

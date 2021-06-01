@@ -243,6 +243,10 @@
   right: .5em;
   top: 3.5em;
 }
+.ol-button.centergps.center button {
+  background-color: rgba(0,136,60,0.5);
+}
+  
 .ol-bar.ol-geobar.centerTrack .ol-bar {
   display: none;
 }
