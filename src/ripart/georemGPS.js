@@ -109,7 +109,7 @@ wapp.ready(() => {
   $('.fa-times', page).click(stopTracking);
   // Stop and start again
   $('.fa-map-marker', page).click(() => {
-    stopTracking(false, true);
+    stopTracking(false, 'choice');
   });
   // Car / pedestrian
   $('.fa-car', page).click(() => {
@@ -200,7 +200,6 @@ let currentRem;
 RIPart.prototype.georemGPS = function (georem) {
   console.log(georem)
   currentRem = georem;
-  wapp.hidePage();
   wapp.showPage('georemGPS');
   $('#georemGPS p.theme').text(georem.theme);
 //  page.show();
@@ -306,7 +305,7 @@ function stopTracking(force, again) {
       (b) => {
         if (b==='ok') {
           page.removeClass('track');
-          stopTracking(true, true);
+          stopTracking(true, again || true);
         }
       }
     );
@@ -318,12 +317,9 @@ function stopTracking(force, again) {
   if (!again) {
     page.removeClass('track');
     wapp.hidePage();
-  }
-  /*
-  else {
+  } else if (again==='choice') {
     wapp.directGPS();
   }
-  */
 }
 
 /** Saisie direct GPS (sans dialogue) */
