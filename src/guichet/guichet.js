@@ -463,7 +463,7 @@ console.log('[DEPRECATED] setGuichet');
   // Charger les couches
   wapp.loadLayers(groupe);
   // Afficher
-  wapp.getLayerGuichet().setVisible(true);
+  wapp.getLayerGuichet().setVisible(wapp.param.visibleLayers.guichet);
 };
 
 
