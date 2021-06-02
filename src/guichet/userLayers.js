@@ -23,8 +23,9 @@ let caps, dialog;
 /** Ajout d'un layer WMS
  */
 Cordovapp.prototype.addUserLayer = function() {
-  //caps.showDialog();
-  wapp.dialog.show(dialog, { className: 'dialogWMS', title: 'WMS', buttons: [], closeBox: true })
+  wapp.dialog.show(dialog, { className: 'dialogWMS', title: 'WMS', buttons: [], closeBox: true });
+  // Update dialog
+  caps.showDialog();
 };
 
 /** Remove a user layer
@@ -54,8 +55,9 @@ function getUserLayers() {
     caps =  new WMSCapabilities({
       target: dialog,
       popupLayer: true,
-      searchLabel: '&#10095;',
+      searchLabel: '<i class="fa fa-search"></i>',
       loadLabel: 'Charger...',
+      placeholder: 'url du service WMS...',
       previewLabel: 'aperçu'
     })
     wapp.map.addControl(caps);

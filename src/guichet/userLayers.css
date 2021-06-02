@@ -78,10 +78,17 @@
 }
 
 .ol-wmscapabilities .ol-select-list {
-  padding: 0 .5em;
+  max-height: 8.5em;
 }
 .ol-wmscapabilities .ol-select-list .ol-info {
   font-style: italic;
+}
+.ol-wmscapabilities ul.ol-wmsform li.extent button:before{
+  content: "\f278";
+  font-family: FontAwesome
+}
+.ol-wmscapabilities .ol-url button {
+  color: #888;
 }
 
 .ol-wmscapabilities .ol-preview {
