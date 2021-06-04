@@ -6,6 +6,7 @@ import map from '../map/map'
 import GeolocationDraw from 'ol-ext/interaction/GeolocationDraw'
 import { toLonLat } from 'ol/proj';
 import Audio from 'cordovapp/media/Audio'
+import saveGeolocationDraw from '../map/interaction/saveGeolocationDraw';
 
 const bip = new Audio({ source: './sound/bip.mp3' });
 const bip2 = new Audio({ source: './sound/bip2.mp3' });
@@ -52,6 +53,7 @@ wapp.ready(() => {
     tolerance: (wapp.param.options ? wapp.param.options.toleranceGPS || 0 : 5),
     minAccuracy: (wapp.param.options ? wapp.param.options.minGPSAccuracy || 20 : 20)
   });
+  saveGeolocationDraw(geolocation, startTracking);
   // Add nmea informations
   geolocation.getPosition = function(loc) {
     var pos = loc.getPosition();
@@ -226,25 +228,27 @@ function saveTracking(e) {
     bip.stop();
     bip2.play();
     const feature = e.feature;
-    const deport = getDeport();
-    if (deport.bxy) feature.set('deportXY', deport.xy);
-    if (deport.bz) feature.set('deportZ', deport.z);
-    const grem = $.extend({}, currentRem);
-    const pt = toLonLat(feature.getGeometry().getFirstCoordinate());
-    grem.lon = pt[0];
-    grem.lat = pt[1];
-    // Save GPS track (with nmea info)
-    if (geolocation.path_[0] && geolocation.path_[0][4]!==undefined) {
-      const nmea = [];
-      geolocation.path_.forEach((c) => {
-        nmea.push([c[3], c[4]]);
-      })
-      feature.set('nmea', nmea);
+    if (feature.getGeometry()) {
+      const deport = getDeport();
+      if (deport.bxy) feature.set('deportXY', deport.xy);
+      if (deport.bz) feature.set('deportZ', deport.z);
+      const grem = $.extend({}, currentRem);
+      const pt = toLonLat(feature.getGeometry().getFirstCoordinate());
+      grem.lon = pt[0];
+      grem.lat = pt[1];
+      // Save GPS track (with nmea info)
+      if (geolocation.path_[0] && geolocation.path_[0][4]!==undefined) {
+        const nmea = [];
+        geolocation.path_.forEach((c) => {
+          nmea.push([c[3], c[4]]);
+        })
+        feature.set('nmea', nmea);
+      }
+      grem.sketch = wapp.ripart.feature2sketch(feature, map.getView().getProjection());
+      wapp.ripart.saveLocalRem(grem, null, (e) => {
+        if (e.error) console.error(e.error);
+      });
     }
-    grem.sketch = wapp.ripart.feature2sketch(feature, map.getView().getProjection());
-    wapp.ripart.saveLocalRem(grem, null, (e) => {
-      if (e.error) console.error(e.error);
-    });
   }
 }
 

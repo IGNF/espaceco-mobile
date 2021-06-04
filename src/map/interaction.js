@@ -16,8 +16,11 @@ import ol_geom_MultiPolygon from 'ol/geom/MultiPolygon'
 import ol_geom_Point from 'ol/geom/Point'
 import ol_geom_Polygon from 'ol/geom/Polygon'
 import ol_control_GeolocationBar from 'ol-ext/control/GeolocationBar'
-
 import ol_Geolocation from 'ol/Geolocation'
+import saveGeolocationDraw from './interaction/saveGeolocationDraw'
+
+import {click as ol_events_condition_click} from 'ol/events/condition'
+import {get as ol_proj_get} from 'ol/proj'
 
 /* HACK recuperer la position */
 var changeGPS = ol_Geolocation.prototype.positionChange_;
@@ -26,9 +29,6 @@ ol_Geolocation.prototype.positionChange_ = function(position) {
   changeGPS.call(this, position);
 }
 /* FIN HACK */
-
-import {click as ol_events_condition_click} from 'ol/events/condition'
-import {get as ol_proj_get} from 'ol/proj'
 
 // Style pour les traces 
 var redStroke = new ol_style_Stroke({ color: "#f00", width: 2 });
@@ -228,6 +228,7 @@ export default function(wapp) {
   }
   map.addControl(geolocBar);
   const geolocation = wapp.interactions.geolocation = geolocBar.getInteraction();
+  saveGeolocationDraw(geolocation);
   // Prevent from falling asleep when geolocating
   if (window.plugins && window.plugins.insomnia) {
     wapp.interactions.geolocation.on('change:active', (e) => {
