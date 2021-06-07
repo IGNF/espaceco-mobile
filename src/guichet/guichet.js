@@ -244,170 +244,6 @@ console.log('[TODO] set guichet')
   wapp.setGuichet(current);
 };
 
-/*
-wapp.initGuichets = function() {
-  this.initGuichet2();
-  return;
-console.log('[DEPRECATED] initguichet')
-  // Reset list
-  var ul = $('#cartes [data-list="guichets"] ul.guichet');
-  ul.html("");
-  if (!this.ripart.isConnected()) {
-    wapp.setGuichet();
-    return;
-  }
-
-  // Recherche des groupes
-  var groupes = wapp.ripart.param.groupes;
-  var current;
-  for (var i=0, g; g = groupes[i]; i++) {
-    // Chargement des logos
-    if (g.logo) {
-      CordovApp.File.dowloadFile(g.logo, "TMP/logo/"+g.id_groupe);
-    }
-    // Guichet courant
-    if (this.ripart.param.guichet == g.id_groupe) current = g;
-    // Affichage si WFS
-    var couches = "";
-    for (var j=0; j<g.layers.length; j++) {
-      if (g.layers[j].type=="WFS") couches += (couches?", ":"")+g.layers[j].nom;
-    }
-    if (couches) {
-      var li = $("<li>")
-        .data('groupe', g)
-        .text(g.nom)
-        .append($("<i>").text(couches))
-        .attr("data-input","")
-        .click(function() {
-          var self = $(this);
-          if (!self.hasClass('selected')) {
-            wapp.setGuichet($(this).data('groupe'));
-            wapp.hidePage();
-          } else {
-            wapp.setGuichet();
-            // Faire clignoter
-            self.addClass('active');
-            setTimeout(function(){ self.removeClass('active'); }, 200);
-          }
-        })
-        .appendTo(ul);
-      $("<i>").addClass('fa fa-info-circle')
-        .click(function(e){
-          e.preventDefault();
-          e.stopPropagation();
-          wapp.showGuichetInfo($(this).parent().data('groupe'));
-        })
-        .appendTo(li);
-      wapp.getLogo (g, function(f) {
-        $("<img>").attr("src",f).prependTo(this);
-      }, li);
-    }
-  }
-  if ($("li", ul).length) $('#cartes [data-list="guichets"] ul.nomap').hide();
-  else $('#cartes [data-list="guichets"] ul.nomap').show();
-  wapp.setGuichet(current);
-};
-
-/** Afficher les infos du guichet
- * @param {} groupe
- * /
-wapp.showGuichetInfo = function (groupe) {
-
-console.log('[DEPRECATED: showInfoGuichet');
-
-  var hasOffline = false;
-  // START VNF PATCH
-  hasOffline = groupe.id_groupe===200 || groupe.id_groupe===13 || groupe.id_groupe===375 || $('.debug').css('display')!=='none';
-  console.log('Hide offline', groupe.id_groupe, hasOffline);
-  // END VNF PATCH
-
-  if (hasOffline) {
-    $('#guichet [data-role="onglet-bt"] [data-list="offline"]').show();
-  }
-  else {
-    $('#guichet [data-role="onglet-bt"] [data-list="offline"]').hide();
-    wapp.showOnglet('guichet');
-  }
-
-  wapp.showPage('guichet');
-  var page = $('#guichet');
-  wapp.vectorCache.setCurrentGuichet(groupe);
-  $('img', page).hide();
-  wapp.getLogo(groupe, function(src) {
-    $('img', page).attr('src',src).show();
-  });
-  var ul = $("ul.layers", page).html('');
-  $("h3.title", page).text(groupe.nom);
-  $(".description", page).html(groupe.desc);
-  var auth = false;
-  var offline = false;
-  for (var i=0, l; l=groupe.layers[i]; i++) {
-    if (l.type==='WFS') {
-      // Has authentication ?
-      auth = auth || l.username;
-      // Hors ligne ?
-      if (!offline && l.mask && l.mask.loadStartegy) offline = 'once';
-      else offline = true;
-      // Add to list
-      $('<li>').html('')
-        .append($('<h4>').html(l.nom+(l.external?' <i>(externe)</i>':'')))
-        .append($('<div>').text(l.description))
-        .appendTo(ul);
-    }
-  }
-  // Gestion du cache vecteur
-  if (offline) {
-    page.addClass('offline');
-    $('[data-mode="offline"] > *', page).hide();
-    if (offline==='once') {
-      $('.once', page).show();
-    } else {
-      $('.cartes', page).show();
-      wapp.vectorCache.showList();
-    }
-  } else {
-    page.removeClass('offline');
-  }
-  if (auth) {
-    $(".auth", page).off()
-      .click(function () {
-        // Remove credentials
-        var layer;
-        for (var k=0, l; l=groupe.layers[k]; k++) {
-          if (l.username) layer = l;
-          delete l.password;
-        }
-        var current = wapp.ripart.param.guichet;
-        if (wapp.ripart.param.guichet === groupe.id_groupe) wapp.setGuichet();
-        wapp.ripart.saveParam();
-        // Clear credentials
-        var win = window.open('logout.html','_blank','clearsessioncache=yes,hidden=yes');
-        setTimeout(function(){ win.close(); }, 100);
-
-        // Ask for new credentials
-        var content = CordovApp.template("dialog-authenticate");
-        $('span', content).text(layer.nom);
-        wapp.dialog.show (content, {
-          title: "Connexion", 
-          buttons: { submit:"OK", cancel:"Annuler" },
-          callback: function(b) {
-            if (b=='submit') {
-              var cryp = new ol_layer_Vector_WFS();
-              for (var k=0, l; l=groupe.layers[k]; k++) {
-                if (l.username) {
-                  l.username = $('.nom', content).val() || 'none';
-                  l.password = cryp.crypt($('.pwd', content).val());
-                }
-              }
-              if (current === groupe.id_groupe) wapp.setGuichet(current);
-            } 
-          }
-        });
-      })
-      .show();
-  }
-  else $(".auth", page).hide();
-};
 
 /** Guichet en cours de modification
 */
@@ -631,7 +467,7 @@ wapp.centerCache = function () {
  */
 wapp.updateCache = function(layer) {
   wapp.message(
-    'Mettre a jour les données du guichet.<br/><i>Cette opération peut être longue</i>',
+    'Mettre à jour les données du guichet.<br/><i>Cette opération peut être longue</i>',
     'Mise à jour', 
     { ok:'Mettre à jour', cancel:'annuler' },
     (b) => {
@@ -647,6 +483,41 @@ wapp.updateCache = function(layer) {
     }
   );
 };
+
+/** Ajouter un layer au cache
+ * @param {ol.layer.Webpart} layer
+ */
+wapp.appendLayerToCache = function(layer) {
+  var name = layer.getFeatureType().name
+  var guichet = this.vectorCache.getCurrentGuichet();
+  for (var i=0, l; l = guichet.layers[i]; i++) {
+    if (l.type === 'WFS' && l.tilezoom && name === l.nom) {
+      break;
+    }
+  }
+  if (l) {
+    wapp.message(
+      'Ajouter une couche en édition<br/><i>Cette opération peut être longue...</i>',
+      'Edition', 
+      { ok: 'Ajouter', cancel: 'Annuler' },
+      (b) => {
+        if (b==='ok') {
+          // Add to cache
+          const cache = wapp.getCache(wapp.guichet).cache;
+          cache.layers.push(l);
+          // Reload cache
+          wapp.wait('Chargement...');
+          wapp.vectorCache.uploadLayers(cache, false);
+        }
+      });
+  } else {
+    console.warn('[AppendLayerToCache]: No layer found');
+    wapp.alert('Impossible de charger ce type de données...');
+    return;
+  }
+  return;
+};
+
 
 /** Mettre a jour la carte
 */

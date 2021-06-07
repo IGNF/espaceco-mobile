@@ -59,6 +59,19 @@
   text-align: right;
 }
 
+.ol-layerswitcher .icn-bar .fa-cloud-download.fa-plus:after {
+  content: '\f055';
+  position: absolute;
+  right: .1em;
+  top: -.2em;
+  border-radius: 50%;
+  background: #fff;
+  font-family: 'FontAwesome';
+  font-size: .8em;
+  border: 1px solid #fff;
+  box-sizing: border-box;
+}
+
 /* Dialogue */
 [data-role="dialog"].dialog-infocouche img {
   float: right;

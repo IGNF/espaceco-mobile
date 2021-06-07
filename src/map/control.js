@@ -57,40 +57,6 @@ export default function(wapp) {
     }
   }));
 
-/* OLD VERSION * /
-console.log('[DEPRECATED] LayerSwitcher')
-  // Layer switcher
-  var lswitcher = new ol_control_LayerSwitcher({ 
-    target:$("#layerswitcher").get(0), 
-    reordering: true
-  });
-
-  // Guichet info
-  lswitcher.on('drawlist', function(e) {
-    if (e.layer.get('cache')) {
-      $('<div>').addClass('nb')
-        .appendTo($('.ol-layerswitcher-buttons', e.li).first())
-        .html (e.layer.getSource().nbModifications());
-    }
-    if (e.layer.get('name')==='guichet') {
-      $('<div>').addClass('layerInfo')
-        .appendTo($('.ol-layerswitcher-buttons', e.li).first())
-        .click(function(){
-          wapp.showGuichetInfo(wapp.ripart.getGuichet());
-        });
-    }
-    if (e.layer.get('vectorCache')) {
-      $('<div>').addClass('layerSynchro')
-        .appendTo($('.ol-layerswitcher-buttons', e.li).first())
-        .click(() => {
-          wapp.vectorCache.saveLayer(e.layer.getLayers().getArray().slice(), e.layer.get('vectorCache'))
-        });
-    }
-  });
-
-  map.addControl (lswitcher);
-/* END OLD */
-
   /* Center on GPS */
   const geolocation = new Geolocation({
     trackingOptions: {

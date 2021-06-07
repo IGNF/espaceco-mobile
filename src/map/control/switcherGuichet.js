@@ -183,18 +183,15 @@ export default function(wapp) {
       } else {
         edit.classList.add('fa-pencil');
       }
-/*
       if (wapp.getCache(wapp.guichet).cache) {
         ol_ext_element.create('I', {
-          className: 'fa fa-cloud-download',
+          className: 'fa fa-cloud-download fa-plus',
           click: () => {
-            //wapp.vectorCache.loadCache(wapp.getCache(wapp.guichet).cache);
-            wapp.loadCache();
+            wapp.appendLayerToCache(layer);
           },
           parent: div
         });  
       }
-*/
     }
 
     if (featureType.styles && featureType.styles.length > 1) {
