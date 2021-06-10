@@ -108,6 +108,7 @@ import { wappStorage } from 'cordovapp/cordovapp/CordovApp'
       })
       .on('hidepage', () => {
         wapp.getLayerGuichet().setVisible(visibleGuichet);
+        wapp.saveContext();
         // Retour sur la page des guichets
         setTimeout(() => wapp.showPage('layer-guichet'))
       });
