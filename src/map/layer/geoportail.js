@@ -70,9 +70,14 @@ const dfci = new ol_layer_Vector({
 
 // Layers geoportail
 const defaultLayers = [
-  new ol_layer_Geoportail('GEOGRAPHICALGRIDSYSTEMS.MAPS', { gppKey: config.apiKey, hidpi: false, visible: true }, { gppKey: config.apiKey, authentication: config.auth }),
-  new	ol_layer_Geoportail('GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2', { gppKey: config.apiKey, hidpi: false, visible: false }, { gppKey: config.apiKey, authentication: config.auth }),
+  'GEOGRAPHICALGRIDSYSTEMS.MAPS',
+  'GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2',
+  'ORTHOIMAGERY.ORTHOPHOTOS'
+  /*
+  new ol_layer_Geoportail('GEOGRAPHICALGRIDSYSTEMS.MAPS', { gppKey: config.apiKey, hidpi: false, visible: false }, { gppKey: config.apiKey, authentication: config.auth }),
+  new	ol_layer_Geoportail('GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2', { gppKey: config.apiKey, hidpi: false, visible: true }, { gppKey: config.apiKey, authentication: config.auth }),
   new	ol_layer_Geoportail('ORTHOIMAGERY.ORTHOPHOTOS', { gppKey: config.apiKey, hidpi: false, visible: false}, { gppKey: config.apiKey, authentication: config.auth }),
+  */
 ];
 
 const defaultOverlays = [
@@ -105,26 +110,15 @@ const geoportailOverlay = new ol_layer_Group({
 });
 export { geoportailOverlay }
 
-function setGeoportailLayers(layers) {
-  wapp.layerReady = false;
 
-  geoportailLayer.getLayers().clear();
-  geoportailOverlay.getLayers().clear();
-  if (!layers) {
-    defaultLayers.forEach((l) => geoportailLayer.getLayers().push(l));
-    // defaultOverlays.forEach((l) => geoportailOverlay.getLayers().push(l));
-    geoportailOverlay.set('displayInLayerSwitcher', false);
-    return;
-  } 
-  geoportailOverlay.set('displayInLayerSwitcher', true);
-  // Ajout des layers dans l'ordre
-  layers = Object.keys(layers);
+// Ajout des layers dans l'ordre
+function addLayers (layers) {
+  console.log(layers)
   const keys = Object.keys(wapp.param.visibleLayers);
   layers.sort((a,b) => keys.indexOf(a) - keys.indexOf(b));
   const caps = window.geoportailConfig.capabilities['default'];
   layers.forEach((l) => {
     if (caps[l]) {
-
       const gpl = new ol_layer_Geoportail(l, { gppKey: config.apiKey, hidpi: false, visible: wapp.param.visibleLayers[l] || false }, { gppKey: config.apiKey, authentication: config.auth });
       if (geoportailOverlays[l]) {
         geoportailOverlay.getLayers().push(gpl);
@@ -135,7 +129,25 @@ function setGeoportailLayers(layers) {
       console.warn('[GEOPORATAIL-CONFIG] Bad layer: ', l);
     }
   });
+}
+
+/** Add Geoportail layers to the map
+ * @param {Object} list of layers
+ */
+function setGeoportailLayers(layers) {
+  wapp.layerReady = false;
+
+  geoportailLayer.getLayers().clear();
+  geoportailOverlay.getLayers().clear();
+  geoportailOverlay.set('displayInLayerSwitcher', true);
+  if (!layers || !Object.keys(layers).length) {
+    addLayers(defaultLayers);
+    return;
+  } 
   
+  layers = Object.keys(layers);
+  addLayers(layers);
+
   geoportailOverlay.getLayers().push(inspireAdress);
   geoportailOverlay.getLayers().push(dfci);
   wapp.layerReady = true;

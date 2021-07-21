@@ -33,9 +33,11 @@ wapp.ready(() => {
       wapp.ripart.on('changegroup', (e) => {
         $('#signalerGPS').hide()
         // SignalerGPS rapide (si thèmes rapides)
-        wapp.ripart.param.themes.forEach((th) => {
-          if (/^GPS@|^Rapide@/.test(th.nom)) $('#signalerGPS').show();
-        });
+        if (wapp.ripart.param.themes) {
+          wapp.ripart.param.themes.forEach((th) => {
+            if (/^GPS@|^Rapide@/.test(th.nom)) $('#signalerGPS').show();
+          });
+        }
       });
     } else  {
       // Try next
@@ -63,6 +65,7 @@ wapp.ready(() => {
       $('.info', page).show();
       pos.push (loc._position.nmea.geoidal);
       //$('.sats', page).html(loc._position.nmea.satsVisible+'/'+loc._position.nmea.satellites);
+      // Deprecated
       $('.sats', page).html(loc._position.nmea.satsActive);
       $('.speed', page).html(((loc._position.coords.speed*3600/1000)||'-') + ' km/h');
       $('.pdop', page).html(loc._position.nmea.pdop);

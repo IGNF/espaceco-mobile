@@ -5,6 +5,7 @@ import CordovAppFile from 'cordovapp/cordovapp/File'
 import {all as ol_loadingstrategy_all} from 'ol/loadingstrategy'
 import ol_layer_Vector_WFS from 'cordovapp/ol/layer/WFS'
 import {boundingExtent as ol_extent_boundingExtent} from 'ol/extent'
+import {buffer as ol_extent_buffer} from 'ol/extent'
 import {transformExtent as ol_proj_transformExtent} from 'ol/proj'
 
 import ol_layer_Vector_Webpart from 'cordovapp/ol/layer/Webpart'
@@ -125,6 +126,8 @@ wapp.layerWFS = function(groupe, l) {
 /**
  * Creer un layer Webpart
  * @param {} l layer options
+ * @param {string} cacheUrl
+ * @param {ol.extent} cacheExtent limit layer visibility inside the extent (deprecated)
  */
 wapp.layerWebpart = function(l, cacheUrl, cacheExtent) {
   var vector;
@@ -132,12 +135,15 @@ wapp.layerWebpart = function(l, cacheUrl, cacheExtent) {
   // var base = l.url.replace(/.*databasename=(.*)/,"$1");
   var base = l.url.replace(/.*databasename=([^&]*).*/,"$1");
   var extent = [];
+  /* Show all features outside the cache extent
   if (cacheExtent) {
     extent = cacheExtent
+    // Extend cache extent to show all features ?
+    // extent = ol_extent_buffer(extent, 5000);
   } else {
-    for (var k=0; k<l.extent.length; k++) extent[k] = parseFloat(l.extent[k]);
-    extent = ol_proj_transformExtent(extent, 'EPSG:4326', wapp.map.getView().getProjection());
-  }
+  */
+  for (var k=0; k<l.extent.length; k++) extent[k] = parseFloat(l.extent[k]);
+  extent = ol_proj_transformExtent(extent, 'EPSG:4326', wapp.map.getView().getProjection());
   // Format CSV sur develop...
   l.format = (/collaboratif-develop/.test(l.url)) ? 'CSV' : 'JSON';
   vector = new ol_layer_Vector_Webpart({

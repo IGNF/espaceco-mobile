@@ -689,8 +689,13 @@ wapp.getLogo = function (g, cback, scope) {
 */
 wapp.connect = function() {
   wapp.ripart.connectDialog({
-    onConnect: function() {
-			wapp.notification("Connecté au service",1200);
+    onConnect: function(result) {
+      console.log('ok', result)
+      if (result.connected === false) {
+        wapp.notification("Vous êtes déconnecté", 1200);
+      } else {
+        wapp.notification("Connecté au service", 1200);
+      }
       wapp.initGuichets();
       wapp.ripart.signalements.getSource().getSource().clear();
       // Test visible layers

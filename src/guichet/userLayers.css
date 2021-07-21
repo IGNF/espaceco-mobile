@@ -43,11 +43,10 @@
   100% { -webkit-transform:rotate(360deg); transform:rotate(360deg); } 
 }
 
-
-.ol-wmscapabilities .ol-searching .ol-url:after {
-  top: 7em;
+.ol-wmscapabilities .ol-url input {
+  width: calc(100% - 2.5em);
+  padding: 0;
 }
-
 .ol-wmscapabilities ul.ol-wmsform {
   padding: 0;
   list-style: none;
@@ -61,7 +60,7 @@
 }
 .ol-wmscapabilities .ol-wmsform li:nth-child(4):before {
   position: absolute;
-  right: 1.2em;
+  right: 1.5em;
   content: "\276f";
 }
 .ol-wmscapabilities .ol-wmsform li:nth-child(9) {
@@ -76,27 +75,6 @@
 .ol-wmscapabilities input:focus {
   border-color: orange;
 }
-
 .ol-wmscapabilities .ol-select-list {
   max-height: 8.5em;
-}
-.ol-wmscapabilities .ol-select-list .ol-info {
-  font-style: italic;
-}
-.ol-wmscapabilities ul.ol-wmsform li.extent button:before{
-  content: "\f278";
-  font-family: FontAwesome
-}
-.ol-wmscapabilities .ol-url button {
-  color: #888;
-}
-
-.ol-wmscapabilities .ol-preview {
-  position: relative;
-}
-.ol-wmscapabilities .ol-preview:before {
-  content: "\276f";
-  position: absolute;
-  left: -1.5em;
-  top: 0;
 }

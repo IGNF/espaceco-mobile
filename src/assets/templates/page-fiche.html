@@ -14,7 +14,9 @@
     <div data-role="button" onclick="wapp.goto();">
       <i class="fa fa-car"></i>Y aller
     </div>
-    <i class="fa fa-close" style="" onclick="wapp.hidePage();"></i>
+    <!-- Remove selection -->
+    <i class="fa fa-close" onclick="wapp.hidePage(); wapp.select.getFeatures().clear(); wapp.onSelect();"></i>
+    <!-- Close from Ripart -->
     <i class="fa fa-close fromRipart" style="font-size:1.5em; padding:0.75em 0.5em; float:right; cursor:pointer" onclick="wapp.showPage('signalements')"></i>
     <div data-role="action-bt">
       <i class="fa fa-check" style="color: #090"></i>

@@ -67,6 +67,7 @@ export default function(wapp) {
   };
   // If croquis, select feature
   wapp.select.on('select', (e) => {
+    // console.log('SELECT',e)
     e.selected.forEach((f) => {
       if (f.layer === wapp.ripart.croquis 
         && wapp.select.getFeatures().getArray().indexOf(f.get('georem')) < 0) {

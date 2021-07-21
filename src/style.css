@@ -406,7 +406,7 @@ div.debug,
 }
 
 [data-role="dialog"].connect .buttons > input:nth-child(2) {
-  display: none;
+  display: inline-block;
 }
 
 /** Profil */
