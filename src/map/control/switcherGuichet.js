@@ -196,7 +196,7 @@ export default function(wapp) {
 
     if (featureType.styles && featureType.styles.length > 1) {
       ol_ext_element.create('I', {
-        className: 'fa tools-color',
+        className: 'fa tools-color confirme',
         click: () => {
           const sel = {}, st = {};
           featureType.styles.forEach((s) => {

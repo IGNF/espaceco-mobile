@@ -213,6 +213,7 @@ export default function(wapp) {
 
   // Bar de geolocalisation
   var geolocBar = new ol_control_GeolocationBar({
+    className: 'ol-geobar confirme',
     centerLabel: 'recentrer',
     source: geodrawlayer.getSource(),
     type: 'LineString',

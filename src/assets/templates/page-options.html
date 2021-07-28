@@ -1,18 +1,18 @@
 ﻿<div data-role="header" data-back-button="true">Paramètres</div>
 <div data-role="content">
   <ul>
-    <li class="title">
+    <li class="title confirme">
       Affichage
     </li>
-    <li data-input="check" data-param="rotmap">
+    <li class="confirme" data-input="check" data-param="rotmap">
       <label>Rotation de la carte </label>
       <div data-input-role="info">Autoriser la rotation de la carte.</div>
     </li>
-    <li data-input="check" data-param="zoombt" data-default=false>
+    <li class="confirme" data-input="check" data-param="zoombt" data-default=false>
       <label>Boutons de zoom </label>
       <div data-input-role="info">Afficher les boutons de zoom sur la carte.</div>
     </li>
-    <li data-input="check" data-param="searchbt" data-default=true>
+    <li class="confirme" data-input="check" data-param="searchbt" data-default=true>
       <label>Boutons de recherche</label>
       <div data-input-role="info">Afficher un bouton pour rechercher une adresse sur la carte.</div>
     </li>
@@ -49,7 +49,7 @@
       Paramètres avancés
     </li>
 
-    <li data-input="button" onclick="wapp.showPage('maintenance')">
+    <li class="confirme" data-input="button" onclick="wapp.showPage('maintenance')">
       <label>Maintenance</label>
       <div data-input-role="info">Afficher le status de l'application et le contenu téléchargé.</div>
     </li>
@@ -73,15 +73,15 @@
       <div data-input-role="info">Ne pas gérer de cache vecteur (au prochain redémarrage).</div>
     </li>
 
-    <li class="title">
+    <li class="title confirme">
       GPS
     </li>
 
-    <li class="sourcegps ios android" data-input="custom" onclick="wapp.selectGPS()">
+    <li class="sourcegps www android expert" data-input="custom" onclick="wapp.selectGPS()">
       <label>Choisir la source GPS</label>
       <div data-input-role="info">GPS interne</div>
     </li>
-    <li data-input="text" data-param="minGPSAccuracy" data-default=100>
+    <li class="confirme" data-input="text" data-param="minGPSAccuracy" data-default=100>
       <label style="display: block; width: Calc(100% + 1em);">
         Précison GPS (m)&nbsp;: 
         <input type="number" min="0" style="width:4em; padding-left:0.5em;"/>
@@ -92,7 +92,7 @@
         pas enregistrés dans la trace (en&nbsp;m).
       </div>
     </li>
-    <li data-input="text" data-param="toleranceGPS" data-default=5>
+    <li class="confirme" data-input="text" data-param="toleranceGPS" data-default=5>
       <label style="display: block; width: Calc(100% + 1em);">
         Distance GPS (m)&nbsp;: 
         <input type="number" min="0" style="width:4em; padding-left:0.5em;"/>

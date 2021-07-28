@@ -187,6 +187,7 @@ export default function(wapp) {
     // Gestion du cache geoportail
     if (e.layer.get('name') === 'cache') {
       setActionCache(wapp, e.layer, div);
+      e.li.classList.add('confirme');
     } else if (e.layer.get('cacheMap')) {
       setActionCacheMap(wapp, e.layer, div);
       e.layer.on('change', () => geoportailSwitcher.drawPanel());
