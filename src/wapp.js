@@ -167,6 +167,7 @@ import { wappStorage } from 'cordovapp/cordovapp/CordovApp'
       }, 500);
     }
 
+    if (wapp.param.gpsSource === 'external') wapp.selectGPS();
     // Fin
 //		wapp.wait(false);
   },

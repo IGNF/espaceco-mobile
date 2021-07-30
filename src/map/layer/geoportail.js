@@ -113,7 +113,6 @@ export { geoportailOverlay }
 
 // Ajout des layers dans l'ordre
 function addLayers (layers) {
-  console.log(layers)
   const keys = Object.keys(wapp.param.visibleLayers);
   layers.sort((a,b) => keys.indexOf(a) - keys.indexOf(b));
   const caps = window.geoportailConfig.capabilities['default'];

@@ -48,7 +48,7 @@ function _addLine(th, ul, title, val, options) {
       .click(function(){
         $('div', th).removeClass('selected');
         $('.'+className, th).addClass('selected');
-        $('li', ul).hide();
+        $('li.edition', ul).hide();
         $('.'+className, ul).show();
       })
       .appendTo(th);

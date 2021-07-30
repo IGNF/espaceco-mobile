@@ -14,17 +14,19 @@ wapp.selectGPS = function() {
     },
     null,
     (source) => {
+      wapp.param.gpsSource = 'internal';
       navigator.geolocation.setSource(source,
         (e) => {
           if (e.type === 'external') {
             $('#options .sourcegps div').html('GPS externe ('+e.name+')');
           }
+          wapp.param.gpsSource = e.type;
         }, 
         () => {
           wapp.alert('Impossible de se connecter au GPS externe.<br/>Vérifiez que le bluetooth est bien activé et le GPS allumé...');
         });
     },{
-      title: 'Sélectionner la source'
+      title: 'Sélectionner la source GPS'
     }
   );
   if (window.bluetoothSerial && !bluetoothSerial.isok) {

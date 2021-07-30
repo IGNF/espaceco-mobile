@@ -10,6 +10,7 @@ import saveGeolocationDraw from '../map/interaction/saveGeolocationDraw';
 
 const bip = new Audio({ source: './sound/bip.mp3' });
 const bip2 = new Audio({ source: './sound/bip2.mp3' });
+let geolocActive = false;
 
 /* GPS  */
 const page = $('#georemGPS');
@@ -203,7 +204,7 @@ let currentRem;
 
 /** Georem GPS */
 RIPart.prototype.georemGPS = function (georem) {
-  console.log(georem)
+//  console.log(georem)
   currentRem = georem;
   wapp.showPage('georemGPS');
   $('#georemGPS p.theme').text(georem.theme);
@@ -216,6 +217,7 @@ RIPart.prototype.georemGPS = function (georem) {
     page.removeClass('car');
   }
   // start
+  geolocActive = wapp.interactions.geolocation.getActive();
   wapp.interactions.geolocation.setActive(false);
   wapp.select.setActive(false);
   geolocation.set('minAccuracy', wapp.param.options.minGPSAccuracy);
@@ -324,6 +326,7 @@ function stopTracking(force, again) {
   if (!again) {
     page.removeClass('track');
     wapp.hidePage();
+    if (geolocActive) wapp.interactions.geolocation.setActive(true);
   } else if (again==='choice') {
     wapp.directGPS();
   }
