@@ -11,9 +11,9 @@ function saveGeolocationDraw(geoloc, cbak) {
   geoloc.on('drawstart', () => {
     // Get existing path in storage
     const path = wappStorage(storageKey);
-    if (path) {
+    if (path && path.length>1) {
       messageDlg(
-        'Une trace a étée interrompue, voulez-vous la continuer ?',
+        'Une trace a étée interrompue, voulez-vous la continuer&nbsp;?',
         'GSP',
         { ok: 'oui', cancel: 'non, merci' },
         (b) => {

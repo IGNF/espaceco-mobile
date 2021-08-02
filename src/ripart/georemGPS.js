@@ -326,7 +326,11 @@ function stopTracking(force, again) {
   if (!again) {
     page.removeClass('track');
     wapp.hidePage();
-    if (geolocActive) wapp.interactions.geolocation.setActive(true);
+    if (geolocActive) {
+      // Restart GPS tracking
+      wapp.interactions.geolocation.setActive(true);
+      wapp.interactions.geolocation.pause(true);
+    }
   } else if (again==='choice') {
     wapp.directGPS();
   }
