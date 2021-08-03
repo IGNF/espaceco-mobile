@@ -276,6 +276,7 @@ wapp.loadLayers = function (groupe) {
 
       // Probleme au chargement
       vector.on("error", function(e){
+        wapp.wait(false);
         if (e.status===401) {
           wapp.message ("Impossible de charger la couche <i>"
               +(this.get('name')||this.get('title'))
