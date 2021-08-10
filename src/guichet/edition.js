@@ -32,6 +32,7 @@ wapp.editFeature = function() {
 
   const editProperties = {};
 
+  // Mode edition
   const div = document.querySelector('#fiche .selection');
   div.classList.remove('multi');
   const ftype = feature.layer.getFeatureType();

@@ -42,13 +42,15 @@ function _addLine(th, ul, title, val, options) {
   if (theme==='symb') return;
   // Add new theme
   var className = theme.replace(/ /g,'_');
+  if (className!=='hidden') className = 'att-'+className;
   if (theme && !$('.'+className, th).length) {
     $('<div>').addClass(className)
       .text(theme)
-      .click(function(){
+      .click(function() {
         $('div', th).removeClass('selected');
         $('.'+className, th).addClass('selected');
-        $('li.edition', ul).hide();
+        $('li', ul).hide();
+        $('.buttons', ul).show();
         $('.'+className, ul).show();
       })
       .appendTo(th);

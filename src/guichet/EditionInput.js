@@ -35,11 +35,12 @@ const EditionInput = function (ftype, value, li, updated) {
   if (index > -1) {
     theme = ftype.title.substring(0, index);
     title = ftype.title.substring(index+1);
+    $(li).addClass('att-'+theme.replace(/ /g,'_'));
   } else {
     theme = "hidden";
     title = ftype.title;
+    $(li).addClass(theme);
   }
-  $(li).addClass(theme);
 
   // Label
   const label = ol_ext_element.create('LABEL', {
