@@ -49,12 +49,14 @@ export default function(wapp) {
     guichetlayerSwitcher.drawPanel();
   });
   // None is visible ?
-  guichetlayerSwitcher.on('layer:visible', () => {
-    let vis = false;
-    layerGuichet.getLayers().forEach((l)=> {
-      vis = vis || l.getVisible();
-    })
-    layerGuichet.setVisible(vis);
+  guichetlayerSwitcher.on('layer:visible', (e) => {
+    if (e.layer.getVisible() !== layerGuichet.getVisible()) {
+      let vis = false;
+      layerGuichet.getLayers().forEach((l)=> {
+        vis = vis || l.getVisible();
+      })
+      layerGuichet.setVisible(vis);
+    }
   })
 
   // Mode edition
