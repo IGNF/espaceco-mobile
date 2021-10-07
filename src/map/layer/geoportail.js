@@ -73,11 +73,6 @@ const defaultLayers = [
   'GEOGRAPHICALGRIDSYSTEMS.MAPS',
   'GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2',
   'ORTHOIMAGERY.ORTHOPHOTOS'
-  /*
-  new ol_layer_Geoportail('GEOGRAPHICALGRIDSYSTEMS.MAPS', { gppKey: config.apiKey, hidpi: false, visible: false }, { gppKey: config.apiKey, authentication: config.auth }),
-  new	ol_layer_Geoportail('GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2', { gppKey: config.apiKey, hidpi: false, visible: true }, { gppKey: config.apiKey, authentication: config.auth }),
-  new	ol_layer_Geoportail('ORTHOIMAGERY.ORTHOPHOTOS', { gppKey: config.apiKey, hidpi: false, visible: false}, { gppKey: config.apiKey, authentication: config.auth }),
-  */
 ];
 
 const defaultOverlays = [

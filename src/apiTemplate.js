@@ -89,6 +89,6 @@ wapp.goto = function() {
   // Get LonLat
   where = transform(where, wapp.map.getView().getProjection(), 'EPSG:4326');
   // Goto
-  if (wapp.getPlatformId()==='ios') cordova.InAppBrowser.open('maps://?q='+where[1]+','+where[0], '_system');
+  if (wapp.getPlatformId()==='ios') window.cordova.InAppBrowser.open('maps://?q='+where[1]+','+where[0], '_system');
   else window.open('geo://0,0?q='+where[1]+','+where[0], '_system');
 }

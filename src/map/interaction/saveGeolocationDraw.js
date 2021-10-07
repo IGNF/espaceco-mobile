@@ -39,6 +39,6 @@ function saveGeolocationDraw(geoloc, cbak) {
   geoloc.on('drawend', () => {
     wappStorage(storageKey, '');
   });
-};
+}
 
 export default saveGeolocationDraw

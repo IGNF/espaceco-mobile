@@ -63,6 +63,7 @@ wapp.ready(() => {
     pos.push (Math.round((loc.getAltitude()||0)*100)/100);
     pos.push (Math.round((new Date()).getTime()/1000));
     if (loc._position.nmea) {
+      // Show icones
       $('.info', page).show();
       pos.push (loc._position.nmea.geoidal);
       //$('.sats', page).html(loc._position.nmea.satsVisible+'/'+loc._position.nmea.satellites);
@@ -71,6 +72,7 @@ wapp.ready(() => {
       $('.speed', page).html(((loc._position.coords.speed*3600/1000)||'-') + ' km/h');
       $('.pdop', page).html(loc._position.nmea.pdop);
     } else {
+      // Hide icones
       $('.info', page).hide();
     }
     return pos;  
@@ -241,6 +243,13 @@ function saveTracking(e) {
       const pt = toLonLat(feature.getGeometry().getFirstCoordinate());
       grem.lon = pt[0];
       grem.lat = pt[1];
+      // Add last point
+      const lastPt = geolocation.geolocation.getPosition();
+      const lastTrackPt = geolocation.path_[geolocation.path_.length-1];
+      if (lastPt[0] !== lastTrackPt[0]  && lastPt[1] !== lastTrackPt[1]) {
+        geolocation.path_.push(lastPt);
+        feature.getGeometry().appendCoordinate(lastPt);
+      }
       // Save GPS track (with nmea info)
       if (geolocation.path_[0] && geolocation.path_[0][4]!==undefined) {
         const nmea = [];

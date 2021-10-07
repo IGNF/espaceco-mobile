@@ -66,7 +66,14 @@ import { wappStorage } from 'cordovapp/cordovapp/CordovApp'
 
     // Gestion des parametres
     wapp.initParams();
-    if (!wapp.param.visibleLayers) wapp.param.visibleLayers = {};
+    if (!wapp.param.visibleLayers) {
+      wapp.param.visibleLayers = {
+        'GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2': true,
+        'Croquis': true,
+        'MesSignalements': true,
+        'Signalements': true
+      };
+    }
     
     // Layers de l'application
     wapp.initMap();
