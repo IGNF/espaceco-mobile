@@ -246,7 +246,16 @@
 .ol-button.centergps.center button {
   background-color: rgba(0,136,60,0.5);
 }
-  
-.ol-bar.ol-geobar.centerTrack .ol-bar {
+
+.ol-bar.ol-geobar.centerTrack .centerBt {
+  display: none
+}
+
+.ol-bar.ol-geobar.centerTrack .startBt,
+.ol-bar.ol-geobar.centerTrack.pauseTrack .pauseBt {
+  display: inline-block;
+}
+
+.ol-bar.ol-geobar.centerTrack.pauseTrack .startBt {
   display: none;
 }
