@@ -141,3 +141,9 @@
   right: 1em;
   max-width: 100%;
 }
+
+@media screen and (min-width: 1024px) and (orientation: landscape) {
+  #help .guichet-edition {
+    right: 50%;
+  }
+}
