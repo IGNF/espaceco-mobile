@@ -24,6 +24,7 @@ import CacheVector from 'cordovapp/ol/cache/CacheVector'
 
 import config from './config';
 import { wappStorage } from 'cordovapp/cordovapp/CordovApp'
+import {unByKey} from 'ol/Observable'
 
 /** Web application pour l'acces a l'espace collaboratif depuis un mobile.
  * 
@@ -102,7 +103,22 @@ import { wappStorage } from 'cordovapp/cordovapp/CordovApp'
     // Gestion du cache vecteur
     this.vectorCache = new CacheVector(wapp, {
       page: '#guichet',
-      loadPage: '#loadGuichet' 
+      loadPage: '#loadGuichet'
+    });
+
+    //gestion apparence des boutons de Chargement/fermeture
+    let mapMoveListener;
+    let reinitloadGuichetBtn = () => {
+      $('.cancel', '#loadGuichet').html('<i class="fa fa-close"></i>');
+      $('.ok', '#loadGuichet').prop("disabled", false);
+    }
+    $('.cancel', '#loadGuichet').click(() => {
+      reinitloadGuichetBtn();
+    });
+
+    $('.ok', '#loadGuichet').click(() => {
+      $('.cancel', '#loadGuichet').html('Valider');
+      $('.ok', '#loadGuichet').prop("disabled", true);
     });
 
     // Masquer les guichets lors du chargement du cache
@@ -112,12 +128,14 @@ import { wappStorage } from 'cordovapp/cordovapp/CordovApp'
         visibleGuichet = wapp.getLayerGuichet().getVisible();
         wapp.getLayerGuichet().setVisible(false);
         wapp.saveContext();
+        mapMoveListener = map.on('moveend', reinitloadGuichetBtn);
       })
       .on('hidepage', () => {
         wapp.getLayerGuichet().setVisible(visibleGuichet);
         wapp.saveContext();
         // Retour sur la page des guichets
-        setTimeout(() => wapp.showPage('layer-guichet'))
+        setTimeout(() => wapp.showPage('layer-guichet'));
+        unByKey(mapMoveListener);
       });
     $('#loadMap')
       .on('showpage', function(){

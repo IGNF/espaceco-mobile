@@ -301,6 +301,10 @@ div.debug,
   margin-top: -0.2em;
 }
 
+#loadGuichet .button:disabled {
+  opacity: 0.5;
+}
+
 [data-page="loadGuichet"] #map:after,
 [data-page="loadMap"] #map:after {
   border: 20px solid rgba(0, 0, 0, 0.5);
