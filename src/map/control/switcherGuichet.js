@@ -1,4 +1,5 @@
 import CordovApp from 'cordovapp/CordovApp'
+import ol_style_Webpart from 'cordovapp/ol/style/Webpart'
 import ol_control_LayerSwitcher from 'ol-ext/control/LayerSwitcher'
 import ol_ext_element from 'ol-ext/util/element'
 
@@ -196,16 +197,29 @@ export default function(wapp) {
       }
     }
 
-    if (featureType.styles && featureType.styles.length > 1) {
+    //pour certains objets comme les troncons de route le style est defini en dur
+    //prise en compte d'un possible style alternatif defini sur le site
+    if (featureType.style && featureType.styles.length == 0){
+      featureType.styles.push(featureType.style);
+    }
+
+    if (featureType.styles && (featureType.styles.length > 1 || ol_style_Webpart[featureType.name])) {
       ol_ext_element.create('I', {
         className: 'fa tools-color confirme',
         click: () => {
           const sel = {}, st = {};
+          var selected = featureType.style ? featureType.style.id : "default";
+          if (ol_style_Webpart[featureType.name]) {
+            sel["default"] = "Style par défaut";
+            st["default"] = null;
+          }
+
           featureType.styles.forEach((s) => {
             sel[s.id] = s.name;
             st[s.id] = s;
           });
-          wapp.selectDialog(sel, featureType.style.id, (s) => {
+          
+          wapp.selectDialog(sel, selected, (s) => {
             featureType.style = st[s];
             layer.changed();
           });
