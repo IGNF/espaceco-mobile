@@ -173,11 +173,16 @@ Ajouter les permissions au fichier `plugin.xml` du plugin bluetooth-serial ???
 
 Compiler l'APK en mode release en utilisant le keystore disponible avec le projet :
 ````
-cordova build android --buildConfig=build.json --release
+npx cordova build android --buildConfig=build.json --apk
 ````
-Le fichier `build.json` demande un mot de passe disponible dans le projet [android-keystore](http://gitlab.dockerforge.ign.fr/jmviglino/android-keystore).    
+Le fichier `build.json` demande un mot de passe. Vous trouverez celui-ci dans le projet [android-keystore](http://gitlab.dockerforge.ign.fr/jmviglino/android-keystore).    
 L'apk résultante est disponible dans le répertoire `./platforms/android/app/build/outputs/apk/release/` de l'application.
+Vous pouvez transmettre l'APK pour installation sur vos machines.
 
+Pour créer un fichier .aab pour diffusion sur les store, la commande est :
+```javascript
+npx cordova build android --buildConfig=build.json --release
+```
 La publication se fait sur la [console du playstore](https://play.google.com/apps/publish)
 
 ### App Store

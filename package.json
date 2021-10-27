@@ -21,15 +21,10 @@
   "homepage": "http://gitlab.dockerforge.ign.fr/express/guichet-mobile",
   "dependencies": {
     "cordova": "^10.0.0",
-    "cordova-plugin-bluetooth-geolocation": "git+https://github.com/viglino/cordova-plugin-bluetooth-geolocation.git",
     "cordova-plugin-bluetooth-serial": "^0.4.7",
-    "cordova-plugin-camera": "^4.1.0",
     "cordova-plugin-dialogs": "^2.0.2",
     "cordova-plugin-file": "^6.0.1",
-    "cordova-plugin-file-transfer": "^1.7.1",
     "cordova-plugin-geolocation": "^4.0.2",
-    "cordova-plugin-inappbrowser": "^3.2.0",
-    "cordova-plugin-insomnia": "git+https://github.com/EddyVerbruggen/Insomnia-PhoneGap-Plugin.git",
     "cordova-plugin-listpicker": "^2.2.2",
     "cordova-plugin-network-information": "^2.0.2",
     "cordovapp": "git+http://gitlab.dockerforge.ign.fr/express/cordovapp.git",
@@ -37,7 +32,7 @@
     "jquery": "^3.4.1",
     "mongo-parse": "^2.1.0",
     "ol": "^5.3.3",
-    "ol-ext": "^3.1.18",
+    "ol-ext": "^3.2.13",
     "papaparse": "^5.3.0",
     "proj4": "^2.5.0",
     "webfontloader": "^1.6.28"
@@ -45,10 +40,15 @@
   "devDependencies": {
     "clean-css": "^3.4.19",
     "cordova-android": "^10.1.1",
+    "cordova-plugin-bluetooth-geolocation": "git+https://github.com/viglino/cordova-plugin-bluetooth-geolocation.git",
+    "cordova-plugin-camera": "^6.0.0",
+    "cordova-plugin-file-transfer": "git+https://github.com/apache/cordova-plugin-file-transfer.git#5c29f9a0",
+    "cordova-plugin-inappbrowser": "^5.0.0",
+    "cordova-plugin-insomnia": "git+https://github.com/EddyVerbruggen/Insomnia-PhoneGap-Plugin.git",
     "eslint": "^6.5.1",
     "gulp": "^3.9.1",
     "gulp-jsdoc3": "^1.0.1",
-    "parcel": "^1.12.3",
+    "parcel-bundler": "^1.12.5",
     "parcel-plugin-clean-dist": "0.0.6",
     "parcel-plugin-static-files-copy": "^2.2.0",
     "uglify-js": "^2.6.4"
@@ -60,27 +60,22 @@
     "watcherGlob": "**"
   },
   "cordova": {
-    "platforms": [
-      "android"
-    ],
+    "platforms": [],
     "plugins": {
       "cordova-plugin-file": {},
       "cordova-plugin-dialogs": {},
       "cordova-plugin-geolocation": {
-        "GEOLOCATION_USAGE_DESCRIPTION": "pour localiser vos signalements"
+        "GEOLOCATION_USAGE_DESCRIPTION": "pour localiser vos signalements",
+        "GPS_REQUIRED": "true"
       },
-      "cordova-plugin-inappbrowser": {},
-      "cordova-plugin-camera": {
-        "CAMERA_USAGE_DESCRIPTION": "pour illustrer vos contributions",
-        "PHOTOLIBRARY_USAGE_DESCRIPTION": "pour illustrer vos contributions",
-        "ANDROID_SUPPORT_V4_VERSION": "27.+"
-      },
-      "cordova-plugin-androidx-adapter": {},
       "cordova-plugin-network-information": {},
       "cordova-plugin-bluetooth-geolocation": {},
-      "cordova-plugin-whitelist": {},
       "cordova-plugin-insomnia": {},
-      "cordova-plugin-file-transfer": {}
+      "cordova-plugin-file-transfer": {},
+      "cordova-plugin-camera": {
+        "ANDROIDX_CORE_VERSION": "1.6.+"
+      },
+      "cordova-plugin-inappbrowser": {}
     }
   }
 }

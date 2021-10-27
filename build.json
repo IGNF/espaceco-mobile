@@ -3,7 +3,8 @@
         "release": {
             "keystore": "android-keystore.jks",
             "alias": "guichet",
-            "keystoreType": ""
+            "keystoreType": "",
+            "packageType": "apk"
         }
     }
 }

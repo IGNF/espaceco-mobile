@@ -62,6 +62,7 @@
 }
 #guichets ul li p.layers {
   color: #369;
+  overflow: hidden;
 }
 
 #guichets ul li .icn-bar > i.fa-pencil,
