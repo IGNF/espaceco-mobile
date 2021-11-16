@@ -44,6 +44,7 @@ var map = new ol_Map({
     zoom: 5,
     center: [166326, 5992663]
   }),
+  moveTolerance: 10,
   controls: ol_control_defaults({ attribution:false }),
   //interactions: ol_interaction_defaults(),
   layers: layers
