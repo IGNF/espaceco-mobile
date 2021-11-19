@@ -205,7 +205,7 @@ export default function(wapp) {
 
     if (featureType.styles && (featureType.styles.length > 1 || ol_style_Webpart[featureType.name])) {
       ol_ext_element.create('I', {
-        className: 'fa tools-color confirme',
+        className: 'fa tools-color expert',
         click: () => {
           const sel = {}, st = {};
           var selected = featureType.style ? featureType.style.id : "default";
