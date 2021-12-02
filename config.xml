@@ -49,6 +49,8 @@
         <config-file parent="UIFileSharingEnabled" target="*-Info.plist">
             <true />
         </config-file>
+        <preference name="scheme" value="app" />
+        <preference name="hostname" value="localhost" />
     </platform>
     <platform name="windows">
         <preference name="windows-target-version" value="10.0" />
