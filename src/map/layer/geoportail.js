@@ -113,7 +113,13 @@ function addLayers (layers) {
   const caps = window.geoportailConfig.capabilities['default'];
   layers.forEach((l) => {
     if (caps[l]) {
-      const gpl = new ol_layer_Geoportail(l, { gppKey: config.apiKey, hidpi: false, visible: wapp.param.visibleLayers[l] || false }, { gppKey: config.apiKey, authentication: config.auth });
+      let options = { hidpi: false, visible: wapp.param.visibleLayers[l] || false };
+      let tileOptions = { authentication: config.auth };
+      if (!caps[l]['key']) {
+        options['gppKey'] = config.apiKey;
+        tileOptions['gppKey'] = config.apiKey;
+      }
+      const gpl = new ol_layer_Geoportail(l, options, tileOptions);
       if (geoportailOverlays[l]) {
         geoportailOverlay.getLayers().push(gpl);
       } else {
