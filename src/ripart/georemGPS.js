@@ -6,7 +6,7 @@ import map from '../map/map'
 import GeolocationDraw from 'ol-ext/interaction/GeolocationDraw'
 import { toLonLat } from 'ol/proj';
 import Audio from 'cordovapp/media/Audio'
-import saveGeolocationDraw from '../map/interaction/saveGeolocationDraw';
+import GeolocationCacheRecorder from '../map/interaction/GeolocationCacheRecorder'
 
 const bip = new Audio({ source: './sound/bip.mp3' });
 const bip2 = new Audio({ source: './sound/bip2.mp3' });
@@ -56,7 +56,7 @@ wapp.ready(() => {
     tolerance: (wapp.param.options ? wapp.param.options.toleranceGPS || 0 : 5),
     minAccuracy: (wapp.param.options ? wapp.param.options.minGPSAccuracy || 20 : 20)
   });
-  saveGeolocationDraw(geolocation, startTracking);
+  GeolocationCacheRecorder.saveDraw(geolocation, startTracking);
   // Add nmea informations
   geolocation.getPosition = function(loc) {
     var pos = loc.getPosition();

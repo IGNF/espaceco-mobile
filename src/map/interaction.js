@@ -17,7 +17,8 @@ import ol_geom_Point from 'ol/geom/Point'
 import ol_geom_Polygon from 'ol/geom/Polygon'
 import ol_control_GeolocationBar from 'ol-ext/control/GeolocationBar'
 import ol_Geolocation from 'ol/Geolocation'
-import saveGeolocationDraw from './interaction/saveGeolocationDraw'
+import GeolocationCacheRecorder from './interaction/GeolocationCacheRecorder'
+
 
 import {click as ol_events_condition_click} from 'ol/events/condition'
 import {get as ol_proj_get} from 'ol/proj'
@@ -230,7 +231,7 @@ export default function(wapp) {
   }
   map.addControl(geolocBar);
   const geolocation = wapp.interactions.geolocation = geolocBar.getInteraction();
-  saveGeolocationDraw(geolocation);
+  GeolocationCacheRecorder.saveDraw(geolocation);
   // Prevent from falling asleep when geolocating
   if (window.plugins && window.plugins.insomnia) {
     wapp.interactions.geolocation.on('change:active', (e) => {
@@ -254,4 +255,5 @@ export default function(wapp) {
       e.feature.set('nmea', nmea);
     }
   });
+  GeolocationCacheRecorder.saveActiveState(geolocation);
 }
