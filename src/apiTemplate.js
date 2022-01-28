@@ -50,6 +50,79 @@ wapp.selectGPS = function() {
   }
 };
 
+/** Cloner le signalement 
+ */
+wapp.cloneGeorem = function() {
+  if (wapp.select.getFeatures().array_.length != 1) {
+    wapp.alert("Sélectionner une seule alerte");
+    return;
+  }
+  let featureGeorem = wapp.select.getFeatures().array_[0];
+
+  let georem = null;
+  let attributes = "";
+  let themes = "";
+  let theme = "";
+
+  if (undefined != featureGeorem.values_.ripart) {
+    //on formate les donnees pour une alerte chargee depuis l api
+    georem = featureGeorem.values_.ripart;
+
+    if (georem.themes.length > 1) {
+      wapp.alert("Impossible de cloner une alerte comportant plusieurs thèmes.");
+      return;
+    }
+
+    let idGroup = georem.themes[0].id_groupe
+    theme = georem.themes[0].nom;
+    themes = `${idGroup}::${theme}=>"1"`;
+    let originalAttributes = georem.themes[0].attribut;
+    for (var key in originalAttributes) {
+      attributes += `,"${idGroup}::${theme}::${key}"=>"${originalAttributes[key]}"`;
+    }
+  } else if (undefined != featureGeorem.values_.georem) {
+    //on formate les donnees pour une alerte cree depuis l appli
+    georem = featureGeorem.values_.georem;
+
+    theme = georem.theme;
+    themes = georem.themes;
+    attributes = georem.attributes;
+  } else {
+    wapp.alert("Sélectionner une alerte");
+    return;
+  }
+  
+  let coord = wapp.map.getView().getCenter();
+  let lonlat = transform(coord, wapp.map.getView().getProjection(), 'EPSG:4326');
+
+  let clone =  {
+    lon: lonlat[0], 
+    lat: lonlat[1], 
+    sketch: undefined,
+    comment: georem.comment ? georem.comment : "",
+    photo: false,
+    id_groupe: georem.id_groupe,
+    themes: themes,
+    theme: theme,
+    attributes: attributes,
+    attText : georem.attText
+  };
+
+  wapp.ripart.saveLocalRem(clone, null, (e) => {
+    if (e.error) {
+      wapp.notification(e.info);
+      return;
+    }
+    wapp.notification("Le signalement a bien été cloné");
+    wapp.ripart.dispatchEvent({
+      type: 'select',
+      georem: clone,
+      add: true
+    });
+    wapp.modifyGeorem();
+  });
+}
+
 /** Afficher la legende
  */
 wapp.showLegend = function() {

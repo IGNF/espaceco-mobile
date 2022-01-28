@@ -141,6 +141,11 @@
   float:right; 
   cursor:pointer
 }
+#fiche .georem-clone {
+  padding: 0.4em 1em 0.2em;
+  float:right;
+  font-size:0.8em;
+}
 #fiche [data-role="onglet-bt"] > .fa-check {
   color: #090;
 }
