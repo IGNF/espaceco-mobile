@@ -15,59 +15,6 @@ import '../capabilities'
 import config from '../../config'
 import wapp from '../../wapp'
 
-// Couche INSPIRE adresse
-const inspireAdress = new ol_layer_Tile ({
-  title: 'Adresses',
-  name: 'ADRESSES',
-  desc: 'Localisation des propriétés fondée sur les identifiants des adresses, habituellement le nom de la rue, le numéro de la maison et le code postal.',
-  extent: [ -7030196.346030043, -2438399.008686918, 6215711.586687296, 6645292.597727471 ],
-  minResolution: 0,
-  maxResolution: 4,
-  visible: false,
-  source: new ol_source_TileWMS({
-    url: 'http://wxs.ign.fr/'+config.apiKey+'/inspire/v/wms',
-    projection: 'EPSG:3857',
-    crossOrigin: 'anonymous',
-    tileLoadFunction: ol_source_Geoportail.tileLoadFunctionWithAuthentication(config.auth, 'image/png'),
-    params: {
-      LAYERS: 'AD.Address',
-      FORMAT: 'image/png',
-      VERSION: '1.3.0'
-    }
-  })
-});
-
-// Carroyage DFCI
-const dfci = new ol_layer_Vector({
-  title: 'Carroyage DFCI',
-  name: 'DFCI',
-  desc: 'Le « carroyage DFCI » est un système de maillage géographique utilisé en France par les acteurs de la Défense des Forêts Contre les Incendies (DFCI).',
-  source: new ol_source_DFCI(),
-  renderMode:'image',
-  visible: false,
-  style: function(f) {
-    return [ 
-    new ol_style_Style({
-      text: new ol_style_Text({
-      text: f.get('id'),
-      font: 'bold 9px sans-serif',
-      backgroundFill: new ol_style_Fill ({ color: "rgba(255,255,255,.6)"}),
-      fill: new ol_style_Fill({ color: '#f00'}),
-      overflow: true,
-      placement: 'point'
-      }),
-      fill: new ol_style_Fill({
-      color: [0,0,0,0]
-      }),
-      stroke: new ol_style_Stroke({
-      width: .75,
-      color: '#000'
-      })
-    })
-    ]
-  }
-});
-
 // Layers geoportail
 const defaultLayers = [
   'GEOGRAPHICALGRIDSYSTEMS.MAPS',
@@ -77,8 +24,7 @@ const defaultLayers = [
 
 const defaultOverlays = [
   new ol_layer_Geoportail('ELEVATION.ELEVATIONGRIDCOVERAGE.SHADOW', { gppKey: config.apiKey, hidpi: false, visible: false, displayInLayerSwitcher: true }, { gppKey: config.apiKey, authentication: config.auth }),
-  new ol_layer_Geoportail('CADASTRALPARCELS.PARCELS', { gppKey: config.apiKey, hidpi: false, visible: false, displayInLayerSwitcher: true }, { gppKey: config.apiKey, authentication: config.auth }),
-  dfci
+  new ol_layer_Geoportail('CADASTRALPARCELS.PARCELS', { gppKey: config.apiKey, hidpi: false, visible: false, displayInLayerSwitcher: true }, { gppKey: config.apiKey, authentication: config.auth })
 ];
 
 const geoportailOverlays = {
@@ -148,8 +94,6 @@ function setGeoportailLayers(layers) {
   layers = Object.keys(layers);
   addLayers(layers);
 
-  geoportailOverlay.getLayers().push(inspireAdress);
-  geoportailOverlay.getLayers().push(dfci);
   wapp.layerReady = true;
 }
 
