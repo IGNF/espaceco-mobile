@@ -172,14 +172,20 @@ wapp.initGuichets = function() {
     if (this.ripart.param.guichet == g.id_groupe) current = g;
     // Affichage si WFS
     var couches = "";
+    
     g.layers.forEach((layer) => {
-      switch (layer.type) {
+      let type = layer.type;
+      if (type != 'WFS' && layer.url && layer.layer && layer.url.indexOf("geoportail") != -1) {
+        type = 'GeoPortail';
+      }
+
+      switch (type) {
         case 'WFS': {
           couches += (couches?", ":"")+layer.nom;
           break;
         }
         case 'GeoPortail': {
-          geoportailLayers[layer.nom] = layer;
+          geoportailLayers[layer.layer] = layer;
           break;
         }
         default: break;
