@@ -11,6 +11,7 @@ import searchControl from './control/searchControl'
 import switcherGuichet from "./control/switcherGuichet"
 import switcherUserLayer from "./control/switcherUserLayer"
 import switcherGeoportail from './control/switcherGeoportail'
+import switcherCache from './control/switcherCache'
 import ol_control_Button from 'ol-ext/control/Button'
 
 /** Initialize map controls
@@ -47,6 +48,9 @@ export default function(wapp) {
 
   // Selecteur fond geoportail
   map.addControl (switcherGeoportail(wapp));
+
+  // Selecteur fonds en cache
+  map.addControl (switcherCache(wapp));
 
   // Acces aux couches
   map.addControl (new ol_control_Toggle({

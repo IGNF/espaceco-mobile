@@ -1,7 +1,10 @@
 import CordovApp from 'cordovapp/CordovApp'
+import { messageDlg } from 'cordovapp/cordovapp/dialog'
 import ol_style_Webpart from 'cordovapp/ol/style/Webpart'
 import ol_control_LayerSwitcher from 'ol-ext/control/LayerSwitcher'
 import ol_ext_element from 'ol-ext/util/element'
+
+let cacheSwitcher;
 
 /** Layer switcher for Guichets
  * @param {CordovApp} wapp
@@ -60,39 +63,11 @@ export default function(wapp) {
     }
   })
 
-  // Mode edition
-  const edit = oldiv.get(0).querySelector('.edition');
-  edit.addEventListener('click', (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    wapp.saveContext();
-    if (!wapp.getCache(wapp.guichet).cache) {
-      wapp.vectorCache.addDialog(() => {
-        //wapp.vectorCache.loadCache(wapp.getCache(wapp.guichet).cache);
-        wapp.loadCache(true);
-      });
-    } else {
-      wapp.message(
-        'Voulez-vous supprimer les données en cache ?<br/><i>Les saisies en cours seront perdues...</i>',
-        'Supprimer',
-        { ok: 'ok', cancel: 'Annuler' },
-        (button) => {
-          if (button==='ok') wapp.vectorCache.removeCache(wapp.getCache(wapp.guichet).cache);
-        }
-      );
-    }
-  });
-
-  // Editions en cours
-  let nbEdit = 0;
   // Affichage des layers et boutons
   guichetlayerSwitcher.on('drawlist', (e) => {
     // Reset if first one
     if (!e.li.previousSibling.previousSibling) {
       oldiv.removeClass('offline');
-      $('input', edit).prop('checked', (wapp.getCache(wapp.guichet).cache));
-      // Edition en cours
-      nbEdit = 0;
     }
 
     // Current layer
@@ -104,6 +79,72 @@ export default function(wapp) {
       className: 'icn-bar',
       parent: e.li
     });
+
+    //sauvegarde
+    if (featureType && !featureType.readOnly && featureType.tileZoomLevel && layer.get('edit') !== false) {
+      const saveBtn = ol_ext_element.create('I', {
+        className: 'fa fa-send fa-disable ',
+        click: () => {
+          if (saveBtn.classList.contains("fa-disable")) return;
+          if (layer.get('cache')) {
+            //on sauvegarde et on recharge les donnees en cache
+            let cache = wapp.getCache(wapp.guichet).cache;
+            wapp.vectorCache.saveLayer([layer], cache);
+          } else {
+            layer.getSource().save(()=>{
+              wapp.notification(layer.get('title')+' sauvegardé...');
+            }, (error, transaction) => {
+              wapp.wait(false);
+              // Look for transaction
+              console.log('ERROR', error, transaction)
+              if (transaction) {
+                wapp.handleConflict(transaction, layer);
+              } else {
+                wapp.alert('Impossible de sauvegarder '+layer.get('title')+'<br/><i class="error">'+error+'</i>');
+              }
+            });
+          }
+        },
+        parent: div
+      });
+
+      const reset = ol_ext_element.create('I', {
+        className: 'fa fa-undo fa-disable',
+        click: () => {
+          if (reset.classList.contains("fa-disable")) return;
+          messageDlg(
+            "Supprimer toutes les modifications sur la couche?", 
+            " ", 
+            {
+              ok: "supprimer",
+              cancel: "annuler"
+            },
+            function (b) {
+              if (b=="ok") {
+                layer.getSource().reset();
+              }
+            }
+          );
+        },
+        parent: div
+      })
+
+      let nbEdit = layer.getSource().nbModifications();
+      if (nbEdit) {
+        ol_ext_element.create('DIV', {
+          className: 'tag',
+          html: '<span>'+nbEdit+'</span>',
+          parent: saveBtn
+        });
+        $('#couches .fa-send .tag').text(nbEdit);
+        saveBtn.classList.remove("fa-disable");
+        reset.classList.remove("fa-disable");
+      } else {
+        saveBtn.classList.add("fa-disable");
+        reset.classList.add("fa-disable");
+      }
+    }
+
     // VectorCache
     if (layer.get('cache')) {
       oldiv.addClass('offline');
@@ -125,34 +166,20 @@ export default function(wapp) {
       const refresh = ol_ext_element.create('I', {
         className: 'fa fa-refresh',
         click: () => {
-          wapp.updateCache(layer);
+          if (layer.getSource().nbModifications()) {
+            wapp.alert("Impossible de rafraîchir le cache car des modifications sont en cours sur la couche.");
+          } else {
+            wapp.updateCache(layer);
+          }
         },
         parent: div
       });
-      if (!featureType.readOnly) {
-        const nb = layer.getSource().nbModifications();
-        nbEdit += nb;
-        if (nbEdit) $('#couches .fa-refresh .tag').show().text(nbEdit);
-        else $('#couches .fa-refresh .tag').hide();
-        ol_ext_element.create('DIV', {
-          className: 'tag',
-          html: '<span>'+nb+'</span>',
-          parent: refresh
-        });
-      }
 
       ol_ext_element.create('I', {
         className: 'fa fa-cloud-download',
         click: () => {
           //wapp.vectorCache.loadCache(wapp.getCache(wapp.guichet).cache);
           wapp.loadCache();
-        },
-        parent: div
-      });
-      ol_ext_element.create('I', {
-        className: 'fa fa-gear fa-disable',
-        click: () => {
-          console.log(layer)
         },
         parent: div
       });

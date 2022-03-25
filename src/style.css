@@ -286,6 +286,7 @@ div.debug,
 
 /** Load maps page */
 #loadGuichet,
+#cacheExtent,
 #loadMap {	
   top: auto;
   bottom: 0;
@@ -294,6 +295,7 @@ div.debug,
   padding: 0.5em;
 }
 #loadGuichet .button,
+#cacheExtent .button,
 #loadMap .button {
   float: right;
   font-size: 1em;
@@ -301,11 +303,12 @@ div.debug,
   margin-top: -0.2em;
 }
 
-#loadGuichet .button:disabled {
+#loadGuichet .button:disabled, #cacheExtent .button:disabled {
   opacity: 0.5;
 }
 
 [data-page="loadGuichet"] #map:after,
+[data-page="cacheExtent"] #map:after,
 [data-page="loadMap"] #map:after {
   border: 20px solid rgba(0, 0, 0, 0.5);
   border-bottom-width: 80px;
@@ -342,6 +345,9 @@ div.debug,
 [data-page="loadGuichet"] #signaler,
 [data-page="loadGuichet"] #signalerGPS,
 [data-page="loadGuichet"] #map .ol-control,
+[data-page="cacheExtent"] #signaler,
+[data-page="cacheExtent"] #signalerGPS,
+[data-page="cacheExtent"] #map .ol-control,
 [data-page="loadMap"] #signaler,
 [data-page="loadMap"] #signalerGPS,
 [data-page="loadMap"] #map .ol-control {
@@ -349,6 +355,7 @@ div.debug,
 }
 
 [data-page="loadGuichet"] #map .ol-control.centergps,
+[data-page="cacheExtent"] #map .ol-control.centergps,
 [data-page="loadMap"] #map .ol-control.centergps {
   display: block;
   right: 1em;

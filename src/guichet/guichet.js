@@ -473,7 +473,7 @@ wapp.centerCache = function () {
  */
 wapp.updateCache = function(layer) {
   wapp.message(
-    'Mettre à jour les données du guichet.<br/><i>Cette opération peut être longue</i>',
+    'Mettre à jour les données du guichet. Si vous continuez, toutes vos modifications seront envoyées.<br/><i>Cette opération peut être longue</i>',
     'Mise à jour', 
     { ok:'Mettre à jour', cancel:'annuler' },
     (b) => {

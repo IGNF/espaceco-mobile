@@ -1,5 +1,18 @@
-﻿<div data-role="header" data-back-button="true">Fonds IGN</div>
+﻿<div data-role="header" data-back-button="true"> Fonds IGN</div>
 <div data-role="content">
   <h3><i class="fa fa-eye"></i> Fonds IGN</h3>
+  <div class="couches expert">
+    <div class="couche offline">      
+      <h2> <!--show page offline-->
+        <i class="fa fa-eye"></i>
+        <span onclick="wapp.showPage('offline');" class="name"> Cartes Hors Ligne </span>
+      </h2>
+      <div class="icn-bar">      
+        </i><i class="fa fa-info-circle" onclick="wapp.dialog.show(' ', {title: 'Mode hors-ligne', buttons: { ok:'ok' }});">
+        </i>
+      </div>
+    </div>
+  </div>
+
   <div class="layerswitcher"></div>
 </div>

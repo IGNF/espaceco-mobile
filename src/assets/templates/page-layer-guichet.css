@@ -24,13 +24,6 @@
   margin: .5em .3em;
 }
 
-#layer-guichet .guichet .toggle-right {
-  display: none;
-}
-#layer-guichet .guichet.offline .toggle-right {
-  display: inline;
-}
-
 #layer-guichet .layerswitcher .ol-layer-group > .ol-layerswitcher-buttons,
 #layer-guichet .layerswitcher .ol-layer-group {
   display: none;

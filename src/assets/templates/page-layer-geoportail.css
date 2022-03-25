@@ -169,16 +169,6 @@
   padding: 0;
 }
 
-#layer-geoportail .cache li.ol-layer-hidden {
-  opacity: 1;
-}
-#layer-geoportail .cache li.ol-layer-hidden > div {
-  opacity: .5;
-}
-#layer-geoportail .cache li.ol-layer-hidden > div.icn-bar {
-  opacity: 1;
-}
-
 /* Dialog */
 [data-page="layer-geoportail"] [data-role="dialog"] .offline .online {
   display: none;

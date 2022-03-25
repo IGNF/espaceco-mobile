@@ -270,7 +270,7 @@ function showGeorem(div, georem, newOne) {
  */
 function showFeature(ul, f, th) {
   // Objet d'un guichet
-  const isEdit = !wapp.isCordova || (f.layer.get('cache') && !f.layer.getFeatureType().readOnly);
+  const isEdit = !wapp.isCordova || !f.layer.getFeatureType().readOnly;
   if (isEdit) {
     $('.edit', ul.parent()).show();
   }

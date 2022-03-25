@@ -12,7 +12,12 @@ import { geoportailLayer, geoportailOverlay } from './layer/geoportail'
 import {dialog} from 'cordovapp/cordovapp/dialog'
 
 // Layer pour l'affichage du cache
-var layerCache = new ol_layer_Group({ title: 'Cartes hors-ligne', name: 'cache', openInLayerSwitcher: false, displayInLayerSwitcher: true })
+var layerCache = new ol_layer_Group({ 
+  title: 'Cartes hors-ligne', 
+  name: 'cache', 
+  openInLayerSwitcher: false, 
+  displayInLayerSwitcher: true
+})
 layerCache.on('change', function() {
   if (layerCache.getLayers().getLength) layerCache.set('displayInLayerSwitcher', true);
 });
@@ -26,12 +31,11 @@ var layers = [
     layers: [
       // Fonds de plan
       geoportailLayer,
-      // Layer pour l'affichage du cache
-      layerCache,
       // Overlays
       geoportailOverlay
     ]
   }),
+  layerCache,
   // Layer pour l'affichage des couches du groupe
   new ol_layer_Group({ title:'Mes couches', name: 'groupe', displayInLayerSwitcher: false, openInLayerSwitcher: true }),
   // Layer pour l'affichage du guichet

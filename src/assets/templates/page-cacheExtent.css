@@ -1,0 +1,23 @@
+﻿#cacheExtent .info {
+  position: absolute;
+  bottom: 2.7em;
+  font-size: .8em;
+  color: #fff;
+  text-align: center;
+  pointer-events: none;
+  left: 0;
+  padding: 0 .5em;
+  width: 100%;
+}
+
+#cacheExtent .visible-type {
+  display: none;
+}
+
+#cacheExtent[data-type="custom"] .visible-type.custom {
+  display: block;
+}
+
+#cacheExtent[data-type="select-obj"] .visible-type.select-obj {
+  display: block;
+}

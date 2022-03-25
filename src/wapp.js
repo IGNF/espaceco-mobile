@@ -7,6 +7,7 @@ import setInteractions from './map/interaction'
 import initRipart from './ripart/initRipart'
 import layerRipart from './guichet/layerRipart'
 import getUserLayers from './guichet/userLayers'
+import initOffline from './guichet/offline'
 
 import ol_View from 'ol/View'
 
@@ -21,10 +22,13 @@ import ol_format_GPX from 'ol/format/GPX'
 
 import CacheMap from 'cordovapp/ol/cache/CacheMap'
 import CacheVector from 'cordovapp/ol/cache/CacheVector'
+import ol_layer_Webpart from 'cordovapp/ol/layer/Webpart'
 
 import config from './config';
 import { wappStorage } from 'cordovapp/cordovapp/CordovApp'
 import {unByKey} from 'ol/Observable'
+import { Collection } from 'ol'
+import Layer from 'ol/layer/layer'
 
 /** Web application pour l'acces a l'espace collaboratif depuis un mobile.
  * 
@@ -52,9 +56,15 @@ import {unByKey} from 'ol/Observable'
     */
     /* Gestion du mode hors-connexion 
      * Rafraichir la carte quand on recupere la connexion
+     * Pour les layers Webpart switch mode en ligne/hors ligne
      */
     document.addEventListener("online", function(){
       wapp.refreshMap();
+      wapp.switchLayersOnline(true);
+    }, false);
+
+    document.addEventListener("offline", function(){
+      wapp.switchLayersOnline(false);
     }, false);
 
     // Version => cordova-plugin-app-version ???
@@ -192,9 +202,54 @@ import {unByKey} from 'ol/Observable'
       }, 500);
     }
 
+    // Mode hors ligne
+    const onlineSwitcher= $("[data-role='menu'] .offline");
+    onlineSwitcher.on("click", function(){
+      let online = !$(this).prop('checked');
+
+      let message = false;
+      if(online && navigator.connection.type == Connection.NONE) {
+        message = "Aucune connexion active sur l'appareil."
+      } else if(!online && !wapp.getCache(wapp.guichet).cache) {
+        message = "Aucune donnée chargée en cache.";
+      }
+
+      if (message) {
+        wapp.alert(message, 'Erreur', () => {$(this).prop('checked', online);});
+      } else {
+        wapp.switchLayersOnline(online);
+      }
+      wapp.toggleMenu();
+    });
+
+    initOffline(wapp);
+
     if (wapp.param.gpsSource === 'external') wapp.selectGPS();
     // Fin
 //		wapp.wait(false);
+  },
+
+  /**
+   * Switch mode en ligne / hors ligne
+   * sur les couches Webpart
+   * @param {bool} online 
+   * @param {Collection<Layer>} layers
+   * @param {boolean} silent pas d'affichage de la notification
+   * @memberof wapp
+   */
+  switchLayersOnline: function(online, layers, silent = false) {
+    if (!silent) {
+      let onlinestr = online ? "désactivé": "activé";
+      wapp.notification("Mode hors ligne " + onlinestr);
+    }
+    if (!layers) layers = wapp.map.getLayers();
+    layers.forEach((l) => {
+      if (l.getLayers) {
+        wapp.switchLayersOnline(online, l.getLayers(), true);
+      } else if (l instanceof ol_layer_Webpart) {
+        l.online(online);
+      }
+    });        
   },
 
   /** Enable map rotation

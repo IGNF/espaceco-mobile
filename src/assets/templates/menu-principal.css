@@ -86,3 +86,9 @@
 .guichet [data-role='menu'] li.guichet {
   display: block;
 }
+
+[data-role='menu'] .toggle-right {
+  position: absolute;
+  top: 30%;
+  right: -0.8em;
+}

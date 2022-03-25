@@ -151,6 +151,36 @@
   max-width: 100%;
 }
 
+#help .offline {
+  left: 4em;
+  width: 30em;
+  max-width: 100%;
+}
+
+#help .offline .help-arrow {
+  position: absolute;
+}
+
+#help .offline p {
+  margin-left: 7em;
+}
+
+#help .extent-offline {
+  top: 2em;
+}
+
+#help .guichet-offline {
+  top: 8em;
+}
+
+#help .map-offline {
+  top: 20em;
+}
+
+#help .map-offline p{
+  padding-top: 3em;
+}
+
 @media screen and (min-width: 1024px) and (orientation: landscape) {
   #help .guichet-edition {
     right: 50%;

@@ -1,0 +1,24 @@
+#offline .button:disabled {
+    opacity: 0.5;
+}
+
+#offline #cache-extents-list p, 
+#offline .layerlist p {
+    font-size: 1.2em;
+    padding: 5px 15px;
+    margin: 0px;
+}
+
+#offline #cache-extents-list p {
+    display: inline-block;
+}
+
+#cache-layers-fond .ol-layerswitcher li.ol-layer-hidden {
+    opacity: 1;
+}
+#cache-layers-fond .ol-layerswitcher li.ol-layer-hidden > div {
+    opacity: .5;
+}
+#cache-layers-fond .ol-layerswitcher li.ol-layer-hidden > div.icn-bar {
+    opacity: 1;
+}

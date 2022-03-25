@@ -1,0 +1,11 @@
+#dialog-cache-extent ul {
+    list-style: none;
+}
+
+#dialog-cache-extent .layer-input {
+    display: none;
+}
+
+#dialog-cache-extent .layer-input.visible {
+    display: block;
+}

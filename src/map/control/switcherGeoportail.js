@@ -1,117 +1,11 @@
 import CordovApp from 'cordovapp/CordovApp'
 import ol_control_LayerSwitcher from 'ol-ext/control/LayerSwitcher'
 import ol_ext_element from 'ol-ext/util/element'
-import ol_layer_Geoportail from 'ol-ext/layer/Geoportail'
 import 'ol-ext/layer/GetPreview'
 
 
 let geoportailSwitcher;
 
-/**
- * Ajout des actions pour les cartes en cache dans leur barre d'icone
- * @param {CordovApp} wapp 
- * @param {ol.layer} layer 
- * @param {Element} div Barre d'icone (icn-bar) 
- */
-function setActionCacheMap (wapp, layer, div) {
-  // Carte en cache
-  const smap = layer.get('cacheMap');
-  ol_ext_element.create('P', {
-    html: smap.date,
-    parent: div
-  });
-  // Refresh
-  ol_ext_element.create('I', {
-    className: 'fa fa-refresh',
-    click: () => {
-      wapp.cache.refreshCacheMap(smap);
-    },
-    parent: div
-  });
-  // Download
-  ol_ext_element.create('I', {
-    className: 'fa fa-cloud-download',
-    click: () => {
-      wapp.cache.loadCacheMap(smap);
-    },
-    parent: div
-  });
-  // Options (modifier le nom de la carte)
-  ol_ext_element.create('I', {
-    className: 'fa fa-gear',
-    click: () => {
-      wapp.prompt('Nom de la carte', smap.nom, (name) => {
-        if (name) {
-          smap.nom = name;
-          layer.set('title', name);
-          geoportailSwitcher.drawPanel();
-        }
-      });
-    },
-    parent: div
-  });
-  // Supprimer une carte
-  ol_ext_element.create('I', {
-    className: 'fa fa-trash',
-    click: () => {
-      wapp.cache.removeCacheMap(smap);
-    },
-    parent: div
-  });
-  // Info sur la carte
-  ol_ext_element.create('I', {
-    className: 'fa fa-info-circle',
-    click: () => {
-      var content = CordovApp.template('dialog-infomap');
-      var title = new ol_layer_Geoportail(smap.layer).get('title')
-      var att = $.extend({ name: title }, smap);
-      wapp.dataAttributes(content, att);
-      $('.centermap', content).get(0).addEventListener('click', () => {
-        wapp.map.getView().fit(smap.extent, wapp.map.getSize());
-        wapp.hidePage();
-        wapp.dialog.close();
-      });
-      wapp.dialog.show (content, {
-        title: layer.get('title'),
-        buttons: { ok:'ok' }
-      });
-    },
-    parent: div
-  });
-}
-
-/** Ajout des actions pour le Layer contenant les caches dans leur barre d'icone
- * @param {CordovApp} wapp
- * @param {ol.layer.Group} layer 
- * @param {Element} div Barre d'icone (icn-bar) 
- */
-function setActionCache(wapp, layer, div) {
-  div.parentNode.className += ' cache';
-  // Ajouter une carte en cache
-  if (wapp.ripart.param.offline) {
-    ol_ext_element.create('I', {
-      className: 'fa fa-plus-circle',
-      click: () => {
-        wapp.cache.addCacheMap(wapp.param.options.mode === 'expert');
-        layer.set('openInLayerSwitcher', true);
-      },
-      parent: div
-    });
-  }
-  // Info sur la carte
-  ol_ext_element.create('I', {
-    className: 'fa fa-info-circle',
-    click: () => {
-      var content = CordovApp.template('dialog-infocache');
-      content.addClass(wapp.ripart.param.offline ? 'offline' : 'online');
-      wapp.dialog.show (content, {
-        title: 'Mode hors-ligne',
-        buttons: { ok:'ok' }
-      });
-    },
-    parent: div
-  });
-}
 
 /**
  * Layer switcher pour les couches Geoportail
@@ -184,14 +78,7 @@ export default function(wapp) {
       className: 'icn-bar',
       parent: e.li
     });
-    // Gestion du cache geoportail
-    if (e.layer.get('name') === 'cache') {
-      setActionCache(wapp, e.layer, div);
-      e.li.classList.add('confirme');
-    } else if (e.layer.get('cacheMap')) {
-      setActionCacheMap(wapp, e.layer, div);
-      e.layer.on('change', () => geoportailSwitcher.drawPanel());
-    } else if (e.layer.get('desc')) {
+    if (e.layer.get('desc')) {
       // Description
       ol_ext_element.create('I', {
         className: 'fa fa-info-circle',
