@@ -11,6 +11,33 @@ import './conflict'
 import './fiche'
 
 let template = null;
+let saveLayers = function(layers) {
+  const l = layers.pop();
+  if (l) {
+    if (typeof(l.getSource().nbModifications) == 'function' && l.getSource().nbModifications() > 0) {
+      wapp.wait('Sauvegarde des modifications...<br/>'+l.get('title'));
+      l.getSource().save(()=>{
+        wapp.notification(l.get('title')+' sauvegardé...');
+        // Next
+        saveLayers(layers);
+      }, (error, transaction) => {
+        wapp.wait(false);
+        // Look for transaction
+        console.log('ERROR', error, transaction)
+        if (transaction) {
+          wapp.handleConflict(transaction, l);
+        } else {
+          wapp.alert('Impossible de sauvegarder '+l.get('title')+'<br/><i class="error">'+error+'</i>');
+        }
+      });
+    } else {
+      saveLayers(layers);
+    }
+  } else {
+    wapp.wait(false);
+    wapp.hidePage();
+  }
+} 
 
 /** Recherche des layers offline du groupe
  * @param {*} groupe
@@ -291,6 +318,37 @@ console.log('setGuichet', groupe)
   } else {
     gdiv.addClass('online');
   }
+
+  $("#couches").on('showpage', function(){
+    let nbModifs = 0;
+    let layers = wapp.getLayerGuichet().getLayers().getArray();
+    for (let i in layers) {
+      if (typeof layers[i].getSource().nbModifications != 'function') continue;
+      nbModifs = parseInt(nbModifs) + parseInt(layers[i].getSource().nbModifications());
+    }
+    $(".fa-send .tag", gdiv).text(nbModifs);
+  });
+
+  $(".fa-refresh", gdiv).on("click", function(){
+    let layers = wapp.getLayerGuichet().getLayers().getArray();
+    for (let i in layers) {
+      if (typeof layers[i].getSource().nbModifications == 'function' && layers[i].getSource().nbModifications()) {
+        wapp.alert("Impossible de rafraîchir le cache car des modifications sont en cours sur une des couches.");
+        return;
+      }
+    }
+    wapp.updateCache();
+  });
+
+  $(".fa-send", gdiv).on('click', function(){
+    if (parseInt($(".fa-send .tag", gdiv).text()) < 1) {
+      wapp.alert("Toutes les modifications ont déjà été envoyée.");
+      return;
+    }
+    let layers = wapp.getLayerGuichet().getLayers().getArray();
+    let layersToSave = [...layers];
+    saveLayers(layersToSave);
+  });
 
 /*
 console.log('[DEPRECATED] setGuichet');

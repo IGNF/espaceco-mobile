@@ -136,7 +136,7 @@ export default function(wapp) {
           html: '<span>'+nbEdit+'</span>',
           parent: saveBtn
         });
-        $('#couches .fa-send .tag').text(nbEdit);
+        $('.tag', saveBtn).text(nbEdit);
         saveBtn.classList.remove("fa-disable");
         reset.classList.remove("fa-disable");
       } else {
