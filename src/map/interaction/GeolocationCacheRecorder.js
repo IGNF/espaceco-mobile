@@ -48,6 +48,7 @@ class GeolocationCacheRecorder {
     const path = wappStorage(storageKeyActiveState);
     if (path && "true" == path) {
       geoloc.setActive(true);
+      geoloc.pause(true);
     } else {
       geoloc.setActive(false)
     }
