@@ -174,7 +174,8 @@ wapp.layerWebpart = function(l, cacheUrl, cacheExtent) {
     // Tile zoom to calculate tiles
     tileZoom: 13,
     maxFeatures: 5000,
-    maxReload: wapp.param.options.maxReload || 10000
+    maxReload: wapp.param.options.maxReload || 10000,
+    online: (wapp.param.online != undefined) ? wapp.param.online : true
   });
 
   return vector;

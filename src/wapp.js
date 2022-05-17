@@ -249,7 +249,11 @@ import Layer from 'ol/layer/layer'
       } else if (l instanceof ol_layer_Webpart) {
         l.online(online);
       }
-    });        
+    });
+    this.param.online = online;
+    this.saveParam();      
+    const onlineSwitcher= $("[data-role='menu'] .offline");
+    onlineSwitcher.prop("checked", !online);
   },
 
   /** Enable map rotation

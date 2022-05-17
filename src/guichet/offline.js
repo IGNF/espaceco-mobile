@@ -4,14 +4,26 @@ import ol_source_Vector from 'ol/source/Vector';
 import {singleClick as ol_condition_singleClick} from 'ol/events/condition';
 import CacheExtents from 'cordovapp/ol/cache/CacheExtents';
 import { selectDialog } from 'cordovapp/cordovapp/dialog';
+import wapp from '../wapp';
 
 var extentLayer;
 var currentGuichet;
 var cacheExtentPage;
 var offlinePage;
-var cacheExtentSelectInteraction;
 
 var cacheExtents;
+
+var refreshCacheAreas = function(domId, hasCache) {
+    // zones utilisees par le cache guichet
+    $(domId).empty();
+
+    if (hasCache.cache) {
+        for (var i in hasCache.cache.extents) {
+            let $p = $("<span></span>").addClass("area").html(hasCache.cache.extents[i]);
+            $("#vector-cache-area").append($p);
+        }
+    }
+}
 
 var refreshCacheExtentsList = function(domId) {
     // Affichage des zones
@@ -19,6 +31,17 @@ var refreshCacheExtentsList = function(domId) {
     let cacheExtentsList = cacheExtents.get();
     for (var name in cacheExtentsList) {
         let div = getCacheExtentHtml(name);
+        div.appendTo(domId);
+    }
+}
+
+var refreshCacheLayersList = function(domId, cache) {
+    $(domId).empty();
+    if (!cache) return;
+
+    var cacheLayers = cache.layers;
+    for (let i in cacheLayers) {
+        let div = getCacheLayerHtml(cacheLayers[i], cache);
         div.appendTo(domId);
     }
 }
@@ -37,11 +60,65 @@ var getCacheExtentHtml = function(name) {
             wapp.showPage(cacheExtentPage.attr('id'));
         }
     }).appendTo(div);
-    $("<button>", {
+    $("<i>", {
         class: "fa fa-trash",
         click: function() {
+            currentGuichet = wapp.vectorCache.getCurrentGuichet();
+            const hasCache = wapp.getCache(currentGuichet);
+            if (hasCache.cache && hasCache.cache.extents.indexOf(name) != -1) {
+                wapp.alert("Impossible de supprimer une zone utilisée pour le cache");
+                return;
+            }
             cacheExtents.remove(name);
             refreshCacheExtentsList("#cache-extents-list");
+        }
+    }).appendTo(div);
+    return div;
+}
+
+var getCacheLayerHtml = function(layer, cache) {
+    let vectorLayer = null;
+    wapp.getLayerGuichet().getLayersArray().forEach((l, i) => {
+        if (l.get('name') && layer.featureType && l.get("name") == layer.featureType.fullName) vectorLayer = l;
+    });
+    let circleClass="fa fa-circle";
+    if (cache.loaded) circleClass += ' loaded';
+    let div = $("<div>", {
+        class: "cache-layer"
+    });
+    $(`<p><i class="${circleClass}"></i> ${layer.nom}</p>`).appendTo(div);
+
+    if (cache.loaded) {
+        $("<i>", {
+            class: "fa fa-refresh",
+            click: function() {
+                wapp.updateCache(vectorLayer);
+            }
+        }).appendTo(div);
+    }
+
+    $("<i>", {
+        class: "fa fa-trash",
+        click: function() {
+            if (!vectorLayer) { // le cache n est pas encore charge
+                for (let i in cache.layers) {
+                    if (cache.layers[i].nom == layer.nom) {
+                        cache.layers.splice(i, 1);
+                        refreshCacheLayersList(".layerlist", cache);
+                        return;
+                    }
+                }
+                return;
+            }
+
+            let cbk = (success) => {
+                if (!success) {
+                    wapp.alert("Echec de la suppression");
+                } else {
+                    refreshCacheLayersList(".layerlist", cache);
+                }
+            }
+            wapp.vectorCache.removeLayerCache(cache, vectorLayer, cbk);
         }
     }).appendTo(div);
     return div;
@@ -53,13 +130,14 @@ var redrawExtent = function() {
     cacheExtents.center(name);
 }
 
-
-
 function initOffline(wapp) {
     cacheExtents = new CacheExtents(wapp);
     cacheExtentPage = $("#cacheExtent");
     offlinePage = $("#offline");
-    wapp.param.online = true;
+    wapp.param.online = (typeof wapp.param.online != "undefined") ? wapp.param.online : true;
+    wapp.switchLayersOnline(wapp.param.online);
+
+    wapp.saveParam();
 
     // gestion de la page cacheExtent
     cacheExtentPage.on("showpage", function() {
@@ -96,6 +174,10 @@ function initOffline(wapp) {
     $('.close', cacheExtentPage).on("click", () => {
         wapp.select.getFeatures().clear();
         extentLayer.setVisible(false);
+
+        const guichet = wapp.getLayerGuichet();
+        guichet.setVisible(true);
+
         wapp.hidePage();
         wapp.showPage('offline');
     });
@@ -123,23 +205,24 @@ function initOffline(wapp) {
         // gestion activation boutons cache guichet
         currentGuichet = wapp.vectorCache.getCurrentGuichet();
         const hasCache = wapp.getCache(currentGuichet);
-        $('.layerlist', offlinePage).empty();
+        refreshCacheLayersList('.layerlist', hasCache.cache);
+        refreshCacheAreas("#vector-cache-area", hasCache);
 
         if (!currentGuichet) {
             $("#add-cache-layer-btn").prop("disabled", true);
             $("#remove-cache-layer-btn").prop("disabled", true);
+            $(".cache-tools", offlinePage).hide();
         }
         
         if (hasCache.cache) {
-            var cacheLayers = hasCache.cache.layers;
-            for (let i in cacheLayers) {
-                $('.layerlist', offlinePage).append(`<p>${cacheLayers[i].nom}</p>`)
-            }
-            $("#add-cache-layer-btn").prop("disabled", true);
             $("#remove-cache-layer-btn").prop("disabled", false);
+            $("#load-cache-layer-btn").prop("disabled", hasCache.cache.loaded);
+            $("#select-area-btn").prop("disabled", hasCache.cache.loaded);
+            hasCache.cache.loaded ? $(".cache-tools", offlinePage).show() : $(".cache-tools", offlinePage).hide();
         } else {
-            $("#add-cache-layer-btn").prop("disabled", false);
+            $("#select-area-btn").prop("disabled", false);
             $("#remove-cache-layer-btn").prop("disabled", true);
+            $(".cache-tools", offlinePage).hide();
         }
     });
 
@@ -191,9 +274,61 @@ function initOffline(wapp) {
         });
     });
 
+    //selection d une zone pour le cache guichet
+    $("#select-area-btn").on('click', function(){
+        let extentsNames = cacheExtents.getExtentNames();
+        if (Object.keys(extentsNames).length == 0) {
+            cache = wapp.getCache(wapp.guichet).cache;
+            wapp.vectorCache.removeCache(cache);
+            wapp.alert("Vous devez saisir une zone pour le chargement du cache");
+            return;
+        }
+        selectDialog(
+            extentsNames, 
+            extentsNames[0], 
+            function(selected) {
+                let $p = $("<span></span>").addClass("area").html(selected);
+                $('#vector-cache-area').html($p);
+            },
+            {'title': 'Choisir une zone'}
+        );
+    });
+
     //boutons de gestion du cache guichet
-    $(".config-btn", offlinePage).on("click", function(){
-        wapp.showPage('layer-guichet');
+    $(".add-area", offlinePage).on("click", function(){
+        let cache = wapp.getCache(wapp.guichet).cache;
+        wapp.vectorCache.currentCache = cache;
+
+        let extentsNames = cacheExtents.getExtentNames();
+        let extentsNamesWithoutUsed = {};
+        for(var name in extentsNames) {
+            if (cache.extents.indexOf(name) == -1) extentsNamesWithoutUsed[name] = name;
+        }
+        if (Object.keys(extentsNamesWithoutUsed).length == 0) {
+            wapp.alert("Vous devez saisir une zone pour le chargement du cache");
+            return;
+        }
+        selectDialog(
+            extentsNamesWithoutUsed, 
+            extentsNamesWithoutUsed[0], 
+            function(selected) {
+                wapp.vectorCache.uploadCache(false, selected);
+                let $p = $("<span></span>").addClass("area").html(selected);
+                $('#vector-cache-area').append($p);
+            },
+            {'title': 'Choisir une zone'}
+        );
+    });
+
+    $("#refresh-all-btn", offlinePage).on("click", function(){
+        let layers = wapp.getLayerGuichet().getLayers().getArray();
+        for (let i in layers) {
+          if (typeof layers[i].getSource().nbModifications == 'function' && layers[i].getSource().nbModifications()) {
+            wapp.alert("Impossible de rafraîchir le cache car des modifications sont en cours sur une des couches.");
+            return;
+          }
+        }
+        wapp.updateCache();
     });
 
     $("#remove-cache-layer-btn", offlinePage).on("click", function(){
@@ -213,27 +348,88 @@ function initOffline(wapp) {
     $("#add-cache-layer-btn", offlinePage).on("click", function(){
         wapp.saveContext();
         var cache = wapp.getCache(wapp.guichet).cache;
-        if (!cache) {
-            wapp.toggleMenu();
-            wapp.vectorCache.addDialog(() => {
-                let extentsNames = cacheExtents.getExtentNamesPlusNew();
-                selectDialog(
-                    extentsNames, 
-                    'new', 
-                    function(selected) {
-                        cache = wapp.getCache(wapp.guichet).cache;
-                        if (selected == 'new') {
-                            wapp.loadCache(cache);
-                        } else {
-                            wapp.vectorCache.currentCache = cache;
-                            let extents = cacheExtents.get(selected);
-                            wapp.vectorCache.uploadCache(false, extents);
-                        }
-                    },
-                    {'title': 'Choisir une zone'}
-                );
-            });
+        var content = CordovApp.template('dialog-guichet');
+        var ul = $('ul.layerselect', content);
+        let layerNames = cache ? cache.layers.map(l => l.nom) : [];
+        if (!wapp.guichet.layers) {
+            wapp.alert("Aucun guichet sélectionné"); 
+            return;
         }
+        for (var i=0, l; l = wapp.guichet.layers[i]; i++) {
+            if (cache && layerNames.indexOf(l.nom) != -1) continue;
+            if (l.type === 'WFS' && l.tilezoom) {
+            $("<li>").addClass('selected')
+                .attr('data-input','')
+                .text(l.nom)
+                .data('layer', l)
+                .click(function(){
+                    var li = $(this).toggleClass('selected').addClass('active');
+                    setTimeout (function(){
+                        li.removeClass('active');
+                    }, 200);
+                })
+                .appendTo(ul);
+            }
+        }
+
+        // All/none
+        $('.all', content).click(()=>{
+            $('li', ul).each(function(){
+            $(this).addClass('selected');
+            })
+        })
+        $('.none', content).click(()=>{
+            $('li', ul).each(function(){
+            $(this).removeClass('selected');
+            })
+        });
+
+        wapp.dialog.show (content, {
+            title: "Ajouter des couches à charger", 
+            buttons: { valid:"Valider", cancel:"Annuler" },
+            className: "attributes guichet",
+            callback: function(b) {
+                if (b=='valid') {
+                    var layers = [];
+                    $("li", ul).each(function() {
+                        var l = $(this).data('layer');
+                        if ($(this).hasClass('selected')) layers.push($.extend({},l));
+                    });
+                    if (!cache) {
+                        wapp.vectorCache.addCache('Sans titre', layers);
+                        offlinePage.trigger("showpage");
+                    } else if (!cache.loaded) {
+                        for(let i in layers) {
+                            cache.layers.push(layers[i]);
+                        }
+                        offlinePage.trigger("showpage");
+                    } else {
+                        for(let i in layers) {
+                            wapp.appendLayerToCache(layers[i]);
+                        }
+                    }
+                }
+            }
+        });
+    });
+
+    $("#load-cache-layer-btn", offlinePage).on("click", function(){
+        var cache = wapp.getCache(wapp.guichet).cache;
+        let extents = null;
+        let extentName = $("#vector-cache-area .area").first().html();
+        if (extentName) {
+            extents = cacheExtents.get(extentName);
+        }
+        if (!cache) {
+            wapp.alert("Choisir des couches à charger.");
+            return;
+        } else if (!extents || extents.length == 0) {
+            wapp.alert("Choisir une zone de chargement du cache.");
+            return;
+        }
+        wapp.vectorCache.currentCache = cache;
+        wapp.vectorCache.uploadCache(false, extentName);
+        wapp.hidePage();
     });
 
     //ajout d'une carte en cache

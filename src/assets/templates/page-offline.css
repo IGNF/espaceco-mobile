@@ -8,9 +8,25 @@
     padding: 5px 15px;
     margin: 0px;
 }
+#offline .layerlist .fa-circle {
+    font-size: 0.5em;
+    vertical-align: middle;
+    color: #c30000;
+}
 
-#offline #cache-extents-list p {
+#offline .layerlist .fa-circle.loaded {
+    color: #00bd00;
+}
+
+#offline #cache-extents-list p,
+#offline .layerlist p {
     display: inline-block;
+    width: 70%;
+}
+
+#offline .layerlist,
+#offline i.fa {
+    margin: 0 0.2em;
 }
 
 #cache-layers-fond .ol-layerswitcher li.ol-layer-hidden {
@@ -21,4 +37,16 @@
 }
 #cache-layers-fond .ol-layerswitcher li.ol-layer-hidden > div.icn-bar {
     opacity: 1;
+}
+
+#offline .area {
+    margin-right: 0.5em;
+}
+
+#offline .areas {
+    margin-bottom: 0.5em;
+}
+
+#offline .cache-tools {
+    display: inline;
 }

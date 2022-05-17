@@ -85,7 +85,13 @@ wapp.cloneGeorem = function() {
     georem = featureGeorem.values_.georem;
 
     theme = georem.theme;
-    themes = georem.themes;
+    if (!theme && typeof georem.themes[0].nom != undefined){
+      theme = georem.themes[0].nom;
+      themes = `${georem.themes[0].id_groupe}::${theme}=>"1"`;
+    } else {
+      themes = georem.themes;
+    }
+    
     attributes = georem.attributes;
   } else {
     wapp.alert("Sélectionner une alerte");

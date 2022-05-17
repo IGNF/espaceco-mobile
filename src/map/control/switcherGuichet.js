@@ -174,15 +174,6 @@ export default function(wapp) {
         },
         parent: div
       });
-
-      ol_ext_element.create('I', {
-        className: 'fa fa-cloud-download',
-        click: () => {
-          //wapp.vectorCache.loadCache(wapp.getCache(wapp.guichet).cache);
-          wapp.loadCache();
-        },
-        parent: div
-      });
     } else if (featureType.readOnly) {
       var select = ol_ext_element.create('I', {
         className: 'fa',
@@ -212,15 +203,6 @@ export default function(wapp) {
         edit.classList.add('fa-lock');
       } else {
         edit.classList.add('fa-pencil');
-      }
-      if (wapp.getCache(wapp.guichet).cache) {
-        ol_ext_element.create('I', {
-          className: 'fa fa-cloud-download fa-plus',
-          click: () => {
-            wapp.appendLayerToCache(layer);
-          },
-          parent: div
-        });  
       }
     }
 

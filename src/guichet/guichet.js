@@ -323,26 +323,15 @@ console.log('setGuichet', groupe)
     let nbModifs = 0;
     let layers = wapp.getLayerGuichet().getLayers().getArray();
     for (let i in layers) {
-      if (typeof layers[i].getSource().nbModifications != 'function') continue;
+      if (!layers[i].getSource() || typeof layers[i].getSource().nbModifications != 'function') continue;
       nbModifs = parseInt(nbModifs) + parseInt(layers[i].getSource().nbModifications());
     }
     $(".fa-send .tag", gdiv).text(nbModifs);
   });
 
-  $(".fa-refresh", gdiv).on("click", function(){
-    let layers = wapp.getLayerGuichet().getLayers().getArray();
-    for (let i in layers) {
-      if (typeof layers[i].getSource().nbModifications == 'function' && layers[i].getSource().nbModifications()) {
-        wapp.alert("Impossible de rafraîchir le cache car des modifications sont en cours sur une des couches.");
-        return;
-      }
-    }
-    wapp.updateCache();
-  });
-
   $(".fa-send", gdiv).on('click', function(){
     if (parseInt($(".fa-send .tag", gdiv).text()) < 1) {
-      wapp.alert("Toutes les modifications ont déjà été envoyée.");
+      wapp.alert("Toutes les modifications ont déjà été envoyées.");
       return;
     }
     let layers = wapp.getLayerGuichet().getLayers().getArray();
@@ -552,7 +541,7 @@ wapp.updateCache = function(layer) {
  * @param {ol.layer.Webpart} layer
  */
 wapp.appendLayerToCache = function(layer) {
-  var name = layer.getFeatureType().name
+  var name = layer.nom
   var guichet = this.vectorCache.getCurrentGuichet();
   for (var i=0, l; l = guichet.layers[i]; i++) {
     if (l.type === 'WFS' && l.tilezoom && name === l.nom) {

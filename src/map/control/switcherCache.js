@@ -33,7 +33,8 @@ let cacheExtents;
   ol_ext_element.create('I', {
     className: 'fa fa-cloud-download',
     click: () => {
-      let extentNames = cacheExtents.getExtentNamesPlusNew();
+      let extentNames = cacheExtents.getExtentNames();
+      extentNames["new"] = "Nouvelle...";
       selectDialog(
         extentNames, 
         'new', 
