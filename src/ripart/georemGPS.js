@@ -250,6 +250,18 @@ function saveTracking(e) {
         geolocation.path_.push(lastPt);
         feature.getGeometry().appendCoordinate(lastPt);
       }
+      // Nettoyage des NaN
+      let coords = feature.getGeometry().getCoordinates();
+      for(let i = coords.length - 1; i >= 0; i--) {
+        if (
+          ( isNaN(coords[i][0]) || isNaN(coords[i][1])
+          || !coords[i][0] || !coords[i][1])
+        ) {
+          coords.splice(i, 1);
+        }
+      }
+      feature.getGeometry().setCoordinates(coords);
+
       // Save GPS track (with nmea info)
       if (geolocation.path_[0] && geolocation.path_[0][4]!==undefined) {
         const nmea = [];
