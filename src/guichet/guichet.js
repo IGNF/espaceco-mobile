@@ -9,6 +9,7 @@ import './layer'
 import './edition'
 import './conflict'
 import './fiche'
+import * as fs from 'fs';
 
 let template = null;
 let saveLayers = function(layers) {
@@ -177,11 +178,45 @@ wapp.initGuichets = function() {
     setGeoportailLayers();
     return;
   }
+
+   //Recherche fichier de config (config.ini)
+   var noguichet = undefined;
+   var changeGuichet = true;
+   var path = './src/config/config.json';
+   try{
+     var result = undefined;
+    console.log("File ");
+      
+       result = fs.readFileSync(path,"utf8")
+       var jsonData = undefined;
+       if (result) {
+         jsonData = JSON.parse(result);
+         console.log(jsonData);
+         if (jsonData  && jsonData.length > 0 && jsonData[0].noguichet !== undefined) {
+           noguichet = jsonData[0].noguichet;
+           if (jsonData[0].changeGuichet === false) {
+            changeGuichet = false;
+            $('.button.big-button').hide();
+           }
+           
+         }
+       }
+   }  catch (e) {
+      console.log('noconfig' + e);
+   }
+   
+  
   // Recherche des groupes
   var groupes = wapp.ripart.param.groupes;
   const geoportailLayers = {};
   var current;
   groupes.forEach((g) => {
+    if (noguichet !== undefined && !changeGuichet ) {
+      if (g.id_groupe != noguichet){
+        return;
+      }
+    }
+    console.log('Guichets: '+ g.id_groupe);
     // Chargement des logos
     if (g.logo) {
       CordovApp.File.dowloadFile(
@@ -195,8 +230,10 @@ wapp.initGuichets = function() {
         }
       );
     }
-    // Guichet courant
-    if (this.ripart.param.guichet == g.id_groupe) current = g;
+    if (noguichet !== undefined && noguichet == g.id_groupe) {
+      current = g
+    }
+    else if (this.ripart.param.guichet == g.id_groupe) current = g;
     // Affichage si WFS
     var couches = "";
     
