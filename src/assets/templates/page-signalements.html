@@ -5,7 +5,7 @@
   <h3 class="nogeorem">Aucun signalement en cours...</h3>
   
   <div class="buttons">
-    <button class="button big-button georemsCount" onclick="wapp.ripart.postLocalRems();">
+    <button class="button big-button georemsCount" onclick="wapp.ripart.postAllLocalRems();">
       <i class="fa fa-paper-plane"></i>
       Envoyer (<span></span>)
     </button><button class="button big-button georepsCount" onclick="wapp.ripart.updateLocalRems();">
@@ -35,6 +35,7 @@
         <span>%nom% (%groupe%)</span>
       </div>
       <div class="small" data-attr="theme"></div>
+      <div class="danger" data-attr="error"></div>
       <div><span data-attr="rep" data-array-length="1"></span> réponse(s)</div>
       <div data-attr="responses" data-nnull="1">
         <i class="fa fa-envelope-o"></i>
