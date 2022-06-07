@@ -31,21 +31,26 @@ let cacheExtents;
   });
   // Download
   ol_ext_element.create('I', {
-    className: 'fa fa-cloud-download',
+    className: 'fa tools-drawpoly fa-plus',
     click: () => {
       let extentNames = cacheExtents.getExtentNames();
-      extentNames["new"] = "Nouvelle...";
+      let unusedExtentNames = [];
+      for (let name in extentNames) {
+        if (smap.extentNames.indexOf(name) == -1) unusedExtentNames[name] = name;
+      }
+      if (!Object.keys(unusedExtentNames).length) {
+        wapp.alert("Aucune zone disponible");
+        return;
+      }
       selectDialog(
-        extentNames, 
-        'new', 
+        unusedExtentNames, 
+        unusedExtentNames[0], 
         function(selected) {
-          if (selected == 'new') {
-            wapp.cache.loadCacheMap(smap);
-          } else {
-            wapp.cache.setCurrentMap(smap);
-            let extent = cacheExtents.getAllInOneExtent(selected);
-            wapp.cache.loadMapDlg(extent);
+          let cbk = function() {
+            $("#offline").trigger('showpage');
           }
+          wapp.cache.setCurrentMap(smap);
+          wapp.cache.loadMapDlg(selected, true, cbk);
         },
         {'title': 'Choisir une zone'}
       );
@@ -60,7 +65,7 @@ let cacheExtents;
         if (name) {
           smap.nom = name;
           layer.set('title', name);
-          geoportailSwitcher.drawPanel();
+          cacheSwitcher.drawPanel();
         }
       });
     },
@@ -71,17 +76,34 @@ let cacheExtents;
     className: 'fa fa-trash',
     click: () => {
       wapp.cache.removeCacheMap(smap);
+      $("#offline").trigger('showpage');
     },
     parent: div
   });
   // Info sur la carte
+  let className = 'fa fa-info-circle';
+  var error = null;
+  if (wapp.cache.errors[smap.id]) {
+    className += ' danger';
+    error = wapp.cache.errors[smap.id];
+  }
   ol_ext_element.create('I', {
-    className: 'fa fa-info-circle',
+    className: className,
     click: () => {
       var content = CordovApp.template('dialog-infomap');
-      var title = new ol_layer_Geoportail(smap.layer).get('title')
-      var att = $.extend({ name: title }, smap);
+      var title = new ol_layer_Geoportail(smap.layer).get('title');
+      var att = $.extend({ name: title, extentNamesList: smap.extentNames.join(', ') }, smap);
+      if (error) att["error"] = error.msg;
       wapp.dataAttributes(content, att);
+      if (error) {
+        $("#reload-error-tiles", content).removeClass("hidden");
+        $("#reload-error-tiles", content).on("click", () => {
+          wapp.cache.reloadErrorTiles(smap);
+          wapp.dialog.close();
+        });
+      } else {
+        $("#reload-error-tiles", content).addClass("hidden");
+      }
       $('.centermap', content).get(0).addEventListener('click', () => {
         wapp.map.getView().fit(smap.extent, wapp.map.getSize());
         wapp.hidePage();

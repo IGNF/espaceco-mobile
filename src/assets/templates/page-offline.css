@@ -50,3 +50,16 @@
 #offline .cache-tools {
     display: inline;
 }
+
+#offline .tools-drawpoly.fa-plus:after {
+    content: '\f055';
+    position: absolute;
+    right: .1em;
+    top: -0.03em;
+    border-radius: 50%;
+    background: #fff;
+    font-family: 'FontAwesome';
+    font-size: .8em;
+    border: 1px solid #fff;
+    box-sizing: border-box;
+  }
