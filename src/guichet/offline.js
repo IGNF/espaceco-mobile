@@ -270,6 +270,10 @@ function initOffline(wapp) {
             className: "attributes",
             callback: function(b) {
                 if (b=='ajouter') {
+                    if ($('.type.selected', content).attr('data-val') == "select-obj" && !$('.layer.selected', list).attr('data-val')) {
+                        wapp.alert("Aucun guichet sélectionné");
+                        return;
+                    }
                     cacheExtentPage.attr('data-name', $('.name', content).val());
                     cacheExtentPage.attr('data-type', $('.type.selected', content).attr('data-val'));
                     cacheExtentPage.attr('data-layer', $('.layer.selected', list).attr('data-val'));
