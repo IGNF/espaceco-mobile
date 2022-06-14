@@ -18,7 +18,7 @@ const page = $('#georemGPS');
 let paramGPS = wappStorage('gpsTracking') || {
   car: { bxy: true, xy: 0, bz: true, z: 0 },
   ped: { bxy: true, xy: 0, bz: true, z: 0 },
-  useCar: false,
+  useCar: true,
   track: []
 };
 
