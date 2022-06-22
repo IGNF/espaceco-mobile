@@ -57,3 +57,16 @@
 .couches .couche.online > .icn-bar > .fa-gear {
   display: none;
 }
+
+#reload-error-tiles {
+  background-color: darkred;
+}
+
+#reload-error-tiles.hidden {
+  display: none;
+}
+
+span[data-attr="error"].danger,
+#offline .icn-bar .danger {
+  color: darkred;
+}

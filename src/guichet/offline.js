@@ -18,8 +18,8 @@ var refreshCacheAreas = function(domId, hasCache) {
     $(domId).empty();
 
     if (hasCache.cache) {
-        for (var i in hasCache.cache.extents) {
-            let $p = $("<span></span>").addClass("area").html(hasCache.cache.extents[i]);
+        for (var i in hasCache.cache.extentNames) {
+            let $p = $("<span></span>").addClass("area").html(hasCache.cache.extentNames[i]);
             $("#vector-cache-area").append($p);
         }
     }
@@ -63,12 +63,6 @@ var getCacheExtentHtml = function(name) {
     $("<i>", {
         class: "fa fa-trash",
         click: function() {
-            currentGuichet = wapp.vectorCache.getCurrentGuichet();
-            const hasCache = wapp.getCache(currentGuichet);
-            if (hasCache.cache && hasCache.cache.extents.indexOf(name) != -1) {
-                wapp.alert("Impossible de supprimer une zone utilisée pour le cache");
-                return;
-            }
             cacheExtents.remove(name);
             refreshCacheExtentsList("#cache-extents-list");
         }
@@ -224,6 +218,17 @@ function initOffline(wapp) {
             $("#remove-cache-layer-btn").prop("disabled", true);
             $(".cache-tools", offlinePage).hide();
         }
+
+        let hasPendingMap = false;
+        let smaps = wapp.param.cacheMap ? wapp.param.cacheMap : [];
+        for (let i in smaps) {
+            if (smaps[i].pending) {
+                hasPendingMap = true;
+                break;
+            }
+        }
+        
+        $("#load-cache-ign-layer-btn").prop("disabled", !hasPendingMap);
     });
 
     // ajout d'une nouvelle zone
@@ -302,7 +307,7 @@ function initOffline(wapp) {
         let extentsNames = cacheExtents.getExtentNames();
         let extentsNamesWithoutUsed = {};
         for(var name in extentsNames) {
-            if (cache.extents.indexOf(name) == -1) extentsNamesWithoutUsed[name] = name;
+            if (cache.extentNames.indexOf(name) == -1) extentsNamesWithoutUsed[name] = name;
         }
         if (Object.keys(extentsNamesWithoutUsed).length == 0) {
             wapp.alert("Vous devez saisir une zone pour le chargement du cache");
@@ -407,6 +412,7 @@ function initOffline(wapp) {
                         for(let i in layers) {
                             wapp.appendLayerToCache(layers[i]);
                         }
+                        wapp.hidePage();
                     }
                 }
             }
@@ -435,6 +441,53 @@ function initOffline(wapp) {
     //ajout d'une carte en cache
     $("#add-cache-ign-layer-btn", offlinePage).on("click", function(){
         wapp.cache.addCacheMap(wapp.param.options.mode === 'expert');
+    });
+
+    //chargement des cartes en attente
+    $("#load-cache-ign-layer-btn", offlinePage).on("click", function(){
+        var downloadCacheMap = function() {
+            var cachePending = null;
+            for (var i=0, c; c=wapp.param.cacheMap[i]; i++) {
+                if (c.pending) {
+                    cachePending = c;
+                    break;
+                }
+            }
+
+            if (!cachePending) {
+                wapp.cache.silentErrors = false;
+                
+                //a la fin on affiche les erreurs
+                let content = $("<div>");
+                let hasErrors = Boolean(Object.keys(wapp.cache.errors).length);
+                for (var i in wapp.cache.errors) {
+                    let cacheMap = wapp.cache.getCacheMapById(i);
+                    let $title = $("<b>"+cacheMap.nom+"</b>");
+                    let $msg = $("<p>"+wapp.cache.errors[i].msg+"</p><br />");
+                    content.append($title, $msg);
+                }
+
+                if (!hasErrors) {
+                    wapp.dialog.show("Chargement terminé avec succès",
+                    {buttons: {"close": "Ok"}});
+                } else {
+                    wapp.dialog.show(content, {
+                        title: "Erreurs de chargement", 
+                        buttons: { ok: "Ok" }
+                    })
+                }
+                return;
+            }
+            
+            wapp.cache.setCurrentMap(cachePending);
+            let downloadArgs = Object.values(cachePending.pending);
+            delete cachePending.pending;
+            downloadArgs.push(downloadCacheMap)
+            wapp.cache.downloadMap(...downloadArgs);
+        };
+
+        wapp.cache.silentErrors = true;
+        downloadCacheMap();
     });
 }
 

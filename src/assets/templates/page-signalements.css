@@ -56,6 +56,11 @@
   color: #369;
 }
 
+#signalements li .danger
+{
+  color: darkred;
+}
+
 #signalements li.badresponse [data-attr="responses"] i:before {
   content: "\f071";
   color: orange;

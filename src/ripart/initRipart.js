@@ -12,6 +12,8 @@ import {buffer as ol_extent_buffer} from 'ol/extent'
 
 import ol_control_LayerSwitcher from 'ol-ext/control/LayerSwitcher'
 import ol_ext_element from 'ol-ext/util/element'
+import { messageDlg } from 'cordovapp/cordovapp/dialog'
+import { waitDlg } from 'cordovapp/cordovapp/dialog'
 
 /** Initialisation des signalements
  */
@@ -82,7 +84,7 @@ function initRipart(wapp) {
           className: 'fa fa-send',
           html: '<div class="georemsCount tag"><span>'+c+'</span></div>',
           click: () => {
-            wapp.ripart.postLocalRems();
+            wapp.ripart.postAllLocalRems();
           },
           parent: div
         });
@@ -239,6 +241,77 @@ function initRipart(wapp) {
     }
     */
   });
+
+  /**
+   * post des georems locales sans interruption en cas d erreur
+   * @param {*} options
+   *  @param {function} onPost a function called when a georem is posted
+   */
+  wapp.ripart.postAllLocalRems = function(options) {
+    options = options || {};
+    var self = this;
+    var nb = this.countLocalRems();
+    var n = 0;
+    var nbErrors = 0;
+
+    //on reessaie de soummettre tous les signalements meme ceux en erreur
+    for (var i=0; i<self.param.georems.length; i++) {
+      delete self.param.georems[i].error;
+    }
+
+    function onError(e, msg) {
+      nbErrors++;
+      if (e.status === 401) {
+        messageDlg ( msg, 
+          "Connexion", {
+            ok: "ok", 
+            connect: "Se connecter..."
+          },
+          function(b) {
+            if (b=="connect") self.connectDialog();
+          }
+        );
+      }
+      else{
+        if (typeof(e.gremIndice) === 'undefined') return false;
+        let grem = self.param.georems[e.gremIndice];
+        grem.error = `Erreur: ${msg}`;
+        postNext();
+      }
+    }
+
+    function postNext() {
+      var p = self.countLocalRems(false);
+      // Ended ?
+      if (!p) {
+        if (typeof(options.onEnd)=='function') {
+          options.onEnd();
+        } else {
+          waitDlg(false);
+          if (nbErrors > 0) messageDlg(`${nbErrors} erreur(s) se sont produites lors de l'envoi des signalements.`);
+          self.onUpdate();
+        }
+        return;
+      }
+      // Send next
+      for (var i=0; i<self.param.georems.length; i++) {
+        var grem = self.param.georems[i];
+        if (!grem.id && !grem.error) {
+          n++;
+          self.postLocalRem (i, { 
+            info: "Envoi des signalements ("+n+"/"+nb+")", 
+            cback: postNext,
+            error: onError,
+            onPost: options.onPost
+          });
+          break;
+        }
+      }
+    }
+    // Start sending...
+    if (nb) postNext();
+    else messageDlg ("Tous les signalements ont déjà été envoyés..."," ");
+  }
 
   wapp.ripart.on("changegroup", function(e){ wapp.changeGroup(e); });
 

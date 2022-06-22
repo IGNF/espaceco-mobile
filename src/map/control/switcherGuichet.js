@@ -10,9 +10,24 @@ let cacheSwitcher;
  * @param {CordovApp} wapp
  */
 export default function(wapp) {
-
-  // Aide en ligne
   $('#layer-guichet').on('showpage', () => {
+    // boutons tout masquer/afficher
+    let displayAll = function(display) {
+      let groupLayer = wapp.getLayerGuichet();
+      let groupVisibility = groupLayer.getVisible();
+      groupLayer.getLayers().forEach((l) => {
+        l.setVisible(display);
+      });
+      if (groupVisibility != groupLayer.getVisible()) groupLayer.setVisible(groupVisibility);
+    };
+    $(".all-layer-vibility-btn.show").on("click", (e) => {
+      displayAll(true);      
+    });
+    $(".all-layer-vibility-btn.hide").on("click", (e) => {
+      displayAll(false);      
+    });
+
+    // Aide en ligne
     if ($('#layer-guichet .guichet .edition').css('display') !== 'none') {
       setTimeout(() => { wapp.help.show('guichet-edition')});
     }

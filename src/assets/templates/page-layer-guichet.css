@@ -90,7 +90,8 @@
 [data-role="dialog"].guichet .switcher {
   float: right;
 }
-[data-role="dialog"].guichet .switcher span {
+[data-role="dialog"].guichet .switcher span,
+.all-layer-vibility-btn {
   color: #369;
 }
 
