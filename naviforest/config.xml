@@ -53,10 +53,9 @@
         <preference name="hostname" value="localhost" />
     </platform>
     <platform name="windows">
-        <preference name="windows-target-version" value="11.0" />
+        <preference name="windows-target-version" value="10.0" />
     </platform>
     <hook src="./naviforest/scripts/parcel.js" type="before_build" />
     <hook src="./naviforest/scripts/parcel.js" type="before_run" />
-      <!-- <hook src="./naviforest/scripts/afterbuildNF.js" type="after_build" />  -->
-
+    <!-- <hook src="./naviforest/scripts/afterbuildNF.js" type="after_build" />  -->
 </widget>

@@ -166,6 +166,9 @@ wapp.dialogInfoGuichet = function (groupe) {
   }
 };
 
+
+
+
 /** Recherche des guichets de l'utilisateur
  */
 wapp.initGuichets = function() {
@@ -179,40 +182,40 @@ wapp.initGuichets = function() {
     return;
   }
 
-   //Recherche fichier de config (config.ini)
-   var noguichet = undefined;
-   var changeGuichet = true;
-   var path = './src/config/config.json';
-   try{
-     var result = undefined;
-    console.log("File ");
+  //  //Recherche fichier de config (config.json)
+  //  wapp.noguichetConfig = undefined;
+  //  var changeGuichet = true;
+  //  var path = './src/config/config.json';
+  //  try{
+  //    var result = undefined;
+  //   console.log("File ");
       
-       result = fs.readFileSync(path,"utf8")
-       var jsonData = undefined;
-       if (result) {
-         jsonData = JSON.parse(result);
-         console.log(jsonData);
-         if (jsonData  && jsonData.length > 0 && jsonData[0].noguichet !== undefined) {
-           noguichet = jsonData[0].noguichet;
-           if (jsonData[0].changeGuichet === false) {
-            changeGuichet = false;
-            $('.button.big-button').hide();
-           }
+  //      result = fs.readFileSync(path,"utf8")
+  //      var jsonData = undefined;
+  //      if (result) {
+  //        jsonData = JSON.parse(result);
+  //        console.log(jsonData);
+  //        if (jsonData  && jsonData.length > 0 && jsonData[0].noguichet !== undefined) {
+  //         wapp.noguichetConfig = jsonData[0].noguichet;
+  //          if (jsonData[0].changeGuichet === false) {
+  //           changeGuichet = false;
+  //           $('.buttons.changeGroupe button.button').hide();
+  //          } 
            
-         }
-       }
-   }  catch (e) {
-      console.log('noconfig' + e);
-   }
+  //        }
+  //      }
+  //  }  catch (e) {
+  //     console.log('noconfig' + e);
+  //  }
    
-  
+
   // Recherche des groupes
   var groupes = wapp.ripart.param.groupes;
   const geoportailLayers = {};
   var current;
   groupes.forEach((g) => {
-    if (noguichet !== undefined && !changeGuichet ) {
-      if (g.id_groupe != noguichet){
+    if (wapp.noguichetConfig !== undefined  ) {
+      if (g.id_groupe != wapp.noguichetConfig){
         return;
       }
     }
@@ -230,7 +233,7 @@ wapp.initGuichets = function() {
         }
       );
     }
-    if (noguichet !== undefined && noguichet == g.id_groupe) {
+    if (wapp.noguichetConfig !== undefined && wapp.noguichetConfig == g.id_groupe) {
       current = g
     }
     else if (this.ripart.param.guichet == g.id_groupe) current = g;
@@ -318,8 +321,11 @@ console.log('[TODO] set guichet')
 /** Guichet en cours de modification
 */
 wapp.setGuichet = function(groupe) {
-console.log('setGuichet', groupe)
+  // groupe = 366;
+  // wapp.ripart.param.groupes=[{'id_group':groupe}]
 
+console.log('setGuichet', groupe);
+   
   if (typeof(groupe)==='number') {
     groupe = wapp.ripart.getGroupById(groupe);
   }
@@ -335,7 +341,7 @@ console.log('setGuichet', groupe)
   
   
   // Nouveau guichet
-  this.ripart.param.guichet = groupe.id_groupe;
+  this.ripart.param.guichet =groupe.id_groupe;
   wapp.ripart.saveParam();
   wapp.select.getFeatures().clear();
   wapp.onSelect();
@@ -626,5 +632,8 @@ wapp.showGuichet= function() {
     wapp.alert(CordovApp.template('dialog-noguichet'));
   }
 }
+
+
+
 
 export default wapp
