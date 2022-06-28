@@ -788,13 +788,14 @@ wapp.getLogo = function (g, cback, scope) {
     
      result = fs.readFileSync(path,"utf8")
      var jsonData = undefined;
-     if (result) {
+     if (result !="") {
        jsonData = JSON.parse(result);
        console.log(jsonData);
        if (jsonData  && jsonData.length > 0 && jsonData[0].noguichet !== undefined) {
         wapp.noguichetConfig = jsonData[0].noguichet;
          if (jsonData[0].changeGuichet === false) {
             wapp.changeGuichet = false;
+            $('#changeGuichet').hide();
          }       
        }
      }
@@ -810,11 +811,14 @@ wapp.connect = function() {
       console.log('ok', result)
       if (result.connected === false) {
         wapp.notification("Vous êtes déconnecté", 1200);
+        $('p.userinfo').hide();
       } else {
         if (wapp.noguichetConfig!== undefined) {
            if (wapp.noguichetConfig !==undefined) wapp.ripart.setProfil(wapp.noguichetConfig);
            if (wapp.changeGuichet === false) $('#changeGuichet').hide();
+           
         } 
+        $('p.userinfo').show();
         wapp.notification("Connecté au service", 1200);
         
       }
