@@ -22,8 +22,10 @@ document.addEventListener("DOMContentLoaded", init, false);
         
         wapp.help.reset();
         wapp.hidePage();
+        
+        $("#headerbackground").hide();
         //$("div[data-role='menu'] .logo.back").hide();
-        //  $("div[data-role='menu'] .img").css({'background-color': 'rgba(255,255,255,0)'});
+      
          $('<li onclick=\'console.log("arretés")\')><i class="fa fa-file-pdf-o"></i>Arrêtés préfect</li>').insertAfter("div[data-role='menu'] ul li.guichet");
         $('head title').html("Naviforest");
        
