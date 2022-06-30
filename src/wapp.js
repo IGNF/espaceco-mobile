@@ -785,17 +785,18 @@ wapp.getLogo = function (g, cback, scope) {
  try{
    var result = undefined;
    console.log("File ");
-    
+
      result = fs.readFileSync(path,"utf8")
      var jsonData = undefined;
      if (result !="") {
        jsonData = JSON.parse(result);
-       console.log(jsonData);
+      //  console.log(jsonData);
        if (jsonData  && jsonData.length > 0 && jsonData[0].noguichet !== undefined) {
         wapp.noguichetConfig = jsonData[0].noguichet;
          if (jsonData[0].changeGuichet === false) {
             wapp.changeGuichet = false;
             $('#changeGuichet').hide();
+           
          }       
        }
      }
@@ -806,19 +807,20 @@ wapp.getLogo = function (g, cback, scope) {
 /** Connexion RIpart
 */
 wapp.connect = function() {
+  console.log("connect function");
   wapp.ripart.connectDialog({
     onConnect: function(result) {
       console.log('ok', result)
       if (result.connected === false) {
         wapp.notification("Vous êtes déconnecté", 1200);
-        $('p.userinfo').hide();
+        if (wapp.noguichetConfig!== undefined) { $('p.userinfo').hide();}
       } else {
         if (wapp.noguichetConfig!== undefined) {
            if (wapp.noguichetConfig !==undefined) wapp.ripart.setProfil(wapp.noguichetConfig);
            if (wapp.changeGuichet === false) $('#changeGuichet').hide();
-           
+           $('p.userinfo').show();
         } 
-        $('p.userinfo').show();
+        
         wapp.notification("Connecté au service", 1200);
         
       }
@@ -871,6 +873,7 @@ wapp.connect = function() {
 		}
 	});
 };
+
 
 
 

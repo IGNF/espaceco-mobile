@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="fr.ign.naviforest" version="2.3.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>Naviforest IGN</name>
+    <name>Naviforest</name>
     <description>
       La solution IGN pour saisir et partager des signalements issus du terrain.
     </description>
