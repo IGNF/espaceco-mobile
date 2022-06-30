@@ -3,7 +3,7 @@
 import ol_layer_Vector_WFS from 'cordovapp/ol/layer/WFS'
 
 import wapp from '../wapp'
-import CordovApp from 'cordovapp/Cordovapp'
+import CordovApp from 'cordovapp/CordovApp'
 import setGeoportailLayers from '../map/layer/geoportail'
 import './layer'
 import './edition'

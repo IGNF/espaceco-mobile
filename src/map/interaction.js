@@ -1,6 +1,6 @@
 import map from './map'
 import ol_Feature from 'ol/Feature'
-import ol_interaction_Select from 'ol/interaction/select'
+import ol_interaction_Select from 'ol/interaction/Select'
 import ol_interaction_LongTouch from 'ol-ext/interaction/LongTouch'
 import ol_style_Style from 'ol/style/Style'
 import ol_style_Stroke from 'ol/style/Stroke'
