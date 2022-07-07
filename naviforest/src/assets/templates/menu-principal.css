@@ -1,0 +1,128 @@
+/** Menu */
+[data-role='menu'] {
+  background: #fff;
+color: #666;
+overflow-y: auto;
+overflow-x: hidden;
+padding:0;
+width: 11em;
+-webkit-transform: translate3d(-12em, 0, 0);
+transform: translate3d(-12em, 0, 0);
+}
+[data-role='menu'].back {
+background-color: rgba(0,0,0,0.5);
+}
+[data-role='menu'] ul li {
+border-bottom: 0;
+margin: 0 1em 0 .5em;
+}
+[data-role='menu'] .header {
+position: relative;
+height: 5em;
+width: 100%;
+overflow: hidden;
+color: #fff;
+}
+[data-role='menu'] .img {
+position: absolute;
+bottom: .3em;
+left: .3em;
+width: 4.5em;
+height: 4.5em;
+border-radius: 50% 50% 50% 10%;
+overflow: hidden;
+background-color: rgba(255,255,255,.8);
+border: 7px solid #97BE0D;
+box-shadow: 1px 1px 8px 2px rgba(0,0,0,0.5)
+}
+[data-role='menu'] img {
+height:100%;
+position: absolute;
+top: 50%;
+left: 50%;
+-webkit-transform: translate(-50%, -50%);
+transform: translate(-50%, -50%);
+}
+[data-role='menu'] .img img {
+  background-color: #fff;
+  max-height: 90%;
+  max-width: 100%;
+  height: auto;
+}
+[data-role='menu'] .img img.back {
+min-height:100%; 
+min-width:100%;
+-webkit-filter: blur(5px);
+-moz-filter: blur(5px);
+-o-filter: blur(5px);
+-ms-filter: blur(5px);
+filter: blur(5px);
+}
+[data-role='menu'] p {
+  position: absolute;
+  left: 5em;
+  bottom: .2em;
+  line-height: 1em;
+  margin: 0;
+  -webkit-transform: scaleX(.6);
+  transform: scaleX(.6);
+  -webkit-transform-origin: 0 0;
+  transform-origin: 0 0;
+  font-weight: bold;
+  width: 10em;
+}
+[data-logo='none'] [data-role='menu'] p {
+left: 1em;
+}
+[data-logo='none'] [data-role='menu'] .img {
+display: none;
+}
+
+#help li.guichet,
+[data-role='menu'] li.guichet {
+display: none;
+}
+.guichet #help li.guichet,
+.guichet [data-role='menu'] li.guichet {
+display: block;
+}
+
+[data-role='menu'] .toggle-right {
+position: absolute;
+top: 30%;
+right: -0.8em;
+}
+
+/* ajout naviforest */
+#headerbackground {
+display: none;
+}
+
+ .userinfo {
+display: none;
+} 
+p.userinfo {
+color : #888;
+
+}
+
+#changeGuichet{
+display:none;
+}
+
+[data-role='menu'] .img {
+border: none;
+border-radius:0;
+box-shadow:none;
+background-color: 'rgba(255,255,255,0)';
+
+left:0px;
+top: 0 ;
+} 
+[data-role='menu'] p {
+left:4.6em;
+width:40% !important;
+}
+div[data-role='menu'] .logo.back {
+display:none;
+}

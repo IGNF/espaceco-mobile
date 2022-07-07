@@ -182,33 +182,8 @@ wapp.initGuichets = function() {
     return;
   }
 
-  //  //Recherche fichier de config (config.json)
-  //  wapp.noguichetConfig = undefined;
-  //  var changeGuichet = true;
-  //  var path = './src/config/config.json';
-  //  try{
-  //    var result = undefined;
-  //   console.log("File ");
-      
-  //      result = fs.readFileSync(path,"utf8")
-  //      var jsonData = undefined;
-  //      if (result) {
-  //        jsonData = JSON.parse(result);
-  //        console.log(jsonData);
-  //        if (jsonData  && jsonData.length > 0 && jsonData[0].noguichet !== undefined) {
-  //         wapp.noguichetConfig = jsonData[0].noguichet;
-  //          if (jsonData[0].changeGuichet === false) {
-  //           changeGuichet = false;
-  //           $('.buttons.changeGroupe button.button').hide();
-  //          } 
-           
-  //        }
-  //      }
-  //  }  catch (e) {
-  //     console.log('noconfig' + e);
-  //  }
+  
    
-
   // Recherche des groupes
   var groupes = wapp.ripart.param.groupes;
   const geoportailLayers = {};
