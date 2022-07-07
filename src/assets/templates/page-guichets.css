@@ -1,0 +1,161 @@
+﻿#guichets [data-role="content"].nomap .hasmap,
+#guichets [data-role="content"] .nomap {
+  display: none;
+}
+#guichets [data-role="content"].nomap .nomap {
+  display: block;
+  margin: 1em;
+}
+
+#guichets ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+#guichets ul li {
+  position: relative;
+  border: 1px solid #ccc;
+  box-shadow: 3px 3px 3px rgba(0,0,0,.5);
+  margin: 0 0 1em;
+}
+
+#guichets ul li.selected:before {
+  content: "\f00c";
+  font-family: Fontawesome;
+  position: absolute;
+  left: 0.5em;
+  top: 1.75em;
+  -webkit-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
+#guichets ul li .li-content {
+  position: relative;
+  padding: .5em .5em .5em 5.5em;
+  min-height: 4.5em;
+}
+#guichets ul li .icn-bar {
+  display: block;
+  text-align: right;
+  background-color: #eee;
+  margin: 0;
+  clear: both;
+}
+#guichets ul li .icn-bar > i {
+  position: relative;
+  width: 2em;
+  display: inline-block;
+  text-align: center;
+  padding: .25em 0;
+}
+#guichets ul li img {
+  position: absolute;
+  max-width: 3em;
+  max-height: 3em;
+  top: 1.75em;
+  left: 3.5em;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+#guichets ul li p {
+  margin: 0;
+}
+#guichets ul li p.layers {
+  color: #369;
+  overflow: hidden;
+}
+
+#guichets ul li .icn-bar > i.fa-pencil,
+#guichets ul li .icn-bar > i.fa-cloud-download {
+  display: none;
+}
+#guichets ul li.cache .icn-bar > i.fa-cloud-download {
+  display: inline-block;
+}
+#guichets ul li.edit .icn-bar > i.fa-pencil {
+  display: inline-block;
+}
+
+/* Dialog */
+[data-role="dialog"].infoguichet h3 {
+  margin-bottom: 0;
+}
+[data-role="dialog"].infoguichet img {
+  float: right;
+  max-width: 5em;
+  max-height: 3em;
+  top: -1.5em;
+  position: relative;
+}
+
+
+[data-role="dialog"].infoguichet {
+  width: 90%;
+}
+[data-role="dialog"].infoguichet h3 {
+  margin: 0;
+}
+
+[data-role="dialog"].infoguichet ul {
+  margin: 0 -.5em;
+}
+[data-role="dialog"].infoguichet ul.layers {
+  padding: 0;
+  list-style: none;
+  margin: .5em -.5em;
+  border-top: 1px solid #999;
+}
+[data-role="dialog"].infoguichet ul.layers li {
+  border-bottom: 1px solid #999;
+  padding: 0 1em
+}
+[data-role="dialog"].infoguichet ul.layers h4 {
+  margin:0;
+}
+[data-role="dialog"].infoguichet ul.layers h4 i {
+  font-weight: normal;
+}
+[data-role="dialog"].infoguichet ul.layers li div {
+  color: #369;
+  font-style: italic;
+}
+
+[data-role="dialog"].infoguichet .description {
+  background: #eee;
+  margin: .5em -.5em;
+  display: block;
+  padding: .5em;
+}
+[data-role="dialog"].infoguichet .auth {
+  margin-top: .5em;
+  text-align: center;
+}
+
+[data-role="dialog"].infoguichet i.background {
+  font-size: 4.5em;
+  position: absolute;
+  z-index: 0;
+  color: rgba(0,0,0,.1);
+  pointer-events: none;
+}
+[data-role="dialog"].infoguichet i.background:before {
+  margin:0;
+}
+[data-role="dialog"].infoguichet .warning-container {
+  display: inline-block;
+  margin: 0;
+}
+[data-role="dialog"].infoguichet .warning-container a {
+  display: block;
+  background: #fff;
+  padding: 0 .5em;
+  cursor: pointer;
+}
+
+
+#couches .guichet {
+  display: none;
+}
+.guichet #couches .guichet {
+  display: block;
+}

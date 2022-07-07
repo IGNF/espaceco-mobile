@@ -112,7 +112,12 @@ var getCacheLayerHtml = function(layer, cache) {
                     refreshCacheLayersList(".layerlist", cache);
                 }
             }
-            wapp.vectorCache.removeLayerCache(cache, vectorLayer, cbk);
+            if (cache.layers.length > 1) {
+                wapp.vectorCache.removeLayerCache(cache, vectorLayer, cbk);
+            } else {
+                wapp.vectorCache.removeCache(cache);
+                wapp.hidePage();
+            }
         }
     }).appendTo(div);
     return div;
@@ -270,6 +275,10 @@ function initOffline(wapp) {
             className: "attributes",
             callback: function(b) {
                 if (b=='ajouter') {
+                    if ($('.type.selected', content).attr('data-val') == "select-obj" && !$('.layer.selected', list).attr('data-val')) {
+                        wapp.alert("Aucun guichet sélectionné");
+                        return;
+                    }
                     cacheExtentPage.attr('data-name', $('.name', content).val());
                     cacheExtentPage.attr('data-type', $('.type.selected', content).attr('data-val'));
                     cacheExtentPage.attr('data-layer', $('.layer.selected', list).attr('data-val'));
@@ -337,17 +346,8 @@ function initOffline(wapp) {
     });
 
     $("#remove-cache-layer-btn", offlinePage).on("click", function(){
-        wapp.message(
-            'Voulez-vous supprimer les données en cache ?<br/><i>Les saisies en cours seront perdues...</i>',
-            'Supprimer',
-            { ok: 'ok', cancel: 'Annuler' },
-            (button) => {
-            if (button==='ok') {
-                wapp.vectorCache.removeCache(wapp.getCache(wapp.guichet).cache);
-                wapp.hidePage();
-            }
-            }
-        );
+        wapp.vectorCache.removeCache(wapp.getCache(wapp.guichet).cache);
+        wapp.hidePage();
     });
 
     $("#add-cache-layer-btn", offlinePage).on("click", function(){

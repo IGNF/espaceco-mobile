@@ -1,4 +1,5 @@
-﻿import CordovApp from 'cordovapp/Cordovapp'
+﻿
+import CordovApp from 'cordovapp/CordovApp'
 import map from './map/map'
 import { layerCache } from './map/map'
 import {layers} from './map/map'
@@ -28,7 +29,7 @@ import config from './config';
 import { wappStorage } from 'cordovapp/cordovapp/CordovApp'
 import {unByKey} from 'ol/Observable'
 import { Collection } from 'ol'
-import Layer from 'ol/layer/layer'
+import Layer from 'ol/layer/Layer'
 import * as fs from 'fs';
 
 
@@ -165,7 +166,9 @@ import * as fs from 'fs';
     initRipart(wapp);
     layerRipart(wapp);
 
+
     wapp.setDebugMode(); 
+
 
 
     // A propos 
