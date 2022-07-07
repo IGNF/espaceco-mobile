@@ -48,6 +48,7 @@ let cacheExtents;
         function(selected) {
           let cbk = function() {
             $("#offline").trigger('showpage');
+            wapp.alert('Zone ' + selected + ' sélectionnée');
           }
           wapp.cache.setCurrentMap(smap);
           wapp.cache.loadMapDlg(selected, true, cbk);
@@ -92,7 +93,13 @@ let cacheExtents;
     click: () => {
       var content = CordovApp.template('dialog-infomap');
       var title = new ol_layer_Geoportail(smap.layer).get('title');
-      var att = $.extend({ name: title, extentNamesList: smap.extentNames.join(', ') }, smap);
+      var extentNames = smap.pending ? [smap.pending.extent] : smap.extentNames;
+      if (smap.pending || !smap.extentNames.length) {
+        $(content).addClass("pending");
+      } else {
+        $(content).removeClass("pending");
+      }
+      var att = $.extend({ name: title, extentNamesList: extentNames.join(', ') }, smap);
       if (error) att["error"] = error.msg;
       wapp.dataAttributes(content, att);
       if (error) {
