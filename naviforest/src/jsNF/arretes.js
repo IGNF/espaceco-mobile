@@ -1,6 +1,6 @@
 import wapp from '../wapp';
 import { toLonLat } from 'ol/proj';
-
+import * as Gp from './GpServices.js';
 
 
 wapp.getArrete = function (n) {  
@@ -38,7 +38,8 @@ wapp.getArrete = function (n) {
        
         }
    
-        window.open(arrete, "_system");
+        window.open("https://naviforest.ign.fr", "_system");
+     
       
     })
     .catch(function(error) {
