@@ -17,8 +17,11 @@ let cacheExtents;
  function setActionCacheMap (wapp, layer, div) {
   // Carte en cache
   const smap = layer.get('cacheMap');
+  var smapExtentNames = [...smap.extentNames];
+  if (smap.pending) smapExtentNames.push(smap.pending.extent);
   ol_ext_element.create('P', {
-    html: smap.date,
+    class: "extents-list",
+    html: smapExtentNames.join(', '),
     parent: div
   });
   // Refresh
@@ -48,6 +51,8 @@ let cacheExtents;
         function(selected) {
           let cbk = function() {
             $("#offline").trigger('showpage');
+            cacheSwitcher.drawPanel();
+            wapp.alert('Zone ' + selected + ' sélectionnée');
           }
           wapp.cache.setCurrentMap(smap);
           wapp.cache.loadMapDlg(selected, true, cbk);
@@ -92,7 +97,13 @@ let cacheExtents;
     click: () => {
       var content = CordovApp.template('dialog-infomap');
       var title = new ol_layer_Geoportail(smap.layer).get('title');
-      var att = $.extend({ name: title, extentNamesList: smap.extentNames.join(', ') }, smap);
+      
+      if (smap.pending || !smap.extentNames.length) {
+        $(content).addClass("pending");
+      } else {
+        $(content).removeClass("pending");
+      }
+      var att = $.extend({ name: title, extentNamesList: smapExtentNames.join(', ') }, smap);
       if (error) att["error"] = error.msg;
       wapp.dataAttributes(content, att);
       if (error) {

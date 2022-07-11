@@ -62,4 +62,8 @@
     font-size: .8em;
     border: 1px solid #fff;
     box-sizing: border-box;
-  }
+}
+
+#offline .extents-list {
+    max-width: 50%;
+}
