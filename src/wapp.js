@@ -1,4 +1,5 @@
-﻿import CordovApp from 'cordovapp/CordovApp'
+﻿
+import CordovApp from 'cordovapp/CordovApp'
 import map from './map/map'
 import { layerCache } from './map/map'
 import {layers} from './map/map'
@@ -29,6 +30,8 @@ import { wappStorage } from 'cordovapp/cordovapp/CordovApp'
 import {unByKey} from 'ol/Observable'
 import { Collection } from 'ol'
 import Layer from 'ol/layer/Layer'
+import * as fs from 'fs';
+
 
 /** Web application pour l'acces a l'espace collaboratif depuis un mobile.
  * 
@@ -85,6 +88,8 @@ import Layer from 'ol/layer/Layer'
         'Signalements': true
       };
     }
+
+
     
     // Layers de l'application
     wapp.initMap();
@@ -161,9 +166,12 @@ import Layer from 'ol/layer/Layer'
     initRipart(wapp);
     layerRipart(wapp);
 
-    wapp.setDebugMode();
 
-    // A propos
+    wapp.setDebugMode(); 
+
+
+
+    // A propos 
     $('#apropos').on('showpage', function(){
       if (wapp.ripart.param.profil) {
         var groupe = wapp.ripart.param.groupes.find( function(g){
@@ -491,6 +499,8 @@ wapp.initParams = function() {
       default: break;
     }
   });
+   
+  
 };
 
 /** Initialise la carte
@@ -770,16 +780,52 @@ wapp.getLogo = function (g, cback, scope) {
   );
 };
 
+
+ //Recherche fichier de config (config.json)
+ wapp.noguichetConfig = undefined;
+ wapp.changeGuichet = true;
+ var path = 'src/config/config.json';
+ try{
+   var result = undefined;
+   console.log("File ");
+
+     result = fs.readFileSync(path,"utf8")
+     var jsonData = undefined;
+     if (result !="") {
+       jsonData = JSON.parse(result);
+      //  console.log(jsonData);
+       if (jsonData  && jsonData.length > 0 && jsonData[0].noguichet !== undefined) {
+        wapp.noguichetConfig = jsonData[0].noguichet;
+         if (jsonData[0].changeGuichet === false) {
+            wapp.changeGuichet = false;
+            $('#changeGuichet').hide();
+           
+         }       
+       }
+     }
+ } catch (e) {
+    console.log('noconfig' + e);
+ }
+
 /** Connexion RIpart
 */
 wapp.connect = function() {
+  console.log("connect function");
   wapp.ripart.connectDialog({
     onConnect: function(result) {
       console.log('ok', result)
       if (result.connected === false) {
         wapp.notification("Vous êtes déconnecté", 1200);
+        if (wapp.noguichetConfig!== undefined) { $('p.userinfo').hide();}
       } else {
+        if (wapp.noguichetConfig!== undefined) {
+           if (wapp.noguichetConfig !==undefined) wapp.ripart.setProfil(wapp.noguichetConfig);
+           if (wapp.changeGuichet === false) $('#changeGuichet').hide();
+           $('p.userinfo').show();
+        } 
+        
         wapp.notification("Connecté au service", 1200);
+        
       }
       wapp.initGuichets();
       wapp.ripart.signalements.getSource().getSource().clear();
@@ -830,5 +876,8 @@ wapp.connect = function() {
 		}
 	});
 };
+
+
+
 
 export default wapp

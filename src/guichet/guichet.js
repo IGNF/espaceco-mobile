@@ -9,6 +9,7 @@ import './layer'
 import './edition'
 import './conflict'
 import './fiche'
+import * as fs from 'fs';
 
 let template = null;
 let saveLayers = function(layers) {
@@ -165,6 +166,9 @@ wapp.dialogInfoGuichet = function (groupe) {
   }
 };
 
+
+
+
 /** Recherche des guichets de l'utilisateur
  */
 wapp.initGuichets = function() {
@@ -177,11 +181,20 @@ wapp.initGuichets = function() {
     setGeoportailLayers();
     return;
   }
+
+  
+   
   // Recherche des groupes
   var groupes = wapp.ripart.param.groupes;
   const geoportailLayers = {};
   var current;
   groupes.forEach((g) => {
+    if (wapp.noguichetConfig !== undefined  ) {
+      if (g.id_groupe != wapp.noguichetConfig){
+        return;
+      }
+    }
+    console.log('Guichets: '+ g.id_groupe);
     // Chargement des logos
     if (g.logo) {
       CordovApp.File.dowloadFile(
@@ -195,8 +208,10 @@ wapp.initGuichets = function() {
         }
       );
     }
-    // Guichet courant
-    if (this.ripart.param.guichet == g.id_groupe) current = g;
+    if (wapp.noguichetConfig !== undefined && wapp.noguichetConfig == g.id_groupe) {
+      current = g
+    }
+    else if (this.ripart.param.guichet == g.id_groupe) current = g;
     // Affichage si WFS
     var couches = "";
     
@@ -281,8 +296,11 @@ console.log('[TODO] set guichet')
 /** Guichet en cours de modification
 */
 wapp.setGuichet = function(groupe) {
-console.log('setGuichet', groupe)
+  // groupe = 366;
+  // wapp.ripart.param.groupes=[{'id_group':groupe}]
 
+console.log('setGuichet', groupe);
+   
   if (typeof(groupe)==='number') {
     groupe = wapp.ripart.getGroupById(groupe);
   }
@@ -298,7 +316,7 @@ console.log('setGuichet', groupe)
   
   
   // Nouveau guichet
-  this.ripart.param.guichet = groupe.id_groupe;
+  this.ripart.param.guichet =groupe.id_groupe;
   wapp.ripart.saveParam();
   wapp.select.getFeatures().clear();
   wapp.onSelect();
@@ -589,5 +607,8 @@ wapp.showGuichet= function() {
     wapp.alert(CordovApp.template('dialog-noguichet'));
   }
 }
+
+
+
 
 export default wapp
