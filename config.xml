@@ -48,16 +48,21 @@
         <icon height="100" src="res/ios/icon-50@2x.png" width="100" />
         <icon height="167" src="res/ios/icon-83.5@2x.png" width="167" />
     </platform>
+    <plugin name="@ahovakimyan/cordova-plugin-wkwebviewxhrfix" />
     <platform name="ios">
         <config-file parent="UIFileSharingEnabled" target="*-Info.plist">
             <true />
         </config-file>
-        <preference name="scheme" value="app" />
-        <preference name="hostname" value="localhost" />
+
+        <feature name="CDVWebViewEngine">
+            <param name="ios-package" value="CDVWebViewEngine" />
+     </feature>
+
     </platform>
     <platform name="windows">
         <preference name="windows-target-version" value="10.0" />
     </platform>
+
     <hook src="scripts/parcel.js" type="before_build" />
     <hook src="scripts/parcel.js" type="before_run" />
 </widget>
