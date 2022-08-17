@@ -31,15 +31,7 @@ wapp.getArrete = function (n) {
       console.log('then');
      var arrete ="";
     
-      // if (result.locations.length > 0) {
-      //   let nodep =result.locations[0].placeAttributes.department;
-      //   arrete = "https://naviforest.ign.fr/arretes/" + nodep + "_arrete_transport_bois.pdf ";
-      //    console.log(arrete);
-       
-      //   }
-   
-      // //  window.open("https://naviforest.ign.fr", "_system");
-     
+  
       
     })
     .catch(function(error) {
@@ -66,20 +58,13 @@ function go(lat,lon,fo) {
         //        params,
 
         url: "https://api-adresse.data.gouv.fr/reverse/?lon="+ lon+"&lat="+lat,
-
-        //La méthode d'envoi (type de requête)
         method: "GET",
-
-        //Le format de réponse attendu
         dataType : "json",
     })
-    //Ce code sera exécuté en cas de succès - La réponse du serveur est passée à done()
-    /*On peut par exemple convertir cette réponse en chaine JSON et insérer
-     * cette chaine dans un div id="res"*/
     .done(function(response){
         let data = JSON.stringify(response);
        if (response.features.length>0) {
-        let dep = response.features[0].properties.postcode.substr(0,2);
+        let dep = response.features[0].properties.context.substr(0,2);
         alert('https://naviforest.ign.fr/arretes/'+dep+ '_arrete_transport_bois.pdf');
        } else {
         alert('https://naviforest.ign.fr/arretes/');

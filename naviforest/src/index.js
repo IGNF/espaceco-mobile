@@ -32,12 +32,12 @@ function init() {
       //$('<div id="arretes" "data-role"="page" onclick=\'wapp.getArrete()\'></div>'). insertAfter("div#loadGuichet");
 
      } else {
-       console('déjà arretes');
+       console.log('déjà arretes');
      }
 
     $('head title').html("Naviforest");
 
-   // $("button i.fa.tools-locate").prop('disabled', false);
+    //$("button i.fa.tools-locate").prop('disabled', false);
     $("button i.fa.tools-locate").trigger('click');
 
    
