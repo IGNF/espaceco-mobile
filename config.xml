@@ -53,7 +53,8 @@
         <config-file parent="UIFileSharingEnabled" target="*-Info.plist">
             <true />
         </config-file>
-
+        <preference name="scheme" value="app" />
+      -        <preference name="hostname" value="localhost" />
         <feature name="CDVWebViewEngine">
             <param name="ios-package" value="CDVWebViewEngine" />
      </feature>
