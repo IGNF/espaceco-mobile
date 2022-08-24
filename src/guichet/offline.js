@@ -151,7 +151,7 @@ function initOffline(wapp) {
         }
 
         const guichet = wapp.getLayerGuichet();
-        
+
         let type = cacheExtentPage.attr("data-type");
         if (type == "select-obj") {
             guichet.setVisible(true);
@@ -212,7 +212,7 @@ function initOffline(wapp) {
             $("#remove-cache-layer-btn").prop("disabled", true);
             $(".cache-tools", offlinePage).hide();
         }
-        
+
         if (hasCache.cache) {
             $("#remove-cache-layer-btn").prop("disabled", false);
             $("#load-cache-layer-btn").prop("disabled", hasCache.cache.loaded);
@@ -232,14 +232,14 @@ function initOffline(wapp) {
                 break;
             }
         }
-        
+
         $("#load-cache-ign-layer-btn").prop("disabled", !hasPendingMap);
     });
 
     // ajout d'une nouvelle zone
     $("#add-cache-extent-btn", offlinePage).on("click", function(){
         let content = CordovApp.template("dialog-cache-extent");
-        
+
         var list = $('li[data-param="layer"]', content);
         const guichet = wapp.getLayerGuichet();
         for (var i=0, l; l = guichet.getLayers().getArray()[i]; i++) {
@@ -268,7 +268,7 @@ function initOffline(wapp) {
         let cacheExtentsLength = Object.keys(cacheExtents.get()).length;
         let number = parseInt(cacheExtentsLength) + 1;
         $('.name', content).val("Zone"+number);
-        $('[data-val="select-obj"').on("change")
+        $('[data-val="select-obj"]').on("change")
         wapp.dialog.show(content, {
             title: "Définir la zone",
             buttons: { ajouter:"Ajouter", cancel:"Annuler" },
@@ -292,14 +292,14 @@ function initOffline(wapp) {
     $("#select-area-btn").on('click', function(){
         let extentsNames = cacheExtents.getExtentNames();
         if (Object.keys(extentsNames).length == 0) {
-            cache = wapp.getCache(wapp.guichet).cache;
+            var cache = wapp.getCache(wapp.guichet).cache;
             wapp.vectorCache.removeCache(cache);
             wapp.alert("Vous devez saisir une zone pour le chargement du cache");
             return;
         }
         selectDialog(
-            extentsNames, 
-            extentsNames[0], 
+            extentsNames,
+            extentsNames[0],
             function(selected) {
                 let $p = $("<span></span>").addClass("area").html(selected);
                 $('#vector-cache-area').html($p);
@@ -323,8 +323,8 @@ function initOffline(wapp) {
             return;
         }
         selectDialog(
-            extentsNamesWithoutUsed, 
-            extentsNamesWithoutUsed[0], 
+            extentsNamesWithoutUsed,
+            extentsNamesWithoutUsed[0],
             function(selected) {
                 wapp.vectorCache.uploadCache(false, selected);
                 let $p = $("<span></span>").addClass("area").html(selected);
@@ -357,7 +357,7 @@ function initOffline(wapp) {
         var ul = $('ul.layerselect', content);
         let layerNames = cache ? cache.layers.map(l => l.nom) : [];
         if (!wapp.guichet.layers) {
-            wapp.alert("Aucun guichet sélectionné"); 
+            wapp.alert("Aucun guichet sélectionné");
             return;
         }
         for (var i=0, l; l = wapp.guichet.layers[i]; i++) {
@@ -390,7 +390,7 @@ function initOffline(wapp) {
         });
 
         wapp.dialog.show (content, {
-            title: "Ajouter des couches à charger", 
+            title: "Ajouter des couches à charger",
             buttons: { valid:"Valider", cancel:"Annuler" },
             className: "attributes guichet",
             callback: function(b) {
@@ -456,7 +456,7 @@ function initOffline(wapp) {
 
             if (!cachePending) {
                 wapp.cache.silentErrors = false;
-                
+
                 //a la fin on affiche les erreurs
                 let content = $("<div>");
                 let hasErrors = Boolean(Object.keys(wapp.cache.errors).length);
@@ -472,13 +472,13 @@ function initOffline(wapp) {
                     {buttons: {"close": "Ok"}});
                 } else {
                     wapp.dialog.show(content, {
-                        title: "Erreurs de chargement", 
+                        title: "Erreurs de chargement",
                         buttons: { ok: "Ok" }
                     })
                 }
                 return;
             }
-            
+
             wapp.cache.setCurrentMap(cachePending);
             let downloadArgs = Object.values(cachePending.pending);
             delete cachePending.pending;
