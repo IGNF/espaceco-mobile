@@ -88,14 +88,14 @@ function getUserLayers() {
   wapp.param.userLayers.forEach((l)=> {
     switch (l.type) {
       case 'WMS':
-      default: {
+      default: 
         const layer = caps.getLayerFromOptions(l);
         layer.set('name', 'USER-'+l.id);
         if (wapp.param.visibleLayers['USER-'+l.id]===false) layer.setVisible(false);
         else layer.setVisible(wapp.param.visibleLayers['USER-'+l.id]);
         layers.push(layer);
         break;
-      }
+      
     }
   });
   return layers;
