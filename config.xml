@@ -12,6 +12,11 @@
     <preference name="BackupWebStorage" value="none" />
     <allow-navigation href="*://*.ign.fr/*" />
     <access origin="*" />
+
+
+
+    <allow-navigation href="file:///*" />
+
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <allow-intent href="tel:*" />
@@ -47,17 +52,23 @@
         <icon height="50" src="res/ios/icon-50.png" width="50" />
         <icon height="100" src="res/ios/icon-50@2x.png" width="100" />
         <icon height="167" src="res/ios/icon-83.5@2x.png" width="167" />
-    </platform>
-    <platform name="ios">
+
         <config-file parent="UIFileSharingEnabled" target="*-Info.plist">
-            <true />
+           <true />
         </config-file>
-        <preference name="scheme" value="app" />
-        <preference name="hostname" value="localhost" />
+
+        <preference name="iosPersistentFileLocation" value="Compatibility" />
+        <feature name="CDVWebViewEngine">
+            <param name="ios-package" value="CDVWebViewEngine" />
+        </feature>
     </platform>
+    <plugin name="@ahovakimyan/cordova-plugin-wkwebviewxhrfix" />
+    <!-- <plugin name="cordova-plugin-file-transfer-latest" /> -->
+
     <platform name="windows">
         <preference name="windows-target-version" value="10.0" />
     </platform>
+
     <hook src="scripts/parcel.js" type="before_build" />
     <hook src="scripts/parcel.js" type="before_run" />
 </widget>
