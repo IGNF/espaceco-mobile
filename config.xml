@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="fr.ign.guichet" version="2.3.0" xmlns:android="http://schemas.android.com/apk/res/android" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="wqsdcf" version="2.3.0" xmlns:android="http://schemas.android.com/apk/res/android" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Espace collaboratif IGN</name>
     <description>
       La solution IGN pour saisir et partager des signalements issus du terrain.
@@ -12,6 +12,11 @@
     <preference name="BackupWebStorage" value="none" />
     <allow-navigation href="*://*.ign.fr/*" />
     <access origin="*" />
+
+
+
+    <allow-navigation href="file:///*" />
+
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <allow-intent href="tel:*" />
@@ -47,19 +52,19 @@
         <icon height="50" src="res/ios/icon-50.png" width="50" />
         <icon height="100" src="res/ios/icon-50@2x.png" width="100" />
         <icon height="167" src="res/ios/icon-83.5@2x.png" width="167" />
-    </platform>
-    <plugin name="@ahovakimyan/cordova-plugin-wkwebviewxhrfix" />
-    <platform name="ios">
+
         <config-file parent="UIFileSharingEnabled" target="*-Info.plist">
-            <true />
+           <true />
         </config-file>
-        <preference name="scheme" value="app" />
-      -        <preference name="hostname" value="localhost" />
+
+        <preference name="iosPersistentFileLocation" value="Compatibility" />
         <feature name="CDVWebViewEngine">
             <param name="ios-package" value="CDVWebViewEngine" />
-     </feature>
-
+        </feature>
     </platform>
+    <plugin name="@ahovakimyan/cordova-plugin-wkwebviewxhrfix" />
+    <!-- <plugin name="cordova-plugin-file-transfer-latest" /> -->
+
     <platform name="windows">
         <preference name="windows-target-version" value="10.0" />
     </platform>
