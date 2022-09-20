@@ -4,7 +4,7 @@ import SketchTools from 'cordovapp/ripart/SketchTools';
 import ol_layer_Vector from 'ol/layer/Vector'
 import ol_source_Vector from 'ol/source/Vector'
 
-$('#createupdateObj').on('click', function(){wapp.createupdateGeom();})
+
 
 /**
  * Création, modification d'un objet sur une couche du guichet
@@ -22,6 +22,10 @@ class CreateupdateObject {
     }
 }
 
+
+if ($('#createupdateObj').attr('onclick')  === undefined){
+    $('#createupdateObj').attr('onclick',"wapp.createupdateGeom()");
+}
 
 //instance de CreateupdateObject
 var cuo = undefined;
