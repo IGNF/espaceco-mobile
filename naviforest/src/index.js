@@ -7,6 +7,7 @@ import './maintenance'
 import './apiTemplate'
 import CordovApp from 'cordovapp/CordovApp';
 import './jsNF/arretes';
+import './guichet/createupdateObject';
 
 // global var
 window.wapp = wapp;
@@ -14,13 +15,10 @@ window.wapp = wapp;
 window.CordovApp = CordovApp;
 window.CordovFile = CordovApp.File;
 
-
 document.addEventListener("deviceready", init, false);
 document.addEventListener("DOMContentLoaded", init, false);
 
 function init() {
-
-  // $('<div id="arretes" data-role="page" data-direction="up" data-template="arretes"></div>'). insertAfter("div#loadGuichet");
 
   setTimeout(() => {
     
@@ -29,21 +27,18 @@ function init() {
     if ($('.arretes').length == 0 || $('.arretes').html() === undefined) {
       console.log('arretes');
       $('<li class=\'arretes\' onclick=\'wapp.getArrete() \')><i class="fa fa-file-pdf-o"></i>Arrêtés préfect</li>'). insertAfter("div[data-role='menu'] ul li.guichet");
-      //$('<div id="arretes" "data-role"="page" onclick=\'wapp.getArrete()\'></div>'). insertAfter("div#loadGuichet");
-
      } else {
        console.log('déjà arretes');
      }
 
     $('head title').html("Naviforest");
 
-    //$("button i.fa.tools-locate").prop('disabled', false);
     $("button i.fa.tools-locate").trigger('click');
-
-   
 
     $('.buttons.changeGroupe button.button').hide();
     $('#changeGuichet').hide();
+
+    $('#createupdateObj').on('click', function(){wapp.createupdateGeom(['Point']);})
 
 
     if ($('span.connected').html() === "" ||

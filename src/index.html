@@ -14,6 +14,7 @@
   <!-- the map -->
   <div id="map" class="needsclick"></div>
   <div id="selection" onclick="wapp.showSelect();" data-placeholder="Signaler !"></div>
+  <i id="createupdateObj"  class="fa fa-edit" title="Mode édition"></i>
   <i id="signaler" onclick="wapp.showRipartForm();" class="fa fa-map-marker" title="Signaler..."></i>
   <i id="signalerGPS" onclick="wapp.directGPS();" class="fa fa-map-marker expert" title="Signaler GPS..."></i>
 
@@ -87,6 +88,13 @@
 
   <!-- Signalements GPS -->
   <div id="georemGPS" data-role="page" data-direction="up" data-template="georemGPS" class="car" ></div>
+
+
+<div>
+       <select id="layerToEdit">
+          
+       </select>
+  </div> 
 
   <script type="text/javascript" src="index.js" charset="UTF-8"></script>
 </body>

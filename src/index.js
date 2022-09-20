@@ -6,7 +6,9 @@ import './codes'
 import './maintenance'
 import './apiTemplate'
 import CordovApp from 'cordovapp/CordovApp';
+import './guichet/createupdateObject';
 
+ 
 // global var
 window.wapp = wapp;
 // DEBUG

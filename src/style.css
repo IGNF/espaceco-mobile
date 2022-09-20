@@ -71,6 +71,25 @@
   left:0.5em;
 }
 
+
+
+#createupdateObj {
+  position: fixed;
+  bottom: 0.3em;
+  right: 2.3em;
+  background: blue;
+  border-radius: 50%;
+  box-shadow: 1px -1px 5px 1px rgba(0,0,0,0.5);
+  font-size: 2.75em;
+  padding: 0.2em;
+  width: 1.5em;
+  height: 1.5em;
+  text-align: center;
+  line-height: 1.2em;
+  color: #fff;
+}
+
+
 /** Debug */
 div.debug,
 .debug {
@@ -640,4 +659,30 @@ span[data-class="nb=1"] {
 [data-role=dialog] .info {
   font-size: .9em;
   color: #369;
+}
+
+
+
+/*Mode édition: create-update objects */
+select#layerToEdit{
+  position: absolute;
+  left: 5em;
+  top: 1em;
+  width: auto;
+  
+  background-color: #fff;
+  border: 1px gray solid;
+  padding:2px;
+  display:none;
+  font-family: 'FontAwesome', 'Arial';
+  font-size: 1.5em;
+}
+
+#layerToEdit option{
+  font-size :1.5m;
+}
+
+
+.ol-overlaycontainer .ol-touch-cursor .ol-button.ol-button-fiche:before {
+  content: "\f298";
 }
