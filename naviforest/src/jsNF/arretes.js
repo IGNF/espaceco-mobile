@@ -23,14 +23,8 @@ wapp.getArrete = function () {
     };
   }
 
-  go(lat, lon, fo)
-    .then(function (result) {
-      var arrete = "";
-    })
-    .catch(function (error) {
-      console.log('catch' + error);
-      wapp.wait(false);
-    });
+  go(lat, lon, fo);
+  
 }
 
 
