@@ -43,8 +43,7 @@ function go(lat, lon, fo) {
   // var params = 'searchgeom={"type":"Circle","coordinates":[' + lat + ',' + lon + '],"radius":100}&' +
   //   'lon=' + lon + '&lat=' + lat +
   //   'index=poi&category=département&limit=1';
-  // return new Promise(function (resolve, reject) {
-  //   wapp.wait("chargement ...");
+
 
   $.ajax({
     //L'URL de la requête 

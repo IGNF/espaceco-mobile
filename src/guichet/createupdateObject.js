@@ -29,34 +29,40 @@ if ($('#createupdateObj').attr('onclick') === undefined) {
 
 //instance de CreateupdateObject
 var cuo = undefined;
+//type de la couche sélectionnée
 var layType = {};
 
-
+/**
+ * Actions lors d'un clic sur le bouton "mode édition"
+ * @param {*} geomFilter  tableau indiquant les types de géométries que l'on veut pouvoir éditer 
+ *                        par ex ['Point'] . Par défaut  ['Point', 'LineString', 'Polygon']
+ */
 wapp.createupdateGeom = function (geomFilter) {
 
     geomFilter = geomFilter ? geomFilter : ['Point', 'LineString', 'Polygon'];
 
-
     var curColor = $("#createupdateObj").css('background-color').replace(/ /g, '');
-    if (curColor == 'rgb(255,0,0)' && cuo) {
-        cuo.drawInteraction.setActive(false);
-        cuo == undefined;
-
+    if (curColor == 'rgb(255,0,0)') {
+        if (cuo){
+            cuo.drawInteraction.setActive(false);
+            cuo == undefined;
+        } 
         $("#layerToEdit").hide();
         $("#createupdateObj").css({ 'background-color': 'rgb(0,0,255)' });
-    } else {
-
+    } 
+    else {
         $("#createupdateObj").css({ 'background-color': 'rgb(255,0,0)' });
-
         var layers = wapp.getLayerGuichet().getLayersArray();   // liste des layers du guichet
+
         // création de la liste déroulante des guichets
         $('#layerToEdit').empty()
             .append('<option selected="selected" value="-1">Couche de travail &#xf0d7;</option>')
             .show();
+
         for (let i = 0; i < layers.length; i++) {
             let geomType = layers[i].getSource().getFeatureType().attributes.geom.type;
-
             layType[layers[i].get('name')] = geomType;
+
             //@TODO vérifier si la couche est éditable  ==> nvlle API
             if (geomFilter.includes(geomType)) {
                 $('#layerToEdit')
@@ -65,8 +71,8 @@ wapp.createupdateGeom = function (geomFilter) {
                         text: layers[i].getSource().getFeatureType().name
                     }));
             }
-
         }
+
 
         $('#layerToEdit').on('change', function () {
             if (cuo !== undefined) {
@@ -91,7 +97,6 @@ wapp.createupdateGeom = function (geomFilter) {
                 }
             }
             if (cuo.selectedLayer !== undefined) {
-
                 showEditTool(cuo.selectedLayer, cuo.drawInteraction);
             }
         })
@@ -101,30 +106,29 @@ wapp.createupdateGeom = function (geomFilter) {
 
 
 /**
- * 
- * @param {*} layer 
- * @param {*} drawInteraction 
+ * Affichage des outils d'édition
+ * @param {*} layer  la couche à éditer
+ * @param {*} drawInteraction  l'instance de SketchTools 
  */
 function showEditTool(layer, drawInteraction) {
     var self = this;
     wapp.ripart.layer = layer;
 
     drawInteraction.setActive(false);
-    drawInteraction.picker.removeButton('ol-button-modify');
+    if (layer.getSource().getFeatureType().attributes.geom.type == 'Point') {
+        drawInteraction.picker.removeButton('ol-button-modify');
+    }
     var draw = drawInteraction.tools.draw;
 
-  
     // redéfinition de la fonction 
     SketchTools.prototype.addActionOnDrawend = function(){
-        console.log('addfiche 2');
         draw.removeButton('ol-button-fiche');
         draw.addButton({
             className: 'ol-button-fiche',
             click: () => {
                 console.log('ouverture fiche');
             }
-        });
-       
+        });      
       }
 
     /** Cancel tracking map mode */
@@ -133,7 +137,6 @@ function showEditTool(layer, drawInteraction) {
         drawInteraction.setActive(false);
         $("#layerToEdit").hide();
         $("#createupdateObj").css({ 'background-color': 'rgb(0,0,255)' });
-
     };
 
     drawInteraction.setActive(true);
