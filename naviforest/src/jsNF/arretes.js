@@ -43,7 +43,8 @@ function go(lat, lon, fo) {
   // var params = 'searchgeom={"type":"Circle","coordinates":[' + lat + ',' + lon + '],"radius":100}&' +
   //   'lon=' + lon + '&lat=' + lat +
   //   'index=poi&category=département&limit=1';
-
+  var urlNaviforest = "https://naviforest.ign.fr/arretes/";
+  var depArrete =  '_arrete_transport_bois.pdf'
 
   $.ajax({
     //L'URL de la requête 
@@ -57,13 +58,15 @@ function go(lat, lon, fo) {
       let data = JSON.stringify(response);
       if (response.features.length > 0) {
         let dep = response.features[0].properties.context.substr(0, 2);
-        alert('https://naviforest.ign.fr/arretes/' + dep + '_arrete_transport_bois.pdf');
+        //depArrete = dep + '_arrete_transport_bois.pdf'
+        alert(urlNaviforest + depArrete);
         // TODO  supprimer l'alert et décommenter ligne suvante (window.open ....) lorsque les arr^tés seront disponibles
-        //window.open('https://naviforest.ign.fr/arretes/' + dep + '_arrete_transport_bois.pdf');
+        window.open(urlNaviforest + '33' +depArrete);
       } else {
-        alert('https://naviforest.ign.fr/arretes/');
+        alert(urlNaviforest);
         // TODO  supprimer l'alert et décommenter ligne suvante (window.open ....) lorsque les arr^tés seront disponibles
-        //window.open('https://naviforest.ign.fr/arretes/' );
+        //window.open(urlNaviforest );
+        window.open(urlNaviforest +depArrete);
       }
     })
 
