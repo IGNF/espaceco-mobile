@@ -762,7 +762,7 @@ wapp.refreshMap = function(layers) {
 wapp.getLogo = function (g, cback, scope) {	
 	CordovApp.File.getFile("TMP/logo/"+(g ? g.id_groupe : '_nologo_'), 
 		function(fileEntry) { 
-			cback.call(scope, fileEntry.toURL()); 
+			cback.call(scope, CordovApp.File.getFileURI(fileEntry.toURL())); 
 		}, 
 		function() { 
 			cback.call(scope, g ? g.logo : null); 

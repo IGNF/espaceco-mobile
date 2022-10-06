@@ -38,9 +38,8 @@
     "webfontloader": "^1.6.28"
   },
   "devDependencies": {
-    "@ahovakimyan/cordova-plugin-wkwebviewxhrfix": "git+https://github.com/AraHovakimyan/cordova-plugin-wkwebviewxhrfix.git",
     "clean-css": "^3.4.19",
-    "cordova-android": "^10.1.1",
+    "cordova-android": "^10.1.2",
     "cordova-ios": "^6.2.0",
     "cordova-plugin-bluetooth-geolocation": "git+https://github.com/viglino/cordova-plugin-bluetooth-geolocation.git",
     "cordova-plugin-camera": "^6.0.0",
@@ -63,7 +62,8 @@
   },
   "cordova": {
     "platforms": [
-      "ios"
+      "ios",
+      "android"
     ],
     "plugins": {
       "cordova-plugin-file": {},
@@ -79,8 +79,7 @@
       "cordova-plugin-camera": {
         "ANDROIDX_CORE_VERSION": "1.6.+"
       },
-      "cordova-plugin-inappbrowser": {},
-      "@ahovakimyan/cordova-plugin-wkwebviewxhrfix": {}
+      "cordova-plugin-inappbrowser": {}
     }
   }
 }
