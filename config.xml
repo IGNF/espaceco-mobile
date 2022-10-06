@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="wqsdcf" version="2.3.0" xmlns:android="http://schemas.android.com/apk/res/android" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="fr.ign.collaboratif" version="2.3.0" xmlns:android="http://schemas.android.com/apk/res/android" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Espace collaboratif IGN</name>
     <description>
       La solution IGN pour saisir et partager des signalements issus du terrain.
@@ -58,12 +58,14 @@
         </config-file>
 
         <preference name="iosPersistentFileLocation" value="Compatibility" />
-        <feature name="CDVWebViewEngine">
-            <param name="ios-package" value="CDVWebViewEngine" />
-        </feature>
+        <preference name="scheme" value="app" />
+        <preference name="hostname" value="localhost" />
+
     </platform>
+    <!--
     <plugin name="@ahovakimyan/cordova-plugin-wkwebviewxhrfix" />
-    <!-- <plugin name="cordova-plugin-file-transfer-latest" /> -->
+    <plugin name="cordova-plugin-file-transfer-latest" />
+    -->
 
     <platform name="windows">
         <preference name="windows-target-version" value="10.0" />
