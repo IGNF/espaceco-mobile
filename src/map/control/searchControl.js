@@ -1,5 +1,5 @@
 /*global wapp*/
-import ol_control_Button from 'ol-ext/control/Button'  
+import ol_control_Button from 'ol-ext/control/Button'
 import ol_control_SearchFeature from 'ol-ext/control/SearchFeature'
 import ol_control_SearchGeoportail from 'ol-ext/control/SearchGeoportail'
 import ol_control_SearchGeoportailParcelle from 'ol-ext/control/SearchGeoportailParcelle'
@@ -25,13 +25,13 @@ function centerMap(coord) {
       var f = new ol_Feature (new ol_geom_Point(coord));
       f.setStyle (new ol_style_Style({
         image: new ol_style_Circle ({
-          radius: 30, 
+          radius: 30,
           stroke: new ol_style_Stroke ({ color: 'red', width: 3 })
         })
       }));
       map.animateFeature (f, new ol_featureAnimation_Zoom({
-        fade: ol_easing_easeOut, 
-        duration: 3000, 
+        fade: ol_easing_easeOut,
+        duration: 3000,
         easing: ol_easing_easeOut
       }));
     }, i*1000);
@@ -41,8 +41,8 @@ function centerMap(coord) {
 export default function() {
 // SearchGeoportail Control
   var locCtrl = new ol_control_SearchGeoportail({
-    apiKey: config.apiKey, 
-    authentication: config.auth,
+    apiKey: 'essentiels',
+    // authentication: config.auth,
     placeholder: "rechercher...",
     target: $('#search [data-role="onglet-li"][data-list="adress"]').get(0)
   });
@@ -69,8 +69,8 @@ export default function() {
 
   // Search Parcelle
   var searchParcel = new ol_control_SearchGeoportailParcelle({
-    apiKey: config.apiKey, 
-    authentication: config.auth,
+    apiKey: 'essentiels',
+    // authentication: config.auth,
     target: $('#search [data-role="onglet-li"][data-list="parcel"]').get(0)
   });
   map.addControl(searchParcel);
@@ -107,7 +107,7 @@ export default function() {
   wapp.setSearchSource = function(source, prop) {
     if (source && prop) {
       var ctrl;
-      wapp.map.getControls().forEach(function (c) { 
+      wapp.map.getControls().forEach(function (c) {
         if (c instanceof ol_control_SearchFeature) {
           ctrl = c;
         }
