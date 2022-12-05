@@ -73,10 +73,10 @@ wapp.cloneGeorem = function() {
       return;
     }
 
-    let idGroup = georem.themes[0].id_groupe
-    theme = georem.themes[0].nom;
+    let idGroup = georem.themes[0].community_id
+    theme = georem.themes[0].theme;
     themes = `${idGroup}::${theme}=>"1"`;
-    let originalAttributes = georem.themes[0].attribut;
+    let originalAttributes = georem.themes[0].attributes;
     for (var key in originalAttributes) {
       attributes += `,"${idGroup}::${theme}::${key}"=>"${originalAttributes[key]}"`;
     }
@@ -85,9 +85,9 @@ wapp.cloneGeorem = function() {
     georem = featureGeorem.values_.georem;
 
     theme = georem.theme;
-    if (!theme && typeof georem.themes[0].nom != undefined){
-      theme = georem.themes[0].nom;
-      themes = `${georem.themes[0].id_groupe}::${theme}=>"1"`;
+    if (!theme && typeof georem.themes[0].theme != undefined){
+      theme = georem.themes[0].theme;
+      themes = `${georem.themes[0].community_id}::${theme}=>"1"`;
     } else {
       themes = georem.themes;
     }
@@ -107,7 +107,7 @@ wapp.cloneGeorem = function() {
     sketch: undefined,
     comment: georem.comment ? georem.comment : "",
     photo: false,
-    id_groupe: georem.id_groupe,
+    community_id: georem.community_id,
     themes: themes,
     theme: theme,
     attributes: attributes,

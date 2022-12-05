@@ -98,8 +98,8 @@ wapp.maintenance = function(nodelay) {
     name = name || d.name;
     if (/^G\d*$/.test(name)) {
       var n = parseInt(name.replace(/^G/,''));
-      var groupe = wapp.ripart.getGroupById(n);
-      if (groupe) name = groupe.nom;
+      var community = wapp.userManager.getGroupById(n);
+      if (community) name = community.name;
     }
     CordovApp.File.listDirectory('FILE/'+d.fullPath, (ldir) => addCache(ldir, cache, name));
   }

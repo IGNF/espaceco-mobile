@@ -1,0 +1,27 @@
+#reload-error-tiles {
+    background-color: darkred;
+}
+
+#dialog-infomap #reload-error-tiles.hidden {
+    display: none;
+}
+
+#dialog-infomap span[data-attr="error"].danger {
+    color: darkred;
+}
+
+#dialog-infomap.pending .pending{
+    display: block;
+}
+
+#dialog-infomap.pending .pending-hidden{
+    display: none;
+}
+
+#dialog-infomap .pending{
+    display: none;
+}
+
+#dialog-infomap .pending-hidden{
+    display: block;
+}

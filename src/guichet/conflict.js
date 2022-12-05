@@ -77,7 +77,7 @@ function saveConflicts(ul, layer, group, theme) {
           lat: lonlat[1], 
           sketch: wapp.ripart.feature2sketch(feature, proj),
           comment: feature.getState(),
-          id_groupe: wapp.ripart.param.profil.id_groupe,
+          community_id: wapp.ripart.param.profil.id,
           theme: theme,
           themes: '"'+group+'::'+theme+'"=>"1"'
         }
@@ -107,7 +107,7 @@ function showConflicts(layer, conflicts) {
     .on('click', () => {
       const choix = {};
       wapp.ripart.param.themes.forEach((t) => {
-        choix[t.id_groupe+'::'+t.nom] = t.nom;
+        choix[t.community_id+'::'+t.theme] = t.theme;
       })
       wapp.selectDialog(choix, theme, (rep)=> {
         theme = rep;

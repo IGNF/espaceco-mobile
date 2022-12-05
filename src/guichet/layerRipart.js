@@ -40,7 +40,7 @@ function layerRipart(wapp) {
   var signalements = new ol_layer_AnimatedCluster({
     title: 'Signalements',
     name: 'Signalements',
-    maxResolution: 600, // zoom 6
+    maxResolution: 30, //zoom 13
     zIndex: Infinity,
     source: new ol_source_Cluster({
       geometryFunction: (feature) => {

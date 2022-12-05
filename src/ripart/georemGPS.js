@@ -36,7 +36,7 @@ wapp.ready(() => {
         // SignalerGPS rapide (si thèmes rapides)
         if (wapp.ripart.param.themes) {
           wapp.ripart.param.themes.forEach((th) => {
-            if (/^GPS@|^Rapide@/.test(th.nom)) $('#signalerGPS').show();
+            if (/^GPS@|^Rapide@/.test(th.name)) $('#signalerGPS').show();
           });
         }
       });
@@ -364,12 +364,12 @@ function startDirectGPS(c, theme) {
     attText: '',
     attributes: '',
     comment: 'Signalement GPS rapide.',
-    id_groupe: theme.id_groupe,
+    community_id: theme.community_id,
     lat: lonlat[0],
     lon: lonlat[1],
     photo: false,
     protocol: '_MONGUICHET_65876',
-    theme: theme.nom,
+    theme: theme.theme,
     themes: JSON.stringify(c)+'=>"1"',
     version: "0.1",
   }
@@ -389,9 +389,9 @@ wapp.directGPS = function() {
   var themes = {};
   var nb = 0;
   wapp.ripart.param.themes.forEach((th) => {
-    if (/^GPS@|^Rapide@/.test(th.nom)) {
-      choix[th.id_groupe+"::"+th.nom] = th.nom;
-      themes[th.id_groupe+"::"+th.nom] = th;
+    if (/^GPS@|^Rapide@/.test(th.name)) {
+      choix[th.community_id+"::"+th.name] = th.name;
+      themes[th.community_id+"::"+th.name] = th;
       nb++;
     }
   });

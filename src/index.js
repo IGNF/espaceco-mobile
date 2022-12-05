@@ -1,3 +1,4 @@
+require('dotenv').config();
 import './style.css'
 import './i18n'
 import wapp from './guichet/guichet'

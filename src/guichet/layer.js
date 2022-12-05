@@ -19,7 +19,7 @@ wapp.layerWFS = function(groupe, l) {
   var vector;
 
   // Methode de chargement
-  if (l.mask.loadStartegy==='all') {
+  if (l.geoservice.input_mask && l.geoservice.input_mask.loadStrategy==='all') {
     l.strategy = new ol_loadingstrategy_all();
     l.once = true;			// Chargement en une fois
   }
@@ -100,8 +100,8 @@ wapp.layerWFS = function(groupe, l) {
   delete l.authentication;
 
   //
-  vector.set('logo', groupe.logo);
-  vector.set('attach', l.mask.joinData);
+  vector.set('logo', groupe.logo_url);
+  vector.set('attach', l.geoservice.input_mask.joinData);
   // Chargement OK
   vector.once('ready', function() { 
       // Sauvegarde login / pwd
@@ -127,32 +127,24 @@ wapp.layerWFS = function(groupe, l) {
  * Creer un layer Webpart
  * @param {} l layer options
  * @param {string} cacheUrl
- * @param {ol.extent} cacheExtent limit layer visibility inside the extent (deprecated)
  */
-wapp.layerWebpart = function(l, cacheUrl, cacheExtent) {
+wapp.layerWebpart = function(l, cacheUrl) {
   var vector;
-  var url = l.url.replace(/(.*)\?(.*)/,"$1");
-  // var base = l.url.replace(/.*databasename=(.*)/,"$1");
-  var base = l.url.replace(/.*databasename=([^&]*).*/,"$1");
+  var url = l.table.wfs.replace(/(.*)\?(.*)/,"$1");
+  var base = l.table.wfs.replace(/.*databasename=([^&]*).*/,"$1");
   var extent = [];
-  /* Show all features outside the cache extent
-  if (cacheExtent) {
-    extent = cacheExtent
-    // Extend cache extent to show all features ?
-    // extent = ol_extent_buffer(extent, 5000);
-  } else {
-  */
+
   for (var k=0; k<l.extent.length; k++) extent[k] = parseFloat(l.extent[k]);
   extent = ol_proj_transformExtent(extent, 'EPSG:4326', wapp.map.getView().getProjection());
   // Format CSV sur develop...
-  l.format = (/collaboratif-develop/.test(l.url)) ? 'CSV' : 'JSON';
+  l.format = (/collaboratif-develop/.test(l.table.wfs)) ? 'CSV' : 'JSON';
   vector = new ol_layer_Vector_Webpart({
     url: url,
     //renderMode: 'image',
-    name: l.nom,
-    title: l.nom,
+    name: l.table.name,
+    title: l.table.title,
     cacheUrl: cacheUrl,
-    featureType: l.featureType,
+    featureType: l.table,
     database: base,
     extent: extent,
     username: wapp.ripart.getUser(),
@@ -163,9 +155,9 @@ wapp.layerWebpart = function(l, cacheUrl, cacheExtent) {
     checkSourceOptions: function (options, featureType) {
       // console.log(featureType.fullName, featureType.tileZoomLevel, '-', featureType.minZoomLevel-2)
       // Limiter la taille des tuilles en fonction du minZoom
-      options.tileZoom = featureType.tileZoomLevel; //|| Math.max(featureType.minZoomLevel-2, 4);
+      options.tileZoom = featureType.tile_zoom_level; //|| Math.max(featureType.minZoomLevel-2, 4);
       // Update tile zoom
-      l.tilezoom = featureType.tileZoomLevel;
+      l.tilezoom = featureType.tile_zoom_level;
     }.bind(this)
   },{
     preserved: this.select.getFeatures(),
@@ -232,7 +224,7 @@ wapp.loadLayers = function (groupe) {
 		return;
 	}
   guichet.set("displayInLayerSwitcher", true);
-  guichet.set("title", 'Guichet: '+groupe.nom);
+  guichet.set("title", 'Guichet: '+groupe.name);
 
   // Layers en cache
   var layers = [];
@@ -246,7 +238,7 @@ wapp.loadLayers = function (groupe) {
     groupe.layers.forEach((l) => {
       var found = false;
       for (let i=0, c; c=cacheLayers[i]; i++) {
-        if (c.nom === l.nom && c.url === l.url) {
+        if (c.nom === l.table.name && c.url === l.table.uri) {
           found = true;
           break;
         }
@@ -263,11 +255,14 @@ wapp.loadLayers = function (groupe) {
   // Ajouter les layers du guichet
   var l;
   for (i=0; l=groupLayers[i]; i++) {
-    if (l.type=="WFS") {
+    if (
+      (l.geoservice && l.geoservice.type == "WFS")
+      || l.table
+    ) {
       nb++;
       var vector;
       // WFS externe
-      if (l.external) vector = wapp.layerWFS(groupe, l);
+      if (l.geoservice && l.geoservice.type == "WFS") vector = wapp.layerWFS(groupe, l);
       // Guichet
       else vector = wapp.layerWebpart(l);
 

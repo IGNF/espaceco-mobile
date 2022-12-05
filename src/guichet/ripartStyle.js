@@ -21,7 +21,7 @@ function filterFeature (f) {
   const filter = wapp.param.georemFilter;
   if (!filter) return false;
   if (filter.isstatus) {
-    if (!filter.status[f.get('ripart').statut]) return true;
+    if (!filter.status[f.get('ripart').status]) return true;
   }
   if (filter.isdate) {
     if (filter.date > f.get('ripart').maj) return true;
@@ -29,7 +29,7 @@ function filterFeature (f) {
   if (filter.istheme) {
     let found = false;
     f.get('ripart').themes.forEach(t => {
-      if (filter.theme[t.nom]) {
+      if (filter.theme[t.theme]) {
         found = true;
       }
     });

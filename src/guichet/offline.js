@@ -80,7 +80,7 @@ var getCacheLayerHtml = function(layer, cache) {
     let div = $("<div>", {
         class: "cache-layer"
     });
-    $(`<p><i class="${circleClass}"></i> ${layer.nom}</p>`).appendTo(div);
+    $(`<p><i class="${circleClass}"></i> ${layer.table.name}</p>`).appendTo(div);
 
     if (cache.loaded) {
         $("<i>", {
@@ -96,7 +96,7 @@ var getCacheLayerHtml = function(layer, cache) {
         click: function() {
             if (!vectorLayer) { // le cache n est pas encore charge
                 for (let i in cache.layers) {
-                    if (cache.layers[i].nom == layer.nom) {
+                    if (cache.layers[i].name == layer.name) {
                         cache.layers.splice(i, 1);
                         refreshCacheLayersList(".layerlist", cache);
                         return;
@@ -361,11 +361,11 @@ function initOffline(wapp) {
             return;
         }
         for (var i=0, l; l = wapp.guichet.layers[i]; i++) {
-            if (cache && layerNames.indexOf(l.nom) != -1) continue;
-            if (l.type === 'WFS' && l.tilezoom) {
+            if (cache && layerNames.indexOf(l.table.name) != -1) continue;
+            if (l.table && l.table.tile_zoom_level) {
             $("<li>").addClass('selected')
                 .attr('data-input','')
-                .text(l.nom)
+                .text(l.table.name)
                 .data('layer', l)
                 .click(function(){
                     var li = $(this).toggleClass('selected').addClass('active');

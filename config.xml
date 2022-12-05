@@ -11,6 +11,7 @@
     <icon src="www/img/logo.png" />
     <preference name="BackupWebStorage" value="none" />
     <allow-navigation href="*://*.ign.fr/*" />
+    <allow-navigation href="https://iam-ign-qa-ext.cegedim.cloud/*" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />

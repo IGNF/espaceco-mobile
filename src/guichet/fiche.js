@@ -166,25 +166,46 @@ function _addLine(th, ul, title, val, options) {
 /** Show a georem
  * @param {Element} div current Element
  * @param {*} georem
- * @param {boolean} newOne if false add a delete button
+ * @param {boolean} newOne if not false add a delete button (c est la propriete ripart du feature lorsqu elle existe)
  */
 function showGeorem(div, georem, newOne) {
+  // pour une alerte existante le feature ne contient pas l info du nom de l auteur
+  // il faut faire un get report pour recuperer l info du nom de l auteur
+  // ne marche que si l utilisateur est connecte
+  if (georem.id && !georem.author.name && wapp.ripart.apiClient.isConnected()) {
+    wapp.wait(true);
+    wapp.ripart.apiClient.getReport(georem.id).then((report) => {
+      wapp.wait(false);
+      georem.author = report.author;
+      georem.replies = report.replies;
+      this.showGeorem(div, report, newOne);
+    }).catch((error) => {
+      wapp.wait(false);
+      wapp.alert("Une erreur s'est produite lors de la récupération du signalement.");
+    });
+    return;
+  }
   div.addClass("georem").removeClass("fiche");
   if (georem.sketch) georem.nb = wapp.ripart.sketch2feature(georem.sketch).length;
   else georem.nb = 0;
-  if (!georem.statut) georem.statut = ' ';
+  if (!georem.status) georem.status = ' ';
+  if (georem.author && georem.author.name ) {
+    georem.author_name = georem.author.name;
+  } else{
+    georem.author_name = '?';
+  }
   const georemDiv = $(".georem", div);
   // Show attributes
   wapp.dataAttributes(georemDiv, georem);
-  // Set response statut code > text
-  for (let k in wapp.codes.statut) {
-    $('.'+k+' span', div).text(wapp.codes.statut[k]);
+  // Set response status code > text
+  for (let k in wapp.codes.status) {
+    $('.'+k+' span', div).text(wapp.codes.status[k]);
   }
   // Reply
   const replyBt = $('button.response', georemDiv).off();
   if (/W/.test(georem.autorisation)) {
     var isok;
-    switch (georem.statut) {
+    switch (georem.status) {
       case 'submit':
       case 'pending':
       case 'pending0':
@@ -225,7 +246,7 @@ function showGeorem(div, georem, newOne) {
     resp.forEach((r) => {
       const li = $("<li>").html(tmp.html()).appendTo(ul);
       if (!isok || r.error) li.addClass('error');
-      $('.statut', li).addClass(r.statut).text(RIPart.status[r.statut] || 'Réponse');
+      $('.statut', li).addClass(r.status).text(RIPart.status[r.status] || 'Réponse');
       $('.comment', li).text(r.comment);
       $('.sendrep', li).click(() => {
         wapp.wait('Envoi en cours...')

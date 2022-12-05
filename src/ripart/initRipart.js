@@ -1,5 +1,7 @@
 import RIPart from 'cordovapp/ripart/RipartForm'
+import UserManagerTemplating from 'cordovapp/collaboratif/UserManagerTemplating'
 import map from '../map/map'
+import {ApiClient} from 'collaboratif-client-api';
 
 import ol_layer_Vector from 'ol/layer/Vector'
 import ol_source_Vector from 'ol/source/Vector'
@@ -15,7 +17,8 @@ import ol_ext_element from 'ol-ext/util/element'
 import { messageDlg } from 'cordovapp/cordovapp/dialog'
 import { waitDlg } from 'cordovapp/cordovapp/dialog'
 
-/** Initialisation des signalements
+/** 
+ * Initialisation des signalements
  */
 function initRipart(wapp) {
   // Couche pour les signalements
@@ -160,11 +163,16 @@ function initRipart(wapp) {
   group.on('change:visible', setVisibility);
   setVisibility();
   
+  var url = wapp.param.options.qlf || process.env.BASE_API_URL;
+  let authParams = wapp.getAuthParameters(url);
+
   // RIPart
-  wapp.ripart = new RIPart({
-    url: wapp.param.options.qlf || 'https://espacecollaboratif.ign.fr/api/',
+  let apiClient = new ApiClient(url, authParams.authBaseUrl, authParams.clientId, authParams.clientSecret);
+  wapp.userManager = new UserManagerTemplating(apiClient, {
+    infoElement: '#options .connect span.connected' //[data-input-role="info"]
+  })
+  wapp.ripart = new RIPart(apiClient, {
     map: map,
-    infoElement: '#options .connect [data-input-role="info"] span.connected',
     countElement: '.georemsCount span',
     listElement: '#signalements [data-role="content"]',
     formElement: '#fiche .signaler',
@@ -225,21 +233,11 @@ function initRipart(wapp) {
           }
         }
       }
-      // Forcer le groupe
-      // georem.id_groupe = this.param.groupes[0].id_groupe;
       // Protocol
       georem.protocol = "_MONGUICHET_65876";
       georem.version = "0.1";
       return true;
-    },
-    /*
-    // Localisation via GPS
-    onLocate : function(loc)
-    {	$("span.lon", this.formElement).text(loc.position[0].toFixed(7));
-      $("span.lat", this.formElement).text(loc.position[1].toFixed(7));
-      $("span.accuracy", this.formElement).text(loc.accuracy);
     }
-    */
   });
 
   /**
@@ -313,7 +311,10 @@ function initRipart(wapp) {
     else messageDlg ("Tous les signalements ont déjà été envoyés..."," ");
   }
 
-  wapp.ripart.on("changegroup", function(e){ wapp.changeGroup(e); });
+  document.addEventListener("changegroup", function(e){ 
+    wapp.changeGroup(e);
+    wapp.ripart.setProfil(e.community);
+  });
 
   // Selection d'un signalement
   wapp.ripart.on('select', (e) => {
@@ -384,7 +385,7 @@ function initRipart(wapp) {
 
   // Actualiser le compte
   var timer = new Date();
-  wapp.ripart.checkUserInfo(
+  wapp.userManager.checkUserInfo(
     function () {
       timer = (new Date())-timer;
       setTimeout (function () { wapp.wait(false); }, Math.max(0, 2000 - timer));
@@ -402,13 +403,13 @@ function initRipart(wapp) {
   // Gerer la coherence
   $("#fiche").on('showpage', function() {
     var signalDiv = $(".signaler", this);
-    if (wapp.ripart.param.groupes && wapp.ripart.param.groupes.length > 1) {
+    if (wapp.userManager.param.communities && wapp.userManager.param.communities.length > 1) {
       $(".changeGroupe", signalDiv).show();
     } else {
       $(".changeGroupe", signalDiv).hide();
     }
     // Groupe public
-    if (wapp.ripart.param.profil && wapp.ripart.param.profil.status!="prive") {
+    if (wapp.ripart.param.profil && wapp.ripart.param.profil.shared_georem=="all") {
       $(".warning_public", signalDiv).show();
     } else {
       $(".warning_public", signalDiv).hide();

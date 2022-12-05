@@ -3,7 +3,7 @@ import wapp from './wapp'
 /** Gestion des codes de l'application
  */
 wapp.codes = {
-  "statut": {
+  "status": {
     "submit": "Reçu dans nos services",
     "pending0": "En demande de qualification",
     "pending": "En cours de traitement",
