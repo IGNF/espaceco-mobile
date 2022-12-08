@@ -13,12 +13,12 @@ function addChangeListener(input, listener) {
 }
 
 /** An edition input
- * @param {*} ftype featureType attribute
+ * @param {*} column table attribute
  * @param {*} value
  * @param {Element} li
  * @param {*} update list of updated input
  */
-const EditionInput = function (ftype, value, li, updated) {
+const EditionInput = function (column, value, li, updated) {
   let inline = false;
   if (!li) {
     li = document.createElement('DIV')
@@ -26,19 +26,19 @@ const EditionInput = function (ftype, value, li, updated) {
     inline = true;
   }
   if (updated) li.className = li.className + ' updated';
-  this.ftype = ftype;
+  this.column = column;
   this.value = value;
 
   // 
   var theme, title;
-  var index = ftype.title.indexOf('@');
+  var index = column.title.indexOf('@');
   if (index > -1) {
-    theme = ftype.title.substring(0, index);
-    title = ftype.title.substring(index+1);
+    theme = column.title.substring(0, index);
+    title = column.title.substring(index+1);
     $(li).addClass('att-'+theme.replace(/ /g,'_'));
   } else {
     theme = "hidden";
-    title = ftype.title;
+    title = column.title;
     $(li).addClass(theme);
   }
 
@@ -51,7 +51,7 @@ const EditionInput = function (ftype, value, li, updated) {
   // Input
   let input;
   let val;
-  let ktype = this.type = ftype.listOfValues ? 'Choice' : ftype.type;
+  let ktype = this.type = column.enum ? 'Choice' : column.type;
   switch (ktype) {
     // Chaine de caractères
     case 'String': {
@@ -60,7 +60,7 @@ const EditionInput = function (ftype, value, li, updated) {
         parent: li
       });
       addChangeListener(input, () => {
-        error.setError(ftype, input.value);
+        error.setError(column, input.value);
       });
       break;
     }
@@ -75,7 +75,7 @@ const EditionInput = function (ftype, value, li, updated) {
         parent: label
       });
       addChangeListener(input, () => {
-        error.setError(ftype, input.checked);
+        error.setError(column, input.checked);
       });     
       break;
     }
@@ -87,17 +87,17 @@ const EditionInput = function (ftype, value, li, updated) {
         disabled: "disabled",
         parent: li
       });
-      if (ftype.listOfValues) {
+      if (column.enum) {
         $(input).data('value', value || '');
-        if (!ftype.listOfValues.forEach) {
-          for (let i in ftype.listOfValues) {
-            if (ftype.listOfValues[i] === value) input.value = i;
+        if (!column.enum.forEach) {
+          for (let i in column.enum) {
+            if (column.enum[i] === value) input.value = i;
           }
         }
       }
       li.addEventListener('click', this.handleChoice.bind(this));
       addChangeListener(input, () => {
-        error.setError(ftype, input.value);
+        error.setError(column, input.value);
       });
       break;
     }
@@ -105,16 +105,16 @@ const EditionInput = function (ftype, value, li, updated) {
     case 'YearMonth':
     case 'Date': {
       val = value;
-      if (ftype.type==='YearMonth' && val) {
+      if (column.type==='YearMonth' && val) {
         val = val.replace(/(\d+)-(\d+)-.*/,'$1-$2');
       }
       input = ol_ext_element.create('INPUT', {
         value: val || '',
-        type: ftype.type==='Date' ? 'date' : 'month',
+        type: column.type==='Date' ? 'date' : 'month',
         parent: li
       });
       addChangeListener(input, () => {
-        error.setError(ftype, input.value);
+        error.setError(column, input.value);
       });
       break;
     }
@@ -128,7 +128,7 @@ const EditionInput = function (ftype, value, li, updated) {
         parent: li
       });
       addChangeListener(input, () => {
-        error.setError(ftype, input.value);
+        error.setError(column, input.value);
       });
       break;
     }
@@ -137,8 +137,8 @@ const EditionInput = function (ftype, value, li, updated) {
     case 'Integer':
     case 'Double': {
       // Number si nombre positif ou tel pour avec acces aux signe '-' sur clavier smartphone
-      let type = ((ftype.min_value && ftype.min_value >= 0) || ftype.min_value===0) ? 'number' : 'tel';
-      if (ftype.type==='Year') type = 'number';
+      let type = ((column.min_value && column.min_value >= 0) || column.min_value===0) ? 'number' : 'tel';
+      if (column.type==='Year') type = 'number';
       input = ol_ext_element.create('INPUT', {
         value: value===null ? '' : value,
         type: type, 
@@ -146,7 +146,7 @@ const EditionInput = function (ftype, value, li, updated) {
       });
       addChangeListener(input, () => {
         if (type==='tel') input.value = input.value.replace(/,/g,'.'); // format anglais avec '.' plutot que ','
-        error.setError(ftype, input.value);
+        error.setError(column, input.value);
       });
       break;
     }
@@ -190,16 +190,16 @@ const EditionInput = function (ftype, value, li, updated) {
  */
 EditionInput.prototype.handleChoice = function(cback) {
   const values = {};
-  if (this.ftype.listOfValues) {
-    if (this.ftype.listOfValues.forEach) {
-      this.ftype.listOfValues.forEach((v) => {
+  if (this.column.enum) {
+    if (this.column.enum.forEach) {
+      this.column.enum.forEach((v) => {
         //if (v===null) values[''] = '<i>indéfini</i>';
         //else values[v] = v;
         values[v] = v;
       });
     } else {
-      for (let i in this.ftype.listOfValues) {
-        values[this.ftype.listOfValues[i]] = i;
+      for (let i in this.column.enum) {
+        values[this.column.enum[i]] = i;
       }
     }
     selectDialog(values, $(this.input).data('value'), (val) => {
@@ -266,7 +266,7 @@ EditionInput.prototype.prompt = function(cback) {
  * @return {*} the value
  */
 EditionInput.prototype.val = function() {
-  const type = this.ftype.listOfValues ? 'Choice' : this.ftype.type;
+  const type = this.column.enum ? 'Choice' : this.column.type;
   const input = this.input;
   let val;
   switch (type) {
@@ -301,7 +301,7 @@ EditionInput.prototype.val = function() {
       break;
     }
     case 'String': {
-      if (this.ftype.nullable && !input.value) {
+      if (this.column.nullable && !input.value) {
         if (!this.value) val = this.value;
         else val = null;
       } else {

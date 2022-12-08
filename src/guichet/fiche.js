@@ -2,7 +2,7 @@ import wapp from '../wapp'
 
 import {containsCoordinate as ol_extent_containsCoordinate} from 'ol/extent'
 import {getCenter as ol_extent_getCenter} from 'ol/extent'
-import ol_layer_Vector_Webpart from 'cordovapp/ol/layer/Webpart'
+import ol_layer_Vector_CollabVector from 'cordovapp/ol/layer/CollabVector'
 import RIPart from 'cordovapp/ripart/Ripart'
 import { Feature } from 'ol';
 
@@ -291,14 +291,14 @@ function showGeorem(div, georem, newOne) {
  */
 function showFeature(ul, f, th) {
   // Objet d'un guichet
-  const isEdit = !wapp.isCordova || !f.layer.getFeatureType().readOnly;
+  const isEdit = !wapp.isCordova || !f.layer.getTable().read_only;
   if (isEdit) {
     $('.edit', ul.parent()).show();
   }
   ul.parent().removeClass('edition');
-  var ftype = f.layer.getSource().featureType_;
-  for (let i in ftype.attributes) if (i !== ftype.geometryName) {
-    let att = ftype.attributes[i];
+  var table = f.layer.getSource().table_;
+  for (let i in table.columns) if (i !== table.geometry_name) {
+    let att = table.columns[i];
     switch (att.type) {
       case "Point":
       case "LineString":
@@ -312,7 +312,7 @@ function showFeature(ul, f, th) {
           f.get(i), {
             feature: f, 
             attribute: att,
-            edit: (isEdit && i !== ftype.idName && !att.readOnly)
+            edit: (isEdit && i !== table.id_name && !att.read_only)
           }
         );
         break;
@@ -342,7 +342,7 @@ function showWMSFeature(ul, f, th) {
 function showWFSFeature(ul, f, th) {
   const prop = f.getProperties();
   const geometryName = f.getGeometryName();
-  const att = f.layer.getFeatureType().attributes || {};
+  const att = f.layer.getTable().columns || {};
   for (let i in prop) if (i !== geometryName) {
     _addLine(th, ul, (att[i]?att[i].title:i).replace(/_/g,' '), f.get(i), att[i]?att[i].type:'string');
   }
@@ -444,7 +444,7 @@ wapp.showSelect = function(options) {
         div.addClass("trace");
       } else 
       // GUICHET
-      if (f.layer instanceof ol_layer_Vector_Webpart) {
+      if (f.layer instanceof ol_layer_Vector_CollabVector) {
         showFeature(ul, f, th);
       } else 
       // WMS
@@ -452,7 +452,7 @@ wapp.showSelect = function(options) {
         showWMSFeature(ul, f, th);
       } else 
       // WFS
-      if (f.layer.getFeatureType) {
+      if (f.layer.getTable) {
         showWFSFeature(ul, f, th);
       }
 

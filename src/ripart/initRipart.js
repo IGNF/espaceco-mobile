@@ -311,10 +311,13 @@ function initRipart(wapp) {
     else messageDlg ("Tous les signalements ont déjà été envoyés..."," ");
   }
 
-  document.addEventListener("changegroup", function(e){ 
-    wapp.changeGroup(e);
-    wapp.ripart.setProfil(e.community);
+  $(() => {
+    $(document).on("changegroup", function(e){ 
+      wapp.changeGroup(e);
+      wapp.ripart.setProfil(e.community);
+    });
   });
+  
 
   // Selection d'un signalement
   wapp.ripart.on('select', (e) => {

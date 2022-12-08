@@ -48,7 +48,7 @@ function showFeatureInfo(li, f, conflict) {
 
 /** Save conflict 
  * @param {Element} conflict list
- * @param {ol.layer.Webpart} layer
+ * @param {ol.layer.CollabVector} layer
  * @param {string} theme
  */
 function saveConflicts(ul, layer, group, theme) {
@@ -95,11 +95,11 @@ function saveConflicts(ul, layer, group, theme) {
 }
 
 /** Show conflict page
- * @param {ol.layer.Webpart} layer
+ * @param {ol.layer.CollabVector} layer
  * @param {Array<any>} conflicts
  */
 function showConflicts(layer, conflicts) {
-  const ftype = layer.getFeatureType();
+  const ftype = layer.getTable();
   const ul = $('#conflicts .content ul').html('');
   let theme = null;
   $('#conflicts .content .theme').off()
@@ -149,7 +149,7 @@ function showConflicts(layer, conflicts) {
 
 /** Handle conflicts
  * @param {string} url conflict url
- * @param {ol.layer.Webpart} layer
+ * @param {ol.layer.CollabVector} layer
  */
 wapp.handleConflict = function(url, layer) {
   $.ajax({

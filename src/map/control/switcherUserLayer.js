@@ -54,7 +54,7 @@ export default function(wapp) {
       parent: e.li
     });
     // Supression
-    if (layer.get('type')!=='Webpart') {
+    if (layer.get('type')!=='CollabVector') {
       ol_ext_element.create('I', {
         className: 'fa fa-trash-o',
         click: () => {

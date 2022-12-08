@@ -23,7 +23,7 @@ import ol_format_GPX from 'ol/format/GPX'
 
 import CacheMap from 'cordovapp/ol/cache/CacheMap'
 import CacheVector from 'cordovapp/ol/cache/CacheVector'
-import ol_layer_Webpart from 'cordovapp/ol/layer/Webpart'
+import ol_layer_CollabVector from 'cordovapp/ol/layer/CollabVector'
 
 import config from './config';
 import { wappStorage } from 'cordovapp/cordovapp/CordovApp'
@@ -59,7 +59,7 @@ import * as fs from 'fs';
     */
     /* Gestion du mode hors-connexion 
      * Rafraichir la carte quand on recupere la connexion
-     * Pour les layers Webpart switch mode en ligne/hors ligne
+     * Pour les layers Wfs collaboratif switch mode en ligne/hors ligne
      */
     document.addEventListener("online", function(){
       wapp.refreshMap();
@@ -239,7 +239,7 @@ import * as fs from 'fs';
 
   /**
    * Switch mode en ligne / hors ligne
-   * sur les couches Webpart
+   * sur les couches wfs collaboratif
    * @param {bool} online 
    * @param {Collection<Layer>} layers
    * @param {boolean} silent pas d'affichage de la notification
@@ -254,7 +254,7 @@ import * as fs from 'fs';
     layers.forEach((l) => {
       if (l.getLayers) {
         wapp.switchLayersOnline(online, l.getLayers(), true);
-      } else if (l instanceof ol_layer_Webpart) {
+      } else if (l instanceof ol_layer_CollabVector) {
         l.online(online);
       }
     });
@@ -525,7 +525,7 @@ wapp.changeGroup = function (e) {
   var layersTab = [];
   // Recuperer les userLayers
   lgroup.getLayers().forEach((l) => {
-    if (l.get('type')!=='Webpart') {
+    if (l.get('type')!=='CollabVector') {
       layersTab.push(l);
     }
   });
@@ -565,7 +565,7 @@ wapp.changeGroup = function (e) {
           })
         };
         const layer = new ol_layer_Tile (wmsParam);
-        layer.set('type', 'Webpart');
+        layer.set('type', 'CollabVector');
         layer.on('change:visible', () => {
           wapp.saveContext();
         });
@@ -771,7 +771,7 @@ wapp.refreshMap = function(layers) {
           // Refresh signalements
           wapp.ripart.signalements.getSource().getSource().clear();
         } else if (l.getSource().reload) {
-          // Reload Webpart layer (when no cache)
+          // Reload CollabVector layer (when no cache)
           if (!l.get('cache')) {
             l.getSource().reload();
           }

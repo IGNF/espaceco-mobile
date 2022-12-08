@@ -30,15 +30,15 @@ EditionError.prototype.show = function() {
 };
 
 /** Gestion des erreurs et contraintes de saisie
- * @param {FeatureType} ftype
+ * @param {*} column table attribute
  * @param {*} value
  * @private
  */
-EditionError.prototype.setError = function(ftype, value) {
-  this.error = this._getError(ftype, value);
+EditionError.prototype.setError = function(column, value) {
+  this.error = this._getError(column, value);
   if (this.inline) this.element.innerText = this.error;
   if (this.error) {
-    console.log('setError', ftype, value)
+    console.log('setError', column, value)
     this.li.classList.add('error');
   }
   else {
@@ -47,18 +47,18 @@ EditionError.prototype.setError = function(ftype, value) {
 };
 
 /** Gestion des erreurs et contraintes de saisie
- * @param {FeatureType} ftype
+ * @param {*} column
  * @param {*} value
  * @private
  */
-EditionError.prototype._getError = function(ftype, value) {
-  const att = ftype.name;
-  switch (ftype.type) {
+EditionError.prototype._getError = function(column, value) {
+  const att = column.name;
+  switch (column.type) {
     case 'String': {
-      if (ftype.max_length && value.length > ftype.max_length) {
-        return ('Chaine trop longue ('+ftype.max_length+' caractères maxi.)...');
-      } else if (ftype.min_length && value.length < ftype.min_length) {
-        return ('Chaine trop courte ('+ftype.min_length+' caractères mini.)...');
+      if (column.max_length && value.length > column.max_length) {
+        return ('Chaine trop longue ('+column.max_length+' caractères maxi.)...');
+      } else if (column.min_length && value.length < column.min_length) {
+        return ('Chaine trop courte ('+column.min_length+' caractères mini.)...');
       }
       break;
     }
@@ -66,35 +66,35 @@ EditionError.prototype._getError = function(ftype, value) {
     case 'Integer':
     case 'Double': {
       // Valeur null autorisee
-      if (value!==0 && !value && ftype.nullable) break;
+      if (value!==0 && !value && column.nullable) break;
       // Nombre valide
       if ((value!==0 && !value) || isNaN(Number(value))) {
-        if (ftype.type==='Year') {
+        if (column.type==='Year') {
           return ('"'+att+'" doit être une année...');
         }
         return ('"'+att+'" doit être un nombre valide...');
-      } else if (ftype.type === 'Integer' && parseInt(value) !== parseFloat(value)) {
+      } else if (column.type === 'Integer' && parseInt(value) !== parseFloat(value)) {
         return ('"'+att+'" doit être un entier...');
-      } else if (ftype.min_value && parseFloat(value) < ftype.min_value) {
-        if (ftype.min_value === 0) return ('"'+att+'" doit être positif...');
-        else return ('Valeur trop petite ( > '+ftype.min_value+')...');
-      } else if (ftype.max_value  && parseFloat(value) > ftype.max_value ) {
-        return ('Valeur trop grande ( < '+ftype.max_value +')...');
+      } else if (column.min_value && parseFloat(value) < column.min_value) {
+        if (column.min_value === 0) return ('"'+att+'" doit être positif...');
+        else return ('Valeur trop petite ( > '+column.min_value+')...');
+      } else if (column.max_value  && parseFloat(value) > column.max_value ) {
+        return ('Valeur trop grande ( < '+column.max_value +')...');
       }
       break;
     }
   }
   // Non nulle
-  if (ftype.nullable === false && value==='') {
+  if (column.nullable === false && value==='') {
     return ('Vous devez entrer une valeur...');
   }
   // required 
-  if (ftype.required && value==='') {
+  if (column.required && value==='') {
     return ('Champ obligatoire...');
   }
   // pattern  
-  if (ftype.pattern && !(new RegExp(ftype.pattern)).test(value) && value !== '') {
-    switch (ftype.pattern) {
+  if (column.pattern && !(new RegExp(column.pattern)).test(value) && value !== '') {
+    switch (column.pattern) {
       case '^([a-z0-9_\\.-]+)@([\\da-z\\.-]+)\\.([a-z\\.]{2,6})$':
         return ('La valeur doit être une adresse mail valide...');
       case '^(https?:\\/\\/)?([\\da-z\\.-]+).([a-z\\.]{2,6})([\\/\w\\.-]*)*\\/?$':
@@ -106,7 +106,7 @@ EditionError.prototype._getError = function(ftype, value) {
       case '^((0[1-9]|[1-8]\\d|9[0-5]|2[AB])\\d{3})|((97[1-5]|98[46789])\\d{2})$':
         return ('La valeur doit être un code INSEE valide...');
       default:
-        return ('La valeur doit être de la forme : '+ftype.pattern);
+        return ('La valeur doit être de la forme : '+column.pattern);
     }
   }
   return '';

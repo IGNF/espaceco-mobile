@@ -73,7 +73,7 @@ var getCacheExtentHtml = function(name) {
 var getCacheLayerHtml = function(layer, cache) {
     let vectorLayer = null;
     wapp.getLayerGuichet().getLayersArray().forEach((l, i) => {
-        if (l.get('name') && layer.featureType && l.get("name") == layer.featureType.fullName) vectorLayer = l;
+        if (l.get('name') && layer.table && l.get("name") == layer.table.full_name) vectorLayer = l;
     });
     let circleClass="fa fa-circle";
     if (cache.loaded) circleClass += ' loaded';
@@ -243,8 +243,8 @@ function initOffline(wapp) {
         var list = $('li[data-param="layer"]', content);
         const guichet = wapp.getLayerGuichet();
         for (var i=0, l; l = guichet.getLayers().getArray()[i]; i++) {
-            if (typeof l.getFeatureType == 'function' && l.getFeatureType()) {
-                let ft = l.getFeatureType();
+            if (typeof l.getTable == 'function' && l.getTable()) {
+                let ft = l.getTable();
                 let geomType = ft.attributes[ft.geometryName].type;
                 if (geomType.indexOf("Polygon") == -1) continue; // on filtre les couches non surfaciques
                 $("<div>")

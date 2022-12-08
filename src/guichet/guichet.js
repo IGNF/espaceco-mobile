@@ -234,21 +234,6 @@ wapp.initGuichets = function() {
     $('body').removeClass('guichet');
   }
 
-  // Update on show
-  // $('#communities').on('showpage', () => {
-  //   $('li', ul).each(function() {
-  //     const groupe = $(this).data('groupe');
-  //     const c = wapp.getCache(groupe);
-  //     $(this).removeClass('cache edit');
-  //     if (c.auth) {
-  //       $(this).addClass('cache');
-  //     }
-  //     if (c.cache) {
-  //       $(this).addClass('cache edit');
-  //     }
-  //   });
-  // });
-
 console.log('[TODO] set guichet')
   wapp.setGuichet(current);
 };
@@ -271,66 +256,65 @@ wapp.setGuichet = function(groupe) {
   } else {
     document.body.removeAttribute('data-guichet');
   }
+
+  var success =  function(community) {
+    let layers = community.layers;
+    const geoportailLayers = {};
+    for (let i in layers) {
+      let geoservice = layers[i].geoservice;
+      let type = geoservice ? geoservice.type : 'WFS';
+      if (type != 'WFS' && geoservice.url.indexOf('geoportail') != -1) {
+        geoportailLayers[geoservice.layers] = layers[i];
+      }
+    }
+
+    // Mettre a jour la liste
+    $('#communities li').each(function() {
+      if ($(this).data('groupe')===groupe) $(this).addClass('selected');
+      else $(this).removeClass('selected');
+    });
+
+    // Mettre a jour la page des couches
+    const gdiv = $('#couches .couches .couche.guichet');
+    $('.name', gdiv).text(wapp.guichet.name || '');
+
+    $("#couches").on('showpage', function(){
+      let nbModifs = 0;
+      let layers = wapp.getLayerGuichet().getLayers().getArray();
+      for (let i in layers) {
+        if (!layers[i].getSource() || typeof layers[i].getSource().nbModifications != 'function') continue;
+        nbModifs = parseInt(nbModifs) + parseInt(layers[i].getSource().nbModifications());
+      }
+      $(".fa-send .tag", gdiv).text(nbModifs);
+    });
+
+    $(".fa-send", gdiv).on('click', function(){
+      if (parseInt($(".fa-send .tag", gdiv).text()) < 1) {
+        wapp.alert("Toutes les modifications ont déjà été envoyées.");
+        return;
+      }
+      let layers = wapp.getLayerGuichet().getLayers().getArray();
+      let layersToSave = [...layers];
+      saveLayers(layersToSave);
+    });
+
+    // Mettre a jour le guichet
+    wapp.setInfoGuichet(groupe);
+    // Charger les couches
+    wapp.loadLayers(groupe);
+    // Afficher
+    wapp.getLayerGuichet().setVisible(wapp.param.visibleLayers.guichet);
+
+    setGeoportailLayers(geoportailLayers);
+  };
   
   // Nouveau guichet
-  wapp.userManager.setCommunity(groupe.id);
-  wapp.guichet = wapp.userManager.getGroupById(groupe.id);
-  wapp.userManager.saveParam();
-  wapp.select.getFeatures().clear();
-  wapp.onSelect();
-
-  // Chargement de la config des layers
   if (groupe && groupe.id) {
-    wapp.userManager.getLayersInfo(groupe.id).then((layers) => {
-      const geoportailLayers = {};
-      for (let i in layers) {
-        let geoservice = layers[i].geoservice;
-        let type = geoservice ? geoservice.type : 'WFS';
-        let title = geoservice ? geoservice.title : layers[i].table.title
-        if (type != 'WFS' && geoservice.url.indexOf('geoportail') != -1) {
-          geoportailLayers[geoservice.layers] = layers[i];
-        }
-      }
-
-       // Mettre a jour la liste
-      $('#communities li').each(function() {
-        if ($(this).data('groupe')===groupe) $(this).addClass('selected');
-        else $(this).removeClass('selected');
-      });
-
-      // Mettre a jour la page des couches
-      const gdiv = $('#couches .couches .couche.guichet');
-      $('.name', gdiv).text(wapp.guichet.name || '');
-
-      $("#couches").on('showpage', function(){
-        let nbModifs = 0;
-        let layers = wapp.getLayerGuichet().getLayers().getArray();
-        for (let i in layers) {
-          if (!layers[i].getSource() || typeof layers[i].getSource().nbModifications != 'function') continue;
-          nbModifs = parseInt(nbModifs) + parseInt(layers[i].getSource().nbModifications());
-        }
-        $(".fa-send .tag", gdiv).text(nbModifs);
-      });
-
-      $(".fa-send", gdiv).on('click', function(){
-        if (parseInt($(".fa-send .tag", gdiv).text()) < 1) {
-          wapp.alert("Toutes les modifications ont déjà été envoyées.");
-          return;
-        }
-        let layers = wapp.getLayerGuichet().getLayers().getArray();
-        let layersToSave = [...layers];
-        saveLayers(layersToSave);
-      });
-
-      // Mettre a jour le guichet
-      wapp.setInfoGuichet(groupe);
-      // Charger les couches
-      wapp.loadLayers(groupe);
-      // Afficher
-      wapp.getLayerGuichet().setVisible(wapp.param.visibleLayers.guichet);
-
-      setGeoportailLayers(geoportailLayers);
-    });
+    wapp.userManager.setCommunity(groupe.id, success);
+    wapp.guichet = wapp.userManager.getGroupById(groupe.id);
+    wapp.userManager.saveParam();
+    wapp.select.getFeatures().clear();
+    wapp.onSelect();
   } else {
     setGeoportailLayers();
   }
@@ -508,7 +492,7 @@ wapp.updateCache = function(layer) {
 };
 
 /** Ajouter un layer au cache
- * @param {ol.layer.Webpart} layer
+ * @param {ol.layer.CollabVector} layer
  */
 wapp.appendLayerToCache = function(layer) {
   if (!layer.table) return;

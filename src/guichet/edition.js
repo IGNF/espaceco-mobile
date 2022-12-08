@@ -7,21 +7,21 @@ import EditionInput from './EditionInput';
 /** Ajouter une nouvelle ligne a éditer
  * @param {Element} ul liste element
  * @param {ol.Feature} feature current feature
- * @param {*} ftype featureType attribute
+ * @param {*} table table attribute
  * @param {string} att current attribut name
  */
-function _addLine (ul, feature, ftype) {
-  if (ftype.readOnly) return;
+function _addLine (ul, feature, table) {
+  if (table.read_only) return; 
 
   // New line
   const li = ol_ext_element.create('LI', {
-    className: 'edition '+ftype.type,
+    className: 'edition '+table.type,
     parent: ul
   });
 
   // New imput
-  const att = ftype.name;
-  return new EditionInput(ftype, feature.get(att), li, feature._updates ? feature._updates[att] : undefined)
+  const att = table.name;
+  return new EditionInput(table, feature.get(att), li, feature._updates ? feature._updates[att] : undefined)
 }
 
 /** Edit current feature
@@ -35,7 +35,7 @@ wapp.editFeature = function() {
   // Mode edition
   const div = document.querySelector('#fiche .selection');
   div.classList.remove('multi');
-  const ftype = feature.layer.getFeatureType();
+  const table = feature.layer.getTable();
   div.querySelector('.edit').style.display = 'none';
   
   const ul = div.querySelector('.fiche').querySelector('ul');
@@ -44,9 +44,9 @@ wapp.editFeature = function() {
   
   // Formulaire
   var i;
-  for (i in ftype.attributes) {
-    if (i !== ftype.geometryName && i !== ftype.idName) {
-      editProperties[i] = _addLine(ul, feature, ftype.attributes[i]);
+  for (i in table.columns) {
+    if (i !== table.geometry_name && i !== table.id_name) {
+      editProperties[i] = _addLine(ul, feature, table.columns[i]);
     }
   }
   // Show selected themes attr
