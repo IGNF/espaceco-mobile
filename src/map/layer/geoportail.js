@@ -22,59 +22,50 @@ const defaultLayers = [
   'ORTHOIMAGERY.ORTHOPHOTOS'
 ];
 
-const defaultOverlays = [
-  new ol_layer_Geoportail('ELEVATION.ELEVATIONGRIDCOVERAGE.SHADOW', { gppKey: config.apiKey, hidpi: false, visible: false, displayInLayerSwitcher: true }, { gppKey: config.apiKey, authentication: config.auth }),
-  new ol_layer_Geoportail('CADASTRALPARCELS.PARCELS', { gppKey: config.apiKey, hidpi: false, visible: false, displayInLayerSwitcher: true }, { gppKey: config.apiKey, authentication: config.auth })
-];
-
-const geoportailOverlays = {
-  'HYDROGRAPHY.HYDROGRAPHY': 1,
-  'CADASTRALPARCELS.PARCELS': 1,
-  'CADASTRALPARCELS.PARCELLAIRE_EXPRESS': 1,
-  'ADMINISTRATIVEUNITS.BOUNDARIES': 1,
-  'BUILDINGS.BUILDINGS': 1,
-  'TRANSPORTNETWORKS.RAILWAYS': 1,
-  'TRANSPORTNETWORKS.ROADS': 1
-}
-
 const geoportailLayer = new ol_layer_Group({
-  title: 'Fonds Géoportail', 
-  name: 'GEOPORTAL_LAYERS',
+  title: 'Géoservices', 
+  name: 'geoportailGroup',
   openInLayerSwitcher: false
 });
 export { geoportailLayer }
 
-const geoportailOverlay = new ol_layer_Group({
-  title: 'Couches Géoportail', 
-  name: 'GEOPORTAL_OVERLAYS',
-  openInLayerSwitcher: false
-});
-export { geoportailOverlay }
+/**
+ * Ajout des layers dans l'ordre
+ * @param {Object} layers object clé = nom de la couche valeur = objet layer ou objet vide
+ */
 
-
-// Ajout des layers dans l'ordre
 function addLayers (layers) {
-  const keys = Object.keys(wapp.param.visibleLayers);
-  layers.sort((a,b) => keys.indexOf(a) - keys.indexOf(b));
+  let oneVisible = false;
   const caps = window.geoportailConfig.capabilities['default'];
-  layers.forEach((l) => {
-    if (caps[l]) {
-      let options = { hidpi: false, visible: wapp.param.visibleLayers[l] || false };
+  for (var name in layers) {
+    if (caps[name]) {
+      let visible = wapp.param.visibleLayers[name] || layers[name].visibility || false;
+      if (visible) oneVisible = true;
+      let options = { hidpi: false, visible: visible };
+      if (layers[name] && Object.keys(layers[name]).length) {
+        options["opacity"] = layers[name].opacity;
+        options["zIndex"] = layers[name].order;
+        if (layers[name].geoservice.length) {
+          options["minZoom"] = layers[name].geoservice["min-zoom"];
+          options["maxZoom"] = layers[name].geoservice["max-zoom"];
+        }
+      }
       let tileOptions = { authentication: config.auth };
-      if (!caps[l]['key']) {
+      if (!caps[name]['key']) {
         options['gppKey'] = config.apiKey;
         tileOptions['gppKey'] = config.apiKey;
       }
-      const gpl = new ol_layer_Geoportail(l, options, tileOptions);
-      if (geoportailOverlays[l]) {
-        geoportailOverlay.getLayers().push(gpl);
-      } else {
-        geoportailLayer.getLayers().push(gpl);
-      }
+      const gpl = new ol_layer_Geoportail(name, options, tileOptions);
+      geoportailLayer.getLayers().push(gpl);
     } else {
-      console.warn('[GEOPORATAIL-CONFIG] Bad layer: ', l);
+      console.warn('[GEOPORATAIL-CONFIG] Bad layer: ', name);
     }
-  });
+  };
+  geoportailLayer.setVisible(true);
+  if (!oneVisible) {
+    let geolayers = geoportailLayer.getLayersArray();
+    geolayers[0].setVisible(true);
+  }
 }
 
 /** Add Geoportail layers to the map
@@ -84,14 +75,12 @@ function setGeoportailLayers(layers) {
   wapp.layerReady = false;
 
   geoportailLayer.getLayers().clear();
-  geoportailOverlay.getLayers().clear();
-  geoportailOverlay.set('displayInLayerSwitcher', true);
   if (!layers || !Object.keys(layers).length) {
-    addLayers(defaultLayers);
+    let defaultLayersByName = Object.fromEntries(defaultLayers.map(obj => [obj, {}]));
+    addLayers(defaultLayersByName);
     return;
   } 
   
-  layers = Object.keys(layers);
   addLayers(layers);
 
   wapp.layerReady = true;

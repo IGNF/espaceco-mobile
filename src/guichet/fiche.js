@@ -5,6 +5,7 @@ import {getCenter as ol_extent_getCenter} from 'ol/extent'
 import ol_layer_Vector_CollabVector from 'cordovapp/ol/layer/CollabVector'
 import RIPart from 'cordovapp/ripart/Ripart'
 import { Feature } from 'ol';
+import moment from 'moment';
 
 /** Get title */
 function getFeatureTitle(f) {
@@ -172,13 +173,14 @@ function showGeorem(div, georem, newOne) {
   // pour une alerte existante le feature ne contient pas l info du nom de l auteur
   // il faut faire un get report pour recuperer l info du nom de l auteur
   // ne marche que si l utilisateur est connecte
-  if (georem.id && !georem.author.name && wapp.ripart.apiClient.isConnected()) {
+  if (georem.id && !georem.author.username && wapp.ripart.apiClient.isConnected()) {
     wapp.wait(true);
-    wapp.ripart.apiClient.getReport(georem.id).then((report) => {
+    wapp.ripart.apiClient.getReport(georem.id).then((response) => {
       wapp.wait(false);
+      let report = response.data;
       georem.author = report.author;
       georem.replies = report.replies;
-      this.showGeorem(div, report, newOne);
+      showGeorem(div, report, newOne);
     }).catch((error) => {
       wapp.wait(false);
       wapp.alert("Une erreur s'est produite lors de la récupération du signalement.");
@@ -189,11 +191,25 @@ function showGeorem(div, georem, newOne) {
   if (georem.sketch) georem.nb = wapp.ripart.sketch2feature(georem.sketch).length;
   else georem.nb = 0;
   if (!georem.status) georem.status = ' ';
-  if (georem.author && georem.author.name ) {
-    georem.author_name = georem.author.name;
+  if (georem.author && georem.author.username ) {
+    georem.author_name = georem.author.username;
   } else{
     georem.author_name = '?';
   }
+  georem.commune_name = georem.commune.title;
+  georem.id_dep = georem.departement.name;
+  georem.pretty_opening_date = moment(georem.opening_date).format('YYYY-MM-DD HH:mm:ss');
+  georem.attText = '';
+  for (var i in georem.attributes) {
+    let att = georem.attributes[i].attributes;
+    let group = wapp.userManager.getGroupById(georem.attributes[i].community);
+    georem.attributes[i].community_name = group ? group.name : "community: "+georem.attributes[i].community;
+    for (var key in att) {
+      georem.attText += key+": "+att[key]+"\n";
+    }
+  }
+  georem.attText = georem.attText.trim();
+
   const georemDiv = $(".georem", div);
   // Show attributes
   wapp.dataAttributes(georemDiv, georem);

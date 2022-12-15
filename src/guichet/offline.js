@@ -244,8 +244,8 @@ function initOffline(wapp) {
         const guichet = wapp.getLayerGuichet();
         for (var i=0, l; l = guichet.getLayers().getArray()[i]; i++) {
             if (typeof l.getTable == 'function' && l.getTable()) {
-                let ft = l.getTable();
-                let geomType = ft.attributes[ft.geometryName].type;
+                let table = l.getTable();
+                let geomType = table.columns[table["geometry_name"]].type;
                 if (geomType.indexOf("Polygon") == -1) continue; // on filtre les couches non surfaciques
                 $("<div>")
                     .attr('data-input-role', 'option')
@@ -292,7 +292,7 @@ function initOffline(wapp) {
     $("#select-area-btn").on('click', function(){
         let extentsNames = cacheExtents.getExtentNames();
         if (Object.keys(extentsNames).length == 0) {
-            cache = wapp.getCache(wapp.guichet).cache;
+            let cache = wapp.getCache(wapp.guichet).cache;
             wapp.vectorCache.removeCache(cache);
             wapp.alert("Vous devez saisir une zone pour le chargement du cache");
             return;

@@ -171,6 +171,7 @@ function initRipart(wapp) {
   wapp.userManager = new UserManagerTemplating(apiClient, {
     infoElement: '#options .connect span.connected' //[data-input-role="info"]
   })
+  $(() => {wapp.userManager.initialize();});
   wapp.ripart = new RIPart(apiClient, {
     map: map,
     countElement: '.georemsCount span',
@@ -315,6 +316,15 @@ function initRipart(wapp) {
     $(document).on("changegroup", function(e){ 
       wapp.changeGroup(e);
       wapp.ripart.setProfil(e.community);
+      wapp.ripart.formElement.addClass("connected");
+    });
+  });
+  $(() => {
+    $(document).on("api_disconnect", function(e){
+      wapp.ripart.setProfil();
+      wapp.ripart.param = { georems:[], nbrem:0 };
+      wapp.ripart.saveParam();
+      wapp.ripart.formElement.removeClass("connected");
     });
   });
   
@@ -352,9 +362,6 @@ function initRipart(wapp) {
     // Ne plus selectionner
     wapp.select.setActive(false);
   });
-
-  // Patience
-  wapp.waitLogo ("Connexion...");
   
   $("#signalements button").click(function(){ wapp.select.getFeatures().clear(); });
   if (wapp.ripart.param.profil) {
@@ -386,22 +393,7 @@ function initRipart(wapp) {
   // Set parameters
   wapp.paramInput.change();
 
-  // Actualiser le compte
-  var timer = new Date();
-  wapp.userManager.checkUserInfo(
-    function () {
-      timer = (new Date())-timer;
-      setTimeout (function () { wapp.wait(false); }, Math.max(0, 2000 - timer));
-      wapp.notification("Connecté au service",1200);
-      wapp.initGuichets();
-    }, 
-    function() {
-      timer = (new Date())-timer;
-      wapp.waitLogo("Chargement...");
-      setTimeout (function () { wapp.wait(false); }, Math.max(0, 2000 - timer)); 
-      wapp.initGuichets();
-    }
-  );
+  wapp.initGuichets();
 
   // Gerer la coherence
   $("#fiche").on('showpage', function() {

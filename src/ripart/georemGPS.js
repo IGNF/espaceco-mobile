@@ -28,24 +28,20 @@ let geolocation;
 wapp.ready(() => {
   // On group change, check if direct GPS is enabled
   $('#signalerGPS').hide()
-  function handleGPS() {
-    if (wapp.ripart) {
-      $('#signalerGPS').hide()
-      wapp.ripart.on('changegroup', (e) => {
-        $('#signalerGPS').hide()
+  $(() => {
+    $(document).on("changegroup", (e) => {
+      $('#signalerGPS').hide();
+      //on met un timeout car le setProfil doit d abord avoir ete fait
+      setTimeout(() => {
         // SignalerGPS rapide (si thèmes rapides)
         if (wapp.ripart.param.themes) {
           wapp.ripart.param.themes.forEach((th) => {
-            if (/^GPS@|^Rapide@/.test(th.name)) $('#signalerGPS').show();
+            if (/^GPS@|^Rapide@/.test(th.theme)) $('#signalerGPS').show();
           });
         }
-      });
-    } else  {
-      // Try next
-      setTimeout(handleGPS, 500);
-    }
-  }
-  handleGPS();
+      }, 100);
+    });
+  });
 
   // Interaction
   if (!wapp.interactions) wapp.interactions = {};
@@ -373,7 +369,7 @@ function startDirectGPS(c, theme) {
     themes: JSON.stringify(c)+'=>"1"',
     version: "0.1",
   }
-  theme.attributs.forEach((a)=> {
+  theme.attributes.forEach((a)=> {
     if (a.defaultVal) {
       georem.attributes += ',"'+c+"::"+a.att+'"=>"'+a.defaultVal+'"';
       georem.attText +=  a.att+': '+a.defaultVal+'\n';
@@ -389,9 +385,9 @@ wapp.directGPS = function() {
   var themes = {};
   var nb = 0;
   wapp.ripart.param.themes.forEach((th) => {
-    if (/^GPS@|^Rapide@/.test(th.name)) {
-      choix[th.community_id+"::"+th.name] = th.name;
-      themes[th.community_id+"::"+th.name] = th;
+    if (/^GPS@|^Rapide@/.test(th.theme)) {
+      choix[th.community_id+"::"+th.theme] = th.theme;
+      themes[th.community_id+"::"+th.theme] = th;
       nb++;
     }
   });

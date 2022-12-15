@@ -166,10 +166,7 @@ import * as fs from 'fs';
     initRipart(wapp);
     layerRipart(wapp);
 
-
     wapp.setDebugMode(); 
-
-
 
     // A propos 
     $('#apropos').on('showpage', function(){

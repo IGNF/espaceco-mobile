@@ -4,7 +4,6 @@ import ol_layer_Vector_WFS from 'cordovapp/ol/layer/WFS'
 
 import wapp from '../wapp'
 import CordovApp from 'cordovapp/CordovApp'
-import downloadDocument from 'cordovapp/collaboratif/Document'
 import setGeoportailLayers from '../map/layer/geoportail'
 import './layer'
 import './edition'
@@ -53,7 +52,7 @@ wapp.getCache = function (groupe) {
   if (groupe && groupe.layers) {
     const cache = wapp.param.vectorCache;
     groupe.layers.forEach((l) => {
-      if (l.type==='WFS') { //@TODO a changer
+      if (l.type==='feature-type') { //@TODO a changer
         // Has authentication ?
         info.auth = info.auth || l.username; 
         // Hors ligne ?
@@ -169,7 +168,7 @@ wapp.initGuichets = function() {
   var ul = $('#communities [data-role="content"] ul');
   if (!template) template = $('[data-role="template"]', ul).html();
   ul.html("");
-  if (!wapp.userManager.apiClient.isConnected()) {
+  if (!wapp.userManager.apiClient.isConnected() && !wapp.userManager.param.communities) {
     wapp.setGuichet();
     setGeoportailLayers();
     return;
@@ -188,10 +187,9 @@ wapp.initGuichets = function() {
     console.log('Guichets: '+ g.id);
     // Chargement des logos
     if (g.logo_url) {
-      downloadDocument(
-        g.logo_url, 
-        "TMP/logo/"+g.id
-      );
+      wapp.userManager.apiClient.getDocument(encodeURI(g.logo_url)).then((response) => {
+        CordovApp.File.saveData(response.data, "TMP/logo/"+g.id, null, null, true);
+      });
     }
     if (wapp.noguichetConfig !== undefined && wapp.noguichetConfig == g.id) {
       current = g
@@ -234,7 +232,6 @@ wapp.initGuichets = function() {
     $('body').removeClass('guichet');
   }
 
-console.log('[TODO] set guichet')
   wapp.setGuichet(current);
 };
 
@@ -248,6 +245,7 @@ wapp.setGuichet = function(groupe) {
     groupe = wapp.userManager.getGroupById(groupe);
   }
   if (!groupe) groupe = { };
+  wapp.select.getFeatures().clear();
 
   // Check if has groupe
   if (wapp.userManager.param && wapp.userManager.param.communities) {
@@ -258,6 +256,8 @@ wapp.setGuichet = function(groupe) {
   }
 
   var success =  function(community) {
+    wapp.guichet = community;
+    wapp.onSelect();
     let layers = community.layers;
     const geoportailLayers = {};
     for (let i in layers) {
@@ -299,9 +299,9 @@ wapp.setGuichet = function(groupe) {
     });
 
     // Mettre a jour le guichet
-    wapp.setInfoGuichet(groupe);
+    wapp.setInfoGuichet(community);
     // Charger les couches
-    wapp.loadLayers(groupe);
+    wapp.loadLayers(community);
     // Afficher
     wapp.getLayerGuichet().setVisible(wapp.param.visibleLayers.guichet);
 
@@ -310,12 +310,14 @@ wapp.setGuichet = function(groupe) {
   
   // Nouveau guichet
   if (groupe && groupe.id) {
-    wapp.userManager.setCommunity(groupe.id, success);
-    wapp.guichet = wapp.userManager.getGroupById(groupe.id);
-    wapp.userManager.saveParam();
-    wapp.select.getFeatures().clear();
-    wapp.onSelect();
+    wapp.userManager.setCommunity(groupe.id).then((community) => {
+      success(community);
+    });
   } else {
+    // Mettre a jour le guichet
+    wapp.setInfoGuichet(groupe);
+    // Charger les couches
+    wapp.loadLayers(groupe);
     setGeoportailLayers();
   }
 };

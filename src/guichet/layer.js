@@ -324,12 +324,7 @@ wapp.loadLayers = function (groupe) {
   // Reset source pour la recherche
   wapp.setSearchSource ();
 
-	// Mettre les signalements en haut de la pile de calque
 	if (nb) {
-    /*
-    wapp.map.removeLayer(wapp.ripart.layer);
-    wapp.map.addLayer(wapp.ripart.layer);
-    */
 		wapp.notification("Chargement des guichets...");
 	}
 };
