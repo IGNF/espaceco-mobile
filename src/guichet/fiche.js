@@ -179,6 +179,10 @@ function showGeorem(div, georem, newOne) {
       wapp.wait(false);
       let report = response.data;
       georem.author = report.author;
+      for (let i in report.replies) {
+        report.replies[i].author_name = report.replies[i].author.username;
+        report.replies[i].date = moment(report.replies[i].date).format('YYYY-MM-DD HH:mm:ss');
+      }
       georem.replies = report.replies;
       showGeorem(div, report, newOne);
     }).catch((error) => {
@@ -219,7 +223,7 @@ function showGeorem(div, georem, newOne) {
   }
   // Reply
   const replyBt = $('button.response', georemDiv).off();
-  if (/W/.test(georem.autorisation)) {
+  if (wapp.ripart.canReply(georem)) {
     var isok;
     switch (georem.status) {
       case 'submit':
@@ -272,13 +276,15 @@ function showGeorem(div, georem, newOne) {
             wapp.wait(false);
             if (error) {
               var msg = "Impossible d'envoyer la réponse.<br/>";
-              if (error.status==0) {
+              if (!error.response) {
                 msg = $('<div>').html(msg+"Vérifiez votre connexion ou réessayez lorsque vous serez à nouveau connecté au réseau.");
               } else {
                 msg = $('<div>').html(msg+"Réponse incorrecte...");
               }
+              let errorTxt = (error.response && error.response.data) ?  error.response.data.code + " : " + error.response.data.message : error.message;
+              errorTxt = errorTxt ? errorTxt : error;
               $("<i>").addClass('error')
-                .html("<br/>Erreur : "+error.status+" - "+error.statusText+"</i>")
+                .html("<br/>Erreur : "+errorTxt+"</i>")
                 .appendTo(msg);
               wapp.alert(msg);
             }

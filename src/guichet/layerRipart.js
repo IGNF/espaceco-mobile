@@ -27,6 +27,7 @@ function layerRipart(wapp) {
       );
     },
     loadCache: function(options) {
+      console.log('logCache'); console.log(options);
       var fileName = dir + options.tileCoord.join('-');
       CordovFile.read(
         fileName, 

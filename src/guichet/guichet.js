@@ -9,8 +9,6 @@ import './layer'
 import './edition'
 import './conflict'
 import './fiche'
-import * as fs from 'fs';
-import { table } from 'console'
 
 let template = null;
 let saveLayers = function(layers) {
@@ -306,12 +304,18 @@ wapp.setGuichet = function(groupe) {
     wapp.getLayerGuichet().setVisible(wapp.param.visibleLayers.guichet);
 
     setGeoportailLayers(geoportailLayers);
+
+    //on recharge la couche des signalements
+    wapp.ripart.signalements.getSource().getSource().clear();
   };
   
   // Nouveau guichet
   if (groupe && groupe.id) {
+    wapp.waitLogo("Chargement du groupe", true);
     wapp.userManager.setCommunity(groupe.id).then((community) => {
       success(community);
+    }).finally(() => {
+      wapp.wait(false);
     });
   } else {
     // Mettre a jour le guichet
@@ -419,40 +423,6 @@ wapp.showRipartForm = function() {
   wapp.showPage('fiche', 'signal');
 };
 
-/** Affichage de la page de gestion des cartes
-*	- Mise a jour des infos du guichet
-*/
-$("#cartes").on("showpage", function() {
-  if (!wapp.vector) return;
-
-  console.log("TODO : cartes info");
-  return;
-/*
-  var ftype = wapp.vector.getFeatureType();
-  var d = $("li[title=\""+ftype.fullName+"\"]", this);
-
-  $('li', this).removeClass("select");
-  $('li [data-input-role="info"]', this).html("");
-
-  d.addClass('select');
-
-  if (wapp.vector.getSource())
-  {	var features = wapp.vector.getSource().getFeatures();
-    var nb = features.length;
-    var t={};
-    for (var i=0, f; f = features[i]; i++)
-    {	var s = f.getState();
-      if (!t[s]) t[s]=1;
-      else t[s] += 1;
-    }
-
-    var info = nb + " objet(s) chargé(s)"
-      + " - "
-      + (t.Update||0) + " objet(s) modifié(s)";
-    $('[data-input-role="info"]', d).html(info);
-  }
-*/
-});
 
 /** Ouverture de la page de chargement du cache 
  */

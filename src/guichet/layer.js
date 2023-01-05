@@ -234,7 +234,7 @@ wapp.loadLayers = function (groupe) {
     groupe.layers.forEach((l) => {
       var found = false;
       for (let i=0, c; c=cacheLayers[i]; i++) {
-        if (c.nom === l.table.name && c.url === l.table.uri) {
+        if (l.table && c.nom === l.table.name && c.url === l.table.uri) {
           found = true;
           break;
         }

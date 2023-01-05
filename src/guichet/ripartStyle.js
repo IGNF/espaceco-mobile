@@ -28,7 +28,7 @@ function filterFeature (f) {
   }
   if (filter.istheme) {
     let found = false;
-    f.get('ripart').themes.forEach(t => {
+    f.get('ripart').attributes.forEach(t => {
       if (filter.theme[t.theme]) {
         found = true;
       }
@@ -85,13 +85,13 @@ $('#filter').on('showpage', () => {
   const filter = wapp.param.georemFilter;
   let ul, toggle;
   // Show themes
-  if (wapp.ripart.param.siteProfil.filtre) {
+  if (wapp.ripart.param.profil.filtre) {
     toggle = document.querySelector('#filter .theme .toggle-right input')
     toggle.checked = filter.istheme;
     disableList(toggle);
     ul = document.querySelector('#filter .theme div');
     ul.innerHTML = '';
-    wapp.ripart.param.siteProfil.filtre.forEach(f => {
+    wapp.ripart.param.profil.filtre.forEach(f => {
       f.themes.forEach(t => {
         const label = ol_ext_element.create('LABEL', {
           className: 'checkbox-left theme',
@@ -99,17 +99,17 @@ $('#filter').on('showpage', () => {
         });
         ol_ext_element.create('INPUT', {
           type: 'checkbox',
-          checked: filter.theme[t],
+          checked: filter.theme[t.theme],
           on: { 
             'change': (e) => {
-              filter.theme[t] = e.target.checked;
+              filter.theme[t.theme] = e.target.checked;
               wapp.ripart.signalements.getSource().getSource().changed()
             }
           },
           parent: label
         });
         ol_ext_element.create('SPAN', {
-          html: t,
+          html: t.theme,
           parent: label
         });
       })
