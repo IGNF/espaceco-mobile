@@ -106,7 +106,7 @@ export default function(wapp) {
     handleClick: () => {
       if (!init) {
         centerLocation(wapp.interactions.geolocation);
-        centerLocation(wapp.interactions.ripartGeolocation);
+        centerLocation(wapp.interactions.reportGeolocation);
         init = true;
       }
       var d = (new Date()).getTime();
@@ -118,8 +118,8 @@ export default function(wapp) {
         centerGPS.element.classList.remove('center');
       }
       wapp.interactions.geolocation.setFollowTrack('auto');
-      wapp.interactions.ripartGeolocation.setFollowTrack('auto');
-      if (!wapp.interactions.geolocation.getActive() && !wapp.interactions.ripartGeolocation.getActive()) {
+      wapp.interactions.reportGeolocation.setFollowTrack('auto');
+      if (!wapp.interactions.geolocation.getActive() && !wapp.interactions.reportGeolocation.getActive()) {
         geolocation.setTracking(true);
       }
       ctime = d;

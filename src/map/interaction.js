@@ -57,7 +57,7 @@ export default function(wapp) {
     hitTolerance: 5,
     condition: ol_events_condition_click,
     filter: function(f, layer) {
-      return (layer && layer.get('edit')!==false && (f.layer || f.get('georem') || f.get('ripart') || f.get('features')));
+      return (layer && layer.get('edit')!==false && (f.layer || f.get('georem') || f.get('report') || f.get('features')));
     },
     style: redStyle
   });
@@ -70,7 +70,7 @@ export default function(wapp) {
   wapp.select.on('select', (e) => {
     // console.log('SELECT',e)
     e.selected.forEach((f) => {
-      if (f.layer === wapp.ripart.croquis 
+      if (f.layer === wapp.report.croquis 
         && wapp.select.getFeatures().getArray().indexOf(f.get('georem')) < 0) {
         wapp.select.getFeatures().push(f.get('georem'));
       }
@@ -82,7 +82,7 @@ export default function(wapp) {
    */
   wapp.onSelect = function() {
     var nb = wapp.select.getFeatures().getLength();
-    // wapp.ripart.cancelFormulaire();
+    // wapp.report.cancelFormulaire();
     if (nb>1) {
       $("#selection").html (nb + ' objets sélectionnés...');
       wapp.showOnglet("info");
@@ -183,7 +183,7 @@ export default function(wapp) {
     handleLongTouchEvent: function(e) {
       wapp.select.getFeatures().clear();
       map.getView().setCenter(e.coordinate);
-      wapp.ripart.showFormulaire();
+      wapp.report.showFormulaire();
     }
   }));
 

@@ -390,7 +390,7 @@ div.debug,
   color: #f90;
 }
 
-/** Ripart */
+/** Report */
 #options li.connect span.connected {
   display: none;
 }
@@ -441,7 +441,7 @@ div.debug,
 }
 
 
-/** Formulaire RIPart */
+/** Formulaire Report */
 #fiche .signaler.connected .connect,
 #fiche .signaler.connected.formulaire .formulaire {
   display: block;

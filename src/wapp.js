@@ -5,8 +5,8 @@ import { layerCache } from './map/map'
 import {layers} from './map/map'
 import setControls from './map/control'
 import setInteractions from './map/interaction'
-import initRipart from './ripart/initRipart'
-import layerRipart from './guichet/layerRipart'
+import initReport from './report/initReport'
+import layerReport from './guichet/layerReport'
 import getUserLayers from './guichet/userLayers'
 import initOffline from './guichet/offline'
 
@@ -163,8 +163,8 @@ import * as fs from 'fs';
       });
 
     // Brancher les signalements
-    initRipart(wapp);
-    layerRipart(wapp);
+    initReport(wapp);
+    layerReport(wapp);
 
     wapp.setDebugMode(); 
 
@@ -386,7 +386,7 @@ wapp.waitLogo = function(info, anim) {
   } else {
     var div = $("<div>").append($("<p>").text(info));
     try {
-      var profil = wappStorage('ripart').profil;
+      var profil = wappStorage('report').profil;
       this.getLogo(profil, function(logo) {
         $("<img>").attr('src', logo || "")
           .prependTo(div);
@@ -463,7 +463,7 @@ wapp.initParams = function() {
         }
         if (wapp.interactions && wapp.interactions.geolocation) {
           wapp.interactions.geolocation.set('tolerance', val);
-          wapp.interactions.ripartGeolocation.set('tolerance', val);
+          wapp.interactions.reportGeolocation.set('tolerance', val);
         }
         break;
       }
@@ -481,10 +481,10 @@ wapp.initParams = function() {
       }
       case "qlf": {
       /*
-        if (wapp.ripart) {
-         if (wapp.ripart.isService(e.val)) {
-          wapp.ripart.setServiceUrl(e.val);
-          wapp.ripart.deconnect();
+        if (wapp.report) {
+         if (wapp.report.isService(e.val)) {
+          wapp.report.setServiceUrl(e.val);
+          wapp.report.deconnect();
           if (e.val) {
             console.warn('QUALIF:', e.val);
           }
@@ -627,9 +627,9 @@ wapp.setQualif = function() {
     (qlf) => { //@TODO et pour l url de prod (par defaut)??
       this.param.options.qlf = qlf;
       $('#options .qlf').text(this.param.options.qlf.replace('https://qlf-collaboratif.ign.fr/', '').replace('/api/', '') || 'Espace Co');
-      wapp.ripart.userManager.setServiceUrl(qlf);
+      wapp.report.userManager.setServiceUrl(qlf);
       let authParams = wapp.getAuthParameters(qlf);
-      wapp.ripart.userManager.switchAuthParams(authParams.authBaseUrl, authParams.clientId, authParams.clientSecret);
+      wapp.report.userManager.switchAuthParams(authParams.authBaseUrl, authParams.clientId, authParams.clientSecret);
       if (qlf) {
         console.warn('QUALIF:', qlf);
       }
@@ -646,9 +646,9 @@ wapp.setQualif = function() {
                 var qlf = this.param.options.qlf = 'https://qlf-collaboratif.ign.fr/'+v+'/api/';
                 this.param.options.qlfList[v] = 'https://qlf-collaboratif.ign.fr/'+v+'/api/';
                 $('#options .qlf').text(v);
-                wapp.ripart.userManager.setServiceUrl(qlf);
+                wapp.report.userManager.setServiceUrl(qlf);
                 let authParams = wapp.getAuthParameters(qlf);
-                wapp.ripart.userManager.switchAuthParams(authParams.authBaseUrl, authParams.clientId, authParams.clientSecret);
+                wapp.report.userManager.switchAuthParams(authParams.authBaseUrl, authParams.clientId, authParams.clientSecret);
               }
             }
           )
@@ -764,9 +764,9 @@ wapp.refreshMap = function(layers) {
         if (l.getSource().setTileLoadFunction) {
           // console.log(l.get('name'), l);
           l.getSource().setTileLoadFunction(l.getSource().getTileLoadFunction())
-        } else if (l===wapp.ripart.signalements && wapp.ripart.signalements.getSource()) {
+        } else if (l===wapp.report.signalements && wapp.report.signalements.getSource()) {
           // Refresh signalements
-          wapp.ripart.signalements.getSource().getSource().clear();
+          wapp.report.signalements.getSource().getSource().clear();
         } else if (l.getSource().reload) {
           // Reload CollabVector layer (when no cache)
           if (!l.get('cache')) {
@@ -844,7 +844,7 @@ wapp.connect = function() {
         if (wapp.noguichetConfig!== undefined) { $('p.userinfo').hide();}
       } else {
         if (wapp.noguichetConfig!== undefined) {
-           if (wapp.noguichetConfig !==undefined) wapp.ripart.setProfil(wapp.noguichetConfig);
+           if (wapp.noguichetConfig !==undefined) wapp.report.setProfil(wapp.noguichetConfig);
            if (wapp.changeGuichet === false) $('#changeGuichet').hide();
            $('p.userinfo').show();
         } 
@@ -853,7 +853,7 @@ wapp.connect = function() {
         
       }
       wapp.initGuichets();
-      wapp.ripart.signalements.getSource().getSource().clear();
+      wapp.report.signalements.getSource().getSource().clear();
       // Test visible layers
       var visible = 0;
       var layers = {};

@@ -2,7 +2,7 @@ require('dotenv').config();
 import './style.css'
 import './i18n'
 import wapp from './guichet/guichet'
-import './ripart/georemGPS'
+import './report/georemGPS'
 import './codes'
 import './maintenance'
 import './apiTemplate'

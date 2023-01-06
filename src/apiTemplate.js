@@ -64,9 +64,9 @@ wapp.cloneGeorem = function() {
   let themes = "";
   let theme = "";
 
-  if (undefined != featureGeorem.values_.ripart) {
+  if (undefined != featureGeorem.values_.report) {
     //on formate les donnees pour une alerte chargee depuis l api
-    georem = featureGeorem.values_.ripart;
+    georem = featureGeorem.values_.report;
 
     if (georem.themes.length > 1) {
       wapp.alert("Impossible de cloner une alerte comportant plusieurs thèmes.");
@@ -114,13 +114,13 @@ wapp.cloneGeorem = function() {
     attText : georem.attText
   };
 
-  wapp.ripart.saveLocalRem(clone, null, (e) => {
+  wapp.report.saveLocalRem(clone, null, (e) => {
     if (e.error) {
       wapp.notification(e.info);
       return;
     }
     wapp.notification("Le signalement a bien été cloné");
-    wapp.ripart.dispatchEvent({
+    wapp.report.dispatchEvent({
       type: 'select',
       georem: clone,
       add: true

@@ -75,20 +75,20 @@ function saveConflicts(ul, layer, group, theme) {
         var grem =  {
           lon: lonlat[0], 
           lat: lonlat[1], 
-          sketch: wapp.ripart.feature2sketch(feature, proj),
+          sketch: wapp.report.feature2sketch(feature, proj),
           comment: feature.getState(),
-          community_id: wapp.ripart.param.profil.id,
+          community_id: wapp.report.param.profil.id,
           theme: theme,
           themes: '"'+group+'::'+theme+'"=>"1"'
         }
-        wapp.ripart.saveLocalRem(grem);
+        wapp.report.saveLocalRem(grem);
         break;
       }
     }
   })
   wapp.hidePage();
-  // UPdate ripart
-  wapp.ripart.saveParam();
+  // UPdate report
+  wapp.report.saveParam();
   // Update layer
   layer.getSource().writeChanges();
   layer.getSource().reload();
@@ -106,7 +106,7 @@ function showConflicts(layer, conflicts) {
     .html('Thème...')
     .on('click', () => {
       const choix = {};
-      wapp.ripart.param.themes.forEach((t) => {
+      wapp.report.param.themes.forEach((t) => {
         choix[t.community_id+'::'+t.theme] = t.theme;
       })
       wapp.selectDialog(choix, theme, (rep)=> {
@@ -155,7 +155,7 @@ wapp.handleConflict = function(url, layer) {
   $.ajax({
     url: url + '.json',
     beforeSend: (xhr) => { 
-      xhr.setRequestHeader("Authorization", "Basic " + wapp.ripart.getHash()); 
+      xhr.setRequestHeader("Authorization", "Basic " + wapp.report.getHash()); 
       xhr.setRequestHeader("Accept-Language", null);
     },
     success: (resp) => {

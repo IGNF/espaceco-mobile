@@ -125,7 +125,7 @@ wapp.dialogInfoGuichet = function (groupe) {
         }
         var current = wapp.userManager.param.active_community;
         if (wapp.userManager.param.active_community === groupe.id) wapp.setGuichet();
-        wapp.ripart.saveParam();
+        wapp.report.saveParam();
         // Clear credentials
         var win = window.open('logout.html','_blank','clearsessioncache=yes,hidden=yes');
         setTimeout(function(){ win.close(); }, 100);
@@ -306,7 +306,7 @@ wapp.setGuichet = function(groupe) {
     setGeoportailLayers(geoportailLayers);
 
     //on recharge la couche des signalements
-    wapp.ripart.signalements.getSource().getSource().clear();
+    wapp.report.signalements.getSource().getSource().clear();
   };
   
   // Nouveau guichet
@@ -358,14 +358,14 @@ wapp.postGeorem = function() {
   var f = wapp.select.getFeatures().item(0);
   var grem = f.get('georem');
   wapp.select.selectFeature();
-  if (grem) wapp.ripart.postLocalRem (grem, {
+  if (grem) wapp.report.postLocalRem (grem, {
     cback: function(prem) {
-      f = wapp.ripart.getFeature(prem);
-      wapp.select.selectFeature(f, wapp.ripart.layer);
+      f = wapp.report.getFeature(prem);
+      wapp.select.selectFeature(f, wapp.report.layer);
       wapp.wait(false)
     },
     error: function(e, msg) {
-      wapp.select.selectFeature(f, wapp.ripart.layer);
+      wapp.select.selectFeature(f, wapp.report.layer);
       wapp.alert(msg);
     }
   });
@@ -377,10 +377,10 @@ wapp.modifyGeorem = function() {
   var f = wapp.select.getFeatures().item(0);
   var grem = f.get('georem');
   // Get feature if  croquis
-  if (f.layer === wapp.ripart.croquis) grem = grem.get('georem');
+  if (f.layer === wapp.report.croquis) grem = grem.get('georem');
 console.log('modify', f, grem)
   wapp.select.selectFeature();
-  if (grem) wapp.ripart.showFormulaire (grem);
+  if (grem) wapp.report.showFormulaire (grem);
 };
 
 /** Supprimer le signalement courant
@@ -399,7 +399,7 @@ wapp.delGeorem = function(warning) {
   } else {
     if (grem) {
       wapp.select.getFeatures().clear();
-      wapp.ripart.delLocalRem (grem);
+      wapp.report.delLocalRem (grem);
       wapp.showSelect();
     }
   }
@@ -418,7 +418,7 @@ wapp.getGeomFr = function(g) {
 
 /** Afficher le formulaire de signalement
 */
-wapp.showRipartForm = function() {
+wapp.showReportForm = function() {
   //wapp.showOnglet("signal");
   wapp.showPage('fiche', 'signal');
 };

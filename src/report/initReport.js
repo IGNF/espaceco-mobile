@@ -1,4 +1,4 @@
-import RIPart from 'cordovapp/ripart/RipartForm'
+import Report from 'cordovapp/report/ReportForm'
 import UserManagerTemplating from 'cordovapp/collaboratif/UserManagerTemplating'
 import map from '../map/map'
 import {ApiClient} from 'collaboratif-client-api';
@@ -20,7 +20,7 @@ import { waitDlg } from 'cordovapp/cordovapp/dialog'
 /** 
  * Initialisation des signalements
  */
-function initRipart(wapp) {
+function initReport(wapp) {
   // Couche pour les signalements
   var layer = new ol_layer_Vector({
     source: new ol_source_Vector(),
@@ -72,22 +72,22 @@ function initRipart(wapp) {
       className: 'icn-bar',
       parent: e.li
     });
-    wapp.ripart.countElement = $('.georemsCount span');
+    wapp.report.countElement = $('.georemsCount span');
     switch (e.layer.get('name')) {
       case 'MesSignalements': {
         ol_ext_element.create('i', {
           className: 'fa fa-refresh',
           click: () => {
-            wapp.ripart.updateLocalRems();
+            wapp.report.updateLocalRems();
           },
           parent: div
         });
-        var c = wapp.ripart.countLocalRems();
+        var c = wapp.report.countLocalRems();
         ol_ext_element.create('i', {
           className: 'fa fa-send',
           html: '<div class="georemsCount tag"><span>'+c+'</span></div>',
           click: () => {
-            wapp.ripart.postAllLocalRems();
+            wapp.report.postAllLocalRems();
           },
           parent: div
         });
@@ -132,7 +132,7 @@ function initRipart(wapp) {
         ol_ext_element.create('i', {
           className: 'fa fa-info-circle',
           click: () => {
-            wapp.showDialog('dialog-info-ripart');
+            wapp.showDialog('dialog-info-report');
           },
           parent: div
         });
@@ -166,13 +166,13 @@ function initRipart(wapp) {
   var url = wapp.param.options.qlf || process.env.BASE_API_URL;
   let authParams = wapp.getAuthParameters(url);
 
-  // RIPart
+  // Report
   let apiClient = new ApiClient(url, authParams.authBaseUrl, authParams.clientId, authParams.clientSecret);
   wapp.userManager = new UserManagerTemplating(apiClient, {
     infoElement: '#options .connect span.connected' //[data-input-role="info"]
   })
   $(() => {wapp.userManager.initialize();});
-  wapp.ripart = new RIPart(apiClient, {
+  wapp.report = new Report(apiClient, {
     map: map,
     countElement: '.georemsCount span',
     listElement: '#signalements [data-role="content"]',
@@ -206,7 +206,7 @@ function initRipart(wapp) {
           if (!f) f = l.getSource().getClosestFeatureToCoordinate(coord);
           if (f) {
             // Verifie pas deja joint
-            var currentFeatures = wapp.ripart.selectOverlay.getSource().getFeatures();
+            var currentFeatures = wapp.report.selectOverlay.getSource().getFeatures();
             var found = false;
             for (k=0; k<currentFeatures.length; k++) {
               var props = currentFeatures[k].getProperties();
@@ -228,7 +228,7 @@ function initRipart(wapp) {
             }
             if (!found) {
               currentFeatures.push(f);
-              georem.sketch = wapp.ripart.feature2sketch(currentFeatures, proj);
+              georem.sketch = wapp.report.feature2sketch(currentFeatures, proj);
               break;
             }
           }
@@ -246,7 +246,7 @@ function initRipart(wapp) {
    * @param {*} options
    *  @param {function} onPost a function called when a georem is posted
    */
-  wapp.ripart.postAllLocalRems = function(options) {
+  wapp.report.postAllLocalRems = function(options) {
     options = options || {};
     var self = this;
     var nb = this.countLocalRems();
@@ -315,31 +315,31 @@ function initRipart(wapp) {
   $(() => {
     $(document).on("changegroup", function(e){ 
       wapp.changeGroup(e);
-      wapp.ripart.setProfil(e.community);
-      wapp.ripart.formElement.addClass("connected");
+      wapp.report.setProfil(e.community);
+      wapp.report.formElement.addClass("connected");
     });
   });
   $(() => {
     $(document).on("api_disconnect", function(e){
-      wapp.ripart.setProfil();
-      wapp.ripart.param = { georems:[], nbrem:0 };
-      wapp.ripart.saveParam();
-      wapp.ripart.formElement.removeClass("connected");
+      wapp.report.setProfil();
+      wapp.report.param = { georems:[], nbrem:0 };
+      wapp.report.saveParam();
+      wapp.report.formElement.removeClass("connected");
     });
   });
   
 
   // Selection d'un signalement
-  wapp.ripart.on('select', (e) => {
-    var f = wapp.ripart.getFeature(e.georem);
+  wapp.report.on('select', (e) => {
+    var f = wapp.report.getFeature(e.georem);
     wapp.select.getFeatures().clear();
-    wapp.select.selectFeature(f, wapp.ripart.layer);
+    wapp.select.selectFeature(f, wapp.report.layer);
     wapp.showOnglet("info");
-    wapp.showSelect({ ripart: !e.add });
+    wapp.showSelect({ report: !e.add });
   });
     
   // Affichage du dialogue 
-  wapp.ripart.on('show', (e) => { 
+  wapp.report.on('show', (e) => { 
     wapp.showPage('fiche', 'signal');
     var f = wapp.select.getFeatures().item(0);
     if (f && f.get('georem')) {
@@ -348,42 +348,42 @@ function initRipart(wapp) {
     // unselect
     if (e.georem===false) f = false;
     wapp.select.getFeatures().clear();
-    wapp.ripart.addFeature(f);
+    wapp.report.addFeature(f);
     var p = f ? ol_extent_getCenter(f.getGeometry().getExtent()) : wapp.map.getView().getCenter();
     p = ol_proj_transform(p, wapp.map.getView().getProjection(),'EPSG:4326');
     $("input.lon", e.form).val(p[0].toFixed(8));
     $("input.lat", e.form).val(p[1].toFixed(8));
     // Pas d'objets a ajouter ?
     if (f || wapp.vector.length || wapp.getLayerGuichet().getLayers().getLength() || wapp.overlays.gps.getSource().getFeatures().length) {
-      $(".addfeatures", wapp.ripart.formElement).show();
+      $(".addfeatures", wapp.report.formElement).show();
     } else {
-      $(".addfeatures", wapp.ripart.formElement).hide();
+      $(".addfeatures", wapp.report.formElement).hide();
     }
     // Ne plus selectionner
     wapp.select.setActive(false);
   });
   
   $("#signalements button").click(function(){ wapp.select.getFeatures().clear(); });
-  if (wapp.ripart.param.profil) {
-    wapp.getLogo(wapp.ripart.param.profil, function(logo) {
+  if (wapp.report.param.profil) {
+    wapp.getLogo(wapp.report.param.profil, function(logo) {
       $("#splash img").attr('src', logo || "");
     });
   }
 
   // Affichage de la page
   $("#fiche").on("showonglet hidepage", function() {
-    wapp.ripart.cancelFormulaire('cancel');
+    wapp.report.cancelFormulaire('cancel');
   });
-  wapp.ripart.on('cancel submit', () => {
+  wapp.report.on('cancel submit', () => {
     wapp.select.setActive(true);
   });
   $("#fiche").on("showonglet showpage", function() {
     // Selection ?
     const sel = wapp.select.getFeatures().item(0);
-    if (sel && !sel.get('georem') && !sel.get('ripart')) {
-      $('.sselect', wapp.ripart.formElement).show();
+    if (sel && !sel.get('georem') && !sel.get('report')) {
+      $('.sselect', wapp.report.formElement).show();
     } else {
-      $('.sselect', wapp.ripart.formElement).hide();
+      $('.sselect', wapp.report.formElement).hide();
     }
   });
   $("#fiche").on("showonglet", function() {
@@ -404,7 +404,7 @@ function initRipart(wapp) {
       $(".changeGroupe", signalDiv).hide();
     }
     // Groupe public
-    if (wapp.ripart.param.profil && wapp.ripart.param.profil.shared_georem=="all") {
+    if (wapp.report.param.profil && wapp.report.param.profil.shared_georem=="all") {
       $(".warning_public", signalDiv).show();
     } else {
       $(".warning_public", signalDiv).hide();
@@ -412,8 +412,8 @@ function initRipart(wapp) {
   });
 
   $('#signalements').on('showpage', () => {
-    wapp.ripart.countLocalReps();
+    wapp.report.countLocalReps();
   });
 }
 
-export default initRipart
+export default initReport

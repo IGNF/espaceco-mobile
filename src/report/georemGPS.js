@@ -1,6 +1,6 @@
 import CordovApp from 'cordovapp/CordovApp';
 import { wappStorage } from 'cordovapp/cordovapp/CordovApp'
-import RIPart from 'cordovapp/ripart/RipartForm'
+import Report from 'cordovapp/report/ReportForm'
 import wapp from '../wapp'
 import map from '../map/map'
 import GeolocationDraw from 'ol-ext/interaction/GeolocationDraw'
@@ -34,8 +34,8 @@ wapp.ready(() => {
       //on met un timeout car le setProfil doit d abord avoir ete fait
       setTimeout(() => {
         // SignalerGPS rapide (si thèmes rapides)
-        if (wapp.ripart.param.themes) {
-          wapp.ripart.param.themes.forEach((th) => {
+        if (wapp.report.param.themes) {
+          wapp.report.param.themes.forEach((th) => {
             if (/^GPS@|^Rapide@/.test(th.theme)) $('#signalerGPS').show();
           });
         }
@@ -45,7 +45,7 @@ wapp.ready(() => {
 
   // Interaction
   if (!wapp.interactions) wapp.interactions = {};
-  wapp.interactions.ripartGeolocation = geolocation = new GeolocationDraw({
+  wapp.interactions.reportGeolocation = geolocation = new GeolocationDraw({
     // source: options.source,
     minZoom: 17,
     followTrack: 'auto',
@@ -201,7 +201,7 @@ function getDeport() {
 let currentRem;
 
 /** Georem GPS */
-RIPart.prototype.georemGPS = function (georem) {
+Report.prototype.georemGPS = function (georem) {
 //  console.log(georem)
   currentRem = georem;
   wapp.showPage('georemGPS');
@@ -266,8 +266,8 @@ function saveTracking(e) {
         })
         feature.set('nmea', nmea);
       }
-      grem.sketch = wapp.ripart.feature2sketch(feature, map.getView().getProjection());
-      wapp.ripart.saveLocalRem(grem, null, (e) => {
+      grem.sketch = wapp.report.feature2sketch(feature, map.getView().getProjection());
+      wapp.report.saveLocalRem(grem, null, (e) => {
         if (e.error) console.error(e.error);
       });
     }
@@ -376,7 +376,7 @@ function startDirectGPS(c, theme) {
     }
   })
   // Start 
-  wapp.ripart.georemGPS(georem);
+  wapp.report.georemGPS(georem);
 }
 
 /** Choix du groupe pour un signelement direct GPS */
@@ -384,7 +384,7 @@ wapp.directGPS = function() {
   var choix = {};
   var themes = {};
   var nb = 0;
-  wapp.ripart.param.themes.forEach((th) => {
+  wapp.report.param.themes.forEach((th) => {
     if (/^GPS@|^Rapide@/.test(th.theme)) {
       choix[th.community_id+"::"+th.theme] = th.theme;
       themes[th.community_id+"::"+th.theme] = th;
@@ -398,7 +398,7 @@ wapp.directGPS = function() {
       buttons: { other: "Autres", cancel:"annuler" },
       callback: (b) => {
         if (b==='other') {
-          wapp.ripart.showFormulaire('gps');
+          wapp.report.showFormulaire('gps');
         }
       }
     });
@@ -411,4 +411,4 @@ wapp.directGPS = function() {
 }
 
 export { geolocation }
-export default RIPart
+export default Report

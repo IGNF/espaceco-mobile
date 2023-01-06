@@ -3,7 +3,7 @@ import wapp from '../wapp'
 import {containsCoordinate as ol_extent_containsCoordinate} from 'ol/extent'
 import {getCenter as ol_extent_getCenter} from 'ol/extent'
 import ol_layer_Vector_CollabVector from 'cordovapp/ol/layer/CollabVector'
-import RIPart from 'cordovapp/ripart/Ripart'
+import Report from 'cordovapp/report/Report'
 import { Feature } from 'ol';
 import moment from 'moment';
 
@@ -167,15 +167,15 @@ function _addLine(th, ul, title, val, options) {
 /** Show a georem
  * @param {Element} div current Element
  * @param {*} georem
- * @param {boolean} newOne if not false add a delete button (c est la propriete ripart du feature lorsqu elle existe)
+ * @param {boolean} newOne if not false add a delete button (c est la propriete report du feature lorsqu elle existe)
  */
 function showGeorem(div, georem, newOne) {
   // pour une alerte existante le feature ne contient pas l info du nom de l auteur
   // il faut faire un get report pour recuperer l info du nom de l auteur
   // ne marche que si l utilisateur est connecte
-  if (georem.id && !georem.author.username && wapp.ripart.apiClient.isConnected()) {
+  if (georem.id && !georem.author.username && wapp.report.apiClient.isConnected()) {
     wapp.wait(true);
-    wapp.ripart.apiClient.getReport(georem.id).then((response) => {
+    wapp.report.apiClient.getReport(georem.id).then((response) => {
       wapp.wait(false);
       let report = response.data;
       georem.author = report.author;
@@ -192,7 +192,7 @@ function showGeorem(div, georem, newOne) {
     return;
   }
   div.addClass("georem").removeClass("fiche");
-  if (georem.sketch) georem.nb = wapp.ripart.sketch2feature(georem.sketch).length;
+  if (georem.sketch) georem.nb = wapp.report.sketch2feature(georem.sketch).length;
   else georem.nb = 0;
   if (!georem.status) georem.status = ' ';
   if (georem.author && georem.author.username ) {
@@ -223,7 +223,7 @@ function showGeorem(div, georem, newOne) {
   }
   // Reply
   const replyBt = $('button.response', georemDiv).off();
-  if (wapp.ripart.canReply(georem)) {
+  if (wapp.report.canReply(georem)) {
     var isok;
     switch (georem.status) {
       case 'submit':
@@ -249,7 +249,7 @@ function showGeorem(div, georem, newOne) {
             'Une réponse en attente...'
           );
         }
-        wapp.ripart.addLocalRep(georem, {
+        wapp.report.addLocalRep(georem, {
           cback: () => {
             showGeorem(div, georem, newOne);
           }
@@ -259,18 +259,18 @@ function showGeorem(div, georem, newOne) {
       replyBt.hide();
     }
     // Local responses
-    const resp = wapp.ripart.getLocalReps(georem);
+    const resp = wapp.report.getLocalReps(georem);
     const ul = $('.localRep', div);
     const tmp = $('[data-role="template"]', ul);
     ul.html('').append(tmp);
     resp.forEach((r) => {
       const li = $("<li>").html(tmp.html()).appendTo(ul);
       if (!isok || r.error) li.addClass('error');
-      $('.statut', li).addClass(r.status).text(RIPart.status[r.status] || 'Réponse');
+      $('.statut', li).addClass(r.status).text(Report.status[r.status] || 'Réponse');
       $('.comment', li).text(r.comment);
       $('.sendrep', li).click(() => {
         wapp.wait('Envoi en cours...')
-        wapp.ripart.postLocalRep(georem, r, {
+        wapp.report.postLocalRep(georem, r, {
           cback: (georem, error) => {
             showGeorem(div, georem, newOne);
             wapp.wait(false);
@@ -292,7 +292,7 @@ function showGeorem(div, georem, newOne) {
         });
       });
       $('.delrep', li).click(() => {
-        wapp.ripart.delLocalRep(georem, r, {
+        wapp.report.delLocalRep(georem, r, {
           cback: () => {
             showGeorem(div, georem, newOne);
           }
@@ -372,7 +372,7 @@ function showWFSFeature(ul, f, th) {
 
 /** Afficher la fiche
  * @param {any}  options
- *	@param {bool} options.ripart true si vient de la page de remontees 
+ *	@param {bool} options.report true si vient de la page de remontees 
  *	@param {int} options.index position dans le liste de selection
  */
 wapp.showSelect = function(options) {
@@ -384,7 +384,7 @@ wapp.showSelect = function(options) {
     if (f.get('features')) {
       features = features.concat(f.get('features'));
     } else {
-      if (f.layer !== wapp.ripart.croquis) features.push(f);
+      if (f.layer !== wapp.report.croquis) features.push(f);
     }
   });
   var nb = features.length;
@@ -397,8 +397,8 @@ wapp.showSelect = function(options) {
   if (options.index && options.index<0) options.index = nb-1;
   var f = features[options.index || 0];
 
-  if (options.ripart) $("#fiche").addClass("fromRipart");
-  else $("#fiche").removeClass("fromRipart");
+  if (options.report) $("#fiche").addClass("fromReport");
+  else $("#fiche").removeClass("fromReport");
 
   var div = $('#fiche .selection').removeClass("georem fiche trace multi");
   div.get(0).scrollTop = 0;
@@ -436,16 +436,16 @@ wapp.showSelect = function(options) {
     this.select.getFeatures().push(f);
     $('#selection').html (f.get('nom') || f.get('nature') || 'Afficher la sélection...');
     var prop = f.getProperties();
-    var georem = prop.georem || prop.ripart;
+    var georem = prop.georem || prop.report;
     // Hide edition
     $('.edit').hide();
     // Georem
     if (georem) {
       // Croquis ?
       if (georem instanceof Feature) {
-        showGeorem(div, georem.get('georem'), prop.ripart);
+        showGeorem(div, georem.get('georem'), prop.report);
       } else {
-        showGeorem(div, georem, prop.ripart);
+        showGeorem(div, georem, prop.report);
       }
     } else {
       // Fiche de l'objet

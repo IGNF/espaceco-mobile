@@ -1,6 +1,6 @@
-import {georemStyle} from 'cordovapp/ol/source/RIPart'
+import {georemStyle} from 'cordovapp/ol/source/Report'
 import ol_ext_element from 'ol-ext/util/element'
-import RIPart from 'cordovapp/ripart/Ripart'
+import Report from 'cordovapp/report/Report'
 import Style from 'ol/style/Style';
 
 // Current application
@@ -21,14 +21,14 @@ function filterFeature (f) {
   const filter = wapp.param.georemFilter;
   if (!filter) return false;
   if (filter.isstatus) {
-    if (!filter.status[f.get('ripart').status]) return true;
+    if (!filter.status[f.get('report').status]) return true;
   }
   if (filter.isdate) {
-    if (filter.date > f.get('ripart').maj) return true;
+    if (filter.date > f.get('report').maj) return true;
   }
   if (filter.istheme) {
     let found = false;
-    f.get('ripart').attributes.forEach(t => {
+    f.get('report').attributes.forEach(t => {
       if (filter.theme[t.theme]) {
         found = true;
       }
@@ -40,7 +40,7 @@ function filterFeature (f) {
 
 /** Style function with filter
  */
-function ripartStyle (theWapp) {
+function reportStyle (theWapp) {
   wapp = theWapp;
 
   // Init filters dialog
@@ -53,7 +53,7 @@ function ripartStyle (theWapp) {
   }
   document.querySelector('#filter input[type="date"]').addEventListener('change', (e) => {
     wapp.param.georemFilter.date = e.target.value;
-    wapp.ripart.signalements.getSource().getSource().changed();
+    wapp.report.signalements.getSource().getSource().changed();
   });
 
   // Style function
@@ -71,7 +71,7 @@ function disableList(input, change) {
   input.parentNode.nextSibling.className = input.checked ? '' : 'disable';
   if (change !== false) {
     wapp.param.georemFilter['is'+input.parentNode.parentNode.className] = input.checked;
-    wapp.ripart.signalements.getSource().getSource().changed();
+    wapp.report.signalements.getSource().getSource().changed();
   }
 }
 
@@ -85,13 +85,13 @@ $('#filter').on('showpage', () => {
   const filter = wapp.param.georemFilter;
   let ul, toggle;
   // Show themes
-  if (wapp.ripart.param.profil.filtre) {
+  if (wapp.report.param.profil.filtre) {
     toggle = document.querySelector('#filter .theme .toggle-right input')
     toggle.checked = filter.istheme;
     disableList(toggle);
     ul = document.querySelector('#filter .theme div');
     ul.innerHTML = '';
-    wapp.ripart.param.profil.filtre.forEach(f => {
+    wapp.report.param.profil.filtre.forEach(f => {
       f.themes.forEach(t => {
         const label = ol_ext_element.create('LABEL', {
           className: 'checkbox-left theme',
@@ -103,7 +103,7 @@ $('#filter').on('showpage', () => {
           on: { 
             'change': (e) => {
               filter.theme[t.theme] = e.target.checked;
-              wapp.ripart.signalements.getSource().getSource().changed()
+              wapp.report.signalements.getSource().getSource().changed()
             }
           },
           parent: label
@@ -122,15 +122,15 @@ $('#filter').on('showpage', () => {
   // List
   ul = document.querySelector('#filter .status div');
   ul.innerHTML = '';
-  for (let s in RIPart.status) {
+  for (let s in Report.status) {
     ol_ext_element.create('BUTTON', {
       className: s + (filter.status[s] ? ' selected' : ''),
-      html: '<i class="'+s+'"></i> '+RIPart.status[s],
+      html: '<i class="'+s+'"></i> '+Report.status[s],
       value: s,
       click: (e) => {
         $(e.target).toggleClass('selected');
         filter.status[e.target.value] = $(e.target).hasClass('selected');
-        wapp.ripart.signalements.getSource().getSource().changed()
+        wapp.report.signalements.getSource().getSource().changed()
       },
       parent: ul
     });
@@ -149,4 +149,4 @@ $('#filter').on('hidepage', () => {
 });
 
 export {filterFeature}
-export default ripartStyle;
+export default reportStyle;

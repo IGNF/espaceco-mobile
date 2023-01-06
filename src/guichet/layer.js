@@ -106,7 +106,7 @@ wapp.layerWFS = function(groupe, l) {
   // Chargement OK
   vector.once('ready', function() {
       // Sauvegarde login / pwd
-      wapp.ripart.saveParam();
+      wapp.report.saveParam();
       // Recherche sur la couche ?
       wapp.setSearchSource(this.getSource(), this.get('search'));
       // Load source at center if once
