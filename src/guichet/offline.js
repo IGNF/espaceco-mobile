@@ -361,7 +361,7 @@ function initOffline(wapp) {
             return;
         }
         for (var i=0, l; l = wapp.guichet.layers[i]; i++) {
-            if (cache && layerNames.indexOf(l.table.name) != -1) continue;
+            if (!l.table || (cache && layerNames.indexOf(l.table.name) != -1)) continue;
             if (l.table && l.table.tile_zoom_level) {
             $("<li>").addClass('selected')
                 .attr('data-input','')

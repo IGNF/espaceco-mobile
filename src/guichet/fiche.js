@@ -200,9 +200,11 @@ function showGeorem(div, georem, newOne) {
   } else{
     georem.author_name = '?';
   }
-  georem.commune_name = georem.commune.title;
-  georem.id_dep = georem.departement.name;
-  georem.pretty_opening_date = moment(georem.opening_date).format('YYYY-MM-DD HH:mm:ss');
+
+  georem.commune_name = georem.commune ? georem.commune.title : '';
+  georem.id_dep = georem.departement ? georem.departement.name : '';
+  georem.pretty_opening_date = georem.opening_date ? moment(georem.opening_date).format('YYYY-MM-DD HH:mm:ss') : '';
+  
   georem.attText = '';
   for (var i in georem.attributes) {
     let att = georem.attributes[i].attributes;
