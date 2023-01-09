@@ -1,5 +1,7 @@
-import RIPart from 'cordovapp/ripart/RipartForm'
+import Report from 'cordovapp/report/ReportForm'
+import UserManagerTemplating from 'cordovapp/collaboratif/UserManagerTemplating'
 import map from '../map/map'
+import {ApiClient} from 'collaboratif-client-api';
 
 import ol_layer_Vector from 'ol/layer/Vector'
 import ol_source_Vector from 'ol/source/Vector'
@@ -15,9 +17,10 @@ import ol_ext_element from 'ol-ext/util/element'
 import { messageDlg } from 'cordovapp/cordovapp/dialog'
 import { waitDlg } from 'cordovapp/cordovapp/dialog'
 
-/** Initialisation des signalements
+/** 
+ * Initialisation des signalements
  */
-function initRipart(wapp) {
+function initReport(wapp) {
   // Couche pour les signalements
   var layer = new ol_layer_Vector({
     source: new ol_source_Vector(),
@@ -69,22 +72,22 @@ function initRipart(wapp) {
       className: 'icn-bar',
       parent: e.li
     });
-    wapp.ripart.countElement = $('.georemsCount span');
+    wapp.report.countElement = $('.georemsCount span');
     switch (e.layer.get('name')) {
       case 'MesSignalements': {
         ol_ext_element.create('i', {
           className: 'fa fa-refresh',
           click: () => {
-            wapp.ripart.updateLocalRems();
+            wapp.report.updateLocalRems();
           },
           parent: div
         });
-        var c = wapp.ripart.countLocalRems();
+        var c = wapp.report.countLocalRems();
         ol_ext_element.create('i', {
           className: 'fa fa-send',
           html: '<div class="georemsCount tag"><span>'+c+'</span></div>',
           click: () => {
-            wapp.ripart.postAllLocalRems();
+            wapp.report.postAllLocalRems();
           },
           parent: div
         });
@@ -129,7 +132,7 @@ function initRipart(wapp) {
         ol_ext_element.create('i', {
           className: 'fa fa-info-circle',
           click: () => {
-            wapp.showDialog('dialog-info-ripart');
+            wapp.showDialog('dialog-info-report');
           },
           parent: div
         });
@@ -160,11 +163,17 @@ function initRipart(wapp) {
   group.on('change:visible', setVisibility);
   setVisibility();
   
-  // RIPart
-  wapp.ripart = new RIPart({
-    url: wapp.param.options.qlf || 'https://espacecollaboratif.ign.fr/api/',
+  var url = wapp.param.options.qlf || process.env.BASE_API_URL;
+  let authParams = wapp.getAuthParameters(url);
+
+  // Report
+  let apiClient = new ApiClient(url, authParams.authBaseUrl, authParams.clientId, authParams.clientSecret);
+  wapp.userManager = new UserManagerTemplating(apiClient, {
+    infoElement: '#options .connect span.connected' //[data-input-role="info"]
+  })
+  $(() => {wapp.userManager.initialize();});
+  wapp.report = new Report(apiClient, {
     map: map,
-    infoElement: '#options .connect [data-input-role="info"] span.connected',
     countElement: '.georemsCount span',
     listElement: '#signalements [data-role="content"]',
     formElement: '#fiche .signaler',
@@ -197,7 +206,7 @@ function initRipart(wapp) {
           if (!f) f = l.getSource().getClosestFeatureToCoordinate(coord);
           if (f) {
             // Verifie pas deja joint
-            var currentFeatures = wapp.ripart.selectOverlay.getSource().getFeatures();
+            var currentFeatures = wapp.report.selectOverlay.getSource().getFeatures();
             var found = false;
             for (k=0; k<currentFeatures.length; k++) {
               var props = currentFeatures[k].getProperties();
@@ -219,27 +228,17 @@ function initRipart(wapp) {
             }
             if (!found) {
               currentFeatures.push(f);
-              georem.sketch = wapp.ripart.feature2sketch(currentFeatures, proj);
+              georem.sketch = wapp.report.feature2sketch(currentFeatures, proj);
               break;
             }
           }
         }
       }
-      // Forcer le groupe
-      // georem.id_groupe = this.param.groupes[0].id_groupe;
       // Protocol
       georem.protocol = "_MONGUICHET_65876";
       georem.version = "0.1";
       return true;
-    },
-    /*
-    // Localisation via GPS
-    onLocate : function(loc)
-    {	$("span.lon", this.formElement).text(loc.position[0].toFixed(7));
-      $("span.lat", this.formElement).text(loc.position[1].toFixed(7));
-      $("span.accuracy", this.formElement).text(loc.accuracy);
     }
-    */
   });
 
   /**
@@ -247,7 +246,7 @@ function initRipart(wapp) {
    * @param {*} options
    *  @param {function} onPost a function called when a georem is posted
    */
-  wapp.ripart.postAllLocalRems = function(options) {
+  wapp.report.postAllLocalRems = function(options) {
     options = options || {};
     var self = this;
     var nb = this.countLocalRems();
@@ -313,19 +312,34 @@ function initRipart(wapp) {
     else messageDlg ("Tous les signalements ont déjà été envoyés..."," ");
   }
 
-  wapp.ripart.on("changegroup", function(e){ wapp.changeGroup(e); });
+  $(() => {
+    $(document).on("changegroup", function(e){ 
+      wapp.changeGroup(e);
+      wapp.report.setProfil(e.community);
+      wapp.report.formElement.addClass("connected");
+    });
+  });
+  $(() => {
+    $(document).on("api_disconnect", function(e){
+      wapp.report.setProfil();
+      wapp.report.param = { georems:[], nbrem:0 };
+      wapp.report.saveParam();
+      wapp.report.formElement.removeClass("connected");
+    });
+  });
+  
 
   // Selection d'un signalement
-  wapp.ripart.on('select', (e) => {
-    var f = wapp.ripart.getFeature(e.georem);
+  wapp.report.on('select', (e) => {
+    var f = wapp.report.getFeature(e.georem);
     wapp.select.getFeatures().clear();
-    wapp.select.selectFeature(f, wapp.ripart.layer);
+    wapp.select.selectFeature(f, wapp.report.layer);
     wapp.showOnglet("info");
-    wapp.showSelect({ ripart: !e.add });
+    wapp.showSelect({ report: !e.add });
   });
     
   // Affichage du dialogue 
-  wapp.ripart.on('show', (e) => { 
+  wapp.report.on('show', (e) => { 
     wapp.showPage('fiche', 'signal');
     var f = wapp.select.getFeatures().item(0);
     if (f && f.get('georem')) {
@@ -334,45 +348,42 @@ function initRipart(wapp) {
     // unselect
     if (e.georem===false) f = false;
     wapp.select.getFeatures().clear();
-    wapp.ripart.addFeature(f);
+    wapp.report.addFeature(f);
     var p = f ? ol_extent_getCenter(f.getGeometry().getExtent()) : wapp.map.getView().getCenter();
     p = ol_proj_transform(p, wapp.map.getView().getProjection(),'EPSG:4326');
     $("input.lon", e.form).val(p[0].toFixed(8));
     $("input.lat", e.form).val(p[1].toFixed(8));
     // Pas d'objets a ajouter ?
     if (f || wapp.vector.length || wapp.getLayerGuichet().getLayers().getLength() || wapp.overlays.gps.getSource().getFeatures().length) {
-      $(".addfeatures", wapp.ripart.formElement).show();
+      $(".addfeatures", wapp.report.formElement).show();
     } else {
-      $(".addfeatures", wapp.ripart.formElement).hide();
+      $(".addfeatures", wapp.report.formElement).hide();
     }
     // Ne plus selectionner
     wapp.select.setActive(false);
   });
-
-  // Patience
-  wapp.waitLogo ("Connexion...");
   
   $("#signalements button").click(function(){ wapp.select.getFeatures().clear(); });
-  if (wapp.ripart.param.profil) {
-    wapp.getLogo(wapp.ripart.param.profil, function(logo) {
+  if (wapp.report.param.profil) {
+    wapp.getLogo(wapp.report.param.profil, function(logo) {
       $("#splash img").attr('src', logo || "");
     });
   }
 
   // Affichage de la page
   $("#fiche").on("showonglet hidepage", function() {
-    wapp.ripart.cancelFormulaire('cancel');
+    wapp.report.cancelFormulaire('cancel');
   });
-  wapp.ripart.on('cancel submit', () => {
+  wapp.report.on('cancel submit', () => {
     wapp.select.setActive(true);
   });
   $("#fiche").on("showonglet showpage", function() {
     // Selection ?
     const sel = wapp.select.getFeatures().item(0);
-    if (sel && !sel.get('georem') && !sel.get('ripart')) {
-      $('.sselect', wapp.ripart.formElement).show();
+    if (sel && !sel.get('georem') && !sel.get('report')) {
+      $('.sselect', wapp.report.formElement).show();
     } else {
-      $('.sselect', wapp.ripart.formElement).hide();
+      $('.sselect', wapp.report.formElement).hide();
     }
   });
   $("#fiche").on("showonglet", function() {
@@ -382,33 +393,18 @@ function initRipart(wapp) {
   // Set parameters
   wapp.paramInput.change();
 
-  // Actualiser le compte
-  var timer = new Date();
-  wapp.ripart.checkUserInfo(
-    function () {
-      timer = (new Date())-timer;
-      setTimeout (function () { wapp.wait(false); }, Math.max(0, 2000 - timer));
-      wapp.notification("Connecté au service",1200);
-      wapp.initGuichets();
-    }, 
-    function() {
-      timer = (new Date())-timer;
-      wapp.waitLogo("Chargement...");
-      setTimeout (function () { wapp.wait(false); }, Math.max(0, 2000 - timer)); 
-      wapp.initGuichets();
-    }
-  );
+  wapp.initGuichets();
 
   // Gerer la coherence
   $("#fiche").on('showpage', function() {
     var signalDiv = $(".signaler", this);
-    if (wapp.ripart.param.groupes && wapp.ripart.param.groupes.length > 1) {
+    if (wapp.userManager.param.communities && wapp.userManager.param.communities.length > 1) {
       $(".changeGroupe", signalDiv).show();
     } else {
       $(".changeGroupe", signalDiv).hide();
     }
     // Groupe public
-    if (wapp.ripart.param.profil && wapp.ripart.param.profil.status!="prive") {
+    if (wapp.report.param.profil && wapp.report.param.profil.shared_georem=="all") {
       $(".warning_public", signalDiv).show();
     } else {
       $(".warning_public", signalDiv).hide();
@@ -416,8 +412,8 @@ function initRipart(wapp) {
   });
 
   $('#signalements').on('showpage', () => {
-    wapp.ripart.countLocalReps();
+    wapp.report.countLocalReps();
   });
 }
 
-export default initRipart
+export default initReport

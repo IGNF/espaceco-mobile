@@ -1,6 +1,6 @@
 import CordovApp from 'cordovapp/CordovApp';
 import { wappStorage } from 'cordovapp/cordovapp/CordovApp'
-import RIPart from 'cordovapp/ripart/RipartForm'
+import Report from 'cordovapp/report/ReportForm'
 import wapp from '../wapp'
 import map from '../map/map'
 import GeolocationDraw from 'ol-ext/interaction/GeolocationDraw'
@@ -28,28 +28,24 @@ let geolocation;
 wapp.ready(() => {
   // On group change, check if direct GPS is enabled
   $('#signalerGPS').hide()
-  function handleGPS() {
-    if (wapp.ripart) {
-      $('#signalerGPS').hide()
-      wapp.ripart.on('changegroup', (e) => {
-        $('#signalerGPS').hide()
+  $(() => {
+    $(document).on("changegroup", (e) => {
+      $('#signalerGPS').hide();
+      //on met un timeout car le setProfil doit d abord avoir ete fait
+      setTimeout(() => {
         // SignalerGPS rapide (si thèmes rapides)
-        if (wapp.ripart.param.themes) {
-          wapp.ripart.param.themes.forEach((th) => {
-            if (/^GPS@|^Rapide@/.test(th.nom)) $('#signalerGPS').show();
+        if (wapp.report.param.themes) {
+          wapp.report.param.themes.forEach((th) => {
+            if (/^GPS@|^Rapide@/.test(th.theme)) $('#signalerGPS').show();
           });
         }
-      });
-    } else  {
-      // Try next
-      setTimeout(handleGPS, 500);
-    }
-  }
-  handleGPS();
+      }, 100);
+    });
+  });
 
   // Interaction
   if (!wapp.interactions) wapp.interactions = {};
-  wapp.interactions.ripartGeolocation = geolocation = new GeolocationDraw({
+  wapp.interactions.reportGeolocation = geolocation = new GeolocationDraw({
     // source: options.source,
     minZoom: 17,
     followTrack: 'auto',
@@ -205,7 +201,7 @@ function getDeport() {
 let currentRem;
 
 /** Georem GPS */
-RIPart.prototype.georemGPS = function (georem) {
+Report.prototype.georemGPS = function (georem) {
 //  console.log(georem)
   currentRem = georem;
   wapp.showPage('georemGPS');
@@ -270,8 +266,8 @@ function saveTracking(e) {
         })
         feature.set('nmea', nmea);
       }
-      grem.sketch = wapp.ripart.feature2sketch(feature, map.getView().getProjection());
-      wapp.ripart.saveLocalRem(grem, null, (e) => {
+      grem.sketch = wapp.report.feature2sketch(feature, map.getView().getProjection());
+      wapp.report.saveLocalRem(grem, null, (e) => {
         if (e.error) console.error(e.error);
       });
     }
@@ -364,23 +360,23 @@ function startDirectGPS(c, theme) {
     attText: '',
     attributes: '',
     comment: 'Signalement GPS rapide.',
-    id_groupe: theme.id_groupe,
+    community_id: theme.community_id,
     lat: lonlat[0],
     lon: lonlat[1],
     photo: false,
     protocol: '_MONGUICHET_65876',
-    theme: theme.nom,
+    theme: theme.theme,
     themes: JSON.stringify(c)+'=>"1"',
     version: "0.1",
   }
-  theme.attributs.forEach((a)=> {
+  theme.attributes.forEach((a)=> {
     if (a.defaultVal) {
       georem.attributes += ',"'+c+"::"+a.att+'"=>"'+a.defaultVal+'"';
       georem.attText +=  a.att+': '+a.defaultVal+'\n';
     }
   })
   // Start 
-  wapp.ripart.georemGPS(georem);
+  wapp.report.georemGPS(georem);
 }
 
 /** Choix du groupe pour un signelement direct GPS */
@@ -388,10 +384,10 @@ wapp.directGPS = function() {
   var choix = {};
   var themes = {};
   var nb = 0;
-  wapp.ripart.param.themes.forEach((th) => {
-    if (/^GPS@|^Rapide@/.test(th.nom)) {
-      choix[th.id_groupe+"::"+th.nom] = th.nom;
-      themes[th.id_groupe+"::"+th.nom] = th;
+  wapp.report.param.themes.forEach((th) => {
+    if (/^GPS@|^Rapide@/.test(th.theme)) {
+      choix[th.community_id+"::"+th.theme] = th.theme;
+      themes[th.community_id+"::"+th.theme] = th;
       nb++;
     }
   });
@@ -402,7 +398,7 @@ wapp.directGPS = function() {
       buttons: { other: "Autres", cancel:"annuler" },
       callback: (b) => {
         if (b==='other') {
-          wapp.ripart.showFormulaire('gps');
+          wapp.report.showFormulaire('gps');
         }
       }
     });
@@ -415,4 +411,4 @@ wapp.directGPS = function() {
 }
 
 export { geolocation }
-export default RIPart
+export default Report

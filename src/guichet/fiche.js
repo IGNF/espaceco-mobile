@@ -2,9 +2,10 @@ import wapp from '../wapp'
 
 import {containsCoordinate as ol_extent_containsCoordinate} from 'ol/extent'
 import {getCenter as ol_extent_getCenter} from 'ol/extent'
-import ol_layer_Vector_Webpart from 'cordovapp/ol/layer/Webpart'
-import RIPart from 'cordovapp/ripart/Ripart'
+import ol_layer_Vector_CollabVector from 'cordovapp/ol/layer/CollabVector'
+import Report from 'cordovapp/report/Report'
 import { Feature } from 'ol';
+import moment from 'moment';
 
 /** Get title */
 function getFeatureTitle(f) {
@@ -166,25 +167,67 @@ function _addLine(th, ul, title, val, options) {
 /** Show a georem
  * @param {Element} div current Element
  * @param {*} georem
- * @param {boolean} newOne if false add a delete button
+ * @param {boolean} newOne if not false add a delete button (c est la propriete report du feature lorsqu elle existe)
  */
 function showGeorem(div, georem, newOne) {
+  // pour une alerte existante le feature ne contient pas l info du nom de l auteur
+  // il faut faire un get report pour recuperer l info du nom de l auteur
+  // ne marche que si l utilisateur est connecte
+  if (georem.id && !georem.author.username && wapp.report.apiClient.isConnected()) {
+    wapp.wait(true);
+    wapp.report.apiClient.getReport(georem.id).then((response) => {
+      wapp.wait(false);
+      let report = response.data;
+      georem.author = report.author;
+      for (let i in report.replies) {
+        report.replies[i].author_name = report.replies[i].author.username;
+        report.replies[i].date = moment(report.replies[i].date).format('YYYY-MM-DD HH:mm:ss');
+      }
+      georem.replies = report.replies;
+      showGeorem(div, report, newOne);
+    }).catch((error) => {
+      wapp.wait(false);
+      wapp.alert("Une erreur s'est produite lors de la récupération du signalement.");
+    });
+    return;
+  }
   div.addClass("georem").removeClass("fiche");
-  if (georem.sketch) georem.nb = wapp.ripart.sketch2feature(georem.sketch).length;
+  if (georem.sketch) georem.nb = wapp.report.sketch2feature(georem.sketch).length;
   else georem.nb = 0;
-  if (!georem.statut) georem.statut = ' ';
+  if (!georem.status) georem.status = ' ';
+  if (georem.author && georem.author.username ) {
+    georem.author_name = georem.author.username;
+  } else{
+    georem.author_name = '?';
+  }
+
+  georem.commune_name = georem.commune ? georem.commune.title : '';
+  georem.id_dep = georem.departement ? georem.departement.name : '';
+  georem.pretty_opening_date = georem.opening_date ? moment(georem.opening_date).format('YYYY-MM-DD HH:mm:ss') : '';
+  
+  georem.attText = '';
+  for (var i in georem.attributes) {
+    let att = georem.attributes[i].attributes;
+    let group = wapp.userManager.getGroupById(georem.attributes[i].community);
+    georem.attributes[i].community_name = group ? group.name : "community: "+georem.attributes[i].community;
+    for (var key in att) {
+      georem.attText += key+": "+att[key]+"\n";
+    }
+  }
+  georem.attText = georem.attText.trim();
+
   const georemDiv = $(".georem", div);
   // Show attributes
   wapp.dataAttributes(georemDiv, georem);
-  // Set response statut code > text
-  for (let k in wapp.codes.statut) {
-    $('.'+k+' span', div).text(wapp.codes.statut[k]);
+  // Set response status code > text
+  for (let k in wapp.codes.status) {
+    $('.'+k+' span', div).text(wapp.codes.status[k]);
   }
   // Reply
   const replyBt = $('button.response', georemDiv).off();
-  if (/W/.test(georem.autorisation)) {
+  if (wapp.report.canReply(georem)) {
     var isok;
-    switch (georem.statut) {
+    switch (georem.status) {
       case 'submit':
       case 'pending':
       case 'pending0':
@@ -208,7 +251,7 @@ function showGeorem(div, georem, newOne) {
             'Une réponse en attente...'
           );
         }
-        wapp.ripart.addLocalRep(georem, {
+        wapp.report.addLocalRep(georem, {
           cback: () => {
             showGeorem(div, georem, newOne);
           }
@@ -218,30 +261,32 @@ function showGeorem(div, georem, newOne) {
       replyBt.hide();
     }
     // Local responses
-    const resp = wapp.ripart.getLocalReps(georem);
+    const resp = wapp.report.getLocalReps(georem);
     const ul = $('.localRep', div);
     const tmp = $('[data-role="template"]', ul);
     ul.html('').append(tmp);
     resp.forEach((r) => {
       const li = $("<li>").html(tmp.html()).appendTo(ul);
       if (!isok || r.error) li.addClass('error');
-      $('.statut', li).addClass(r.statut).text(RIPart.status[r.statut] || 'Réponse');
+      $('.statut', li).addClass(r.status).text(Report.status[r.status] || 'Réponse');
       $('.comment', li).text(r.comment);
       $('.sendrep', li).click(() => {
         wapp.wait('Envoi en cours...')
-        wapp.ripart.postLocalRep(georem, r, {
+        wapp.report.postLocalRep(georem, r, {
           cback: (georem, error) => {
             showGeorem(div, georem, newOne);
             wapp.wait(false);
             if (error) {
               var msg = "Impossible d'envoyer la réponse.<br/>";
-              if (error.status==0) {
+              if (!error.response) {
                 msg = $('<div>').html(msg+"Vérifiez votre connexion ou réessayez lorsque vous serez à nouveau connecté au réseau.");
               } else {
                 msg = $('<div>').html(msg+"Réponse incorrecte...");
               }
+              let errorTxt = (error.response && error.response.data) ?  error.response.data.code + " : " + error.response.data.message : error.message;
+              errorTxt = errorTxt ? errorTxt : error;
               $("<i>").addClass('error')
-                .html("<br/>Erreur : "+error.status+" - "+error.statusText+"</i>")
+                .html("<br/>Erreur : "+errorTxt+"</i>")
                 .appendTo(msg);
               wapp.alert(msg);
             }
@@ -249,7 +294,7 @@ function showGeorem(div, georem, newOne) {
         });
       });
       $('.delrep', li).click(() => {
-        wapp.ripart.delLocalRep(georem, r, {
+        wapp.report.delLocalRep(georem, r, {
           cback: () => {
             showGeorem(div, georem, newOne);
           }
@@ -270,14 +315,14 @@ function showGeorem(div, georem, newOne) {
  */
 function showFeature(ul, f, th) {
   // Objet d'un guichet
-  const isEdit = !wapp.isCordova || !f.layer.getFeatureType().readOnly;
+  const isEdit = !wapp.isCordova || !f.layer.getTable().read_only;
   if (isEdit) {
     $('.edit', ul.parent()).show();
   }
   ul.parent().removeClass('edition');
-  var ftype = f.layer.getSource().featureType_;
-  for (let i in ftype.attributes) if (i !== ftype.geometryName) {
-    let att = ftype.attributes[i];
+  var table = f.layer.getSource().table_;
+  for (let i in table.columns) if (i !== table.geometry_name) {
+    let att = table.columns[i];
     switch (att.type) {
       case "Point":
       case "LineString":
@@ -291,7 +336,7 @@ function showFeature(ul, f, th) {
           f.get(i), {
             feature: f, 
             attribute: att,
-            edit: (isEdit && i !== ftype.idName && !att.readOnly)
+            edit: (isEdit && i !== table.id_name && !att.read_only)
           }
         );
         break;
@@ -321,7 +366,7 @@ function showWMSFeature(ul, f, th) {
 function showWFSFeature(ul, f, th) {
   const prop = f.getProperties();
   const geometryName = f.getGeometryName();
-  const att = f.layer.getFeatureType().attributes || {};
+  const att = f.layer.getTable().columns || {};
   for (let i in prop) if (i !== geometryName) {
     _addLine(th, ul, (att[i]?att[i].title:i).replace(/_/g,' '), f.get(i), att[i]?att[i].type:'string');
   }
@@ -329,7 +374,7 @@ function showWFSFeature(ul, f, th) {
 
 /** Afficher la fiche
  * @param {any}  options
- *	@param {bool} options.ripart true si vient de la page de remontees 
+ *	@param {bool} options.report true si vient de la page de remontees 
  *	@param {int} options.index position dans le liste de selection
  */
 wapp.showSelect = function(options) {
@@ -341,7 +386,7 @@ wapp.showSelect = function(options) {
     if (f.get('features')) {
       features = features.concat(f.get('features'));
     } else {
-      if (f.layer !== wapp.ripart.croquis) features.push(f);
+      if (f.layer !== wapp.report.croquis) features.push(f);
     }
   });
   var nb = features.length;
@@ -354,8 +399,8 @@ wapp.showSelect = function(options) {
   if (options.index && options.index<0) options.index = nb-1;
   var f = features[options.index || 0];
 
-  if (options.ripart) $("#fiche").addClass("fromRipart");
-  else $("#fiche").removeClass("fromRipart");
+  if (options.report) $("#fiche").addClass("fromReport");
+  else $("#fiche").removeClass("fromReport");
 
   var div = $('#fiche .selection').removeClass("georem fiche trace multi");
   div.get(0).scrollTop = 0;
@@ -393,16 +438,16 @@ wapp.showSelect = function(options) {
     this.select.getFeatures().push(f);
     $('#selection').html (f.get('nom') || f.get('nature') || 'Afficher la sélection...');
     var prop = f.getProperties();
-    var georem = prop.georem || prop.ripart;
+    var georem = prop.georem || prop.report;
     // Hide edition
     $('.edit').hide();
     // Georem
     if (georem) {
       // Croquis ?
       if (georem instanceof Feature) {
-        showGeorem(div, georem.get('georem'), prop.ripart);
+        showGeorem(div, georem.get('georem'), prop.report);
       } else {
-        showGeorem(div, georem, prop.ripart);
+        showGeorem(div, georem, prop.report);
       }
     } else {
       // Fiche de l'objet
@@ -423,7 +468,7 @@ wapp.showSelect = function(options) {
         div.addClass("trace");
       } else 
       // GUICHET
-      if (f.layer instanceof ol_layer_Vector_Webpart) {
+      if (f.layer instanceof ol_layer_Vector_CollabVector) {
         showFeature(ul, f, th);
       } else 
       // WMS
@@ -431,7 +476,7 @@ wapp.showSelect = function(options) {
         showWMSFeature(ul, f, th);
       } else 
       // WFS
-      if (f.layer.getFeatureType) {
+      if (f.layer.getTable) {
         showWFSFeature(ul, f, th);
       }
 

@@ -1,14 +1,14 @@
-import ol_source_RIPart from 'cordovapp/ol/source/RIPart'
+import ol_source_Report from 'cordovapp/ol/source/Report'
 import CordovFile from 'cordovapp/cordovapp/File'
 import getCacheFileName from 'cordovapp/cordovapp/File'
-import ripartStyle, { filterFeature } from './ripartStyle'
+import reportStyle, { filterFeature } from './reportStyle'
 
 import ol_layer_AnimatedCluster from 'ol-ext/layer/AnimatedCluster'
 import ol_source_Cluster from 'ol/source/Cluster'
 
 /** Calque des signalements 
  */
-function layerRipart(wapp) {
+function layerReport(wapp) {
   const dir = 'FILE/cache-signalements/';
   const cache = {
     saveCache: function(response, tileCoord) {
@@ -27,6 +27,7 @@ function layerRipart(wapp) {
       );
     },
     loadCache: function(options) {
+      console.log('logCache'); console.log(options);
       var fileName = dir + options.tileCoord.join('-');
       CordovFile.read(
         fileName, 
@@ -40,15 +41,15 @@ function layerRipart(wapp) {
   var signalements = new ol_layer_AnimatedCluster({
     title: 'Signalements',
     name: 'Signalements',
-    maxResolution: 600, // zoom 6
+    maxResolution: 30, //zoom 13
     zIndex: Infinity,
     source: new ol_source_Cluster({
       geometryFunction: (feature) => {
         if (filterFeature(feature)) return null;
         return feature.getGeometry(); 
       },
-      source: new ol_source_RIPart({
-        ripart: wapp.ripart
+      source: new ol_source_Report({
+        report: wapp.report
       }, cache),
       attributions: 'IGN'
     })
@@ -57,18 +58,18 @@ function layerRipart(wapp) {
   lgroup.getLayers().insertAt(0, signalements);
 
   // Gestion visibilite
-  wapp.toggleRipart = function() {
+  wapp.toggleReport = function() {
     signalements.set('visible', !signalements.get('visible'));
   };
   signalements.on('change:visible', () => {
-    if (signalements.get('visible')) $('#layer-signalement .ripart .fa-eye').removeClass('fa-eye-slash');
-    else $('#layer-signalement .ripart .fa-eye').addClass('fa-eye-slash');
+    if (signalements.get('visible')) $('#layer-signalement .report .fa-eye').removeClass('fa-eye-slash');
+    else $('#layer-signalement .report .fa-eye').addClass('fa-eye-slash');
   });
 
   wapp.testHiddenLayer(signalements);
 
-  signalements.setStyle(ripartStyle(wapp));
-  wapp.ripart.signalements = signalements;
+  signalements.setStyle(reportStyle(wapp));
+  wapp.report.signalements = signalements;
 }
 
-export default layerRipart
+export default layerReport

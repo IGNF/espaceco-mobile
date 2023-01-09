@@ -8,7 +8,7 @@ import { defaults as ol_control_defaults } from 'ol/control'
 import ol_layer_Group from 'ol/layer/Group'
 import ol_layer_Vector from 'ol/layer/Vector'
 
-import { geoportailLayer, geoportailOverlay } from './layer/geoportail'
+import { geoportailLayer } from './layer/geoportail'
 import {dialog} from 'cordovapp/cordovapp/dialog'
 
 // Layer pour l'affichage du cache
@@ -24,17 +24,7 @@ layerCache.on('change', function() {
 
 // Layers 
 var layers = [
-  new ol_layer_Group({
-    title:'Mes couches', 
-    name: 'geoportailGroup',
-    visible: true,
-    layers: [
-      // Fonds de plan
-      geoportailLayer,
-      // Overlays
-      geoportailOverlay
-    ]
-  }),
+  geoportailLayer,
   layerCache,
   // Layer pour l'affichage des couches du groupe
   new ol_layer_Group({ title:'Mes couches', name: 'groupe', displayInLayerSwitcher: false, openInLayerSwitcher: true }),

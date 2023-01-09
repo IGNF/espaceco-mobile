@@ -16,31 +16,31 @@
   <li>
     <label>
       Statut :
-    </label><span data-code="statut"></span>
+    </label><span data-code="status"></span>
   </li>
   <li>
     <label>
       Position :
     </label><span>
-      <span data-attr="lon"></span>, <span data-attr="lat"></span>
+      <span data-attr="geometry"></span>
     </span>
   </li>
   <li>
     <label>
       Date :
-    </label><span data-attr="date" ></span>
+    </label><span data-attr="pretty_opening_date" ></span>
   </li>
   <li>
     <label>
       Auteur :
-    </label><span data-attr="auteur" ></span>
+    </label><span data-attr="author_name" ></span>
   </li>
   <li>
     <label>
       Thèmes :
     </label><span>
-      <span data-attr="themes" data-array="1" data-sep=", ">
-        <span>%nom% (%groupe%)</span>
+      <span data-attr="attributes" data-array="1" data-sep=", ">
+        <span>%theme% (%community_name%)</span>
       </span>
       <span data-attr="theme">
       </span>
@@ -54,7 +54,7 @@
   <li>
     <label>
       Commune :
-    </label><span data-attr="commune"></span>
+    </label><span data-attr="commune_name"></span>
   </li>
   <li>
     <label>
@@ -84,7 +84,7 @@
   <div data-attr="id" data-null="1" data-role="dialogBt" class="send" onclick="wapp.postGeorem();">Envoyer</div>
   <div data-attr="id" data-null="1" data-role="dialogBt" class="modify" onclick="wapp.modifyGeorem();">Modifier</div>
 </div>
-<div class="responses" data-attr="rep" data-nnull="1">
+<div class="responses" data-attr="replies" data-nnull="1">
   <h3>Réponses :</h3>
   <ul class="localRep">
     <li data-role="template">
@@ -97,22 +97,22 @@
     </li>
   </ul>
   <button class="response"><i class="fa fa-reply"></i> Répondre à ce signalement...</button>
-  <ul data-attr="rep" data-array="1">
+  <ul data-attr="replies" data-array="1">
     <li>
       <p class="date">
         <i class="fa fa-comment"></i>
         %date%
       </p>
       <p>
-        <label>Auteur :</label><span>%auteur%</span>
+        <label>Auteur :</label><span>%author_name%</span>
       </p>
-      <p class="%statut%">
-        <label>Statut :</label><span>%statut%</span>
+      <p class="%status%">
+        <label>Statut :</label><span>%status%</span>
       </p>
       <p>
         <label>Commentaire :</label>
-        %titre% 
-        %comment%
+        %title% 
+        %content%
       </p>
     </li>
   </ul>

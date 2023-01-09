@@ -9,7 +9,6 @@ import './layer'
 import './edition'
 import './conflict'
 import './fiche'
-import * as fs from 'fs';
 
 let template = null;
 let saveLayers = function(layers) {
@@ -51,12 +50,12 @@ wapp.getCache = function (groupe) {
   if (groupe && groupe.layers) {
     const cache = wapp.param.vectorCache;
     groupe.layers.forEach((l) => {
-      if (l.type==='WFS') {
+      if (l.type==='feature-type') { //@TODO a changer
         // Has authentication ?
-        info.auth = info.auth || l.username;
+        info.auth = info.auth || l.username; 
         // Hors ligne ?
         cache.forEach(c => {
-          if (c.id_guichet === groupe.id_groupe) {
+          if (c.id_guichet === groupe.id) {
             info.cache = c;
           }
         });
@@ -71,29 +70,15 @@ wapp.getCache = function (groupe) {
  */
 wapp.dialogInfoGuichet = function (groupe) {
   if (!groupe) {
-    groupe = wapp.guichet;
+    groupe = wapp.userManager.active_community;
   }
   if (!groupe.layers) {
     wapp.showDialog('dialog-info-guichets');
     return;
   }
 
+  //@TODO ????
   const infoCache = wapp.getCache(groupe);
-
-  /*
-  var hasOffline = false;
-  // VNF PATCH 
-  hasOffline = groupe.id_groupe===200 || groupe.id_groupe===13 || groupe.id_groupe===375 || $('.debug').css('display')!=='none';
-  console.log('OFFLINE', hasOffline);
-  console.log(groupe);
-  if (hasOffline) {
-    $('#guichet [data-role="onglet-bt"] [data-list="offline"]').show();
-  }
-  else {
-    $('#guichet [data-role="onglet-bt"] [data-list="offline"]').hide();
-    wapp.showOnglet('guichet');
-  }
-  */
 
   /// Dialogue
   var page = CordovApp.template("dialog-infoguichet");
@@ -110,20 +95,25 @@ wapp.dialogInfoGuichet = function (groupe) {
   });
   // Nom, description
   var ul = $("ul.layers", page).html('');
-  $("h3.title", page).text(groupe.nom);
-  $(".description", page).html(groupe.desc);
+  $("h3.title", page).text(groupe.name);
+  $(".description", page).html(groupe.description);
 
   // Liste des layers
   groupe.layers.forEach(l => {
-    if (l.type==='WFS') {
+    if (l.type == "feature-type") {
       $('<li>').html('')
-        .append($('<h4>').html(l.nom+(l.external?' <i>(externe)</i>':'')))
-        .append($('<div>').text(l.description))
+        .append($('<h4>').html(l.table.title))
+        .append($('<div>').text(l.table.description))
+        .appendTo(ul);
+    } else if ( l.geoservice && l.geoservice.type ==='WFS') {
+      $('<li>').html('')
+        .append($('<h4>').html(l.geoservice.title+' <i>(externe)</i>'))
+        .append($('<div>').text(l.geoservice.description))
         .appendTo(ul);
     }
   });
 
-  // Credential
+  // Credential @TODO a garder???
   if (infoCache.auth) {
     $(".auth", page).off()
       .click(function () {
@@ -133,16 +123,16 @@ wapp.dialogInfoGuichet = function (groupe) {
           if (l.username) layer = l;
           delete l.password;
         }
-        var current = wapp.ripart.param.guichet;
-        if (wapp.ripart.param.guichet === groupe.id_groupe) wapp.setGuichet();
-        wapp.ripart.saveParam();
+        var current = wapp.userManager.param.active_community;
+        if (wapp.userManager.param.active_community === groupe.id) wapp.setGuichet();
+        wapp.report.saveParam();
         // Clear credentials
         var win = window.open('logout.html','_blank','clearsessioncache=yes,hidden=yes');
         setTimeout(function(){ win.close(); }, 100);
 
         // Ask for new credentials
         var content = CordovApp.template("dialog-authenticate");
-        $('span', content).text(layer.nom);
+        $('span', content).text(layer.geoservice.name);
         wapp.dialog.show (content, {
           title: "Connexion", 
           buttons: { submit:"OK", cancel:"Annuler" },
@@ -151,11 +141,11 @@ wapp.dialogInfoGuichet = function (groupe) {
               var cryp = new ol_layer_Vector_WFS();
               for (var k=0, l; l=groupe.layers[k]; k++) {
                 if (l.username) {
-                  l.username = $('.nom', content).val() || 'none';
+                  l.username = $('.nom', content).val() || 'none'; //@TODO a changer
                   l.password = cryp.crypt($('.pwd', content).val());
                 }
               }
-              if (current === groupe.id_groupe) wapp.setGuichet(current);
+              if (current === groupe.id) wapp.setGuichet(current);
             } 
           }
         });
@@ -173,204 +163,167 @@ wapp.dialogInfoGuichet = function (groupe) {
  */
 wapp.initGuichets = function() {
   // Reset list
-  var ul = $('#guichets [data-role="content"] ul');
+  var ul = $('#communities [data-role="content"] ul');
   if (!template) template = $('[data-role="template"]', ul).html();
   ul.html("");
-  if (!this.ripart.isConnected()) {
+  if (!wapp.userManager.apiClient.isConnected() && !wapp.userManager.param.communities) {
     wapp.setGuichet();
     setGeoportailLayers();
     return;
   }
-
-  
    
   // Recherche des groupes
-  var groupes = wapp.ripart.param.groupes;
+  var groupes = wapp.userManager.param.communities || [];
   const geoportailLayers = {};
   var current;
   groupes.forEach((g) => {
     if (wapp.noguichetConfig !== undefined  ) {
-      if (g.id_groupe != wapp.noguichetConfig){
+      if (g.id != wapp.noguichetConfig){
         return;
       }
     }
-    console.log('Guichets: '+ g.id_groupe);
+    console.log('Guichets: '+ g.id);
     // Chargement des logos
-    if (g.logo) {
-      CordovApp.File.dowloadFile(
-        g.logo, 
-        "TMP/logo/"+g.id_groupe,
-        undefined,
-        undefined, {
-          headers: {
-            'Authorization': 'Basic '+ wapp.ripart.getHash()
-          }
-        }
-      );
+    if (g.logo_url) {
+      wapp.userManager.apiClient.getDocument(encodeURI(g.logo_url)).then((response) => {
+        CordovApp.File.saveData(response.data, "TMP/logo/"+g.id, null, null, true);
+      });
     }
-    if (wapp.noguichetConfig !== undefined && wapp.noguichetConfig == g.id_groupe) {
+    if (wapp.noguichetConfig !== undefined && wapp.noguichetConfig == g.id) {
       current = g
     }
-    else if (this.ripart.param.guichet == g.id_groupe) current = g;
-    // Affichage si WFS
-    var couches = "";
-    
-    g.layers.forEach((layer) => {
-      let type = layer.type;
-      if (type != 'WFS' && layer.url && layer.layer && layer.url.indexOf("geoportail") != -1) {
-        type = 'GeoPortail';
-      }
-
-      switch (type) {
-        case 'WFS': {
-          couches += (couches?", ":"")+layer.nom;
-          break;
-        }
-        case 'GeoPortail': {
-          geoportailLayers[layer.layer] = layer;
-          break;
-        }
-        default: break;
+    else if (wapp.userManager.param.active_community == g.id) current = g;
+  
+    var li = $('<li>').html(template)
+      .data('groupe', g)
+      .appendTo(ul);
+    li.on("click", () => {
+      if (!li.hasClass('selected')) {
+        wapp.setGuichet(li.data('groupe'));
+        //wapp.hidePage();
+        wapp.showPage('layer-guichet')
+      } else {
+        wapp.setGuichet();
+        // Faire clignoter
+        li.addClass('active');
+        setTimeout(function(){ li.removeClass('active'); }, 200);
       }
     });
-    if (couches) {
-      var li = $('<li>').html(template)
-        .data('groupe', g)
-        .appendTo(ul);
-      li.click(() => {
-        if (!li.hasClass('selected')) {
-          wapp.setGuichet(li.data('groupe'));
-          //wapp.hidePage();
-          wapp.showPage('layer-guichet')
-        } else {
-          wapp.setGuichet();
-          // Faire clignoter
-          li.addClass('active');
-          setTimeout(function(){ li.removeClass('active'); }, 200);
-        }
-      });
-      $('.title', li).text(g.nom);
-      $('.layers', li).text(couches);
-      $('.fa-info-circle', li).on('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        wapp.dialogInfoGuichet(li.data('groupe'));
-      });
-      $('img', li).hide();
-      wapp.getLogo (g, (f) => {
-        $('img', li).attr('src',f).show();
-      });
-    }
+    $('.title', li).text(g.name);
+    $('.description', li).text(g.description)
+    $('.fa-info-circle', li).on('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      wapp.dialogInfoGuichet(li.data('groupe'));
+    });
+    $('img', li).hide();
+    wapp.getLogo (g, (f) => {
+      $('img', li).attr('src',f).show();
+    });
   });
 
-  setGeoportailLayers(geoportailLayers);
-
   if ($("li", ul).length) {
-    $('#guichets [data-role="content"]').removeClass('nomap');
+    $('#communities [data-role="content"]').removeClass('nomap');
     $('body').addClass('guichet');
   } else {
-    $('#guichets [data-role="content"]').addClass('nomap');
+    $('#communities [data-role="content"]').addClass('nomap');
     $('body').removeClass('guichet');
   }
 
-  // Update on show
-  $('#guichets').on('showpage', () => {
-    $('li', ul).each(function() {
-      const groupe = $(this).data('groupe');
-      const c = wapp.getCache(groupe);
-      $(this).removeClass('cache edit');
-      if (c.auth) {
-        $(this).addClass('cache');
-      }
-      if (c.cache) {
-        $(this).addClass('cache edit');
-      }
-    });
-  });
-
-console.log('[TODO] set guichet')
   wapp.setGuichet(current);
 };
 
 
-/** Guichet en cours de modification
-*/
+/** 
+ * Guichet en cours de modification
+ * @param {Integer|Object} groupe le groupe ou l identifiant du groupe
+ */
 wapp.setGuichet = function(groupe) {
-  // groupe = 366;
-  // wapp.ripart.param.groupes=[{'id_group':groupe}]
-
-console.log('setGuichet', groupe);
-   
   if (typeof(groupe)==='number') {
-    groupe = wapp.ripart.getGroupById(groupe);
+    groupe = wapp.userManager.getGroupById(groupe);
   }
   if (!groupe) groupe = { };
+  wapp.select.getFeatures().clear();
 
   // Check if has groupe
-  if (wapp.ripart.param && wapp.ripart.param.groupes) {
-    if (wapp.ripart.param.groupes.length) document.body.setAttribute('data-guichet', groupe.id_groupe || 'none' );
+  if (wapp.userManager.param && wapp.userManager.param.communities) {
+    if (wapp.userManager.param.communities.length) document.body.setAttribute('data-guichet', groupe.id || 'none' );
     else document.body.removeAttribute('data-guichet');
   } else {
     document.body.removeAttribute('data-guichet');
   }
-  
+
+  var success =  function(community) {
+    wapp.guichet = community;
+    wapp.onSelect();
+    let layers = community.layers;
+    const geoportailLayers = {};
+    for (let i in layers) {
+      let geoservice = layers[i].geoservice;
+      let type = geoservice ? geoservice.type : 'WFS';
+      if (type != 'WFS' && geoservice.url.indexOf('geoportail') != -1) {
+        geoportailLayers[geoservice.layers] = layers[i];
+      }
+    }
+
+    // Mettre a jour la liste
+    $('#communities li').each(function() {
+      if ($(this).data('groupe')===groupe) $(this).addClass('selected');
+      else $(this).removeClass('selected');
+    });
+
+    // Mettre a jour la page des couches
+    const gdiv = $('#couches .couches .couche.guichet');
+    $('.name', gdiv).text(wapp.guichet.name || '');
+
+    $("#couches").on('showpage', function(){
+      let nbModifs = 0;
+      let layers = wapp.getLayerGuichet().getLayers().getArray();
+      for (let i in layers) {
+        if (!layers[i].getSource() || typeof layers[i].getSource().nbModifications != 'function') continue;
+        nbModifs = parseInt(nbModifs) + parseInt(layers[i].getSource().nbModifications());
+      }
+      $(".fa-send .tag", gdiv).text(nbModifs);
+    });
+
+    $(".fa-send", gdiv).on('click', function(){
+      if (parseInt($(".fa-send .tag", gdiv).text()) < 1) {
+        wapp.alert("Toutes les modifications ont déjà été envoyées.");
+        return;
+      }
+      let layers = wapp.getLayerGuichet().getLayers().getArray();
+      let layersToSave = [...layers];
+      saveLayers(layersToSave);
+    });
+
+    // Mettre a jour le guichet
+    wapp.setInfoGuichet(community);
+    // Charger les couches
+    wapp.loadLayers(community);
+    // Afficher
+    wapp.getLayerGuichet().setVisible(wapp.param.visibleLayers.guichet);
+
+    setGeoportailLayers(geoportailLayers);
+
+    //on recharge la couche des signalements
+    wapp.report.signalements.getSource().getSource().clear();
+  };
   
   // Nouveau guichet
-  this.ripart.param.guichet =groupe.id_groupe;
-  wapp.ripart.saveParam();
-  wapp.select.getFeatures().clear();
-  wapp.onSelect();
-  wapp.guichet = groupe;
-
-  // Mettre a jour la liste
-  $('#guichets li').each(function() {
-    if ($(this).data('groupe')===groupe) $(this).addClass('selected');
-    else $(this).removeClass('selected');
-  });
-
-  // Mettre a jour la page des couches
-  const gdiv = $('#couches .couches .couche.guichet');
-  $('.name', gdiv).text(wapp.guichet.nom || '');
-  if (wapp.getCache(wapp.guichet).cache) {
-    gdiv.removeClass('online');
+  if (groupe && groupe.id) {
+    wapp.waitLogo("Chargement du groupe", true);
+    wapp.userManager.setCommunity(groupe.id).then((community) => {
+      success(community);
+    }).finally(() => {
+      wapp.wait(false);
+    });
   } else {
-    gdiv.addClass('online');
+    // Mettre a jour le guichet
+    wapp.setInfoGuichet(groupe);
+    // Charger les couches
+    wapp.loadLayers(groupe);
+    setGeoportailLayers();
   }
-
-  $("#couches").on('showpage', function(){
-    let nbModifs = 0;
-    let layers = wapp.getLayerGuichet().getLayers().getArray();
-    for (let i in layers) {
-      if (!layers[i].getSource() || typeof layers[i].getSource().nbModifications != 'function') continue;
-      nbModifs = parseInt(nbModifs) + parseInt(layers[i].getSource().nbModifications());
-    }
-    $(".fa-send .tag", gdiv).text(nbModifs);
-  });
-
-  $(".fa-send", gdiv).on('click', function(){
-    if (parseInt($(".fa-send .tag", gdiv).text()) < 1) {
-      wapp.alert("Toutes les modifications ont déjà été envoyées.");
-      return;
-    }
-    let layers = wapp.getLayerGuichet().getLayers().getArray();
-    let layersToSave = [...layers];
-    saveLayers(layersToSave);
-  });
-
-/*
-console.log('[DEPRECATED] setGuichet');
-  $('#cartes [data-list="guichets"] ul.guichet li').each(function() {
-    if ($(this).data('groupe')===groupe) $(this).addClass('selected');
-    else $(this).removeClass('selected');
-  });
-*/
-
-  // Mettre a jour le guichet
-  wapp.setInfoGuichet(groupe);
-  // Charger les couches
-  wapp.loadLayers(groupe);
-  // Afficher
-  wapp.getLayerGuichet().setVisible(wapp.param.visibleLayers.guichet);
 };
 
 
@@ -380,22 +333,11 @@ wapp.setInfoGuichet = function(groupe) {
   var content = document.querySelector('#layer-guichet .guichet');
   console.log('setInfoGuichet',groupe);
 
-  /* VNF PATCH * /
-  hasOffline = groupe.id_groupe===200 || groupe.id_groupe===13 || groupe.id_groupe===375 || $('.debug').css('display')!=='none';
-  console.log('Hide offline', groupe.id_groupe, hasOffline);
-  if (hasOffline) {
-    content.classList.add('offline');
-  } else {
-    content.classList.remove('offline');
-  }
-  */
-  // var cache = wapp.getCache(groupe);
-
   // Affichage du groupe
   wapp.vectorCache.setCurrentGuichet(groupe);
 
   // Display info
-  $('h3', content).text(groupe.nom || '');
+  $('h3', content).text(groupe.name || '');
   $('img', content).hide();
   wapp.getLogo(groupe, function(src) {
     if (src) $('img', content).attr('src',src).show();
@@ -407,7 +349,7 @@ wapp.setInfoGuichet = function(groupe) {
  * Guichet en cours
  */
 wapp.getIdGuichet = function(){
-  return this.ripart.param.guichet;
+  return wapp.userManager.param.active_community;
 };
 
 /** Envoyer le signalements courant
@@ -416,14 +358,14 @@ wapp.postGeorem = function() {
   var f = wapp.select.getFeatures().item(0);
   var grem = f.get('georem');
   wapp.select.selectFeature();
-  if (grem) wapp.ripart.postLocalRem (grem, {
+  if (grem) wapp.report.postLocalRem (grem, {
     cback: function(prem) {
-      f = wapp.ripart.getFeature(prem);
-      wapp.select.selectFeature(f, wapp.ripart.layer);
+      f = wapp.report.getFeature(prem);
+      wapp.select.selectFeature(f, wapp.report.layer);
       wapp.wait(false)
     },
     error: function(e, msg) {
-      wapp.select.selectFeature(f, wapp.ripart.layer);
+      wapp.select.selectFeature(f, wapp.report.layer);
       wapp.alert(msg);
     }
   });
@@ -435,10 +377,10 @@ wapp.modifyGeorem = function() {
   var f = wapp.select.getFeatures().item(0);
   var grem = f.get('georem');
   // Get feature if  croquis
-  if (f.layer === wapp.ripart.croquis) grem = grem.get('georem');
+  if (f.layer === wapp.report.croquis) grem = grem.get('georem');
 console.log('modify', f, grem)
   wapp.select.selectFeature();
-  if (grem) wapp.ripart.showFormulaire (grem);
+  if (grem) wapp.report.showFormulaire (grem);
 };
 
 /** Supprimer le signalement courant
@@ -457,7 +399,7 @@ wapp.delGeorem = function(warning) {
   } else {
     if (grem) {
       wapp.select.getFeatures().clear();
-      wapp.ripart.delLocalRem (grem);
+      wapp.report.delLocalRem (grem);
       wapp.showSelect();
     }
   }
@@ -476,45 +418,11 @@ wapp.getGeomFr = function(g) {
 
 /** Afficher le formulaire de signalement
 */
-wapp.showRipartForm = function() {
+wapp.showReportForm = function() {
   //wapp.showOnglet("signal");
   wapp.showPage('fiche', 'signal');
 };
 
-/** Affichage de la page de gestion des cartes
-*	- Mise a jour des infos du guichet
-*/
-$("#cartes").on("showpage", function() {
-  if (!wapp.vector) return;
-
-  console.log("TODO : cartes info");
-  return;
-/*
-  var ftype = wapp.vector.getFeatureType();
-  var d = $("li[title=\""+ftype.fullName+"\"]", this);
-
-  $('li', this).removeClass("select");
-  $('li [data-input-role="info"]', this).html("");
-
-  d.addClass('select');
-
-  if (wapp.vector.getSource())
-  {	var features = wapp.vector.getSource().getFeatures();
-    var nb = features.length;
-    var t={};
-    for (var i=0, f; f = features[i]; i++)
-    {	var s = f.getState();
-      if (!t[s]) t[s]=1;
-      else t[s] += 1;
-    }
-
-    var info = nb + " objet(s) chargé(s)"
-      + " - "
-      + (t.Update||0) + " objet(s) modifié(s)";
-    $('[data-input-role="info"]', d).html(info);
-  }
-*/
-});
 
 /** Ouverture de la page de chargement du cache 
  */
@@ -556,13 +464,14 @@ wapp.updateCache = function(layer) {
 };
 
 /** Ajouter un layer au cache
- * @param {ol.layer.Webpart} layer
+ * @param {ol.layer.CollabVector} layer
  */
 wapp.appendLayerToCache = function(layer) {
-  var name = layer.nom
+  if (!layer.table) return;
+  var name = layer.table.name
   var guichet = this.vectorCache.getCurrentGuichet();
   for (var i=0, l; l = guichet.layers[i]; i++) {
-    if (l.type === 'WFS' && l.tilezoom && name === l.nom) {
+    if (l.type === 'WFS' && l.table.tile_zoom_level && name === l.table.name) {
       break;
     }
   }
@@ -599,9 +508,9 @@ $("#fiche").on("showpage hidepage", function() {
 /** Affichage de la page du guichet
  */
 wapp.showGuichet= function() {
-  if (!wapp.ripart.param.groupes) {
+  if (!wapp.userManager.param.communities) {
     wapp.alert(CordovApp.template('dialog-noconnect'));
-  } else if (wapp.ripart.param.groupes.length) {
+  } else if (wapp.userManager.param.communities.length) {
     wapp.showPage('layer-guichet');
   } else {
     wapp.alert(CordovApp.template('dialog-noguichet'));

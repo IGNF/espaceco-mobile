@@ -153,10 +153,10 @@
   background-color:#eee;
 }
 
-#fiche i.fromRipart {
+#fiche i.fromReport {
   display: none;
 }
-#fiche span.fromRipart {
+#fiche span.fromReport {
   display: none;
 	font-style: normal;
 	font-size: 1.7em;
@@ -166,12 +166,12 @@
 	margin: 0 0.3em 0 0;
 	cursor: pointer;
 }
-#fiche.fromRipart i.fa-close,
-#fiche.fromRipart i.backArrowBt {
+#fiche.fromReport i.fa-close,
+#fiche.fromReport i.backArrowBt {
   display:none;
 }
-#fiche.fromRipart i.fromRipart,
-#fiche.fromRipart .fromRipart {
+#fiche.fromReport i.fromReport,
+#fiche.fromReport .fromReport {
   display: initial
 }
 
@@ -549,14 +549,14 @@ ul li.obligatoire label:after {
   margin: 0;  
 }
 /* Dialog response */
-[data-role=dialog].responseRIPart textarea {
+[data-role=dialog].responseReport textarea {
   font-size: 1em;
   min-width: 100%;
   max-width: 100%;
   height: 7em;
   display: block;
 }
-[data-role=dialog].responseRIPart span {
+[data-role=dialog].responseReport span {
   position: relative;
   display: block;
   width: 100%;
@@ -564,7 +564,7 @@ ul li.obligatoire label:after {
   padding: .5em 2em .5em .5em;
   height: 2.4em;
 }
-[data-role=dialog].responseRIPart span:after {
+[data-role=dialog].responseReport span:after {
   position: absolute;
   content: '\2771';
   right: .5em;

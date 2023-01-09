@@ -5,8 +5,8 @@ import { layerCache } from './map/map'
 import {layers} from './map/map'
 import setControls from './map/control'
 import setInteractions from './map/interaction'
-import initRipart from './ripart/initRipart'
-import layerRipart from './guichet/layerRipart'
+import initReport from './report/initReport'
+import layerReport from './guichet/layerReport'
 import getUserLayers from './guichet/userLayers'
 import initOffline from './guichet/offline'
 
@@ -23,7 +23,7 @@ import ol_format_GPX from 'ol/format/GPX'
 
 import CacheMap from 'cordovapp/ol/cache/CacheMap'
 import CacheVector from 'cordovapp/ol/cache/CacheVector'
-import ol_layer_Webpart from 'cordovapp/ol/layer/Webpart'
+import ol_layer_CollabVector from 'cordovapp/ol/layer/CollabVector'
 
 import config from './config';
 import { wappStorage } from 'cordovapp/cordovapp/CordovApp'
@@ -59,7 +59,7 @@ import * as fs from 'fs';
     */
     /* Gestion du mode hors-connexion 
      * Rafraichir la carte quand on recupere la connexion
-     * Pour les layers Webpart switch mode en ligne/hors ligne
+     * Pour les layers Wfs collaboratif switch mode en ligne/hors ligne
      */
     document.addEventListener("online", function(){
       wapp.refreshMap();
@@ -163,24 +163,21 @@ import * as fs from 'fs';
       });
 
     // Brancher les signalements
-    initRipart(wapp);
-    layerRipart(wapp);
-
+    initReport(wapp);
+    layerReport(wapp);
 
     wapp.setDebugMode(); 
 
-
-
     // A propos 
     $('#apropos').on('showpage', function(){
-      if (wapp.ripart.param.profil) {
-        var groupe = wapp.ripart.param.groupes.find( function(g){
-          return g.id_groupe === wapp.ripart.param.profil.id_groupe;
+      if (wapp.userManager.param.active_community) {
+        var community = wapp.userManager.param.communities.find( function(g){
+          return g.id === wapp.userManager.param.active_community;
         });
-        if (groupe) {
+        if (community) {
           $("#apropos .groupe").show();
-          $("#apropos .groupe h3 span").html('').text(groupe.nom);
-          $("#apropos .groupe div").html('').html(groupe.desc);
+          $("#apropos .groupe h3 span").html('').text(community.name);
+          $("#apropos .groupe div").html('').html(community.description);
         } else {
           $("#apropos .groupe").hide();
         }
@@ -239,7 +236,7 @@ import * as fs from 'fs';
 
   /**
    * Switch mode en ligne / hors ligne
-   * sur les couches Webpart
+   * sur les couches wfs collaboratif
    * @param {bool} online 
    * @param {Collection<Layer>} layers
    * @param {boolean} silent pas d'affichage de la notification
@@ -254,7 +251,7 @@ import * as fs from 'fs';
     layers.forEach((l) => {
       if (l.getLayers) {
         wapp.switchLayersOnline(online, l.getLayers(), true);
-      } else if (l instanceof ol_layer_Webpart) {
+      } else if (l instanceof ol_layer_CollabVector) {
         l.online(online);
       }
     });
@@ -389,7 +386,7 @@ wapp.waitLogo = function(info, anim) {
   } else {
     var div = $("<div>").append($("<p>").text(info));
     try {
-      var profil = wappStorage('ripart').profil;
+      var profil = wappStorage('report').profil;
       this.getLogo(profil, function(logo) {
         $("<img>").attr('src', logo || "")
           .prependTo(div);
@@ -466,7 +463,7 @@ wapp.initParams = function() {
         }
         if (wapp.interactions && wapp.interactions.geolocation) {
           wapp.interactions.geolocation.set('tolerance', val);
-          wapp.interactions.ripartGeolocation.set('tolerance', val);
+          wapp.interactions.reportGeolocation.set('tolerance', val);
         }
         break;
       }
@@ -484,10 +481,10 @@ wapp.initParams = function() {
       }
       case "qlf": {
       /*
-        if (wapp.ripart) {
-         if (wapp.ripart.isService(e.val)) {
-          wapp.ripart.setServiceUrl(e.val);
-          wapp.ripart.deconnect();
+        if (wapp.report) {
+         if (wapp.report.isService(e.val)) {
+          wapp.report.setServiceUrl(e.val);
+          wapp.report.deconnect();
           if (e.val) {
             console.warn('QUALIF:', e.val);
           }
@@ -525,7 +522,7 @@ wapp.changeGroup = function (e) {
   var layersTab = [];
   // Recuperer les userLayers
   lgroup.getLayers().forEach((l) => {
-    if (l.get('type')!=='Webpart') {
+    if (l.get('type')!=='CollabVector') {
       layersTab.push(l);
     }
   });
@@ -538,22 +535,22 @@ wapp.changeGroup = function (e) {
   if (e.group) {
     var layers = e.group.layers;
     layers.forEach((l) => {
-      if (l.type=="WMS") {
-        var extent = l.extent;
+      if (l.geoservice && l.geoservice.type=="WMS") {
+        var extent = l.geoservice.extent;
         extent = ol_proj_transformExtent(extent, "EPSG:4326", "EPSG:3857");
         var wmsParam = {
-          title: l.nom,
-          name: 'groupe_'+ l.layer,
-          visible: wapp.param.visibleLayers ? wapp.param.visibleLayers['groupe_'+ l.layer] : true,
+          title: l.geoservice.title,
+          name: 'groupe_'+ l.geoservice.layers,
+          visible: wapp.param.visibleLayers ? wapp.param.visibleLayers['groupe_'+ l.geoservice.layers] : true,
           description: l.description,
           query: !!l.getFeatureInfoMask,
-          logo: e.group.logo,
+          logo: e.group.logo_url,
           extent: extent[0] ? extent : undefined,
-          minResolution: new ol_View({ zoom: l.maxzoom }).getResolution(),
-          maxResolution: new ol_View({ zoom: l.minzoom }).getResolution(),
+          minResolution: new ol_View({ zoom: l.geoservice.max_zoom }).getResolution(),
+          maxResolution: new ol_View({ zoom: l.geoservice.min_zoom }).getResolution(),
           getFeatureInfoMask: l.getFeatureInfoMask,
           source: new ol_source_TileWMS({
-            url: l.url,
+            url: l.geoservice.url,
             projection: "EPSG:3857",
             // "crossOrigin": "anonymous",
             params: {
@@ -561,11 +558,11 @@ wapp.changeGroup = function (e) {
               "FORMAT": l.format,
               "VERSION": l.version
             },
-            attributions: [e.group.nom]
+            attributions: [e.group.name]
           })
         };
         const layer = new ol_layer_Tile (wmsParam);
-        layer.set('type', 'Webpart');
+        layer.set('type', 'CollabVector');
         layer.on('change:visible', () => {
           wapp.saveContext();
         });
@@ -580,7 +577,7 @@ wapp.changeGroup = function (e) {
       layersTab.sort((a,b) => keys.indexOf(a.get('name')) - keys.indexOf(b.get('name')));
       layersTab.forEach((l) => { lgroup.getLayers().push(l); });
       // Titre
-      lgroup.set('title', e.group.nom);
+      lgroup.set('title', e.group.name);
       lgroup.setVisible(true);
     }
     // Afficher ?
@@ -627,15 +624,14 @@ wapp.setQualif = function() {
   }
   wapp.selectDialog(choice, 
     this.param.options.qlf, 
-    (qlf) => {
+    (qlf) => { //@TODO et pour l url de prod (par defaut)??
       this.param.options.qlf = qlf;
       $('#options .qlf').text(this.param.options.qlf.replace('https://qlf-collaboratif.ign.fr/', '').replace('/api/', '') || 'Espace Co');
-      if (wapp.ripart.isService(qlf)) {
-        wapp.ripart.setServiceUrl(qlf);
-        wapp.ripart.deconnect();
-        if (qlf) {
-          console.warn('QUALIF:', qlf);
-        }
+      wapp.report.userManager.setServiceUrl(qlf);
+      let authParams = wapp.getAuthParameters(qlf);
+      wapp.report.userManager.switchAuthParams(authParams.authBaseUrl, authParams.clientId, authParams.clientSecret);
+      if (qlf) {
+        console.warn('QUALIF:', qlf);
       }
     }, { 
       buttons: { cancel:'annuler', raz: 'RAZ', add:'Ajouter' }, 
@@ -650,10 +646,9 @@ wapp.setQualif = function() {
                 var qlf = this.param.options.qlf = 'https://qlf-collaboratif.ign.fr/'+v+'/api/';
                 this.param.options.qlfList[v] = 'https://qlf-collaboratif.ign.fr/'+v+'/api/';
                 $('#options .qlf').text(v);
-                if (wapp.ripart.isService(qlf)) {
-                  wapp.ripart.setServiceUrl(qlf);
-                  wapp.ripart.deconnect();
-                }
+                wapp.report.userManager.setServiceUrl(qlf);
+                let authParams = wapp.getAuthParameters(qlf);
+                wapp.report.userManager.switchAuthParams(authParams.authBaseUrl, authParams.clientId, authParams.clientSecret);
               }
             }
           )
@@ -665,6 +660,28 @@ wapp.setQualif = function() {
     }
   )
 };
+
+/**
+ * Recuperation des parametres d environnement pour l interface de prod ou de qualif
+ * selon l url d'api donnee
+ * @param {String} url de base de l api collaborative
+ * @returns {Object} {"authBaseUrl": "...", "clientId": "...", "clientSecret": "..."}
+ */
+wapp.getAuthParameters = function(url) {
+  if ( url == wapp.param.options.qlf ) {
+    return {
+      "authBaseUrl": process.env.QLF_BASE_AUTH_URL,
+      "clientId": process.env.QLF_COLLAB_API_CLIENT_ID,
+      "clientSecret": process.env.QLF_COLLAB_API_CLIENT_SECRET
+    };
+  } else {
+    return {
+      "authBaseUrl": process.env.BASE_AUTH_URL,
+      "clientId": process.env.COLLAB_API_CLIENT_ID,
+      "clientSecret": process.env.COLLAB_API_CLIENT_SECRET
+    };
+  }
+}
 
 
 /** Affichage des layers
@@ -747,11 +764,11 @@ wapp.refreshMap = function(layers) {
         if (l.getSource().setTileLoadFunction) {
           // console.log(l.get('name'), l);
           l.getSource().setTileLoadFunction(l.getSource().getTileLoadFunction())
-        } else if (l===wapp.ripart.signalements && wapp.ripart.signalements.getSource()) {
+        } else if (l===wapp.report.signalements && wapp.report.signalements.getSource()) {
           // Refresh signalements
-          wapp.ripart.signalements.getSource().getSource().clear();
+          wapp.report.signalements.getSource().getSource().clear();
         } else if (l.getSource().reload) {
-          // Reload Webpart layer (when no cache)
+          // Reload CollabVector layer (when no cache)
           if (!l.get('cache')) {
             l.getSource().reload();
           }
@@ -765,17 +782,26 @@ wapp.refreshMap = function(layers) {
   }
 };
 
+/**
+ * clic sur le header permettant de changer de groupe actif
+ * @returns void
+ */
+wapp.communityChoice =  function() {
+  if (!wapp.userManager.param.user) return;
+  wapp.userManager.communityChoice();
+}
+
 /** Recupere le logo d'un goupe
  * @param {any} g le groupe
  * @param {function} cback callback fonction qui renvoie le nom du fichier
  */
 wapp.getLogo = function (g, cback, scope) {	
-	CordovApp.File.getFile("TMP/logo/"+(g ? g.id_groupe : '_nologo_'), 
+	CordovApp.File.getFile("TMP/logo/"+(g ? g.id : '_nologo_'), 
 		function(fileEntry) { 
 			cback.call(scope, CordovApp.File.getFileURI(fileEntry.toURL())); 
 		}, 
 		function() { 
-			cback.call(scope, g ? g.logo : null); 
+			cback.call(scope, g ? g.logo_url : null); 
     }
   );
 };
@@ -810,16 +836,15 @@ wapp.getLogo = function (g, cback, scope) {
 /** Connexion RIpart
 */
 wapp.connect = function() {
-  console.log("connect function");
-  wapp.ripart.connectDialog({
-    onConnect: function(result) {
-      console.log('ok', result)
-      if (result.connected === false) {
+  wapp.userManager.connectDialog({
+    onConnect: function(user) {
+      console.log('ok', user)
+      if (user.username === "anonymous") {
         wapp.notification("Vous êtes déconnecté", 1200);
         if (wapp.noguichetConfig!== undefined) { $('p.userinfo').hide();}
       } else {
         if (wapp.noguichetConfig!== undefined) {
-           if (wapp.noguichetConfig !==undefined) wapp.ripart.setProfil(wapp.noguichetConfig);
+           if (wapp.noguichetConfig !==undefined) wapp.report.setProfil(wapp.noguichetConfig);
            if (wapp.changeGuichet === false) $('#changeGuichet').hide();
            $('p.userinfo').show();
         } 
@@ -828,7 +853,7 @@ wapp.connect = function() {
         
       }
       wapp.initGuichets();
-      wapp.ripart.signalements.getSource().getSource().clear();
+      wapp.report.signalements.getSource().getSource().clear();
       // Test visible layers
       var visible = 0;
       var layers = {};
@@ -854,14 +879,14 @@ wapp.connect = function() {
 		},
 		onError: function(error) {
 			var msg = [];
-      wapp.par
 			wapp.initGuichets();
-			switch (error.status) {
+      let status = error.response ? error.response.status : 500;
+			switch (status) {
         case 401: 
 					msg = [ "Accès interdit" , "Utilisateur inconnu." ];
 					break;
-				case "no_profile":
-					msg = [ "Connexion", error.statusText ]
+				case 400:
+					msg = [ "Connexion", error.response.message ];
 					break;
 				default: 
 					msg = [ "Connexion", "Connexion impossible...<br/>Vérifiez votre connexion." ];

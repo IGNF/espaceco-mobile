@@ -8,7 +8,7 @@ import {boundingExtent as ol_extent_boundingExtent} from 'ol/extent'
 import {buffer as ol_extent_buffer} from 'ol/extent'
 import {transformExtent as ol_proj_transformExtent} from 'ol/proj'
 
-import ol_layer_Vector_Webpart from 'cordovapp/ol/layer/Webpart'
+import ol_layer_Vector_CollabVector from 'cordovapp/ol/layer/CollabVector'
 
 /**
  * Creer un layer WFS externe
@@ -19,7 +19,7 @@ wapp.layerWFS = function(groupe, l) {
   var vector;
 
   // Methode de chargement
-  if (l.mask.loadStartegy==='all') {
+  if (l.geoservice.input_mask && l.geoservice.input_mask.loadStrategy==='all') {
     l.strategy = new ol_loadingstrategy_all();
     l.once = true;			// Chargement en une fois
   }
@@ -100,12 +100,13 @@ wapp.layerWFS = function(groupe, l) {
   delete l.authentication;
 
   //
-  vector.set('logo', groupe.logo);
-  vector.set('attach', l.mask.joinData);
+  vector.set('logo', groupe.logo_url);
+  if (l.geoservice.input_mask) vector.set('attach', l.geoservice.input_mask.joinData);
+  
   // Chargement OK
-  vector.once('ready', function() { 
+  vector.once('ready', function() {
       // Sauvegarde login / pwd
-      wapp.ripart.saveParam();
+      wapp.report.saveParam();
       // Recherche sur la couche ?
       wapp.setSearchSource(this.getSource(), this.get('search'));
       // Load source at center if once
@@ -124,52 +125,39 @@ wapp.layerWFS = function(groupe, l) {
 };
 
 /**
- * Creer un layer Webpart
+ * Creer un layer CollabVector
  * @param {} l layer options
  * @param {string} cacheUrl
- * @param {ol.extent} cacheExtent limit layer visibility inside the extent (deprecated)
  */
-wapp.layerWebpart = function(l, cacheUrl, cacheExtent) {
+wapp.layerCollabVector = function(l, cacheUrl) {
   var vector;
-  var url = l.url.replace(/(.*)\?(.*)/,"$1");
-  // var base = l.url.replace(/.*databasename=(.*)/,"$1");
-  var base = l.url.replace(/.*databasename=([^&]*).*/,"$1");
+  var url = l.table.wfs.replace(/(.*)\?(.*)/,"$1");
   var extent = [];
-  /* Show all features outside the cache extent
-  if (cacheExtent) {
-    extent = cacheExtent
-    // Extend cache extent to show all features ?
-    // extent = ol_extent_buffer(extent, 5000);
-  } else {
-  */
+
   for (var k=0; k<l.extent.length; k++) extent[k] = parseFloat(l.extent[k]);
   extent = ol_proj_transformExtent(extent, 'EPSG:4326', wapp.map.getView().getProjection());
-  // Format CSV sur develop...
-  l.format = (/collaboratif-develop/.test(l.url)) ? 'CSV' : 'JSON';
-  vector = new ol_layer_Vector_Webpart({
+  vector = new ol_layer_Vector_CollabVector({
     url: url,
     //renderMode: 'image',
-    name: l.nom,
-    title: l.nom,
+    name: l.table.name,
+    title: l.table.title,
     cacheUrl: cacheUrl,
-    featureType: l.featureType,
-    database: base,
+    table: l.table,
+    database: l.table.database,
     extent: extent,
-    username: wapp.ripart.getUser(),
-    password: wapp.ripart.getUser(true),
+    client: wapp.userManager.apiClient,
     options: l,
     // style: guichet.style,
     maxResolution: 40, // zoom 13
-    checkSourceOptions: function (options, featureType) {
-      // console.log(featureType.fullName, featureType.tileZoomLevel, '-', featureType.minZoomLevel-2)
+    checkSourceOptions: function (options, table) {
       // Limiter la taille des tuilles en fonction du minZoom
-      options.tileZoom = featureType.tileZoomLevel; //|| Math.max(featureType.minZoomLevel-2, 4);
+      options.tileZoom = table.tile_zoom_level; //|| Math.max(featureType.minZoomLevel-2, 4);
       // Update tile zoom
-      l.tilezoom = featureType.tileZoomLevel;
+      l.tilezoom = table.tile_zoom_level;
     }.bind(this)
   },{
     preserved: this.select.getFeatures(),
-    filter: (base=="bduni_metropole" ? {detruit:false} : {}),
+    filter: (l.table.database=="bduni_metropole" ? {detruit:false} : {}),
     outputFormat: l.format,
     // Tile zoom to calculate tiles
     tileZoom: 13,
@@ -232,7 +220,7 @@ wapp.loadLayers = function (groupe) {
 		return;
 	}
   guichet.set("displayInLayerSwitcher", true);
-  guichet.set("title", 'Guichet: '+groupe.nom);
+  guichet.set("title", 'Guichet: '+groupe.name);
 
   // Layers en cache
   var layers = [];
@@ -246,7 +234,7 @@ wapp.loadLayers = function (groupe) {
     groupe.layers.forEach((l) => {
       var found = false;
       for (let i=0, c; c=cacheLayers[i]; i++) {
-        if (c.nom === l.nom && c.url === l.url) {
+        if (l.table && c.table.name === l.table.name && c.table.uri === l.table.uri) {
           found = true;
           break;
         }
@@ -263,13 +251,16 @@ wapp.loadLayers = function (groupe) {
   // Ajouter les layers du guichet
   var l;
   for (i=0; l=groupLayers[i]; i++) {
-    if (l.type=="WFS") {
+    if (
+      (l.geoservice && l.geoservice.type == "WFS")
+      || l.table
+    ) {
       nb++;
       var vector;
       // WFS externe
-      if (l.external) vector = wapp.layerWFS(groupe, l);
+      if (l.geoservice && l.geoservice.type == "WFS") vector = wapp.layerWFS(groupe, l);
       // Guichet
-      else vector = wapp.layerWebpart(l);
+      else vector = wapp.layerCollabVector(l);
 
       // Ajouter
       this.vector.push(vector);
@@ -303,7 +294,7 @@ wapp.loadLayers = function (groupe) {
         });
         // Notification de chargement
         this.getSource().on(['loadstart', 'loadend'], function (e) {
-          loading[e.target.getFeatureType().fullName] = e.remains;
+          loading[e.target.getTable().full_name] = e.remains;
           var remains=0;
           for (var i in loading) remains += loading[i];
           if (remains) {
@@ -333,12 +324,7 @@ wapp.loadLayers = function (groupe) {
   // Reset source pour la recherche
   wapp.setSearchSource ();
 
-	// Mettre les signalements en haut de la pile de calque
 	if (nb) {
-    /*
-    wapp.map.removeLayer(wapp.ripart.layer);
-    wapp.map.addLayer(wapp.ripart.layer);
-    */
 		wapp.notification("Chargement des guichets...");
 	}
 };

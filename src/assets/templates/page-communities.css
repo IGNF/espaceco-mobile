@@ -1,25 +1,25 @@
-﻿#guichets [data-role="content"].nomap .hasmap,
-#guichets [data-role="content"] .nomap {
+﻿#communities [data-role="content"].nomap .hasmap,
+#communities [data-role="content"] .nomap {
   display: none;
 }
-#guichets [data-role="content"].nomap .nomap {
+#communities [data-role="content"].nomap .nomap {
   display: block;
   margin: 1em;
 }
 
-#guichets ul {
+#communities ul {
   list-style: none;
   margin: 0;
   padding: 0;
 }
-#guichets ul li {
+#communities ul li {
   position: relative;
   border: 1px solid #ccc;
   box-shadow: 3px 3px 3px rgba(0,0,0,.5);
   margin: 0 0 1em;
 }
 
-#guichets ul li.selected:before {
+#communities ul li.selected:before {
   content: "\f00c";
   font-family: Fontawesome;
   position: absolute;
@@ -29,26 +29,26 @@
   transform: translateY(-50%);
 }
 
-#guichets ul li .li-content {
+#communities ul li .li-content {
   position: relative;
   padding: .5em .5em .5em 5.5em;
   min-height: 4.5em;
 }
-#guichets ul li .icn-bar {
+#communities ul li .icn-bar {
   display: block;
   text-align: right;
   background-color: #eee;
   margin: 0;
   clear: both;
 }
-#guichets ul li .icn-bar > i {
+#communities ul li .icn-bar > i {
   position: relative;
   width: 2em;
   display: inline-block;
   text-align: center;
   padding: .25em 0;
 }
-#guichets ul li img {
+#communities ul li img {
   position: absolute;
   max-width: 3em;
   max-height: 3em;
@@ -57,22 +57,22 @@
   -webkit-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
 }
-#guichets ul li p {
+#communities ul li p {
   margin: 0;
 }
-#guichets ul li p.layers {
+#communities ul li p.layers {
   color: #369;
   overflow: hidden;
 }
 
-#guichets ul li .icn-bar > i.fa-pencil,
-#guichets ul li .icn-bar > i.fa-cloud-download {
+#communities ul li .icn-bar > i.fa-pencil,
+#communities ul li .icn-bar > i.fa-cloud-download {
   display: none;
 }
-#guichets ul li.cache .icn-bar > i.fa-cloud-download {
+#communities ul li.cache .icn-bar > i.fa-cloud-download {
   display: inline-block;
 }
-#guichets ul li.edit .icn-bar > i.fa-pencil {
+#communities ul li.edit .icn-bar > i.fa-pencil {
   display: inline-block;
 }
 

@@ -3,6 +3,7 @@
 .vscode
 .idea
 .VSCodeCounter
+.env.local
 hooks
 node_modules
 node_modules-copie

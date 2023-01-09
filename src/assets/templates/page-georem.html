@@ -6,7 +6,7 @@
 	<h2>Signalement <span data-attr="id" data-prefix="#"></span></h2>
 
 	<div>
-		<span data-attr="commune"></span>
+		<span data-attr="commune_name"></span>
 		<span data-attr="id_dep" data-prefix="(" data-suffix=")"></span>
 	</div>
 
@@ -14,8 +14,8 @@
 
 	<h3>Réponses :</h3>
 	<ul data-role="list" data-attr="rep" 
-		data-array="&lt;li class='%statut%' &gt; &lt;span&gt; %date% &lt;/span&gt; %titre% : %comment%  &lt;/li&gt;">
-		<li class='%statut%'><span>%date%</span> %titre% : %comment%  </li>
+		data-array="&lt;li class='%status%' &gt; &lt;span&gt; %date% &lt;/span&gt; %title% : %content%  &lt;/li&gt;">
+		<li class='%statut%'><span>%date%</span> %title% : %content%  </li>
 	</ul>
 
 	<div style="text-align:center;">
@@ -24,7 +24,7 @@
 
 	<div style="width:100%; margin-top:0.5em;">
 		<div data-role="dialogBt" onclick="wapp.showPage('signalements');">Annuler</div>
-		<div data-role="dialogBt" class="del" onclick="wapp.ripart.delCurrentRem();">Supprimer</div>
-		<div data-role="dialogBt" class="send" onclick="wapp.ripart.postCurrentRem();">Envoyer</div>
+		<div data-role="dialogBt" class="del" onclick="wapp.report.delCurrentRem();">Supprimer</div>
+		<div data-role="dialogBt" class="send" onclick="wapp.report.postCurrentRem();">Envoyer</div>
 	</div>
 </div>

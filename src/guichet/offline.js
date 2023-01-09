@@ -73,14 +73,14 @@ var getCacheExtentHtml = function(name) {
 var getCacheLayerHtml = function(layer, cache) {
     let vectorLayer = null;
     wapp.getLayerGuichet().getLayersArray().forEach((l, i) => {
-        if (l.get('name') && layer.featureType && l.get("name") == layer.featureType.fullName) vectorLayer = l;
+        if (l.get('name') && layer.table && l.get("name") == layer.table.full_name) vectorLayer = l;
     });
     let circleClass="fa fa-circle";
     if (cache.loaded) circleClass += ' loaded';
     let div = $("<div>", {
         class: "cache-layer"
     });
-    $(`<p><i class="${circleClass}"></i> ${layer.nom}</p>`).appendTo(div);
+    $(`<p><i class="${circleClass}"></i> ${layer.table.name}</p>`).appendTo(div);
 
     if (cache.loaded) {
         $("<i>", {
@@ -96,7 +96,7 @@ var getCacheLayerHtml = function(layer, cache) {
         click: function() {
             if (!vectorLayer) { // le cache n est pas encore charge
                 for (let i in cache.layers) {
-                    if (cache.layers[i].nom == layer.nom) {
+                    if (cache.layers[i].name == layer.name) {
                         cache.layers.splice(i, 1);
                         refreshCacheLayersList(".layerlist", cache);
                         return;
@@ -243,9 +243,9 @@ function initOffline(wapp) {
         var list = $('li[data-param="layer"]', content);
         const guichet = wapp.getLayerGuichet();
         for (var i=0, l; l = guichet.getLayers().getArray()[i]; i++) {
-            if (typeof l.getFeatureType == 'function' && l.getFeatureType()) {
-                let ft = l.getFeatureType();
-                let geomType = ft.attributes[ft.geometryName].type;
+            if (typeof l.getTable == 'function' && l.getTable()) {
+                let table = l.getTable();
+                let geomType = table.columns[table["geometry_name"]].type;
                 if (geomType.indexOf("Polygon") == -1) continue; // on filtre les couches non surfaciques
                 $("<div>")
                     .attr('data-input-role', 'option')
@@ -361,11 +361,11 @@ function initOffline(wapp) {
             return;
         }
         for (var i=0, l; l = wapp.guichet.layers[i]; i++) {
-            if (cache && layerNames.indexOf(l.nom) != -1) continue;
-            if (l.type === 'WFS' && l.tilezoom) {
+            if (!l.table || (cache && layerNames.indexOf(l.table.name) != -1)) continue;
+            if (l.table && l.table.tile_zoom_level) {
             $("<li>").addClass('selected')
                 .attr('data-input','')
-                .text(l.nom)
+                .text(l.table.name)
                 .data('layer', l)
                 .click(function(){
                     var li = $(this).toggleClass('selected').addClass('active');

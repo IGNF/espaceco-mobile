@@ -1,6 +1,6 @@
 import CordovApp from 'cordovapp/CordovApp'
 import { messageDlg } from 'cordovapp/cordovapp/dialog'
-import ol_style_Webpart from 'cordovapp/ol/style/Webpart'
+import ol_style_Collaboratif from 'cordovapp/ol/style/Collaboratif'
 import ol_control_LayerSwitcher from 'ol-ext/control/LayerSwitcher'
 import ol_ext_element from 'ol-ext/util/element'
 
@@ -87,7 +87,7 @@ export default function(wapp) {
 
     // Current layer
     var layer = e.layer;
-    var featureType = layer.getFeatureType();
+    var table = layer.getTable();
 
     // Boutons
     const div = ol_ext_element.create('DIV', {
@@ -96,7 +96,7 @@ export default function(wapp) {
     });
 
     //sauvegarde
-    if (featureType && !featureType.readOnly && featureType.tileZoomLevel && layer.get('edit') !== false) {
+    if (table && !table.read_only && table.tile_zoom_level && layer.get('edit') !== false) {
       const saveBtn = ol_ext_element.create('I', {
         className: 'fa fa-send fa-disable ',
         click: () => {
@@ -173,7 +173,7 @@ export default function(wapp) {
       });
       if (layer.get('edit') === false) {
         edit.classList.add('fa-lock');
-      } else if (featureType.readOnly) {
+      } else if (table.read_only) {
         edit.classList.add('fa-unlock-alt');
       } else {
         edit.classList.add('fa-pencil');
@@ -189,7 +189,7 @@ export default function(wapp) {
         },
         parent: div
       });
-    } else if (featureType.readOnly) {
+    } else if (table.read_only) {
       var select = ol_ext_element.create('I', {
         className: 'fa',
         click: () => {
@@ -203,7 +203,7 @@ export default function(wapp) {
       } else {
         select.classList.add('fa-unlock-alt');
       }
-    } else if (!featureType.readOnly && featureType.tileZoomLevel) {
+    } else if (!table.read_only && table.tile_zoom_level) {
       // Couche editable
       oldiv.addClass('offline')
       const edit = ol_ext_element.create('I', {
@@ -223,28 +223,28 @@ export default function(wapp) {
 
     //pour certains objets comme les troncons de route le style est defini en dur
     //prise en compte d'un possible style alternatif defini sur le site
-    if (featureType.style && featureType.styles.length == 0){
-      featureType.styles.push(featureType.style);
+    if (table.style && table.styles.length == 0){
+      table.styles.push(table.style);
     }
 
-    if (featureType.styles && (featureType.styles.length > 1 || ol_style_Webpart[featureType.name])) {
+    if (table.styles && (table.styles.length > 1 || ol_style_Collaboratif[table.name])) {
       ol_ext_element.create('I', {
         className: 'fa tools-color expert',
         click: () => {
           const sel = {}, st = {};
-          var selected = featureType.style ? featureType.style.id : "default";
-          if (ol_style_Webpart[featureType.name]) {
+          var selected = table.style ? table.style.id : "default";
+          if (ol_style_Collaboratif[table.name]) {
             sel["default"] = "Style par défaut";
             st["default"] = null;
           }
 
-          featureType.styles.forEach((s) => {
+          table.styles.forEach((s) => {
             sel[s.id] = s.name;
             st[s.id] = s;
           });
           
           wapp.selectDialog(sel, selected, (s) => {
-            featureType.style = st[s];
+            table.style = st[s];
             layer.changed();
           });
         },
@@ -268,10 +268,10 @@ export default function(wapp) {
         } else {
           $('.histo span', content).html(e.layer.get('options').numrec);
         }
-        if (e.layer.getFeatureType()) {
-          var ft = e.layer.getFeatureType();
-          content.addClass(ft.readOnly || !ft.tileZoomLevel ? 'readonly':'edit');
-          wapp.dataAttributes(content, ft);
+        if (e.layer.getTable()) {
+          var table = e.layer.getTable();
+          content.addClass(table.read_only || !table.tile_zoom_level ? 'readonly':'edit');
+          wapp.dataAttributes(content, table);
         } else {
           wapp.dataAttributes(content, { 
             warning: true,
