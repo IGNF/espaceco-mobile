@@ -354,6 +354,7 @@ function stopTracking(force, again) {
 }
 
 /** Saisie direct GPS (sans dialogue) */
+// @TODO themes et lon lat
 function startDirectGPS(c, theme) {
   var lonlat = toLonLat(wapp.map.getView().getCenter());
   var georem = {

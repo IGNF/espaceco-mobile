@@ -50,7 +50,9 @@ wapp.selectGPS = function() {
   }
 };
 
-/** Cloner le signalement 
+/** 
+ * Cloner le signalement 
+ * @TODO a revoir
  */
 wapp.cloneGeorem = function() {
   if (wapp.select.getFeatures().array_.length != 1) {
@@ -68,46 +70,41 @@ wapp.cloneGeorem = function() {
     //on formate les donnees pour une alerte chargee depuis l api
     georem = featureGeorem.values_.report;
 
-    if (georem.themes.length > 1) {
+    if (georem.attributes.length > 1) {
       wapp.alert("Impossible de cloner une alerte comportant plusieurs thèmes.");
       return;
     }
 
-    let idGroup = georem.themes[0].community_id
-    theme = georem.themes[0].theme;
-    themes = `${idGroup}::${theme}=>"1"`;
-    let originalAttributes = georem.themes[0].attributes;
-    for (var key in originalAttributes) {
-      attributes += `,"${idGroup}::${theme}::${key}"=>"${originalAttributes[key]}"`;
-    }
+    let idGroup = georem.attributes[0].community
+    theme = georem.attributes[0].theme;
+    themes = `${idGroup}::${theme}`;
+    attributes = JSON.stringify(georem.attributes[0].attributes);
   } else if (undefined != featureGeorem.values_.georem) {
     //on formate les donnees pour une alerte cree depuis l appli
     georem = featureGeorem.values_.georem;
 
     theme = georem.theme;
-    if (!theme && typeof georem.themes[0].theme != undefined){
-      theme = georem.themes[0].theme;
-      themes = `${georem.themes[0].community_id}::${theme}=>"1"`;
+    if (!theme && typeof georem.attributes[0].theme != undefined){
+      theme = georem.attributes[0].theme;
+      themes = `${georem.attributes[0].community_id}::${theme}`;
     } else {
       themes = georem.themes;
     }
-    
     attributes = georem.attributes;
   } else {
     wapp.alert("Sélectionner une alerte");
     return;
   }
   
-  let coord = wapp.map.getView().getCenter();
-  let lonlat = transform(coord, wapp.map.getView().getProjection(), 'EPSG:4326');
+  let p = transform(wapp.map.getView().getCenter(), wapp.map.getView().getProjection(),'EPSG:4326');
+  let wkt="POINT(" + p[0] + " " + p[1] + ")";
 
   let clone =  {
-    lon: lonlat[0], 
-    lat: lonlat[1], 
+    geometry: wkt,
     sketch: undefined,
     comment: georem.comment ? georem.comment : "",
     photo: false,
-    community_id: georem.community_id,
+    community: georem.community,
     themes: themes,
     theme: theme,
     attributes: attributes,

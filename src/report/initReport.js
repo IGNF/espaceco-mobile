@@ -8,6 +8,7 @@ import ol_source_Vector from 'ol/source/Vector'
 import ol_layer_Group from 'ol/layer/Group'
 import {transform as ol_proj_transform} from 'ol/proj'
 import {fromLonLat as ol_proj_fromLonLat} from 'ol/proj'
+import WKT from 'ol/format/wkt'
 import {getCenter as ol_extent_getCenter} from 'ol/extent'
 import {boundingExtent as ol_extent_boundingExtent} from 'ol/extent'
 import {buffer as ol_extent_buffer} from 'ol/extent'
@@ -313,7 +314,11 @@ function initReport(wapp) {
   }
 
   $(() => {
-    $(document).on("changegroup", function(e){ 
+    if (wapp.userManager.param.active_community) {
+      wapp.report.setProfil(wapp.userManager.param.active_community);
+      wapp.report.formElement.addClass("connected");
+    }
+    $(document).on("changegroup", function(e){
       wapp.changeGroup(e);
       wapp.report.setProfil(e.community);
       wapp.report.formElement.addClass("connected");
@@ -351,8 +356,8 @@ function initReport(wapp) {
     wapp.report.addFeature(f);
     var p = f ? ol_extent_getCenter(f.getGeometry().getExtent()) : wapp.map.getView().getCenter();
     p = ol_proj_transform(p, wapp.map.getView().getProjection(),'EPSG:4326');
-    $("input.lon", e.form).val(p[0].toFixed(8));
-    $("input.lat", e.form).val(p[1].toFixed(8));
+    let wkt="POINT(" + p[0] + " " + p[1] + ")";
+    $("input.geometry", e.form).val(wkt);
     // Pas d'objets a ajouter ?
     if (f || wapp.vector.length || wapp.getLayerGuichet().getLayers().getLength() || wapp.overlays.gps.getSource().getFeatures().length) {
       $(".addfeatures", wapp.report.formElement).show();

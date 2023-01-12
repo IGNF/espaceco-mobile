@@ -195,25 +195,24 @@ function showGeorem(div, georem, newOne) {
   if (georem.sketch) georem.nb = wapp.report.sketch2feature(georem.sketch).length;
   else georem.nb = 0;
   if (!georem.status) georem.status = ' ';
-  if (georem.author && georem.author.username ) {
-    georem.author_name = georem.author.username;
-  } else{
-    georem.author_name = '?';
-  }
+  georem.author_name = (georem.author && georem.author.username ) ? georem.author.username : ''
 
   georem.commune_name = georem.commune ? georem.commune.title : '';
   georem.id_dep = georem.departement ? georem.departement.name : '';
   georem.pretty_opening_date = georem.opening_date ? moment(georem.opening_date).format('YYYY-MM-DD HH:mm:ss') : '';
   
-  georem.attText = '';
-  for (var i in georem.attributes) {
-    let att = georem.attributes[i].attributes;
-    let group = wapp.userManager.getGroupById(georem.attributes[i].community);
-    georem.attributes[i].community_name = group ? group.name : "community: "+georem.attributes[i].community;
-    for (var key in att) {
-      georem.attText += key+": "+att[key]+"\n";
+  georem.attText = typeof georem.attributes === 'string' ? georem.attributes : '';
+  if (typeof georem.attributes != 'string') {
+    for (var i in georem.attributes) {
+      let att = georem.attributes[i].attributes;
+      let group = wapp.userManager.getGroupById(georem.attributes[i].community);
+      georem.attributes[i].community_name = group ? group.name : "community: "+georem.attributes[i].community;
+      for (var key in att) {
+        georem.attText += key+": "+att[key]+"\n";
+      }
     }
   }
+  
   georem.attText = georem.attText.trim();
 
   const georemDiv = $(".georem", div);

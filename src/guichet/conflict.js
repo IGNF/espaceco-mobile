@@ -50,6 +50,7 @@ function showFeatureInfo(li, f, conflict) {
  * @param {Element} conflict list
  * @param {ol.layer.CollabVector} layer
  * @param {string} theme
+ * @TODO geometry et plus lonlat
  */
 function saveConflicts(ul, layer, group, theme) {
   $('li', ul).each(function() {
@@ -77,9 +78,9 @@ function saveConflicts(ul, layer, group, theme) {
           lat: lonlat[1], 
           sketch: wapp.report.feature2sketch(feature, proj),
           comment: feature.getState(),
-          community_id: wapp.report.param.profil.id,
-          theme: theme,
-          themes: '"'+group+'::'+theme+'"=>"1"'
+          community: wapp.report.param.profil.id,
+          themeStr: theme,
+          theme: {"community": group, "theme": theme}
         }
         wapp.report.saveLocalRem(grem);
         break;

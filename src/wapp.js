@@ -88,8 +88,6 @@ import * as fs from 'fs';
         'Signalements': true
       };
     }
-
-
     
     // Layers de l'application
     wapp.initMap();
