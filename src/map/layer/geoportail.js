@@ -60,7 +60,7 @@ function addLayers (layers) {
     } else {
       console.warn('[GEOPORATAIL-CONFIG] Bad layer: ', name);
     }
-  };
+  }
   geoportailLayer.setVisible(true);
   if (!oneVisible) {
     let geolayers = geoportailLayer.getLayersArray();

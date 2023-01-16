@@ -804,7 +804,7 @@ wapp.getLogo = function (g, cback, scope) {
   );
 };
 
-
+/* config is in wapp * /
  //Recherche fichier de config (config.json)
  wapp.noguichetConfig = undefined;
  wapp.changeGuichet = true;

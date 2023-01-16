@@ -1,5 +1,7 @@
-﻿/** Config */
-export default {
+﻿import appli from './appli/config.js'
+
+/** Default Config */
+const config = {
   // App version
   version: "2.3.0",
 
@@ -9,3 +11,10 @@ export default {
   auth: 'Z3VpY2hldDpFc3BhY2VDMDgwNjk=',
 
 };
+
+// Overwrite
+Object.keys(appli).forEach(k => {
+  config[k] = appli[k]
+})
+
+export default config
