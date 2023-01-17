@@ -172,7 +172,29 @@ function initReport(wapp) {
   wapp.userManager = new UserManagerTemplating(apiClient, {
     infoElement: '#options .connect span.connected' //[data-input-role="info"]
   })
-  $(() => {wapp.userManager.initialize();});
+  $(() => {
+    wapp.userManager.initialize();
+
+    if (wapp.userManager.getUser()) {
+      wapp.report.formElement.addClass("connected");
+    }
+    if (wapp.userManager.param.active_community) {
+      wapp.report.setProfil(wapp.userManager.param.active_community);
+    }
+    $(document).on("changegroup", function(e){
+      wapp.changeGroup(e);
+      wapp.report.setProfil(e.community);      
+    });
+    $(document).on("api_connect", function(e){
+      wapp.report.formElement.addClass("connected");
+    });
+    $(document).on("api_disconnect", function(e){
+      wapp.report.setProfil();
+      wapp.report.param = { georems:[], nbrem:0 };
+      wapp.report.saveParam();
+      wapp.report.formElement.removeClass("connected");
+    });
+  });
   wapp.report = new Report(apiClient, {
     map: map,
     countElement: '.georemsCount span',
@@ -312,27 +334,6 @@ function initReport(wapp) {
     if (nb) postNext();
     else messageDlg ("Tous les signalements ont déjà été envoyés..."," ");
   }
-
-  $(() => {
-    if (wapp.userManager.param.active_community) {
-      wapp.report.setProfil(wapp.userManager.param.active_community);
-      wapp.report.formElement.addClass("connected");
-    }
-    $(document).on("changegroup", function(e){
-      wapp.changeGroup(e);
-      wapp.report.setProfil(e.community);
-      wapp.report.formElement.addClass("connected");
-    });
-  });
-  $(() => {
-    $(document).on("api_disconnect", function(e){
-      wapp.report.setProfil();
-      wapp.report.param = { georems:[], nbrem:0 };
-      wapp.report.saveParam();
-      wapp.report.formElement.removeClass("connected");
-    });
-  });
-  
 
   // Selection d'un signalement
   wapp.report.on('select', (e) => {
