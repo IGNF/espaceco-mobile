@@ -192,7 +192,14 @@ function showGeorem(div, georem, newOne) {
     return;
   }
   div.addClass("georem").removeClass("fiche");
-  if (georem.sketch) georem.nb = wapp.report.sketch2feature(georem.sketch).length;
+  if (georem.sketch) {
+    try {
+      georem.nb = wapp.report.sketch2feature(georem.sketch).length;
+    } catch (error) {
+      wapp.wait(false);
+      wapp.alert("Une erreur s'est produite lors de la récupération du signalement.");
+    }
+  }
   else georem.nb = 0;
   if (!georem.status) georem.status = ' ';
   georem.author_name = (georem.author && georem.author.username ) ? georem.author.username : ''
