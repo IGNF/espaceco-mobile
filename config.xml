@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="fr.ign.naviforest">
-    <name>NaviForest</name>
+<widget id="fr.ign.guichet">
+    <name>Espace collaboratif IGN</name>
     <description>
       La solution IGN pour saisir et partager des signalements issus du terrain.
     </description>
@@ -25,9 +25,6 @@
     <allow-intent href="mailto:*" />
     <allow-intent href="geo:*" />
     <platform name="android">
-        <edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application">
-            <application android:usesCleartextTraffic="true" />
-        </edit-config>
         <allow-intent href="market:*" />
         <preference name="AndroidXEnabled" value="true" />
         <preference name="AndroidInsecureFileModeEnabled" value="true" />
