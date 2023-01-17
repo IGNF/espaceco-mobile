@@ -316,6 +316,7 @@ wapp.setGuichet = function(groupe) {
       success(community);
     }).finally(() => {
       wapp.wait(false);
+      wapp.dispatchEvent({ type: 'change:guichet', group: groupe })
     });
   } else {
     // Mettre a jour le guichet
@@ -323,7 +324,9 @@ wapp.setGuichet = function(groupe) {
     // Charger les couches
     wapp.loadLayers(groupe);
     setGeoportailLayers();
+    wapp.dispatchEvent({ type: 'change:guichet', group: groupe })
   }
+
 };
 
 
