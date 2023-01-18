@@ -1,1 +1,23 @@
 /* Special scripts for Naviforest app */
+[data-role="menu"] .header .img {
+  background-image: url("./logo.png");
+  background-size: auto 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+[data-role="menu"] .header .img img {
+  display: none;
+}
+
+
+#layer-guichet .noguichet {
+  text-align: center!important;
+  padding: 1em 0;
+}
+#layer-guichet .noguichet button {
+  display: none;
+}
+
+#fiche .changeGroupe {
+  display: none!important;
+}
