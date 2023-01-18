@@ -836,8 +836,7 @@ wapp.getLogo = function (g, cback, scope) {
 wapp.connect = function() {
   wapp.userManager.connectDialog({
     onConnect: function(user) {
-      console.log('ok', user)
-      if (user.username === "anonymous") {
+      if (!user.username) {
         wapp.notification("Vous êtes déconnecté", 1200);
         if (wapp.noguichetConfig!== undefined) { $('p.userinfo').hide();}
       } else {
@@ -877,6 +876,7 @@ wapp.connect = function() {
 		},
 		onError: function(error) {
 			var msg = [];
+      wapp.userManager.disconnect();
 			wapp.initGuichets();
       let status = error.response ? error.response.status : 500;
 			switch (status) {
