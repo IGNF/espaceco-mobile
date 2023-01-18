@@ -63,12 +63,15 @@ Au final, le répertoire doit contenir les dossiers suivant (hooks, platforms et
 |  └──parcel.js
 ├─[+] src
 ├─[+] www
+├──.env.dist
 ├──android-keystore.jks
 ├──build.json
 ├──config.xml
 ├──package.json
 └──readme.md
 ````
+
+Dupliquer le fichier `.env.dist` et renommer le `.env` et remplissez les variables d'environnement utilisé par le projet.
 
 ### Installation des plugins
 Afin de fonctionner l'application doit avoir accès :
@@ -159,12 +162,34 @@ Pour déboguer une webview dans chrome rendez-vous sur : [chrome://inspect/](chr
 
 NB: le contenu des canvas (donc des cartes Openlayers) n'est pas visible sur la console du debuggeur.
 
+## Développement d'une application spécifique
+
+Il est possible de développer une application spécifique.
+Pour cela, vous devez modifier le fichier `.env` pour indiquer les informations sur l'application a générer (en utilisant le fichier `.env.dist` comme exemple) : 
+```
+APPLI=Répertoire de l'application (EspaceCo)
+APPLI_ID=identifiant de l'application sur les stores (fr.ign.guichet)
+APPLI_NAME=Nom de l'application (Espace collaboratif IGN)
+```
+
+L'identifiant et le nom de l'application seront mis à jour dans le fichier confg.xml de Cordova.
+Les fichiers dans le répertoire de l'application seront copié dans le répertoire `./src/appli` du projet
+
+Les fichiers spécifiques sont à placer dans le répertoire `./scripts/APPLI` du projet (`APPLI` étant le nom donné dans le fichier `.env`)
+Les fichiers du répertoire `./scripts/APPLI` sont recopiés dans le répertoire `./appli` du projet.
+/!\ les fichiers existant sont supprimés et remplacé à chaque build par ceux contenus dans le répertoire `./scripts/APPLI` !
+
+Lancez le script `backup` pour assurer la sauvegarde des modifications automatiques du répertoire `./src/appli` dans le répertoire d'origine `./scripts/APPLI`.
+```
+$ npm run backup
+```
+
 ## Geolocalisation Bluetooth
 
 Ajouter les permissions au fichier `plugin.xml` du plugin bluetooth-serial ???
 ```xml
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+  <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 ```
 
 ## Publication

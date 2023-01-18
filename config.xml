@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="fr.ign.guichet">
-    <name>Espace collaboratif IGN</name>
+<widget id="fr.ign.naviforest">
+    <name>NaviForest</name>
     <description>
       La solution IGN pour saisir et partager des signalements issus du terrain.
     </description>

@@ -2,8 +2,8 @@ const fs = require('fs');
 
 // Load local env (or default .env)
 const dotenv = require('dotenv')
-dotenv.config();
-dotenv.config({ path: "./.env.local", override: true });
+dotenv.config({ path: "./.env.dist" });
+dotenv.config({ path: "./.env", override: true });
 
 console.log('\x1b[36m\x1b[1m\x1b[44m', '  APPLICATION >>>> ', process.env.APPLI, ' <<<<  \x1b[0m');
 

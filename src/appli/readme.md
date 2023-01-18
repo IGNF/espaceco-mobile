@@ -2,7 +2,7 @@
 
 ## Créer une application spécifique
 
-Modifier le fichier `.env.local` pour indiquer les informations sur l'application a générer : 
+Modifier le fichier `.env` pour indiquer les informations sur l'application a générer (en utilisant le fichier `.env.dist` comme exemple) : 
 ```
 APPLI=Répertoire de l'application (EspaceCo)
 APPLI_ID=identifiant de l'application sur les stores (fr.ign.guichet)
@@ -21,3 +21,12 @@ Les fichiers du répertoire `./scripts/APPLI` sont recopiés dans le répertoire
 
 Le fichier `./scripts/APPLI/appli.js` est inclus et exécuté au lancement de l'application.
 Le fichier `./scripts/APPLI/logo.png` est utilisé comme logo de l'application (recopié dans le répertoire `./assets/img`).
+
+## Developpement
+
+Avant chaque construction de l'application (start, build) le répertoire spécifique de l'application sont recopié dans le  repertoire `./src/appli`.
+Si vous modifiez un fichier dans ce répertoire il faut s'assurer de le recopier dans le répertoire d'origine (au risque de le voir écrasé lors de la prochaine construction).
+Vous pouvez lancer le script `backup` pour assurer la sauvegarde des modifications automatique.
+```
+$ npm run backup
+```
