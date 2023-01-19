@@ -4,6 +4,8 @@ import ol_style_Collaboratif from 'cordovapp/ol/style/Collaboratif'
 import ol_control_LayerSwitcher from 'ol-ext/control/LayerSwitcher'
 import ol_ext_element from 'ol-ext/util/element'
 
+import editionMode from '../../guichet/editionMode'
+
 let cacheSwitcher;
 
 /** Layer switcher for Guichets
@@ -163,6 +165,7 @@ export default function(wapp) {
     // VectorCache
     if (layer.get('cache')) {
       oldiv.addClass('offline');
+      // Toggle edit
       const edit = ol_ext_element.create('I', {
         className: 'fa',
         click: () => {
@@ -178,6 +181,7 @@ export default function(wapp) {
       } else {
         edit.classList.add('fa-pencil');
       }
+      // Refresh
       const refresh = ol_ext_element.create('I', {
         className: 'fa fa-refresh',
         click: () => {
@@ -206,6 +210,13 @@ export default function(wapp) {
     } else if (!table.read_only && table.tile_zoom_level) {
       // Couche editable
       oldiv.addClass('offline')
+       // Edition tools
+      ol_ext_element.create('I', {
+        className: 'fa fa-pencil-square-o',
+        click: (e) => { editionMode(wapp, layer) },
+        parent: div
+      });
+      // Enable selection
       const edit = ol_ext_element.create('I', {
         className: 'fa',
         click: () => {

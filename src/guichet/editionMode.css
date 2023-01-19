@@ -1,0 +1,29 @@
+#editionBar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2em;
+  font-size: 2em;
+  padding: 0.5em 2.5em 0.5em 2em;
+  background: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: none;
+}
+#editionBar:before {
+  content: "\f044";
+  font-family: fontawesome;
+  position: absolute;
+  left: .5em;
+}
+#editionBar > * {
+  vertical-align: top;
+  display: inline-block;
+}
+
+
+[data-layer-edition] #editionBar {
+  display: block;
+}

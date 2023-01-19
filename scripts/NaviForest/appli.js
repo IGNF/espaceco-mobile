@@ -52,5 +52,4 @@ wapp.ready(() => {
  */
 wapp.on('change:guichet', e => {
   // console.log('guichet', e.group)
-  console.log('APPLI', process.env.APPLI)
 })
