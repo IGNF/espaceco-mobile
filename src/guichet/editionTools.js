@@ -1,0 +1,123 @@
+import ol_Object from 'ol/Object'
+import TouchCursorSelect from 'ol-ext/interaction/TouchCursorSelect'
+import TouchCursorDraw from 'ol-ext/interaction/TouchCursorDraw'
+
+import wapp from '../wapp'
+
+/** A TouchCursor to select objects on hovering the cursor
+ * @constructor
+ * @extends {ol_Object}
+ * @param {Object} options
+ */
+class EditonTools extends ol_Object {
+  constructor(options) {
+    super();
+    const select = this.select = new TouchCursorSelect({
+      layerFilter: l => (l === this.layer)
+    })
+    // Add edit button
+    select.addButton({
+      className: 'ol-button-info',
+      click: () => {
+        var f = this.select.getSelection();
+        if (f) {
+          wapp.showSelect({ features: [f] });
+        }
+      }
+    })
+    // Add a delete button
+    select.addButton({
+      className: 'ol-button-trash',
+      click: () => {
+        var f = this.select.getSelection();
+        if (f) this.layer.getSource().removeFeature(f);
+      }
+    })
+    // Add a delete button
+    select.addButton({
+      className: 'ol-button-geom',
+      click: () => {
+        console.log('LAYER', this.geomType)
+        if (this.draw[this.geomType]) {
+          const coord = select.getPosition();
+          select.setActive(false);
+          this.draw[this.geomType].setActive(true, coord)
+        } else {
+          wapp.alert('Géométrie non prise en compte...')
+        }
+      }
+    })
+    // Quit
+    select.addButton({
+      className: 'ol-button-quit',
+      click: () => this.dispatchEvent({ type: 'quit' })
+    });
+
+    // Draw interactions
+    this.draw = {};
+    ['Point', 'LineString', 'Polygon'].forEach(g => {
+      const drawi = this.draw[g] = new TouchCursorDraw({
+        className: 'sketch ' + g,
+        type: g,
+      })
+      drawi.addButton({
+        className: 'ol-button-back',
+        click: () => {
+          const coord = drawi.getPosition();
+          drawi.setActive(false);
+          select.setActive(true, coord)
+        },
+        before: true
+      });
+
+      drawi.on('drawstart', e => {
+        drawi.removeButton('ol-button-trash');
+      })
+      // Add feature to current layer
+      drawi.on('drawend', e => {
+        this.layer.getSource().addFeature(e.feature)
+        wapp.showSelect({ features: [e.feature] });
+        /*
+        drawi.removeButton('ol-button-trash');
+        // Undo button
+        drawi.addButton({
+          className: 'ol-button-trash', 
+          click: () => {
+            this.layer.getSource().removeFeature(e.feature);
+            drawi.removeButton('ol-button-trash');
+          }
+        })
+        */
+      })
+    })
+  }
+}
+
+/** Set layer to edit
+ * @param {CollabVector} [layer]
+ */
+EditonTools.prototype.setLayer = function(layer) {
+  if (!this.init) {
+    this.init = true;
+    wapp.map.addInteraction(this.select)
+    for (let g in this.draw) {
+      wapp.map.addInteraction(this.draw[g])
+    }
+  }
+  this.layer = layer;
+  if (layer) {
+    const table = layer.get('table');
+    this.geomType = table.columns[table.geometry_name].type;
+    const geomBt = this.select.getButtonElement(2)
+    geomBt.classList.remove('Point')
+    geomBt.classList.remove('LineString')
+    geomBt.classList.remove('Polygon')
+    geomBt.classList.add(this.geomType.replace(/multi/i, ''))
+  }
+  this.select.setActive(!!layer)
+  for (let g in this.draw) {
+    this.draw[g].setActive(false)
+  }
+}
+
+export default new EditonTools

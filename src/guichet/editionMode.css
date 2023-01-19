@@ -27,3 +27,16 @@
 [data-layer-edition] #editionBar {
   display: block;
 }
+
+/* Buttons */
+.ol-overlaycontainer .ol-touch-cursor .ol-button.ol-button-info:before {
+  content: "\f129";
+}
+.ol-overlaycontainer .ol-touch-cursor .ol-button.ol-button-quit {
+  background-color: rgba(51,102,153, .7)!important;
+  opacity: 1!important;
+}
+.ol-overlaycontainer .ol-touch-cursor .ol-button.ol-button-quit:before {
+  content: "\f00d";
+  color: #fff;
+}

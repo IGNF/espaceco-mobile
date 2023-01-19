@@ -1,7 +1,10 @@
 import CordovApp from "cordovapp/CordovApp";
 import ol_ext_element from "ol-ext/util/element";
 
+import editionTools from './editionTools.js'
+
 import './editionMode.css'
+import wapp from "../wapp.js";
 
 // New edition bar (after selection)
 const editionBar = ol_ext_element.create('DIV', {
@@ -12,9 +15,12 @@ document.querySelector('#selection').insertAdjacentElement('afterend', editionBa
 /** Qui edition mode
  */
 function quitEditionMode() {
+  editionTools.setLayer();
   wapp.select.setActive(true);
   delete document.body.dataset.layerEdition;
 }
+
+editionTools.on('quit', quitEditionMode)
 
 // Quit button
 const layerNameDiv = ol_ext_element.create('SPAN', { parent: editionBar })
@@ -39,6 +45,7 @@ const editionMode = function(wapp, layer) {
   wapp.select.setActive(false);
   document.body.dataset.layerEdition = '';
   layerNameDiv.innerText = layer.get('title')
+  editionTools.setLayer(layer);
 }
 
 
