@@ -274,8 +274,8 @@ function showGeorem(div, georem, newOne) {
     resp.forEach((r) => {
       const li = $("<li>").html(tmp.html()).appendTo(ul);
       if (!isok || r.error) li.addClass('error');
-      $('.statut', li).addClass(r.status).text(Report.status[r.status] || 'Réponse');
-      $('.comment', li).text(r.comment);
+      $('.status', li).addClass(r.status).text(Report.status[r.status] || 'Réponse');
+      $('.content', li).text(r.content);
       $('.sendrep', li).click(() => {
         wapp.wait('Envoi en cours...')
         wapp.report.postLocalRep(georem, r, {
@@ -289,8 +289,16 @@ function showGeorem(div, georem, newOne) {
               } else {
                 msg = $('<div>').html(msg+"Réponse incorrecte...");
               }
-              let errorTxt = (error.response && error.response.data) ?  error.response.data.code + " : " + error.response.data.message : error.message;
-              errorTxt = errorTxt ? errorTxt : error;
+              let errorTxt = '';
+              if (error.response && error.response.status == 403) {
+                errorTxt = "Vous n'êtes pas autorisé à effecuer cette opération";
+              } else if (error.response && error.response.data) {
+                errorTxt = error.response.data.code + " : " + error.response.data.message
+              } else if (error.message) {
+                errorTxt = error.message;
+              } else {
+                error;
+              }
               $("<i>").addClass('error')
                 .html("<br/>Erreur : "+errorTxt+"</i>")
                 .appendTo(msg);

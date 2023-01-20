@@ -3,6 +3,7 @@ import ol_layer_Vector from 'ol/layer/Vector';
 import ol_source_Vector from 'ol/source/Vector';
 import {singleClick as ol_condition_singleClick} from 'ol/events/condition';
 import CacheExtents from 'cordovapp/ol/cache/CacheExtents';
+import CollabVector from 'cordovapp/ol/layer/CollabVector';
 import { selectDialog } from 'cordovapp/cordovapp/dialog';
 import wapp from '../wapp';
 
@@ -243,7 +244,7 @@ function initOffline(wapp) {
         var list = $('li[data-param="layer"]', content);
         const guichet = wapp.getLayerGuichet();
         for (var i=0, l; l = guichet.getLayers().getArray()[i]; i++) {
-            if (typeof l.getTable == 'function' && l.getTable()) {
+            if (l instanceof CollabVector && typeof l.getTable == 'function' && l.getTable()) {
                 let table = l.getTable();
                 let geomType = table.columns[table["geometry_name"]].type;
                 if (geomType.indexOf("Polygon") == -1) continue; // on filtre les couches non surfaciques
@@ -479,7 +480,7 @@ function initOffline(wapp) {
                 return;
             }
 
-            wapp.cache.setCurrentMap(cachePending);
+            if (!wapp.cache.setCurrentMap(cachePending)) return;
             let downloadArgs = Object.values(cachePending.pending);
             delete cachePending.pending;
             downloadArgs.push(downloadCacheMap)

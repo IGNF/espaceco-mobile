@@ -283,7 +283,7 @@ function initReport(wapp) {
 
     function onError(e, msg) {
       nbErrors++;
-      if (e.status === 401) {
+      if (e.response && e.response.status === 401) {
         messageDlg ( msg, 
           "Connexion", {
             ok: "ok", 

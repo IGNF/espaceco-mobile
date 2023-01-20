@@ -530,33 +530,33 @@ wapp.changeGroup = function (e) {
   }
 
   // Verifier les layers disponibles
-  if (e.group) {
-    var layers = e.group.layers;
+  if (e.community) {
+    var layers = e.community.layers;
     layers.forEach((l) => {
       if (l.geoservice && l.geoservice.type=="WMS") {
-        var extent = l.geoservice.extent;
+        var extent = l.geoservice.map_extent;
         extent = ol_proj_transformExtent(extent, "EPSG:4326", "EPSG:3857");
         var wmsParam = {
           title: l.geoservice.title,
           name: 'groupe_'+ l.geoservice.layers,
-          visible: wapp.param.visibleLayers ? wapp.param.visibleLayers['groupe_'+ l.geoservice.layers] : true,
-          description: l.description,
-          query: !!l.getFeatureInfoMask,
-          logo: e.group.logo_url,
+          visible: wapp.param.visibleLayers ? wapp.param.visibleLayers['groupe_'+ l.geoservice.layers] : l.visibility,
+          description: l.geoservice.description,
+          query: !!l.geoservice.input_mask,
+          logo: e.community.logo_url,
           extent: extent[0] ? extent : undefined,
           minResolution: new ol_View({ zoom: l.geoservice.max_zoom }).getResolution(),
           maxResolution: new ol_View({ zoom: l.geoservice.min_zoom }).getResolution(),
-          getFeatureInfoMask: l.getFeatureInfoMask,
+          getFeatureInfoMask: l.geoservice.input_mask,
           source: new ol_source_TileWMS({
             url: l.geoservice.url,
             projection: "EPSG:3857",
             // "crossOrigin": "anonymous",
             params: {
-              "LAYERS": l.layer,
-              "FORMAT": l.format,
-              "VERSION": l.version
+              "LAYERS": l.geoservice.layers,
+              "FORMAT": l.geoservice.format,
+              "VERSION": l.geoservice.version
             },
-            attributions: [e.group.name]
+            attributions: [e.community.name]
           })
         };
         const layer = new ol_layer_Tile (wmsParam);
@@ -575,7 +575,7 @@ wapp.changeGroup = function (e) {
       layersTab.sort((a,b) => keys.indexOf(a.get('name')) - keys.indexOf(b.get('name')));
       layersTab.forEach((l) => { lgroup.getLayers().push(l); });
       // Titre
-      lgroup.set('title', e.group.name);
+      lgroup.set('title', e.community.name);
       lgroup.setVisible(true);
     }
     // Afficher ?
