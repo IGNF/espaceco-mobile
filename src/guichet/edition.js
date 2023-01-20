@@ -25,8 +25,9 @@ function _addLine (ul, feature, table) {
 }
 
 /** Edit current feature
+ * @param {boolean} [closeOnSubmit=false]
  */ 
-wapp.editFeature = function() {
+wapp.editFeature = function(closeOnSubmit) {
   const feature = this.select.getFeatures().item(0);
   if (!feature) return;
 
@@ -64,7 +65,13 @@ wapp.editFeature = function() {
     html: 'annuler',
     'data-role': 'dialogBt',
     click: () => {
-      wapp.showSelect();
+      if (closeOnSubmit) {
+        wapp.hidePage(); 
+        wapp.select.getFeatures().clear(); 
+        wapp.onSelect();
+      } else {
+        wapp.showSelect();
+      }
     },
     parent: li
   });
@@ -90,7 +97,13 @@ wapp.editFeature = function() {
         }
       }
       // Back to selection
-      wapp.showSelect();
+      if (closeOnSubmit) {
+        wapp.hidePage(); 
+        wapp.select.getFeatures().clear(); 
+        wapp.onSelect();
+      } else {
+        wapp.showSelect();
+      }
     },
     parent: li
   });

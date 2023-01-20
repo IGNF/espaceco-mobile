@@ -31,6 +31,14 @@ ol_ext_element.create('BUTTON', {
   parent: editionBar 
 })
 
+// Remove selection on hide page
+$('#fiche').on('hidepage', () => {
+  if (document.body.dataset.layerEdition) {
+    wapp.select.getFeatures().clear(); 
+    wapp.onSelect();
+  }
+})
+
 /** Set edition mode
  * @param {CordovApp} [wapp]
  * @param {CollabVector} [layer] the layer to edit (if none quit edition mode)
@@ -47,6 +55,5 @@ const editionMode = function(wapp, layer) {
   layerNameDiv.innerText = layer.get('title')
   editionTools.setLayer(layer);
 }
-
 
 export default editionMode
