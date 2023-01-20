@@ -22,6 +22,14 @@
   vertical-align: top;
   display: inline-block;
 }
+#editionBar button {
+  position: absolute;
+  right: 0;
+  border: 10px solid #fff;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+}
 
 
 [data-layer-edition] #editionBar {
