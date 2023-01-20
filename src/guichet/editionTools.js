@@ -1,6 +1,7 @@
 import ol_Object from 'ol/Object'
 import TouchCursorSelect from 'ol-ext/interaction/TouchCursorSelect'
 import TouchCursorDraw from 'ol-ext/interaction/TouchCursorDraw'
+import TouchCursorModify from 'ol-ext/interaction/TouchCursorModify'
 
 import wapp from '../wapp'
 
@@ -33,11 +34,10 @@ class EditonTools extends ol_Object {
         if (f) this.layer.getSource().removeFeature(f);
       }
     })
-    // Add a delete button
+    // Add a create button
     select.addButton({
       className: 'ol-button-geom',
       click: () => {
-        console.log('LAYER', this.geomType)
         if (this.draw[this.geomType]) {
           const coord = select.getPosition();
           select.setActive(false);
@@ -45,6 +45,15 @@ class EditonTools extends ol_Object {
         } else {
           wapp.alert('Géométrie non prise en compte...')
         }
+      }
+    })
+    // Add a modify button
+    select.addButton({
+      className: 'ol-button-modify',
+      click: () => {
+        const coord = select.getPosition();
+        select.setActive(false);
+        this.modify.setActive(true, coord)
       }
     })
     // Quit
@@ -81,7 +90,7 @@ class EditonTools extends ol_Object {
         drawi.removeButton('ol-button-trash');
         // Undo button
         drawi.addButton({
-          className: 'ol-button-trash', 
+          className: 'ol-button-trash',
           click: () => {
             this.layer.getSource().removeFeature(e.feature);
             drawi.removeButton('ol-button-trash');
@@ -90,6 +99,7 @@ class EditonTools extends ol_Object {
         */
       })
     })
+
   }
 }
 
@@ -117,6 +127,29 @@ EditonTools.prototype.setLayer = function(layer) {
   this.select.setActive(!!layer)
   for (let g in this.draw) {
     this.draw[g].setActive(false)
+  }
+  // Modify interaction
+  if (this.modify) {
+    wapp.map.removeInteraction(this.modify)
+  }
+  this.modify = null;
+  if (layer) {
+    const modify = this.modify = new TouchCursorModify({
+      className: 'sketch modify',
+      source: layer.getSource()
+    })
+    modify.setActive(false)
+    wapp.map.addInteraction(this.modify)
+    
+    modify.addButton({
+      className: 'ol-button-back',
+      click: () => {
+        const coord = modify.getPosition();
+        modify.setActive(false);
+        this.select.setActive(true, coord)
+      },
+      before: true
+    });
   }
 }
 

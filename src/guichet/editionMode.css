@@ -28,10 +28,16 @@
   display: block;
 }
 
+/* Prevent signalements */
+[data-layer-edition] #signaler {
+  display: none;
+}
+
 /* Buttons */
 .ol-overlaycontainer .ol-touch-cursor .ol-button.ol-button-info:before {
   content: "\f129";
 }
+.ol-overlaycontainer .ol-touch-cursor .ol-button.ol-button-modify,
 .ol-overlaycontainer .ol-touch-cursor .ol-button.ol-button-quit {
   background-color: rgba(51,102,153, .7)!important;
   opacity: 1!important;
