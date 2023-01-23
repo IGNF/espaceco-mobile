@@ -87,7 +87,6 @@ Ceci nécessite d'ajouter les plugins suivant au projet :
 
 ````powershell
 cordova plugin add cordova-plugin-file --save
-cordova plugin add cordova-plugin-file-transfer --save
 cordova plugin add cordova-plugin-dialogs --save
 cordova plugin add cordova-plugin-camera --save
 cordova plugin add cordova-plugin-geolocation --save
