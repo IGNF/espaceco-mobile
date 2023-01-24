@@ -50,7 +50,8 @@ wapp.getCache = function (groupe) {
   if (groupe && groupe.layers) {
     const cache = wapp.param.vectorCache;
     groupe.layers.forEach((l) => {
-      if (l.type==='feature-type') { //@TODO a changer
+      console.log(l.type);
+      if (l.type==='feature-type') {
         // Has authentication ?
         info.auth = info.auth || l.username; 
         // Hors ligne ?
@@ -77,7 +78,6 @@ wapp.dialogInfoGuichet = function (groupe) {
     return;
   }
 
-  //@TODO ????
   const infoCache = wapp.getCache(groupe);
 
   /// Dialogue
@@ -113,7 +113,7 @@ wapp.dialogInfoGuichet = function (groupe) {
     }
   });
 
-  // Credential @TODO a garder???
+  // Credential
   if (infoCache.auth) {
     $(".auth", page).off()
       .click(function () {
@@ -141,7 +141,7 @@ wapp.dialogInfoGuichet = function (groupe) {
               var cryp = new ol_layer_Vector_WFS();
               for (var k=0, l; l=groupe.layers[k]; k++) {
                 if (l.username) {
-                  l.username = $('.nom', content).val() || 'none'; //@TODO a changer
+                  l.username = $('.nom', content).val() || 'none';
                   l.password = cryp.crypt($('.pwd', content).val());
                 }
               }

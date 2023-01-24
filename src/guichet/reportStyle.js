@@ -24,7 +24,7 @@ function filterFeature (f) {
     if (!filter.status[f.get('report').status]) return true;
   }
   if (filter.isdate) {
-    if (filter.date > f.get('report').maj) return true;
+    if (filter.date > f.get('report').updating_date) return true;
   }
   if (filter.istheme) {
     let found = false;

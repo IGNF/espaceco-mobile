@@ -35,19 +35,35 @@ export { geoportailLayer }
  */
 
 function addLayers (layers) {
+  let layersArr = Object.keys(layers);
   let oneVisible = false;
   const caps = window.geoportailConfig.capabilities['default'];
-  for (var name in layers) {
+  //on ordonne les couches selon leur ordre dans visibleLayers (chargement depuis cache) ou selon le parametre order (au premier chargement)
+  let cacheOrdered = true;
+  for (var key in layers) {
+    if (!key in wapp.param.visibleLayers) {
+      cacheOrdered = false;
+      break;
+    }
+  }
+  if (cacheOrdered) {
+    const keys = Object.keys(wapp.param.visibleLayers);
+    layersArr.sort((a,b) => keys.indexOf(a) - keys.indexOf(b));
+  } else {
+    layersArr.sort((a,b) => layers[a].order - layers[b].order)
+  }
+  for (var i in layersArr) {
+    let name = layersArr[i];
+    let layer = layers[name];
     if (caps[name]) {
-      let visible = wapp.param.visibleLayers[name] || layers[name].visibility || false;
+      let visible = name in wapp.param.visibleLayers ? wapp.param.visibleLayers[name] : (layer.visibility || false);
       if (visible) oneVisible = true;
       let options = { hidpi: false, visible: visible };
-      if (layers[name] && Object.keys(layers[name]).length) {
-        options["opacity"] = layers[name].opacity;
-        options["zIndex"] = layers[name].order;
-        if (layers[name].geoservice.length) {
-          options["minZoom"] = layers[name].geoservice["min-zoom"];
-          options["maxZoom"] = layers[name].geoservice["max-zoom"];
+      if (layer && Object.keys(layer).length) {
+        options["opacity"] = name in wapp.param.visibleLayers ? wapp.param.visibleLayers[name] : (layer.opacity || 1);
+        if (layer.geoservice.length) {
+          options["minZoom"] = layer.geoservice["min-zoom"];
+          options["maxZoom"] = layer.geoservice["max-zoom"];
         }
       }
       let tileOptions = { authentication: config.auth };
@@ -64,7 +80,7 @@ function addLayers (layers) {
   geoportailLayer.setVisible(true);
   if (!oneVisible) {
     let geolayers = geoportailLayer.getLayersArray();
-    geolayers[0].setVisible(true);
+    if (geolayers[0]) geolayers[0].setVisible(true);
   }
 }
 

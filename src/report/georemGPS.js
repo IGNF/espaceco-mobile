@@ -354,28 +354,30 @@ function stopTracking(force, again) {
 }
 
 /** Saisie direct GPS (sans dialogue) */
-// @TODO themes et lon lat
+// @TODO a tester
 function startDirectGPS(c, theme) {
   var lonlat = toLonLat(wapp.map.getView().getCenter());
+  pos = ol_proj_transform(lonlat, self.map.getView().getProjection(),'EPSG:4326');
+  let wkt="POINT(" + pos[0] + " " + pos[1] + ")";
   var georem = {
     attText: '',
     attributes: '',
     comment: 'Signalement GPS rapide.',
     community_id: theme.community_id,
-    lat: lonlat[0],
-    lon: lonlat[1],
+    geometry: wkt,
     photo: false,
     protocol: '_MONGUICHET_65876',
     theme: theme.theme,
-    themes: JSON.stringify(c)+'=>"1"',
+    themes: JSON.stringify(c),
     version: "0.1",
   }
+  let attributes = {};
   theme.attributes.forEach((a)=> {
-    if (a.defaultVal) {
-      georem.attributes += ',"'+c+"::"+a.att+'"=>"'+a.defaultVal+'"';
-      georem.attText +=  a.att+': '+a.defaultVal+'\n';
+    if (a.default) {
+      attributes[a.name] = a.default;
     }
   })
+  georem.attributes = attributes;
   // Start 
   wapp.report.georemGPS(georem);
 }

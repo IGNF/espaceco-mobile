@@ -180,9 +180,11 @@ function initReport(wapp) {
     }
     if (wapp.userManager.param.active_community) {
       wapp.report.setProfil(wapp.userManager.param.active_community);
+      let community = wapp.userManager.getGroupById(wapp.userManager.param.active_community);
+      wapp.changeGroup(community);
     }
     $(document).on("changegroup", function(e){
-      wapp.changeGroup(e);
+      wapp.changeGroup(e.community);
       wapp.report.setProfil(e.community);      
     });
     $(document).on("api_connect", function(e){

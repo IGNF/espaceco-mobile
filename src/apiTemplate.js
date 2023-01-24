@@ -51,8 +51,7 @@ wapp.selectGPS = function() {
 };
 
 /** 
- * Cloner le signalement 
- * @TODO a revoir
+ * Cloner le signalement
  */
 wapp.cloneGeorem = function() {
   if (wapp.select.getFeatures().array_.length != 1) {

@@ -173,7 +173,7 @@ function showGeorem(div, georem, newOne) {
   // pour une alerte existante le feature ne contient pas l info du nom de l auteur
   // il faut faire un get report pour recuperer l info du nom de l auteur
   // ne marche que si l utilisateur est connecte
-  if (georem.id && !georem.author.username && wapp.report.apiClient.isConnected()) {
+  if (georem.id && !georem.complete && wapp.report.apiClient.isConnected()) {
     wapp.wait(true);
     wapp.report.apiClient.getReport(georem.id).then((response) => {
       wapp.wait(false);
@@ -184,6 +184,7 @@ function showGeorem(div, georem, newOne) {
         report.replies[i].date = moment(report.replies[i].date).format('YYYY-MM-DD HH:mm:ss');
       }
       georem.replies = report.replies;
+      georem.complete = report.complete = true;
       showGeorem(div, report, newOne);
     }).catch((error) => {
       wapp.wait(false);

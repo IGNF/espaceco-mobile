@@ -478,17 +478,14 @@ wapp.initParams = function() {
         break;
       }
       case "qlf": {
-      /*
-        if (wapp.report) {
-         if (wapp.report.isService(e.val)) {
-          wapp.report.setServiceUrl(e.val);
-          wapp.report.deconnect();
-          if (e.val) {
-            console.warn('QUALIF:', e.val);
+        if (wapp.userManager) {
+          if (wapp.userManager.setServiceUrl(e.val)) {
+            wapp.report.deconnect();
+            if (e.val) {
+              console.warn('QUALIF:', e.val);
+            }
           }
-         }
         }
-      */
         break;
       }
       default: break;
@@ -509,9 +506,11 @@ wapp.initMap = function() {
   map.setTarget('map');
 };
 
-/** On a change de groupe 
+/** 
+ * On a change de groupe 
+ * @param {Object} community
 */
-wapp.changeGroup = function (e) {
+wapp.changeGroup = function (community) {
   // Supprimer la selection
   wapp.select.getFeatures().clear();
   wapp.onSelect();
@@ -530,8 +529,8 @@ wapp.changeGroup = function (e) {
   }
 
   // Verifier les layers disponibles
-  if (e.community) {
-    var layers = e.community.layers;
+  if (community) {
+    var layers = community.layers;
     layers.forEach((l) => {
       if (l.geoservice && l.geoservice.type=="WMS") {
         var extent = l.geoservice.map_extent;
@@ -542,7 +541,7 @@ wapp.changeGroup = function (e) {
           visible: wapp.param.visibleLayers ? wapp.param.visibleLayers['groupe_'+ l.geoservice.layers] : l.visibility,
           description: l.geoservice.description,
           query: !!l.geoservice.input_mask,
-          logo: e.community.logo_url,
+          logo: community.logo_url,
           extent: extent[0] ? extent : undefined,
           minResolution: new ol_View({ zoom: l.geoservice.max_zoom }).getResolution(),
           maxResolution: new ol_View({ zoom: l.geoservice.min_zoom }).getResolution(),
@@ -556,7 +555,7 @@ wapp.changeGroup = function (e) {
               "FORMAT": l.geoservice.format,
               "VERSION": l.geoservice.version
             },
-            attributions: [e.community.name]
+            attributions: [community.name]
           })
         };
         const layer = new ol_layer_Tile (wmsParam);
@@ -575,7 +574,7 @@ wapp.changeGroup = function (e) {
       layersTab.sort((a,b) => keys.indexOf(a.get('name')) - keys.indexOf(b.get('name')));
       layersTab.forEach((l) => { lgroup.getLayers().push(l); });
       // Titre
-      lgroup.set('title', e.community.name);
+      lgroup.set('title', community.name);
       lgroup.setVisible(true);
     }
     // Afficher ?
@@ -606,28 +605,28 @@ wapp.setDebugMode = function() {
   // Mode debug en qualif
   if (this.param.options.qlf) {
     $(".debug").show();
-    $('#options .qlf').text(this.param.options.qlf.replace('https://qlf-collaboratif.ign.fr/', '').replace('/api/', ''));
+    $('#options .qlf').text(this.param.options.qlf.replace('https://qlf-collaboratif.ign.fr/', '').replace('/gcms/api/', ''));
   }
 };
 
 /** Passer en mode qualif */
 wapp.setQualif = function() {
   if (!this.param.options.qlfList) this.param.options.qlfList = {};
-  const choice = {
-    '': 'Espace Co',
-    'https://qlf-collaboratif.ign.fr/collaboratif-develop/api/' : 'Collaboratif-develop'
-  }
+  var choice = {};
+  choice[process.env.BASE_API_URL] = 'Espace Co';
+  choice['https://qlf-collaboratif.ign.fr/collaboratif-develop/gcms/api/'] = 'Collaboratif-develop';
+  
   for (let i in this.param.options.qlfList) {
     choice[this.param.options.qlfList[i]] = i;
   }
   wapp.selectDialog(choice, 
     this.param.options.qlf, 
-    (qlf) => { //@TODO et pour l url de prod (par defaut)??
+    (qlf) => {
       this.param.options.qlf = qlf;
-      $('#options .qlf').text(this.param.options.qlf.replace('https://qlf-collaboratif.ign.fr/', '').replace('/api/', '') || 'Espace Co');
-      wapp.report.userManager.setServiceUrl(qlf);
+      $('#options .qlf').text(this.param.options.qlf.replace('https://qlf-collaboratif.ign.fr/', '').replace('/gcms/api/', '') || 'Espace Co');
+      wapp.userManager.setServiceUrl(qlf);
       let authParams = wapp.getAuthParameters(qlf);
-      wapp.report.userManager.switchAuthParams(authParams.authBaseUrl, authParams.clientId, authParams.clientSecret);
+      wapp.userManager.switchAuthParams(authParams.authBaseUrl, authParams.clientId, authParams.clientSecret);
       if (qlf) {
         console.warn('QUALIF:', qlf);
       }
@@ -641,12 +640,12 @@ wapp.setQualif = function() {
             null, 
             (v) => {
               if (v) {
-                var qlf = this.param.options.qlf = 'https://qlf-collaboratif.ign.fr/'+v+'/api/';
-                this.param.options.qlfList[v] = 'https://qlf-collaboratif.ign.fr/'+v+'/api/';
+                var qlf = this.param.options.qlf = 'https://qlf-collaboratif.ign.fr/'+v+'/gcms/api/';
+                this.param.options.qlfList[v] = 'https://qlf-collaboratif.ign.fr/'+v+'/gcms/api/';
                 $('#options .qlf').text(v);
-                wapp.report.userManager.setServiceUrl(qlf);
+                wapp.userManager.setServiceUrl(qlf);
                 let authParams = wapp.getAuthParameters(qlf);
-                wapp.report.userManager.switchAuthParams(authParams.authBaseUrl, authParams.clientId, authParams.clientSecret);
+                wapp.userManager.switchAuthParams(authParams.authBaseUrl, authParams.clientId, authParams.clientSecret);
               }
             }
           )
@@ -666,7 +665,7 @@ wapp.setQualif = function() {
  * @returns {Object} {"authBaseUrl": "...", "clientId": "...", "clientSecret": "..."}
  */
 wapp.getAuthParameters = function(url) {
-  if ( url == wapp.param.options.qlf ) {
+  if ( url != process.env.BASE_API_URL ) {
     return {
       "authBaseUrl": process.env.QLF_BASE_AUTH_URL,
       "clientId": process.env.QLF_COLLAB_API_CLIENT_ID,
