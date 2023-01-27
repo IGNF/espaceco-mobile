@@ -354,21 +354,20 @@ function stopTracking(force, again) {
 }
 
 /** Saisie direct GPS (sans dialogue) */
-// @TODO a tester
 function startDirectGPS(c, theme) {
-  var lonlat = toLonLat(wapp.map.getView().getCenter());
-  pos = ol_proj_transform(lonlat, self.map.getView().getProjection(),'EPSG:4326');
+  var center = wapp.map.getView().getCenter();
+  let pos = toLonLat(center, wapp.map.getView().getProjection(),'EPSG:4326');
   let wkt="POINT(" + pos[0] + " " + pos[1] + ")";
   var georem = {
     attText: '',
     attributes: '',
     comment: 'Signalement GPS rapide.',
-    community_id: theme.community_id,
+    community_id: wapp.userManager.param.active_community,
     geometry: wkt,
     photo: false,
     protocol: '_MONGUICHET_65876',
     theme: theme.theme,
-    themes: JSON.stringify(c),
+    themes: c,
     version: "0.1",
   }
   let attributes = {};
@@ -377,7 +376,7 @@ function startDirectGPS(c, theme) {
       attributes[a.name] = a.default;
     }
   })
-  georem.attributes = attributes;
+  georem.attributes = JSON.stringify(attributes);
   // Start 
   wapp.report.georemGPS(georem);
 }
@@ -387,10 +386,11 @@ wapp.directGPS = function() {
   var choix = {};
   var themes = {};
   var nb = 0;
+  let community_id =  wapp.report.param.profil.community_id;
   wapp.report.param.themes.forEach((th) => {
     if (/^GPS@|^Rapide@/.test(th.theme)) {
-      choix[th.community_id+"::"+th.theme] = th.theme;
-      themes[th.community_id+"::"+th.theme] = th;
+      choix[community_id+"::"+th.theme] = th.theme;
+      themes[community_id+"::"+th.theme] = th;
       nb++;
     }
   });

@@ -72,15 +72,14 @@ function saveConflicts(ul, layer, group, theme) {
       case 'signal': {
         layer.getSource().removeFeatureUpdate(feature);
         var proj = wapp.map.getView().getProjection();
-        var lonlat = toLonLat(feature.getGeometry().getFirstCoordinate(), proj);
+        var lonlat = toLonLat(feature.getGeometry().getFirstCoordinate(), proj,'EPSG:4326');
         var grem =  {
-          lon: lonlat[0], 
-          lat: lonlat[1], 
+          geometry: "POINT(" + lonlat[0] + " " + lonlat[1] + ")", 
           sketch: wapp.report.feature2sketch(feature, proj),
           comment: feature.getState(),
-          community: wapp.report.param.profil.id,
-          themeStr: theme,
-          theme: {"community": group, "theme": theme}
+          community_id: wapp.report.param.profil.community_id,
+          theme: theme,
+          themes: group + '::' + theme
         }
         wapp.report.saveLocalRem(grem);
         break;
@@ -108,7 +107,7 @@ function showConflicts(layer, conflicts) {
     .on('click', () => {
       const choix = {};
       wapp.report.param.themes.forEach((t) => {
-        choix[t.community_id+'::'+t.theme] = t.theme;
+        choix[wapp.report.param.profil.community_id+'::'+t.theme] = t.theme;
       })
       wapp.selectDialog(choix, theme, (rep)=> {
         theme = rep;
@@ -126,14 +125,14 @@ function showConflicts(layer, conflicts) {
     })
   const features = layer.getSource().getFeatureUpdate() /*debug*/ || layer.getSource().getFeatures();
   conflicts.forEach((c) => {
-    const id = c.server_object[ftype.idName];
+    const id = c.server_object[ftype.id_name];
     var f;
     for (let i=0; f = features[i]; i++) {
-      if (f.get(ftype.idName)===id) {
+      if (f.get(ftype.id_name)===id) {
         break;
       }
     }
-    var li = $('<li>').text(ftype.idName + ': ' + id)
+    var li = $('<li>').text(ftype.id_name + ': ' + id)
       .data('feature', f)
       .data('conflict', c)
       .click(() => {
@@ -149,32 +148,20 @@ function showConflicts(layer, conflicts) {
 }
 
 /** Handle conflicts
- * @param {string} url conflict url
+ * @param {object} transaction
  * @param {ol.layer.CollabVector} layer
  */
-wapp.handleConflict = function(url, layer) {
-  $.ajax({
-    url: url + '.json',
-    beforeSend: (xhr) => { 
-      xhr.setRequestHeader("Authorization", "Basic " + wapp.report.getHash()); 
-      xhr.setRequestHeader("Accept-Language", null);
-    },
-    success: (resp) => {
-      const conflicts = resp.conflicts;
-      wapp.message(
-        'Détection de '+conflicts.length+' conflit(s)...', 
-        'Conflits', 
-        { ok:'Traiter les conflits', cancel:'Annuler' },
-        (b) => {
-          if (b === 'ok') {
-            showConflicts(layer, conflicts);
-          }
-        }
-      );
-      console.log(layer, resp)
-    },
-    error: () => {
-      wapp.alert('')
+wapp.handleConflict = function(transaction, layer) {
+  const conflicts = transaction.conflicts;
+  wapp.message(
+    'Détection de '+conflicts.length+' conflit(s)...', 
+    'Conflits', 
+    { ok:'Traiter les conflits', cancel:'Annuler' },
+    (b) => {
+      if (b === 'ok') {
+        showConflicts(layer, conflicts);
+      }
     }
-  })
+  );
+  console.log(layer, transaction);
 };
