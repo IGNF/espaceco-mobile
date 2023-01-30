@@ -3,8 +3,8 @@ import wapp from '../wapp'
 import config from '../config'
 import ol_ext_element from 'ol-ext/util/element'
 
-import apropos from './page/apropos.html'
-import noguichet from './page/noguichet.html'
+import apropos from './page/apropos'
+import noguichet from './page/noguichet'
 import './appli.css'
 
 /* Disable change guichet (force config.guichetID)
