@@ -21,6 +21,7 @@
   },
   "homepage": "http://gitlab.dockerforge.ign.fr/express/guichet-mobile",
   "dependencies": {
+    "bootbox": "^6.0.0",
     "cordova": "^11.0.0",
     "cordova-plugin-bluetooth-serial": "^0.4.7",
     "cordova-plugin-dialogs": "^2.0.2",
@@ -28,7 +29,7 @@
     "cordova-plugin-geolocation": "^4.0.2",
     "cordova-plugin-listpicker": "^2.2.2",
     "cordova-plugin-network-information": "^2.0.2",
-    "cordovapp": "git+http://gitlab.dockerforge.ign.fr/express/cordovapp.git#main",
+    "cordovapp": "git+http://gitlab.dockerforge.ign.fr/express/cordovapp.git#collab-form",
     "dotenv": "^16.0.3",
     "jquery": "^3.4.1",
     "mongo-parse": "^2.1.0",
