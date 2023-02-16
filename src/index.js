@@ -1,4 +1,5 @@
 require('dotenv').config();
+import 'collab-form/scss/main.scss'
 import './style.css'
 import './i18n'
 import wapp from './guichet/guichet'
