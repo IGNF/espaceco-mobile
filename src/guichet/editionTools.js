@@ -109,6 +109,7 @@ class EditonTools extends ol_Object {
  * @param {CollabVector} [layer]
  */
 EditonTools.prototype.setLayer = function(layer) {
+  console.log(layer)
   if (!this.init) {
     this.init = true;
     wapp.map.addInteraction(this.select)
@@ -137,12 +138,16 @@ EditonTools.prototype.setLayer = function(layer) {
   this.modify = null;
   if (layer) {
     const modify = this.modify = new TouchCursorModify({
-      className: 'sketch modify',
+      className: 'sketch modify geom' + this.geomType.replace(/multi/i, ''),
       source: layer.getSource()
     })
     modify.setActive(false)
     wapp.map.addInteraction(this.modify)
     
+    if (/Point/.test(this.geomType)) {
+      modify.removeButton('ol-button-add');
+      modify.removeButton('ol-button-remove');
+    }
     modify.addButton({
       className: 'ol-button-back',
       click: () => {
