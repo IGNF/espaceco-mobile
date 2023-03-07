@@ -7,6 +7,29 @@ import Report from 'cordovapp/report/Report'
 import { Feature } from 'ol';
 import moment from 'moment';
 
+/** Show Visibulle / thematics in the selection bar
+ * @param {ol/Feature} f
+ */
+wapp.setVisibulle = function(f) {
+  if (!f) {
+    $('#selection').html(' ')
+  } else if (f.layer && f.layer.get('table').thematic_ids) {
+    const st = [];
+    const table = f.layer.get('table');
+    table.thematic_ids.forEach(k => {
+      console.log(table)
+      if (String(f.get(k))) {
+        st.push(table.columns[k].title + ' : ' + f.get(k))
+      }
+    })
+    // Display thematics 
+    $('#selection').html (st.join('<br/>') || f.get('nom') || f.get('nature') || 'Afficher la sélection...');
+  } else {
+    // Default display
+    $('#selection').html (f.get('nom') || f.get('nature') || 'Afficher la sélection...');
+  }
+}
+
 /** Get title */
 function getFeatureTitle(f) {
   var prop = f.getProperties();
@@ -451,7 +474,9 @@ wapp.showSelect = function(options) {
 
     this.select.getFeatures().clear();
     this.select.getFeatures().push(f);
-    $('#selection').html (f.get('nom') || f.get('nature') || 'Afficher la sélection...');
+    // Visibule
+    wapp.setVisibulle(f)
+    // Properties
     var prop = f.getProperties();
     var georem = prop.georem || prop.report;
     // Hide edition

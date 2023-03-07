@@ -86,10 +86,9 @@ export default function(wapp) {
     if (nb>1) {
       $("#selection").html (nb + ' objets sélectionnés...');
       wapp.showOnglet("info");
-    }
-    else if (nb===1) {
+    } else if (nb===1) {
       var f = wapp.select.getFeatures().item(0);
-      $('#selection').html (f.get('nom') || f.get('nature') || 'Afficher la sélection...');
+      wapp.setVisibulle(f)
       wapp.showOnglet("info");
     }
     else

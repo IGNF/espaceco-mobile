@@ -137,7 +137,6 @@ wapp.layerCollabVector = function(l, cacheUrl) {
   for (var k=0; k<l.extent.length; k++) extent[k] = parseFloat(l.extent[k]);
   extent = ol_proj_transformExtent(extent, 'EPSG:4326', wapp.map.getView().getProjection());
   let snapTo = l.snapto;
-  console.log(l)
   if (snapTo) {
     snapTo = snapTo.split(',');
     snapTo.forEach((s, i) => {
@@ -176,7 +175,6 @@ wapp.layerCollabVector = function(l, cacheUrl) {
     online: (wapp.param.online != undefined) ? wapp.param.online : true
   });
 
-  console.log(vector.getProperties())
   return vector;
 };
 
