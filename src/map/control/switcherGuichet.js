@@ -98,7 +98,10 @@ export default function(wapp) {
     });
 
     //sauvegarde
-    if (table && !table.read_only && table.tile_zoom_level && layer.get('edit') !== false) {
+    if (table && !table.read_only && table.tile_zoom_level 
+      // && layer.get('edit') !== false 
+      && layer.get('role') === 'edit') {
+      // Save Button
       const saveBtn = ol_ext_element.create('I', {
         className: 'fa fa-send fa-disable ',
         click: () => {
@@ -124,7 +127,7 @@ export default function(wapp) {
         },
         parent: div
       });
-
+      // Reset
       const reset = ol_ext_element.create('I', {
         className: 'fa fa-undo fa-disable',
         click: () => {
@@ -145,7 +148,7 @@ export default function(wapp) {
         },
         parent: div
       })
-
+      // Show modifications
       let nbEdit = layer.getSource().nbModifications();
       if (nbEdit) {
         ol_ext_element.create('DIV', {
@@ -210,12 +213,14 @@ export default function(wapp) {
     } else if (!table.read_only && table.tile_zoom_level) {
       // Couche editable
       oldiv.addClass('offline')
-       // Edition tools
-      ol_ext_element.create('I', {
-        className: 'fa fa-pencil-square-o',
-        click: (e) => { editionMode(wapp, layer) },
-        parent: div
-      });
+      // Edition tools
+      if (layer.get('role') === 'edit') {
+        ol_ext_element.create('I', {
+          className: 'fa fa-pencil-square-o',
+          click: (e) => { editionMode(wapp, layer) },
+          parent: div
+        });
+      }
       // Enable selection
       const edit = ol_ext_element.create('I', {
         className: 'fa',

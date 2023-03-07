@@ -155,6 +155,7 @@ wapp.layerCollabVector = function(l, cacheUrl) {
     extent: extent,
     client: wapp.userManager.apiClient,
     snapTo: snapTo,
+    role: l.role,
     options: l,
     // style: guichet.style,
     maxResolution: 40, // zoom 13

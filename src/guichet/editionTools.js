@@ -113,7 +113,7 @@ class EditonTools extends ol_Object {
  * @param {CollabVector} [layer]
  */
 EditonTools.prototype.setLayer = function(layer) {
-  console.log(layer)
+  if (layer && layer.get('role') !== 'edit') layer = null;
   if (!this.init) {
     this.init = true;
     wapp.map.addInteraction(this.select)
