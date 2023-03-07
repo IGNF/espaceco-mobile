@@ -136,6 +136,14 @@ wapp.layerCollabVector = function(l, cacheUrl) {
 
   for (var k=0; k<l.extent.length; k++) extent[k] = parseFloat(l.extent[k]);
   extent = ol_proj_transformExtent(extent, 'EPSG:4326', wapp.map.getView().getProjection());
+  let snapTo = l.snapto;
+  console.log(l)
+  if (snapTo) {
+    snapTo = snapTo.split(',');
+    snapTo.forEach((s, i) => {
+      snapTo[i] = parseInt(s);
+    })
+  }
   vector = new ol_layer_Vector_CollabVector({
     url: url,
     //renderMode: 'image',
@@ -146,6 +154,7 @@ wapp.layerCollabVector = function(l, cacheUrl) {
     database: l.table.database,
     extent: extent,
     client: wapp.userManager.apiClient,
+    snapTo: snapTo,
     options: l,
     // style: guichet.style,
     maxResolution: 40, // zoom 13
@@ -166,6 +175,7 @@ wapp.layerCollabVector = function(l, cacheUrl) {
     online: (wapp.param.online != undefined) ? wapp.param.online : true
   });
 
+  console.log(vector.getProperties())
   return vector;
 };
 

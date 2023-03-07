@@ -2,6 +2,7 @@ import ol_Object from 'ol/Object'
 import TouchCursorSelect from 'ol-ext/interaction/TouchCursorSelect'
 import TouchCursorDraw from 'ol-ext/interaction/TouchCursorDraw'
 import TouchCursorModify from 'ol-ext/interaction/TouchCursorModify'
+import SnapInteraction from 'ol/interaction/Snap'
 
 import wapp from '../wapp'
 
@@ -61,6 +62,9 @@ class EditonTools extends ol_Object {
       className: 'ol-button-quit',
       click: () => this.dispatchEvent({ type: 'quit' })
     });
+
+    // List of snap interactions
+    this.snap = [];
 
     // Draw interactions
     this.draw = {};
@@ -157,6 +161,29 @@ EditonTools.prototype.setLayer = function(layer) {
       },
       before: true
     });
+  }
+  // Remove snapping
+  this.snap.forEach(s => wapp.map.removeInteraction(s));
+  this.snap = [];
+  // Add Snapping
+  if (layer && layer.get('snapTo')) {
+    const layerId = {};
+    wapp.getLayerGuichet().getLayers().forEach(l => {
+      const table = l.get('table');
+      if (table) {
+        layerId[table.id] = l;
+      }
+    })
+    layer.get('snapTo').forEach(i => {
+      const l = layerId[i];
+      if (l) {
+        const si = new SnapInteraction({
+          source: l.getSource()
+        })
+        this.snap.push(si);
+        wapp.map.addInteraction(si);
+      }
+    })
   }
 }
 
