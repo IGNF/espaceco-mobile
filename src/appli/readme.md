@@ -26,7 +26,7 @@ Le fichier `./scripts/APPLI/logo.png` est utilisé comme logo de l'application (
 
 Avant chaque construction de l'application (start, build) le répertoire spécifique de l'application sont recopié dans le  repertoire `./src/appli`.
 Si vous modifiez un fichier dans ce répertoire il faut s'assurer de le recopier dans le répertoire d'origine (au risque de le voir écrasé lors de la prochaine construction).
-Vous pouvez lancer le script `backup` pour assurer la sauvegarde des modifications automatiques.
+Vous pouvez lancer le script `backup` pour assurer la sauvegarde des modifications automatique.
 ```
 $ npm run backup
 ```
