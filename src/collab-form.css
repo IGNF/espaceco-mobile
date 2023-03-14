@@ -9,19 +9,12 @@
   position: relative;
 }
 
-.feature-form [data-type="list"]:after {
-  content: "\276f";
-  display: block;
-  font-size: 1.5em;
-  margin-top: -0.5em;
-  position: absolute;
-  right: 0.1em;
-  top: 50%;
-  line-height: 1em;
-  pointer-events: none;
-}
-
 /* popup */
+.feature-form select {
+  background-color: #fff;
+  border: 0;
+  padding: 0 1em 0 .5em;
+}
 .feature-form .select-popup {
   position: fixed;
   z-index: 99;
@@ -33,6 +26,10 @@
 .feature-form .select-popup [aria-hidden="true"] {
   display: none!important;
 }
+.feature-form .select-popup li.filtered {
+  display: none!important;
+}
+
 .feature-form .select-popup > form {
   position: absolute;
   width: 20em;
@@ -51,3 +48,38 @@
   position: unset;
   font-size: 1em;
 }
+
+.feature-form .table input {
+  background: #fff;
+  background-image: none!important;
+  padding-left: .5em;
+}
+.feature-form .table input[type^="month"],
+.feature-form .table input[type^="date"] {
+  padding-right: 0;
+}
+.feature-form .table tr[data-type]:after {
+  font-family: 'FontAwesome';
+  position: absolute;
+  top: 50%;
+  right: .2em;
+  color: #000;
+  font-size: .85em;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.feature-form .table tr[data-type="double"]:after,
+.feature-form .table tr[data-type="integer"]:after {
+  content: "\f162";
+}
+.feature-form .table tr[data-type="text"]:after {
+  content: "\f031";
+}
+.feature-form .table tr[data-type="year"]:after {
+  content: "\f133";
+}
+.feature-form .table tr[data-type="list"]:after,
+.feature-form .table tr[data-type="checkbox"]:after {
+  content: "\f054";
+}
+
