@@ -1,0 +1,53 @@
+
+/* Feature form */
+.feature-form .table {
+  position: relative;
+  font-size: 1em;
+  width: 100%;
+}
+.feature-form .table tr {
+  position: relative;
+}
+
+.feature-form [data-type="list"]:after {
+  content: "\276f";
+  display: block;
+  font-size: 1.5em;
+  margin-top: -0.5em;
+  position: absolute;
+  right: 0.1em;
+  top: 50%;
+  line-height: 1em;
+  pointer-events: none;
+}
+
+/* popup */
+.feature-form .select-popup {
+  position: fixed;
+  z-index: 99;
+  inset: 0;
+  background-color: rgba(0,0,0,.5);
+  cursor: auto;
+}
+.feature-form .select-popup[aria-hidden="true"],
+.feature-form .select-popup [aria-hidden="true"] {
+  display: none!important;
+}
+.feature-form .select-popup > form {
+  position: absolute;
+  width: 20em;
+  max-width: 90%;
+  max-height: 90%;
+  box-shadow: 1px 1px 5px rgba(0,0,0,.5);
+  background-color: #fff;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 1em;
+  font-size: 24px;
+  opacity: 1;
+}
+.feature-form .select-popup > form > div {
+  position: unset;
+  font-size: 1em;
+}

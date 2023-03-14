@@ -9,8 +9,11 @@ import './maintenance'
 import './apiTemplate'
 import CordovApp from 'cordovapp/CordovApp';
 
+import './collab-form.css'
+
 // Import specific options
 import './appli/appli.js'
+
 
 // global var
 window.wapp = wapp;
