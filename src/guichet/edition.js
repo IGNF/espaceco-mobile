@@ -2,58 +2,40 @@
 
 import wapp from '../wapp'
 import ol_ext_element from 'ol-ext/util/element'
-import EditionInput from './EditionInput';
+import {createFormForTable} from 'collab-form';
+import { alertDlg } from 'cordovapp/cordovapp/dialog'
 
-/** Ajouter une nouvelle ligne a éditer
- * @param {Element} ul liste element
- * @param {ol.Feature} feature current feature
- * @param {*} table table attribute
- * @param {string} att current attribut name
- */
-function _addLine (ul, feature, table) {
-  if (table.read_only) return; 
-
-  // New line
-  const li = ol_ext_element.create('LI', {
-    className: 'edition '+table.type,
-    parent: ul
-  });
-
-  // New imput
-  const att = table.name;
-  return new EditionInput(table, feature.get(att), li, feature._updates ? feature._updates[att] : undefined)
-}
-
-/** Edit current feature
+/** 
+ * Edit current feature
  * @param {boolean} [closeOnSubmit=false]
  */ 
 wapp.editFeature = function(closeOnSubmit) {
   const feature = this.select.getFeatures().item(0);
   if (!feature) return;
 
-  const editProperties = {};
+  let editProperties = feature.getProperties();
 
   // Mode edition
   const div = document.querySelector('#fiche .selection');
   div.classList.remove('multi');
   const table = feature.layer.getTable();
   div.querySelector('.edit').style.display = 'none';
-  
+
   const ul = div.querySelector('.fiche').querySelector('ul');
   ul.innerText = '';
-  $(ul).parent().addClass('edition');
-  
-  // Formulaire
-  var i;
-  for (i in table.columns) {
-    if (i !== table.geometry_name && i !== table.id_name) {
-      editProperties[i] = _addLine(ul, feature, table.columns[i]);
+    
+  // Ajout du userId pour le fonctionnement du champs like
+  for (var i in table.columns) {
+    if (table.columns[i].type.toLowerCase() === "like") {
+      table.columns[i].userId = wapp.userManager.userId;
     }
   }
-  // Show selected themes attr
-  var bt = $('.themes .selected', div);
-  if (bt.length) bt.click();
-
+  // Formulaire
+  let form = createFormForTable($(ul), "form-atts", table, editProperties, "mobile");
+  $(".feature-form").ready(function(){
+    form.init();
+  });
+  
   // Buttons
   const li = ol_ext_element.create('LI', {
     className: 'buttons',
@@ -81,19 +63,28 @@ wapp.editFeature = function(closeOnSubmit) {
     html: 'enregistrer',
     'data-role': 'dialogBt',
     click: () => {
-      // Check remaining error
-      if (ul.querySelector('li.error:not([hidden])')) {
-        wapp.alert('<i class="fa fa-fleft fa-exclamation-triangle fa-2x"></i>'
-          +'<h3>Le formulaire contient des erreurs...</h3>'
-          +'Merci de les corriger avant de pouvoir enregistrer.', {
-            title: ''
-          });
-        return;
+      // validation
+      var attr = {};
+      for (var i in form.attributes) {
+        let attribute = form.attributes[i]
+        if (!attribute.validate()) {
+          alertDlg('Erreur sur "' + attribute.title + '": ' +  attribute.error);
+          return;
+
+          // wapp.alert('<i class="fa fa-fleft fa-exclamation-triangle fa-2x"></i>'
+          // +'<h3>Le formulaire contient des erreurs...</h3>'
+          // +'Merci de les corriger avant de pouvoir enregistrer.', {
+          //   title: ''
+          // });
+          // return;
+        }
+        attr[attribute.name] = attribute.getNormalizedValue();
       }
+
       // Get modifications
-      for (let k in editProperties) {
-        if (editProperties[k] && editProperties[k].hasChanged()) {
-          feature.set(k, editProperties[k].val());
+      for (let name in attr) {
+        if (attr[name] !=  feature.get(name)) {
+          feature.set(name, attr[name]);
         }
       }
       // Back to selection

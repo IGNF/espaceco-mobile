@@ -82,7 +82,6 @@ export default function(wapp) {
    */
   wapp.onSelect = function() {
     var nb = wapp.select.getFeatures().getLength();
-    // wapp.report.cancelFormulaire();
     if (nb>1) {
       $("#selection").html (nb + ' objets sélectionnés...');
       wapp.showOnglet("info");
@@ -92,9 +91,8 @@ export default function(wapp) {
       $('#selection').html (f.get('nom') || f.get('nature') || 'Afficher la sélection...');
       wapp.showOnglet("info");
     }
-    else
-    {	$("#selection").html ("");//("<i>"+$("#selection").data("placeholder")+"</i>");
-      //wapp.showOnglet("signal");
+    else {	
+      $("#selection").html ("");
     }
     if (wapp.isPage("fiche")) wapp.showSelect();
   };
