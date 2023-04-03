@@ -23,6 +23,7 @@ wapp.editFeature = function(closeOnSubmit) {
 
   const ul = div.querySelector('.fiche').querySelector('ul');
   ul.innerText = '';
+  $(ul).removeClass("read-only");
     
   // Ajout du userId pour le fonctionnement du champs like
   for (var i in table.columns) {

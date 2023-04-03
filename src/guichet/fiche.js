@@ -423,6 +423,7 @@ wapp.showSelect = function(options) {
       }
       var saveTheme =  $(".fiche .themes .selected", div).removeClass('selected').attr('class');
       ul = $(".fiche ul", div).html('');
+      ul.addClass("read-only");
       th = $(".fiche .themes", div).html("");
 
       // Trace GPS
