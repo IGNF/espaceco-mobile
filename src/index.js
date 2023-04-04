@@ -1,4 +1,5 @@
 require('dotenv').config();
+import 'collab-form/scss/main.scss'
 import './style.css'
 import './i18n'
 import wapp from './guichet/guichet'
@@ -8,8 +9,11 @@ import './maintenance'
 import './apiTemplate'
 import CordovApp from 'cordovapp/CordovApp';
 
+import './collab-form.css'
+
 // Import specific options
 import './appli/appli.js'
+
 
 // global var
 window.wapp = wapp;

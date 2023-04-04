@@ -122,66 +122,13 @@ function _addLine(th, ul, title, val, options) {
         }
         val = v;
       }
+      if (options.attribute && options.attribute.type.toLowerCase() === "like" && val && val.cnt) {
+        val = val.cnt;
+      }
       //const sp = 
       $("<span>").text(val)
         .appendTo(li);
-/*
-      // Gestion de l'edition sur place
-      if (options.edit) {
-        let edit = new EditionInput(options.attribute, '');
-        if (edit.input) {
-          switch (edit.type) {
-            case 'DateTime':
-            case 'YearMonth':
-            case 'Date': {
-              ol_ext_element.create('INPUT', {
-                className: 'editDate',
-                value: edit.type==='DateTime' ? val.replace(' ','T') : val,
-                on: {
-                  'change': (e) => {
-                    val = e.target.value;
-                    if (edit.type==='DateTime' && !/T/.test(options.feature.set(options.attribute.name))) {
-                      val = val.replace('T',' ');
-                    }
-                    sp.text(val);
-                    options.feature.set(options.attribute.name, val);
-                  }
-                },
-                type: edit.type==='DateTime' ? 'datetime-local' : edit.type==='Date' ? 'date' : 'month',
-                parent: li.get(0)
-              });
-              ol_ext_element.create('I', {
-                className: 'fa fa-calendar',
-                style: { 'pointer-event': 'none' },
-                parent: li.get(0)
-              });
-              break;
-            }
-            default: {
-              const icon = ol_ext_element.create('I', {
-                className: 'fa fa-pencil',
-                click: () => {
-                  edit = new EditionInput(options.attribute, val);
-                  edit.prompt((resp) => {
-                    if (edit.type==='Boolean') {
-                      icon.className = 'fa checkbox ' + (resp ? 'check' : 'uncheck');
-                    }
-                    val = resp;
-                    sp.text(val);
-                    options.feature.set(options.attribute.name, val);
-                  });
-                },
-                parent: li.get(0)
-              });
-              if (edit.type==='Boolean') {
-                icon.className = 'fa checkbox ' + (val ? 'check' : 'uncheck');
-              }
-              break;
-            }
-          }
-        }
-      }
-*/
+
       break;
     }
   }
@@ -501,6 +448,7 @@ wapp.showSelect = function(options) {
       }
       var saveTheme =  $(".fiche .themes .selected", div).removeClass('selected').attr('class');
       ul = $(".fiche ul", div).html('');
+      ul.addClass("read-only");
       th = $(".fiche .themes", div).html("");
 
       // Trace GPS

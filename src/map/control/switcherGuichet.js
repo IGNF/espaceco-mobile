@@ -233,7 +233,7 @@ export default function(wapp) {
       if (layer.get('edit') === false) {
         edit.classList.add('fa-lock');
       } else {
-        edit.classList.add('fa-pencil');
+        edit.classList.add('fa-unlock');
       }
     }
 

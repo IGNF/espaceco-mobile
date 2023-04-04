@@ -1,0 +1,85 @@
+
+/* Feature form */
+.feature-form .table {
+  position: relative;
+  font-size: 1em;
+  width: 100%;
+}
+.feature-form .table tr {
+  position: relative;
+}
+
+/* popup */
+.feature-form select {
+  background-color: #fff;
+  border: 0;
+  padding: 0 1em 0 .5em;
+}
+.feature-form .select-popup {
+  position: fixed;
+  z-index: 99;
+  inset: 0;
+  background-color: rgba(0,0,0,.5);
+  cursor: auto;
+}
+.feature-form .select-popup[aria-hidden="true"],
+.feature-form .select-popup [aria-hidden="true"] {
+  display: none!important;
+}
+.feature-form .select-popup li.filtered {
+  display: none!important;
+}
+
+.feature-form .select-popup > form {
+  position: absolute;
+  width: 20em;
+  max-width: 90%;
+  max-height: 90%;
+  box-shadow: 1px 1px 5px rgba(0,0,0,.5);
+  background-color: #fff;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 1em;
+  font-size: 24px;
+  opacity: 1;
+}
+.feature-form .select-popup > form > div {
+  position: unset;
+  font-size: 1em;
+}
+
+.feature-form .table input {
+  background: #fff;
+  background-image: none!important;
+  padding-left: .5em;
+}
+.feature-form .table input[type^="month"],
+.feature-form .table input[type^="date"] {
+  padding-right: 0;
+}
+.feature-form .table tr[data-type]:after {
+  font-family: 'FontAwesome';
+  position: absolute;
+  top: 50%;
+  right: .2em;
+  color: #000;
+  font-size: .85em;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.feature-form .table tr[data-type="double"]:after,
+.feature-form .table tr[data-type="integer"]:after {
+  content: "\f162";
+}
+.feature-form .table tr[data-type="text"]:after {
+  content: "\f031";
+}
+.feature-form .table tr[data-type="year"]:after {
+  content: "\f133";
+}
+.feature-form .table tr[data-type="list"]:after,
+.feature-form .table tr[data-type="checkbox"]:after {
+  content: "\f054";
+}
+
