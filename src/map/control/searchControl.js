@@ -3,6 +3,7 @@ import ol_control_Button from 'ol-ext/control/Button'
 import ol_control_SearchFeature from 'ol-ext/control/SearchFeature'
 import ol_control_SearchGeoportail from 'ol-ext/control/SearchGeoportail'
 import ol_control_SearchGeoportailParcelle from 'ol-ext/control/SearchGeoportailParcelle'
+import ol_control_SearchGPS from 'ol-ext/control/SearchGPS'
 
 import ol_Feature from 'ol/Feature'
 import ol_geom_Point from 'ol/geom/Point'
@@ -81,6 +82,19 @@ export default function() {
   // Focus on input
   $('#search [data-role="onglet-li"]').on('showonglet', function(e){
     setTimeout (function(){ $('.search', e.target).focus();}, 0);
+  });
+
+  // Se centrer par coordonnées
+  var searchCoord = new ol_control_SearchGPS({
+    target: $('#search [data-role="onglet-li"][data-list="coordinates"]').get(0)
+  });
+  map.addControl(searchCoord);
+  searchCoord.on('select', function(e){
+    // console.log(e);
+    map.getView().animate({
+      center: e.search.coordinate,
+      zoom: Math.max (map.getView().getZoom(), 17)
+    });
   });
 
   // Search feature

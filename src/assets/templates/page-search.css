@@ -110,3 +110,8 @@
   height: 1.4em;
   padding: 0;
 }
+
+/* on cache la geolocalisation qui vient avec le control de recherche par coordonnees */
+#search .search_coordinates button.ol-geoloc {
+  display: none;
+}
