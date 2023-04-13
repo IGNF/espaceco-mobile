@@ -220,3 +220,10 @@ NB: A l'installation du plugin camera, il faut ajouter les variables nécessaire
 ````
 cordova plugin add cordova-plugin-camera --variable CAMERA_USAGE_DESCRIPTION="pour illustrez vos contributions" --variable PHOTOLIBRARY_USAGE_DESCRIPTION="pour illustrez vos contributions"
 ````
+
+Pour ios il est nécessaire de renseigner les valeurs suivantes dans xcode pour le pInfoList:
+
+Privacy - Camera Usage Description
+Privacy - Photo Library Usage Description
+Privacy - Location When In Use Usage Description
+Privacy - Location Always Usage Description
