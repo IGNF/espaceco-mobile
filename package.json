@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "clean-css": "^3.4.19",
-    "cordova-android": "^11.0.0",
+    "cordova-android": "^10.1.2",
     "cordova-ios": "^6.2.0",
     "cordova-plugin-bluetooth-geolocation": "github:viglino/cordova-plugin-bluetooth-geolocation",
     "cordova-plugin-camera": "^6.0.0",

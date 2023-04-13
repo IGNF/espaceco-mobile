@@ -13,7 +13,7 @@ import moment from 'moment';
 wapp.setVisibulle = function(f) {
   if (!f) {
     $('#selection').html(' ')
-  } else if (f.layer && f.layer.get('table').thematic_ids) {
+  } else if (f.layer && f.layer.get('table') && f.layer.get('table').thematic_ids) {
     const st = [];
     const table = f.layer.get('table');
     table.thematic_ids.forEach(k => {
