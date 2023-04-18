@@ -9,6 +9,18 @@
   position: relative;
 }
 
+/* documents */
+.feature-form button.doc-btn {
+  float: right;
+  margin: 1em 0.2em;
+  font-size: 0.85em;
+}
+
+.feature-form img {
+  max-height: 3em;
+  max-width: 40%;
+}
+
 /* popup */
 .feature-form select {
   background-color: #fff;
@@ -83,3 +95,7 @@
   content: "\f054";
 }
 
+.feature-form .error {
+  color: red;
+  font-weight: normal;
+}

@@ -18,6 +18,7 @@
 
 #fiche .selection > div ul {
   margin: 0;
+  margin-bottom: 2em;
   padding: 0;
   list-style: none;
   clear: both;
@@ -346,6 +347,9 @@ screen and (orientation:portrait) and (max-height:1023px) {
   top: 50%;
   transform: translateY(-50%);
   font-size: 1.5em;
+}
+#fiche li.attributes[data-input="custom"]:after {
+  content: none;
 }
 
 /* Dialog */

@@ -2,8 +2,17 @@
 
 import wapp from '../wapp'
 import ol_ext_element from 'ol-ext/util/element'
-import {createFormForTable} from 'collab-form';
+const collabForm = require('collab-form');
 import { alertDlg } from 'cordovapp/cordovapp/dialog'
+import { DocumentForm } from 'cordovapp/collaboratif/DocumentForm'
+
+/**
+ * Initialisation des champs document du formulaire
+ */
+const initDocumentForm = function () {
+  let docForm = new DocumentForm(wapp);
+  docForm.init();
+}
 
 /** 
  * Edit current feature
@@ -32,9 +41,10 @@ wapp.editFeature = function(closeOnSubmit) {
     }
   }
   // Formulaire
-  let form = createFormForTable($(ul), "form-atts", table, editProperties, "mobile");
+  let form = collabForm.createFormForTable($(ul), "form-atts", table, editProperties, "mobile");
   $(".feature-form").ready(function(){
     form.init();
+    initDocumentForm();
   });
   
   // Buttons
@@ -66,25 +76,35 @@ wapp.editFeature = function(closeOnSubmit) {
     click: () => {
       // validation
       var attr = {};
+      let htmlErrors = "";
+      let errors = {};
       for (var i in form.attributes) {
         let attribute = form.attributes[i]
         if (!attribute.validate()) {
-          alertDlg('Erreur sur "' + attribute.title + '": ' +  attribute.error);
-          return;
-
-          // wapp.alert('<i class="fa fa-fleft fa-exclamation-triangle fa-2x"></i>'
-          // +'<h3>Le formulaire contient des erreurs...</h3>'
-          // +'Merci de les corriger avant de pouvoir enregistrer.', {
-          //   title: ''
-          // });
-          // return;
+          errors[attribute.id] = attribute.error;
+          htmlErrors += '<p>Erreur sur "' + attribute.title + '": ' +  attribute.error + '</p>';
         }
         attr[attribute.name] = attribute.getNormalizedValue();
       }
 
+      if (Object.keys(errors).length) {
+        for (let id in errors) {
+          var $elt = $('.feature-form .table .feature-attribute#' + id);
+          $elt.addClass('has-error');
+          $('.feature-form table label[for="' + id + '"]').addClass('has-error');
+          
+        }
+        alertDlg(htmlErrors);
+        return;
+      }
+
       // Get modifications
       for (let name in attr) {
-        if (attr[name] !=  feature.get(name)) {
+        if (attr[name] && attr[name].cnt) {
+          if (attr[name].cnt != feature.get(name).cnt) {
+            feature.set(name, attr[name]);
+          }
+        } else if (attr[name] !=  feature.get(name)) {
           feature.set(name, attr[name]);
         }
       }

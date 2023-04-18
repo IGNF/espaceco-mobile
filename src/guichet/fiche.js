@@ -125,6 +125,9 @@ function _addLine(th, ul, title, val, options) {
       if (options.attribute && options.attribute.type.toLowerCase() === "like" && val && val.cnt) {
         val = val.cnt;
       }
+      if (options.attribute && options.attribute.type.toLowerCase() === "document" && val && parseInt(val) != val) {
+        val = val.substring(val.lastIndexOf("/")+1, val.lastIndexOf("?"));
+      }
       //const sp = 
       $("<span>").text(val)
         .appendTo(li);
