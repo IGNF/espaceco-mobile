@@ -213,6 +213,8 @@ La publication se fait sur la [console du playstore](https://play.google.com/app
 
 NB: fr.ign.guichet ayant été refusé par Apple l'ID de l'application iOS est : `fr.ign.collaboratif`
 
+fr.ign.navi-forest pour Naviforest
+
 La publication se fait sur la [AppleStore connect](https://appstoreconnect.apple.com/apps).
 Il est nécessaire d'avoir un [compte développeur](https://developer.apple.com/account/) associé au compte IGN - Institut national de l'information géographique et forestière.
 
@@ -224,6 +226,9 @@ cordova plugin add cordova-plugin-camera --variable CAMERA_USAGE_DESCRIPTION="po
 Pour ios il est nécessaire de renseigner les valeurs suivantes dans xcode pour le pInfoList:
 
 Privacy - Camera Usage Description
+
 Privacy - Photo Library Usage Description
+
 Privacy - Location When In Use Usage Description
+
 Privacy - Location Always Usage Description
