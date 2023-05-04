@@ -90,11 +90,11 @@ export default function() {
   });
   map.addControl(searchCoord);
   searchCoord.on('select', function(e){
-    // console.log(e);
     map.getView().animate({
       center: e.search.coordinate,
       zoom: Math.max (map.getView().getZoom(), 17)
     });
+    wapp.hidePage();
   });
 
   // Search feature
