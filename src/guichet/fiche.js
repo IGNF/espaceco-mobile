@@ -4,8 +4,13 @@ import {containsCoordinate as ol_extent_containsCoordinate} from 'ol/extent'
 import {getCenter as ol_extent_getCenter} from 'ol/extent'
 import ol_layer_Vector_CollabVector from 'cordovapp/ol/layer/CollabVector'
 import Report from 'cordovapp/report/Report'
+import { Slider } from 'cordovapp/cordovapp/slider'
+import { DocumentForm } from 'cordovapp/collaboratif/DocumentForm'
+import 'cordovapp/cordovapp/slider.css'
 import { Feature } from 'ol';
 import moment from 'moment';
+
+var slider, docForm;
 
 /** Show Visibulle / thematics in the selection bar
  * @param {ol/Feature} f
@@ -125,16 +130,30 @@ function _addLine(th, ul, title, val, options) {
       if (options.attribute && options.attribute.type.toLowerCase() === "like" && val && val.cnt) {
         val = val.cnt;
       }
-      if (options.attribute && options.attribute.type.toLowerCase() === "document" && val && parseInt(val) != val) {
-        val = val.substring(val.lastIndexOf("/")+1, val.lastIndexOf("?"));
-      }
-      //const sp = 
-      $("<span>").text(val)
+      if (options.attribute && options.attribute.type.toLowerCase() === "document") {
+        let url = docForm.getDocumentLink(val);
+        if (url) slider.addImage(url, label);
+        
+        if (val && parseInt(val) != val) {
+          val = val.substring(val.lastIndexOf("/")+1, val.lastIndexOf("?"));
+        }
+        $('<a>').text(val).appendTo(li).on('click', showSlider);
+      } else {
+        $("<span>").text(val)
         .appendTo(li);
+      }
 
       break;
     }
   }
+}
+
+/**
+ * affichage du slider
+ */
+function showSlider() {
+  wapp.showPage('slider');
+  slider.show()
 }
 
 /** Show a georem
@@ -309,6 +328,8 @@ function showFeature(ul, f, th) {
   }
   ul.parent().removeClass('edition');
   var table = f.layer.getSource().table_;
+  slider = new Slider($("#slider"));
+  docForm = new DocumentForm(wapp);
   for (let i in table.columns) if (i !== table.geometry_name) {
     let att = table.columns[i];
     switch (att.type) {

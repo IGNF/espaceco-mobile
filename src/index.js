@@ -10,6 +10,7 @@ import './apiTemplate'
 import CordovApp from 'cordovapp/CordovApp';
 
 import './collab-form.css'
+import 'cordovapp/cordovapp/slider.css'
 
 // Import specific options
 import './appli/appli.js'
