@@ -21,7 +21,6 @@
   },
   "homepage": "http://gitlab.dockerforge.ign.fr/express/guichet-mobile",
   "dependencies": {
-    "bootbox": "^6.0.0",
     "cordova": "^11.0.0",
     "cordova-plugin-bluetooth-serial": "^0.4.7",
     "cordova-plugin-dialogs": "^2.0.2",
