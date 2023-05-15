@@ -52,24 +52,6 @@ import * as fs from 'fs';
   },
   
   initWapp: function() {
-    /*
-    // Splashscreen
-    wapp.showPage('splash');
-    setTimeout(function(){ wapp.hidePage('splash'); }, 2000);
-    */
-    /* Gestion du mode hors-connexion 
-     * Rafraichir la carte quand on recupere la connexion
-     * Pour les layers Wfs collaboratif switch mode en ligne/hors ligne
-     */
-    document.addEventListener("online", function(){
-      wapp.refreshMap();
-      wapp.switchLayersOnline(true);
-    }, false);
-
-    document.addEventListener("offline", function(){
-      wapp.switchLayersOnline(false);
-    }, false);
-
     // Version => cordova-plugin-app-version ???
     $(".version").text(config.version);
     // Gestion de l'aide en ligne
