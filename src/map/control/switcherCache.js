@@ -55,7 +55,7 @@ let cacheExtents;
             wapp.alert('Zone ' + selected + ' sélectionnée');
           }
           wapp.cache.setCurrentMap(smap);
-          wapp.cache.loadMapDlg(selected, true, cbk);
+          wapp.cache.loadMapDlg(selected, false, cbk);
         },
         {'title': 'Choisir une zone'}
       );

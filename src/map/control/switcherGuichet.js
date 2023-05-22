@@ -5,6 +5,7 @@ import ol_control_LayerSwitcher from 'ol-ext/control/LayerSwitcher'
 import ol_ext_element from 'ol-ext/util/element'
 
 import editionMode from '../../guichet/editionMode'
+import { prettifyAxiosError } from 'cordovapp/collaboratif/errorHelper'
 
 let cacheSwitcher;
 
@@ -97,10 +98,10 @@ export default function(wapp) {
       parent: e.li
     });
 
+    var locked = table.read_only || layer.get('edit') === false || !table.tile_zoom_level;
+
     //sauvegarde
-    if (table && !table.read_only && table.tile_zoom_level 
-      // && layer.get('edit') !== false 
-      && layer.get('role') === 'edit') {
+    if (table && !locked) {
       // Save Button
       const saveBtn = ol_ext_element.create('I', {
         className: 'fa fa-send fa-disable ',
@@ -120,7 +121,8 @@ export default function(wapp) {
               if (transaction) {
                 wapp.handleConflict(transaction, layer);
               } else {
-                wapp.alert('Impossible de sauvegarder '+layer.get('title')+'<br/><i class="error">'+error+'</i>');
+                let prettyError = prettifyAxiosError(error);
+                wapp.alert('Impossible de sauvegarder '+layer.get('title')+'<br/><i class="error">'+prettyError.message+'</i>');
               }
             });
           }
@@ -129,11 +131,11 @@ export default function(wapp) {
       });
       // Reset
       const reset = ol_ext_element.create('I', {
-        className: 'fa fa-undo fa-disable',
+        className: 'fa fa-undo',
         click: () => {
           if (reset.classList.contains("fa-disable")) return;
           messageDlg(
-            "Supprimer toutes les modifications sur la couche?", 
+            "Supprimer toutes les modifications sur la couche et recharger les données?", 
             " ", 
             {
               ok: "supprimer",
@@ -158,59 +160,10 @@ export default function(wapp) {
         });
         $('.tag', saveBtn).text(nbEdit);
         saveBtn.classList.remove("fa-disable");
-        reset.classList.remove("fa-disable");
       } else {
         saveBtn.classList.add("fa-disable");
-        reset.classList.add("fa-disable");
       }
-    }
 
-    // VectorCache
-    if (layer.get('cache')) {
-      oldiv.addClass('offline');
-      // Toggle edit
-      const edit = ol_ext_element.create('I', {
-        className: 'fa',
-        click: () => {
-          layer.set('edit', layer.get('edit')===false);
-          guichetlayerSwitcher.drawPanel();
-        },
-        parent: div
-      });
-      if (layer.get('edit') === false) {
-        edit.classList.add('fa-lock');
-      } else if (table.read_only) {
-        edit.classList.add('fa-unlock-alt');
-      } else {
-        edit.classList.add('fa-pencil');
-      }
-      // Refresh
-      const refresh = ol_ext_element.create('I', {
-        className: 'fa fa-refresh',
-        click: () => {
-          if (layer.getSource().nbModifications()) {
-            wapp.alert("Impossible de rafraîchir le cache car des modifications sont en cours sur la couche.");
-          } else {
-            wapp.updateCache(layer);
-          }
-        },
-        parent: div
-      });
-    } else if (table.read_only) {
-      var select = ol_ext_element.create('I', {
-        className: 'fa',
-        click: () => {
-          layer.set('edit', layer.get('edit')===false);
-          guichetlayerSwitcher.drawPanel();
-        },
-        parent: div
-      });
-      if (layer.get('edit') === false) {
-        select.classList.add('fa-lock');
-      } else {
-        select.classList.add('fa-unlock-alt');
-      }
-    } else if (!table.read_only && table.tile_zoom_level) {
       // Couche editable
       oldiv.addClass('offline')
       // Edition tools
@@ -221,20 +174,26 @@ export default function(wapp) {
           parent: div
         });
       }
-      // Enable selection
-      const edit = ol_ext_element.create('I', {
-        className: 'fa',
-        click: () => {
+    }
+      
+    // Enable selection
+    const edit = ol_ext_element.create('I', {
+      className: 'fa',
+      click: () => {
+        if (!table || table.read_only || !table.tile_zoom_level) {
+          wapp.alert("Cette couche n'est pas éditable");
+        } else {
           layer.set('edit', layer.get('edit')===false);
-          guichetlayerSwitcher.drawPanel();
-        },
-        parent: div
-      });
-      if (layer.get('edit') === false) {
-        edit.classList.add('fa-lock');
-      } else {
-        edit.classList.add('fa-unlock');
-      }
+          guichetlayerSwitcher.drawPanel(); 
+        } 
+      },
+      parent: div
+    });
+
+    if (locked) {
+      edit.classList.add('fa-lock');
+    } else {
+      edit.classList.add('fa-unlock');
     }
 
     //pour certains objets comme les troncons de route le style est defini en dur

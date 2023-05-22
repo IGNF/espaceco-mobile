@@ -9,6 +9,7 @@ import { DocumentForm } from 'cordovapp/collaboratif/DocumentForm'
 import 'cordovapp/cordovapp/slider.css'
 import { Feature } from 'ol';
 import moment from 'moment';
+import { prettifyAxiosError } from 'cordovapp/collaboratif/errorHelper'
 
 var slider, docForm;
 
@@ -277,23 +278,9 @@ function showGeorem(div, georem, newOne) {
             wapp.wait(false);
             if (error) {
               var msg = "Impossible d'envoyer la réponse.<br/>";
-              if (!error.response) {
-                msg = $('<div>').html(msg+"Vérifiez votre connexion ou réessayez lorsque vous serez à nouveau connecté au réseau.");
-              } else {
-                msg = $('<div>').html(msg+"Réponse incorrecte...");
-              }
-              let errorTxt = '';
-              if (error.response && error.response.status == 403) {
-                errorTxt = "Vous n'êtes pas autorisé à effecuer cette opération";
-              } else if (error.response && error.response.data) {
-                errorTxt = error.response.data.code + " : " + error.response.data.message
-              } else if (error.message) {
-                errorTxt = error.message;
-              } else {
-                error;
-              }
+              let prettyError = prettifyAxiosError(error);
               $("<i>").addClass('error')
-                .html("<br/>Erreur : "+errorTxt+"</i>")
+                .html("<br/>Erreur : "+ prettyError['code'] + ":" + prettyError['message'] +"</i>")
                 .appendTo(msg);
               wapp.alert(msg);
             }

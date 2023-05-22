@@ -217,10 +217,15 @@ function initOffline(wapp) {
         if (hasCache.cache) {
             $("#remove-cache-layer-btn").prop("disabled", false);
             $("#load-cache-layer-btn").prop("disabled", hasCache.cache.loaded);
-            $("#select-area-btn").prop("disabled", hasCache.cache.loaded);
-            hasCache.cache.loaded ? $(".cache-tools", offlinePage).show() : $(".cache-tools", offlinePage).hide();
+            if (hasCache.cache.loaded) {
+                $(".cache-tools", offlinePage).show();
+                $(".areas", offlinePage).show();
+            } else {
+                $(".cache-tools", offlinePage).hide();
+                $(".areas", offlinePage).hide();
+            }
         } else {
-            $("#select-area-btn").prop("disabled", false);
+            $(".areas", offlinePage).hide();
             $("#remove-cache-layer-btn").prop("disabled", true);
             $(".cache-tools", offlinePage).hide();
         }
@@ -289,26 +294,6 @@ function initOffline(wapp) {
         });
     });
 
-    //selection d une zone pour le cache guichet
-    $("#select-area-btn").on('click', function(){
-        let extentsNames = cacheExtents.getExtentNames();
-        if (Object.keys(extentsNames).length == 0) {
-            var cache = wapp.getCache(wapp.guichet).cache;
-            wapp.vectorCache.removeCache(cache);
-            wapp.alert("Vous devez saisir une zone pour le chargement du cache");
-            return;
-        }
-        selectDialog(
-            extentsNames,
-            extentsNames[0],
-            function(selected) {
-                let $p = $("<span></span>").addClass("area").html(selected);
-                $('#vector-cache-area').html($p);
-            },
-            {'title': 'Choisir une zone'}
-        );
-    });
-
     //boutons de gestion du cache guichet
     $(".add-area", offlinePage).on("click", function(){
         let cache = wapp.getCache(wapp.guichet).cache;
@@ -320,7 +305,7 @@ function initOffline(wapp) {
             if (cache.extentNames.indexOf(name) == -1) extentsNamesWithoutUsed[name] = name;
         }
         if (Object.keys(extentsNamesWithoutUsed).length == 0) {
-            wapp.alert("Vous devez saisir une zone pour le chargement du cache");
+            wapp.alert("Aucune zone disponible");
             return;
         }
         selectDialog(
@@ -420,10 +405,14 @@ function initOffline(wapp) {
         });
     });
 
-    $("#load-cache-layer-btn", offlinePage).on("click", function(){
+    /**
+     * chargement du cache vecteur sur une zone donnee 
+     * @param string extentName le nom de la zone a charger
+     */ 
+    
+    var loadVectorCache = function(extentName) {
         var cache = wapp.getCache(wapp.guichet).cache;
         let extents = null;
-        let extentName = $("#vector-cache-area .area").first().html();
         if (extentName) {
             extents = cacheExtents.get(extentName);
         }
@@ -437,11 +426,47 @@ function initOffline(wapp) {
         wapp.vectorCache.currentCache = cache;
         wapp.vectorCache.uploadCache(false, extentName);
         wapp.hidePage();
+    }
+
+    // clic sur le bouton de chargement de cache vecteur
+    // si aucune zone erreur, si une zone chargement direct
+    // si plusieurs zones dialogue de choix
+    $("#load-cache-layer-btn", offlinePage).on("click", function(){
+        let extentsNames = cacheExtents.getExtentNames();
+        if (Object.keys(extentsNames).length == 0) {
+            wapp.alert("Vous devez saisir une zone pour le chargement du cache");
+        } else if (Object.keys(extentsNames).length == 1) {
+            let $p = $("<span></span>").addClass("area").html(Object.keys(extentsNames)[0]);
+            $('#vector-cache-area').empty().html($p);
+            loadVectorCache(Object.keys(extentsNames)[0]);
+        } else {
+            selectDialog(
+                extentsNames,
+                extentsNames[0],
+                function(selected) {
+                    let $p = $("<span></span>").addClass("area").html(selected);
+                    $('#vector-cache-area').html($p);
+                    loadVectorCache(selected);
+                },
+                {'title': 'Choisir une zone'}
+            );
+        }
     });
 
     //ajout d'une carte en cache
     $("#add-cache-ign-layer-btn", offlinePage).on("click", function(){
-        wapp.cache.addCacheMap(wapp.param.options.mode === 'expert');
+        wapp.cache.addCacheMap(wapp.param.options.mode === 'expert').then((smap) => {
+            let extentsNames = cacheExtents.getExtentNames();
+            if (Object.keys(extentsNames).length == 1) {
+                let cbk = function() {
+                    
+                }
+                wapp.cache.setCurrentMap(smap);
+                wapp.cache.loadMapDlg(Object.keys(extentsNames)[0], false, cbk);
+            }
+        });
+
+        
     });
 
     //chargement des cartes en attente

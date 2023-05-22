@@ -29,6 +29,12 @@
     margin: 0 0.2em;
 }
 
+#offline i.fa {
+    margin: 0 0.2em;
+    position: relative;
+    padding: 0.25em 0.25em;
+}
+
 #cache-layers-fond .ol-layerswitcher li.ol-layer-hidden {
     opacity: 1;
 }

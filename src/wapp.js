@@ -31,6 +31,7 @@ import {unByKey} from 'ol/Observable'
 import { Collection } from 'ol'
 import Layer from 'ol/layer/Layer'
 import * as fs from 'fs';
+import { prettifyAxiosError } from 'cordovapp/collaboratif/errorHelper'
 
 
 /** Web application pour l'acces a l'espace collaboratif depuis un mobile.
@@ -147,6 +148,13 @@ import * as fs from 'fs';
     layerReport(wapp);
 
     wapp.setDebugMode(); 
+
+    //si on a de nouveau du reseau et aucun token il faut reinitialiser l'authentification
+    document.addEventListener("online", () => {
+      if (wapp.userManager.apiClient.isConnected() === false) {
+        wapp.userManager.apiClient.disconnect();
+      }
+    }, false)
 
     // A propos 
     $('#apropos').on('showpage', function(){
@@ -859,13 +867,14 @@ wapp.connect = function() {
 			var msg = [];
       wapp.userManager.disconnect();
 			wapp.initGuichets();
-      let status = error.response ? error.response.status : 500;
+      let prettyError = prettifyAxiosError(error);
+      let status = prettyError['code'];
 			switch (status) {
         case 401: 
 					msg = [ "Accès interdit" , "Utilisateur inconnu." ];
 					break;
 				case 400:
-					msg = [ "Connexion", error.response.message ];
+					msg = [ "Connexion", prettyError.message ];
 					break;
 				default: 
 					msg = [ "Connexion", "Connexion impossible...<br/>Vérifiez votre connexion." ];

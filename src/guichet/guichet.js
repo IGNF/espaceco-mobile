@@ -9,6 +9,7 @@ import './layer'
 import './edition'
 import './conflict'
 import './fiche'
+import { prettifyAxiosError } from 'cordovapp/collaboratif/errorHelper'
 
 let template = null;
 let saveLayers = function(layers) {
@@ -27,7 +28,8 @@ let saveLayers = function(layers) {
         if (transaction) {
           wapp.handleConflict(transaction, l);
         } else {
-          wapp.alert('Impossible de sauvegarder '+l.get('title')+'<br/><i class="error">'+error+'</i>');
+          let prettyError = prettifyAxiosError(error);
+          wapp.alert('Impossible de sauvegarder '+l.get('title')+'<br/><i class="error">'+prettyError.message+'</i>');
         }
       });
     } else {
@@ -474,7 +476,7 @@ wapp.appendLayerToCache = function(layer) {
   var name = layer.table.name
   var guichet = this.vectorCache.getCurrentGuichet();
   for (var i=0, l; l = guichet.layers[i]; i++) {
-    if (l.type === 'WFS' && l.table.tile_zoom_level && name === l.table.name) {
+    if (l.type === 'feature-type' && l.table.tile_zoom_level && name === l.table.name) {
       break;
     }
   }
