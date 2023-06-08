@@ -91,6 +91,7 @@ function getUserLayers() {
       default: 
         const layer = caps.getLayerFromOptions(l);
         layer.set('name', 'USER-'+l.id);
+        layer.getSource().crossOrigin = 'anonymous'
         if (wapp.param.visibleLayers['USER-'+l.id]===false) layer.setVisible(false);
         else layer.setVisible(wapp.param.visibleLayers['USER-'+l.id]);
         layers.push(layer);
