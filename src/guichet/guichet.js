@@ -73,7 +73,8 @@ wapp.getCache = function (groupe) {
  */
 wapp.dialogInfoGuichet = function (groupe) {
   if (!groupe) {
-    groupe = wapp.userManager.active_community;
+    let groupId = wapp.userManager.param.active_community;
+    groupe = wapp.userManager.getGroupById(groupId);
   }
   if (!groupe.layers) {
     wapp.showDialog('dialog-info-guichets');
