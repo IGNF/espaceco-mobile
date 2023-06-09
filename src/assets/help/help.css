@@ -49,9 +49,11 @@
 }
 #help .locate {
   right: 3em;
+  top: 2.5em;
 }
 #help .locate p {
-  margin: 0 4em 0 0;
+  margin: 5em 0 0 0;
+  text-align: right;
 }
 #help .gps-button {
   bottom: 3.5em;
