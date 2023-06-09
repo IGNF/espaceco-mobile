@@ -23,9 +23,9 @@ wapp.setVisibulle = function(f) {
     const st = [];
     const table = f.layer.get('table');
     table.thematic_ids.forEach(k => {
-      console.log(table)
       if (String(f.get(k))) {
-        st.push(table.columns[k].title + ' : ' + f.get(k))
+        let strVal = f.get(k) ? f.get(k) : "-";
+        st.push(strVal);
       }
     })
     // Display thematics 
