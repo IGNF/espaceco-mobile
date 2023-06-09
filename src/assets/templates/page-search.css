@@ -115,3 +115,7 @@
 #search .search_coordinates button.ol-geoloc {
   display: none;
 }
+
+#search .search_coordinates .ol-searchgps{
+  font-size: 0.8em;
+}
