@@ -80,14 +80,13 @@
   transform: translateY(-50%);
   pointer-events: none;
 }
-.feature-form .table tr[data-type="double"]:after,
-.feature-form .table tr[data-type="integer"]:after {
+.feature-form .table tr[data-type="number"]:after {
   content: "\f162";
 }
 .feature-form .table tr[data-type="text"]:after {
   content: "\f031";
 }
-.feature-form .table tr[data-type="year"]:after {
+.feature-form .table tr[data-type="date"]:after {
   content: "\f133";
 }
 .feature-form .table tr[data-type="list"]:after,

@@ -309,7 +309,7 @@ function showGeorem(div, georem, newOne) {
  */
 function showFeature(ul, f, th) {
   // Objet d'un guichet
-  const isEdit = !wapp.isCordova || !f.layer.getTable().read_only;
+  const isEdit = wapp.isCordova && !f.layer.getTable().read_only && f.layer.get('role') === 'edit';
   if (isEdit) {
     $('.edit', ul.parent()).show();
   }
