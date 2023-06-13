@@ -52,7 +52,7 @@ let cacheExtents;
           let cbk = function() {
             $("#offline").trigger('showpage');
             cacheSwitcher.drawPanel();
-            wapp.alert('Zone ' + selected + ' sélectionnée');
+            wapp.notification('Zone ' + selected + ' sélectionnée');
           }
           wapp.cache.setCurrentMap(smap);
           wapp.cache.loadMapDlg(selected, false, cbk);

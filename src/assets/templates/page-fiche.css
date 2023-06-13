@@ -85,7 +85,7 @@
 /* affichage de la liste des champs de l objet sans le formulaire */
 #fiche .selection > div .read-only label {
   display: inline-block;
-	width:30%;
+	width:40%;
 	overflow: hidden;
   color: #369;
   vertical-align: middle;
@@ -97,7 +97,7 @@
 }
 
 #fiche .selection > div li > span {
-  width: 70%;
+  width: 60%;
 	display: inline-block;
 	vertical-align: middle;
 } 

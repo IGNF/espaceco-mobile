@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="fr.ign.guichet">
-    <name>Espace collaboratif IGN</name>
+<widget id="fr.ign.naviforest">
+    <name>Naviforest</name>
     <description>
       La solution IGN pour saisir et partager des signalements issus du terrain.
     </description>
@@ -59,14 +59,11 @@
         </config-file>
 
         <preference name="iosPersistentFileLocation" value="Compatibility" />
+        <preference name="AndroidPersistentFileLocation" value="Compatibility" />
         <preference name="scheme" value="app" />
         <preference name="hostname" value="localhost" />
 
     </platform>
-    <!--
-    <plugin name="@ahovakimyan/cordova-plugin-wkwebviewxhrfix" />
-    <plugin name="cordova-plugin-file-transfer-latest" />
-    -->
 
     <platform name="windows">
         <preference name="windows-target-version" value="10.0" />
