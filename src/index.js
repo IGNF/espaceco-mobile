@@ -4,7 +4,6 @@ import './style.css'
 import './i18n'
 import wapp from './guichet/guichet'
 import './report/georemGPS'
-import './codes'
 import './maintenance'
 import './apiTemplate'
 import CordovApp from 'cordovapp/CordovApp';

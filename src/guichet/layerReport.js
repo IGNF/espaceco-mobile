@@ -38,6 +38,10 @@ function layerReport(wapp) {
   };
 
   // Calque des signalements
+  let sourceOptions = {
+    report: wapp.report
+  };
+  if (wapp.param.georemFilter && wapp.param.georemFilter.closed) sourceOptions.loadClosed = true;
   var signalements = new ol_layer_AnimatedCluster({
     title: 'Signalements',
     name: 'Signalements',
@@ -48,9 +52,7 @@ function layerReport(wapp) {
         if (filterFeature(feature)) return null;
         return feature.getGeometry(); 
       },
-      source: new ol_source_Report({
-        report: wapp.report
-      }, cache),
+      source: new ol_source_Report(sourceOptions, cache),
       attributions: 'IGN'
     })
   });

@@ -1,6 +1,6 @@
 import {georemStyle} from 'cordovapp/ol/source/Report'
 import ol_ext_element from 'ol-ext/util/element'
-import Report from 'cordovapp/report/Report'
+import {reportStatus} from 'cordovapp/report/Report'
 import Style from 'ol/style/Style';
 
 // Current application
@@ -25,6 +25,9 @@ function filterFeature (f) {
   }
   if (filter.isdate) {
     if (filter.date > f.get('report').updating_date) return true;
+  }
+  if (filter.mine) {
+    if (f.get('report').author == wapp.userManager.userId) return true;
   }
   if (filter.istheme) {
     let found = false;
@@ -80,7 +83,8 @@ function disableList(input, change) {
 $('#filter').on('showpage', () => {
   if (!wapp.param.georemFilter) wapp.param.georemFilter = { 
     theme: {},
-    status: {}
+    status: {},
+    closed: false
   };
   const filter = wapp.param.georemFilter;
   let ul, toggle;
@@ -114,18 +118,42 @@ $('#filter').on('showpage', () => {
         });
       })
     });
+
+    /**
+     * Gestion du status ferme
+     */
+    $("#filter .close-state input[type=checkbox]").on('change', () => {
+      let checked = $("#filter .close-state input[type=checkbox]").prop('checked');
+      wapp.report.signalements.getSource().getSource().loadClosed = checked;
+      wapp.report.signalements.getSource().getSource().clear();
+      filter.closed = checked;
+      if (checked) {
+        $("#filter .status").addClass("show-closed");
+      } else {
+        $("#filter .status").removeClass("show-closed");
+      }
+    });
+
+    /**
+     * Gestion de mes signalements
+     */
+    $("#filter .mine input[type=checkbox]").on('change', () => {
+      filter.mine = $("#filter .mine input[type=checkbox]").prop('checked');
+      wapp.report.signalements.getSource().getSource().changed();
+    });
   }
   // Show status
   toggle = document.querySelector('#filter .status .toggle-right input')
   toggle.checked = filter.isstatus;
   disableList(toggle);
+
   // List
   ul = document.querySelector('#filter .status div');
   ul.innerHTML = '';
-  for (let s in Report.status) {
+  for (let s in reportStatus) {
     ol_ext_element.create('BUTTON', {
       className: s + (filter.status[s] ? ' selected' : ''),
-      html: '<i class="'+s+'"></i> '+Report.status[s],
+      html: '<i class="'+s+'"></i> '+reportStatus[s],
       value: s,
       click: (e) => {
         $(e.target).toggleClass('selected');
@@ -135,6 +163,17 @@ $('#filter').on('showpage', () => {
       parent: ul
     });
   }
+  // Show State
+  toggle = document.querySelector('#filter .close-state .toggle-right input')
+  toggle.checked = filter.closed;
+  if (toggle.checked) {
+    $("#filter .status").addClass("show-closed");
+  }
+
+  //Mes signalements
+  toggle = document.querySelector('#filter .mine .toggle-right input')
+  toggle.checked = filter.mine;
+  
   // Show Date
   toggle = document.querySelector('#filter .date .toggle-right input')
   toggle.checked = filter.isdate;

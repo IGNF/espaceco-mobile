@@ -296,8 +296,11 @@ import { prettifyAxiosError } from 'cordovapp/collaboratif/errorHelper'
   /** Save current position
    */
   savePosition: function() {
-    var pos = this.map.getView().getCenter();
-    var zoom = this.map.getView().getZoom();
+    if (!this.map) return;
+    let view = this.map.getView();
+    if (!view) return;
+    var pos = view.getCenter();
+    var zoom = view.getZoom();
     var position = this.param['position'] = { 
       lon: Math.round(pos[0]*100)/100, 
       lat: Math.round(pos[1]*100)/100, 
@@ -317,6 +320,7 @@ import { prettifyAxiosError } from 'cordovapp/collaboratif/errorHelper'
   * @memberof wapp
   */
   saveContext: function() {
+    if (!wapp.map) return;
     this.savePosition();
     var visible = {};
     var noEdit = {};

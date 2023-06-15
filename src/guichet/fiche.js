@@ -3,7 +3,7 @@ import wapp from '../wapp'
 import {containsCoordinate as ol_extent_containsCoordinate} from 'ol/extent'
 import {getCenter as ol_extent_getCenter} from 'ol/extent'
 import ol_layer_Vector_CollabVector from 'cordovapp/ol/layer/CollabVector'
-import Report from 'cordovapp/report/Report'
+import {reportStatus} from 'cordovapp/report/Report'
 import { Slider } from 'cordovapp/cordovapp/slider'
 import { DocumentForm } from 'cordovapp/collaboratif/DocumentForm'
 import 'cordovapp/cordovapp/slider.css'
@@ -220,8 +220,8 @@ function showGeorem(div, georem, newOne) {
   // Show attributes
   wapp.dataAttributes(georemDiv, georem);
   // Set response status code > text
-  for (let k in wapp.codes.status) {
-    $('.'+k+' span', div).text(wapp.codes.status[k]);
+  for (let k in reportStatus) {
+    $('.'+k+' span', div).text(reportStatus[k]);
   }
   // Reply
   const replyBt = $('button.response', georemDiv).off();
@@ -268,7 +268,7 @@ function showGeorem(div, georem, newOne) {
     resp.forEach((r) => {
       const li = $("<li>").html(tmp.html()).appendTo(ul);
       if (!isok || r.error) li.addClass('error');
-      $('.status', li).addClass(r.status).text(Report.status[r.status] || 'Réponse');
+      $('.status', li).addClass(r.status).text(reportStatus[r.status] || 'Réponse');
       $('.content', li).text(r.content);
       $('.sendrep', li).click(() => {
         wapp.wait('Envoi en cours...')
