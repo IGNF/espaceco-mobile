@@ -311,6 +311,11 @@ screen and (orientation:portrait) and (max-height:1023px) {
   margin: .5em 0 1em;
 }
 
+/* on eloigne les boutons enregistrer et annuler */
+#fiche .signaler [data-role=dialogBt].cancel {
+  float: left; 
+}
+
 /** Edition */
 [data-role="dialog"].edition .edit {
   position: relative;
