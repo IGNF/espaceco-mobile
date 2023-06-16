@@ -155,6 +155,8 @@ wapp.layerCollabVector = function(l, cacheUrl) {
     client: wapp.userManager.apiClient,
     snapTo: snapTo,
     role: l.role,
+    visible: l.visibility,
+    opacity: l.opacity,
     options: l,
     // style: guichet.style,
     maxResolution: 40, // zoom 13
@@ -192,8 +194,11 @@ wapp.testHiddenLayer = function(layer) {
   if (this.param.noEditLayers && this.param.noEditLayers[layer.get('name')]) {
     layer.set('edit', false);
   }
+  
   if (layer.get('title') === 'extent') {
     layer.setVisible(true);
+  } else if (!(layer.get('name') in this.param.visibleLayers)) {
+    return; // si pas de cache on garde les parametres de la layer a la construction
   } else {
     if (layer.get('displayInLayerSwitcher') !== false 
     && this.param.visibleLayers[layer.get('name')] !== false) {
@@ -325,7 +330,6 @@ wapp.loadLayers = function (groupe) {
   // Add sorted layers
   layers.forEach((l) => {
     // Check visibility
-    l.setVisible(wapp.param.visibleLayers[l.get('name')]);
     guichet.getLayers().push(l);
     wapp.testHiddenLayer(l);
   });
