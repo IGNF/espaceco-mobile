@@ -32,6 +32,7 @@ import { Collection } from 'ol'
 import Layer from 'ol/layer/Layer'
 import * as fs from 'fs';
 import { prettifyAxiosError } from 'cordovapp/collaboratif/errorHelper'
+import CollabVector from 'cordovapp/ol/layer/CollabVector'
 
 
 /** Web application pour l'acces a l'espace collaboratif depuis un mobile.
@@ -828,6 +829,21 @@ wapp.getLogo = function (g, cback, scope) {
 */
 wapp.connect = function() {
   wapp.userManager.connectDialog({
+    onShow: function() {
+      //calcul du nombre d actions en cours
+      let layers = wapp.map.getLayerGroup('groupe').getLayersArray();
+      let count = 0;
+      for (var i in layers) {
+        if (layers[i] instanceof CollabVector) {
+          count = parseFloat(layers[i].getSource().nbModifications()) + parseFloat(count);
+        }
+      }
+      $('#map').attr("actions-count", count);
+
+      //calcul du nombre de signalements en cours
+      let reportCount = wapp.report.countLocalRems();
+      $('#signalements').attr("local-count", reportCount);
+    },
     onConnect: function(user) {
       if (!user.username) {
         wapp.notification("Vous êtes déconnecté", 1200);

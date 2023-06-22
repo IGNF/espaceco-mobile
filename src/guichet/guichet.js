@@ -52,7 +52,6 @@ wapp.getCache = function (groupe) {
   if (groupe && groupe.layers) {
     const cache = wapp.param.vectorCache;
     groupe.layers.forEach((l) => {
-      console.log(l.type);
       if (l.type==='feature-type') {
         // Has authentication ?
         info.auth = info.auth || l.username; 
