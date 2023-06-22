@@ -198,7 +198,7 @@ export default function(wapp) {
         stroke: new ol_style_Stroke ({ color: [255, 255, 255, 0.8], width: 5 })
       }),
       new ol_style_Style({
-        stroke: new ol_style_Stroke ({ color: [0, 153, 255, 1], width: 3 })
+        stroke: new ol_style_Stroke ({ color: [0, 153, 255, 1], width: 6 })
       })
     ]
   });

@@ -24,10 +24,11 @@ wapp.setVisibulle = function(f) {
     const table = f.layer.get('table');
     table.thematic_ids.forEach(k => {
       if (String(f.get(k))) {
-        let strVal = f.get(k) ? f.get(k) : "-";
+        let strVal = f.get(k);
         st.push(strVal);
       }
     })
+    
     // Display thematics 
     $('#selection').html (st.join('<br/>') || f.get('nom') || f.get('nature') || 'Afficher la sélection...');
   } else {

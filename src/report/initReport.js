@@ -4,11 +4,12 @@ import map from '../map/map'
 import {ApiClient} from 'collaboratif-client-api';
 
 import ol_layer_Vector from 'ol/layer/Vector'
+import ol_style_Style from 'ol/style/Style'
+import ol_style_Stroke from 'ol/style/Stroke'
 import ol_source_Vector from 'ol/source/Vector'
 import ol_layer_Group from 'ol/layer/Group'
 import {transform as ol_proj_transform} from 'ol/proj'
 import {fromLonLat as ol_proj_fromLonLat} from 'ol/proj'
-import WKT from 'ol/format/wkt'
 import {getCenter as ol_extent_getCenter} from 'ol/extent'
 import {boundingExtent as ol_extent_boundingExtent} from 'ol/extent'
 import {buffer as ol_extent_buffer} from 'ol/extent'
@@ -36,7 +37,10 @@ function initReport(wapp) {
     source: new ol_source_Vector(),
     title: 'Croquis',
     name: 'Croquis',
-    zIndex: Infinity
+    zIndex: Infinity,
+    style: new ol_style_Style({
+      stroke: new ol_style_Stroke ({ color: [0, 153, 255, 1], width: 6 })
+    })
   });
   layerCroquis.setVisible(wapp.param.visibleLayers.Croquis);
 
