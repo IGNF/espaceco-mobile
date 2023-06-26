@@ -509,7 +509,7 @@ body.trackingGeorem #fiche .signaler .movePosition {
   font-size: 2em;
 }
 [data-list=signal] .formulaire .photo img {
-  max-width:90%;
+  max-width:40%;
   width: 400px;
   display:none;
 }

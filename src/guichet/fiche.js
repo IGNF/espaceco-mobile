@@ -217,6 +217,15 @@ function showGeorem(div, georem, newOne) {
   
   georem.attText = georem.attText.trim();
 
+  $('img.photo', div).each(function(i) {
+    $(this).attr('src', '');
+  });
+  for (let i in georem.photos) {
+    let count = i;
+    count++;
+    $('.photo.img'+count).attr('src', georem.photos[i]).show();
+  }
+
   const georemDiv = $(".georem", div);
   // Show attributes
   wapp.dataAttributes(georemDiv, georem);
