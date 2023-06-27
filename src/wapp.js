@@ -157,6 +157,12 @@ import CollabVector from 'cordovapp/ol/layer/CollabVector'
       }
     }, false)
 
+    // Scroll top a l affichage des attributs d un feature
+    $('#fiche').on('showpage', function(){
+      //l evenement showpage est declenche avant affichage de la page
+      setTimeout(() => {$('#fiche .selection').scrollTop(0);});
+    })
+
     // A propos 
     $('#apropos').on('showpage', function(){
       if (wapp.userManager.param.active_community) {
