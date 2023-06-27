@@ -98,7 +98,7 @@ export default function(wapp) {
       parent: e.li
     });
 
-    var locked = table.read_only || layer.get('edit') === false || !table.tile_zoom_level;
+    var locked = table.read_only || layer.get('edit') === false || !table.tile_zoom_level || layer.get('role') !== 'edit';
 
     //sauvegarde
     if (table && !locked) {
@@ -180,7 +180,7 @@ export default function(wapp) {
     const edit = ol_ext_element.create('I', {
       className: 'fa',
       click: () => {
-        if (!table || table.read_only || !table.tile_zoom_level) {
+        if (!table || table.read_only || !table.tile_zoom_level || layer.get('role') !== 'edit') {
           wapp.alert("Cette couche n'est pas éditable");
         } else {
           layer.set('edit', layer.get('edit')===false);

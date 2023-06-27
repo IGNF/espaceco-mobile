@@ -90,10 +90,7 @@ export default function() {
   });
   map.addControl(searchCoord);
   searchCoord.on('select', function(e){
-    map.getView().animate({
-      center: e.search.coordinate,
-      zoom: Math.max (map.getView().getZoom(), 17)
-    });
+    centerMap(e.search.coordinate);
     wapp.hidePage();
   });
 
