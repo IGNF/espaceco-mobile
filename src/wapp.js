@@ -707,34 +707,16 @@ wapp.saveGPS = function() {
       +"-"+ ("00" + (d.getMonth() + 1)).slice(-2)
       +"-"+ ("00" + d.getDate()).slice(-2);
     var filename = d+".gpx";
-    var path = "SD/"+ (wapp.getPlatformId() === 'ios' ? "" : "GPX/");
+    var path = "TMP/"+ filename;
 
-    var write = function() {
-      CordovApp.File.write (path + filename, gpx, function() {
-        wapp.message("La fichier GPX/"+filename+" a bien été enregistré","GPX")
-      }, function() {
-        wapp.alert ("Impossible de créer le fichier");
+    CordovApp.File.write (path, gpx, function(fileEntry) {
+      cordova.plugins.email.open({
+        subject:     'Trace GPX Espace Collaboratif Mobile du '+d,
+        attachments: CordovApp.File.getFileURI(fileEntry.toURL())
       });
-    }
-
-    // Verifier la non existence du fichier
-    CordovApp.File.listDirectory(path,
-      function(files) {
-        var nb = 0;
-        /* eslint-disable-next-line no-constant-condition */
-        while (true) {
-          for (var i=0; i<files.length; i++) {
-            if (files[i].name===filename) {
-              nb++;
-              break;
-            }
-          }
-          // incrmenter ?
-          if (i==files.length) break;
-          else filename = d+"-"+nb+".gpx";
-        }
-        write();
-      }, write );
+    }, function() {
+      wapp.alert ("Impossible de créer le fichier");
+    });
   }
 };
 

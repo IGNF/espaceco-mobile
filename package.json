@@ -46,6 +46,7 @@
     "cordova-plugin-bluetooth-geolocation": "github:viglino/cordova-plugin-bluetooth-geolocation",
     "cordova-plugin-camera": "^6.0.0",
     "cordova-plugin-device": "^2.1.0",
+    "cordova-plugin-email-composer": "^0.10.1",
     "cordova-plugin-inappbrowser": "^5.0.0",
     "cordova-plugin-insomnia": "github:EddyVerbruggen/Insomnia-PhoneGap-Plugin",
     "eslint": "^6.5.1",
@@ -83,7 +84,8 @@
         "ANDROIDX_CORE_VERSION": "1.6.+"
       },
       "cordova-plugin-inappbrowser": {},
-      "cordova-plugin-background-mode": {}
+      "cordova-plugin-background-mode": {},
+      "cordova-plugin-email-composer": {}
     }
   }
 }
