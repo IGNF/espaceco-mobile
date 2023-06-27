@@ -252,6 +252,7 @@
 
 @media screen and (orientation:landscape) and (min-width:1024px), 
 screen and (max-width:640px) {
+  #fiche .selection > div .read-only label,
   #fiche .selection > div label,
   #fiche .selection > div li > span,
   #fiche .selection > div input,
