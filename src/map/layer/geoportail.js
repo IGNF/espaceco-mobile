@@ -58,7 +58,7 @@ function addLayers (layers) {
     if (caps[name]) {
       let visible = name in wapp.param.visibleLayers ? wapp.param.visibleLayers[name] : (layer.visibility || false);
       if (visible) oneVisible = true;
-      let options = { hidpi: false, visible: visible };
+      let options = { hidpi: false, visible: visible, desc: layer.geoservice.description};
       if (layer && Object.keys(layer).length) {
         options["opacity"] = name in wapp.param.visibleLayers ? wapp.param.visibleLayers[name] : (layer.opacity || 1);
         if (layer.geoservice.length) {

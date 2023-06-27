@@ -94,6 +94,7 @@ export default function(wapp) {
             const img = new Image();
             img.onload = function() {
               const msg = document.querySelector('[data-role="dialog"].layerInfo .content');
+              img.classList.add('preview');
               msg.insertBefore(img, msg.childNodes[0]);
             };
             const loader = e.layer.getSource().getTileLoadFunction();

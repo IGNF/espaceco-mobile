@@ -192,7 +192,7 @@
   left: auto;
 }
 
-[data-role="dialog"].layerInfo img {
+[data-role="dialog"].layerInfo img.preview {
   width: 128px;
   height: 128px;
   box-shadow: 1px 1px 5px;
