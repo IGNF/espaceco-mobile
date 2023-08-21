@@ -177,10 +177,11 @@ export default function(wapp) {
     }
       
     // Enable selection
+    let noEdit = !table || table.read_only || !table.tile_zoom_level || layer.get('role') !== 'edit';
     const edit = ol_ext_element.create('I', {
       className: 'fa',
       click: () => {
-        if (!table || table.read_only || !table.tile_zoom_level || layer.get('role') !== 'edit') {
+        if (noEdit) {
           wapp.alert("Cette couche n'est pas éditable");
         } else {
           layer.set('edit', layer.get('edit')===false);
@@ -245,7 +246,7 @@ export default function(wapp) {
         }
         if (e.layer.getTable()) {
           var table = e.layer.getTable();
-          content.addClass(table.read_only || !table.tile_zoom_level ? 'readonly':'edit');
+          content.addClass(noEdit ? 'readonly':'edit');
           wapp.dataAttributes(content, table);
         } else {
           wapp.dataAttributes(content, { 
