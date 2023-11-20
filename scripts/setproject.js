@@ -13,7 +13,7 @@ const fse = require('fs-extra');
 // Remove / copy application files
 fse.emptyDirSync('./src/appli')
 fse.copySync('./scripts/' + process.env.APPLI, './src/appli', { overwrite: true });
-
+console.log('./scripts/' + process.env.APPLI + '/logo.png', './src/assets/img/logo.png');
 fs.copyFileSync('./scripts/' + process.env.APPLI + '/logo.png', './src/assets/img/logo.png')
 
 // Update config.xml
