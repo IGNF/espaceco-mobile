@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Documentation Module: CordovApp-Parametres</title>
+	<title>Documentation Class: EditonTools</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -86,10 +86,17 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Module: CordovApp-Parametres</h1>
+	<h1 class="page-title">Class: EditonTools</h1>
 <section>
 
 <header>
+    
+        <h2>
+        EditonTools
+        </h2>
+        
+            <div class="class-description"><p>A TouchCursor to select objects on hovering the cursor</p></div>
+        
     
 </header>
 
@@ -98,94 +105,74 @@
     <div class="container-overview">
     
         
-            <div class="description"><p>Fichier: <code>./js/wapp/cordovapp.param.js</code></p>
-<h2>Gestion et affichage de paramètres</h2>
-<p>L'objet CordovApp contient des fonctionnalités évoluées pour la gestion des paramètre et leur affichage.</p>
-<h3>Gestion des paramètres de l'application</h3>
-<p>En standard, l'application gère, via le localStorage HTML5, la sauvegarde et la restauration des paramètres
-de l'application. Ceux-ci sont enregistrés dans <code>WebApp@param</code> du localStorage (via la fonctino CordovApp#saveParam)
-et sont stockées dans l'attribut param de l'application.
-Les paramètres sont automatiquement chargés au lancement de l'application et disponible dans le initialize
-de l'application. Le programmeur est responsable de leur enregistrement, en particulier, il peut être utile
-de les sauvegarder lorsque l'application quitte ou se met en pause (dans la méthode CordovApp#onQuit
-ou CordovApp#onPause).</p>
-<pre class="prettyprint source"><code>var wapp = new CordovApp();
-// Modifier un parametre
-wapp.param.mon_option = 1;
-// Sauvegarder la modification pour la prochaine fois
-wapp.saveParam();
-</code></pre>
-<h3>Lier un objet à un formulaire</h3>
-<p>Il est possible de lier une liste de valeur à un formulaire via la méthode CordovApp#setParamInput
-de l'application. L'application va alors associer les blocs data-input correspondant au aux lignes de l'objet
-fourni afin de les afficher et de gérer leur modification.</p>
-<pre class="prettyprint source"><code>var wapp = new CordovApp();
-var p = { name:&quot;sans nom&quot;, zoombt:true, imgsize:&quot;petite&quot; };
-// Lier au formulaire
-var pi = wapp.setParamInput($(&quot;#formulaire&quot;), p);
-</code></pre>
-<h4>Définition des inputs d'un formulaire</h4>
-<p>Les input son des blocs HTML avec un paramètre data-input précisant leur type (text, check ou select).</p>
-<p>L'attribut <code>data-param</code> définit la clé correspondant à la ligne de l'objet fourni.
-Si aucun paramètre ne correspond à cette clé, celle-ci est ajoutée à l'objet.<br>
-L'application va ensuite gérer l'affichage et la saisie de la valeur en fonction des informations fournies par
-le formulaire et du type d'input.<br>
-L'attribut data-default indique la valeur par défaut du paramètre concerné.<br>
-Les data-input type select doivent fournir un liste d'options (<code>data-input-role=&quot;option&quot;</code>) avec une valeur (<code>data-val</code>).<br>
-Les input de type <code>custom</code> ne sont pas traités par l'application et c'est au programmeur de gérer son comportement et
-la mise à jour de la valeur associée dans le formulaire (afficher un dialogue par exemple).</p>
-<h5>input de type text</h5>
-<pre class="prettyprint source lang-xml"><code>&lt;ul>
-    &lt;li data-input=&quot;text&quot; data-param=&quot;name&quot; data-default=&quot;sans nom&quot;>
-        &lt;input type=&quot;text&quot;/>&lt;i class=&quot;clear-input&quot;>&lt;/i>
-        &lt;div data-input-role=&quot;info&quot;>Entrez un nom.&lt;/div>
-    &lt;/li>
-&lt;/ul>
-</code></pre>
-<h5>input de type check</h5>
-<pre class="prettyprint source lang-xml"><code>&lt;ul>
-    &lt;li data-input=&quot;check&quot; data-param=&quot;zoombt&quot; data-default=&quot;true&quot; >
-        &lt;label>Boutons de zoom &lt;/label>
-        &lt;div data-input-role=&quot;info&quot;>Afficher les boutons de zoom sur la carte.&lt;/div>
-    &lt;/li>
-&lt;/ul>
-</code></pre>
-<h5>input de type select</h5>
-<pre class="prettyprint source lang-xml"><code>&lt;ul>
-    &lt;li data-input=&quot;select&quot; data-param=&quot;imgsize&quot;>
-        &lt;label>Taille des images &lt;/label>
-        &lt;div data-input-role=&quot;option&quot; data-val=&quot;max&quot;>Grande&lt;/div>
-        &lt;div data-input-role=&quot;option&quot; data-val=&quot;med&quot;>Moyenne&lt;/div>
-        &lt;div data-input-role=&quot;option&quot; data-val=&quot;min&quot; data-default=&quot;true&quot;>Petite&lt;/div>
-    &lt;/li>
-&lt;/ul>
-</code></pre>
-<h5>input de type custom</h5>
-<pre class="prettyprint source lang-xml"><code>&lt;ul>
-    &lt;li data-input=&quot;custom&quot; class=&quot;connect&quot; onclick=&quot;wapp.connect();&quot;>
-        &lt;label>Identifiant de connexion &lt;/label>
-        &lt;div data-input-role=&quot;info&quot;>
-            &lt;span class=&quot;noinfo&quot;>Vous n'êtes pas connecté.&lt;/span>
-            &lt;span class=&quot;info&quot;>Vous êtes bien connecté.&lt;/span>
-        &lt;/div>
-    &lt;/li>
-&lt;/ul>
-</code></pre>
-<h4>Récupération des valeurs</h4>
-<p>Les valeurs sont modifiées sur place (l'objet fourni est modifié).
-Il n'est donc pas forcément nécessaire de récupérer la mise à jour.
-Cependant, la méthode setParamInput renvoi un objet permettant de récupérer
-les valeurs (via getParams).</p>
-<p>De même si vous modifier la valeur d'un paramètre, la méthode change() de l'objet renvoyé permet
-de mettre à jour le formulaire.</p>
-<p>Le troisième argument de setParamInput est
-une fonction de rappel appelée à chaque modification
-d'une valeur et qui fourni l'information du paramètre modifié.
-Il est alors possible de gérer la modification de manière spécifique pour d'appliquer
-un contrôle de cohérence par exemple.</p></div>
+<hr>
+<dt>
+    <h4 class="name" id="EditonTools"><span class="type-signature"></span>new EditonTools(options)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
         
 
         
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
 <dl class="details">
     
 
@@ -225,11 +212,34 @@ un contrôle de cohérence par exemple.</p></div>
 </dl>
 
 
-        
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
     
     </div>
 
     
+        <h3 class="subsection-title">Extends</h3>
+
+        
+
+
+    <ul>
+        <li>ol_Object</li>
+    </ul>
+
 
     
 
@@ -241,6 +251,152 @@ un contrôle de cohérence par exemple.</p></div>
 
     
 
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
+            
+<hr>
+<dt>
+    <h4 class="name" id="setLayer"><span class="type-signature"></span>setLayer( [layer])</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Set layer to edit</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>layer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">CollabVector</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        </dl>
     
 
     
