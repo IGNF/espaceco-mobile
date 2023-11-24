@@ -6,10 +6,10 @@
   "scripts": {
     "clean-dist": "rm -rf www && mkdir www",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./scripts/setproject.js && parcel ./src/index.html --out-dir ./.dist",
+    "start": "node ./scripts/setproject.js && parcel ./src/index.html --out-dir ./www",
     "backup": "node ./scripts/backup.js",
     "lint": "eslint --fix src/ || exit 0",
-    "build-dev": "npm run clean-dist && node ./scripts/setproject.js && parcel build ./src/index.html --no-optimize --no-source-maps --no-content-hash --public-url . --dist-dir ./www",
+    "build-dev": "npm run clean-dist && node ./scripts/setproject.js && parcel build ./src/index.html --no-optimize --no-content-hash --public-url . --dist-dir ./www",
     "build": "npm run clean-dist && node ./scripts/setproject.js && parcel build ./src/index.html --no-source-maps --no-content-hash --public-url . --dist-dir ./www"
   },
   "repository": {},
@@ -22,7 +22,8 @@
   "homepage": "http://gitlab.dockerforge.ign.fr/express/guichet-mobile",
   "dependencies": {
     "cordova": "^12.0.0",
-    "cordova-plugin-bluetooth-serial": "^0.4.7",
+    "cordova-plugin-bluetooth-serial": "github:brandomcombr/BluetoothSerial",
+    "cordova-plugin-background-mode": "github:suritcate/cordova-plugin-background-mode",
     "cordova-plugin-dialogs": "^2.0.2",
     "cordova-plugin-file": "^6.0.1",
     "cordova-plugin-geolocation": "^4.0.2",
@@ -86,6 +87,14 @@
       "cordova-plugin-inappbrowser": {},
       "cordova-plugin-background-mode": {},
       "cordova-plugin-email-composer": {}
+    }
+  },
+  "targets": {
+    "default": {
+      "sourceMap": {
+        "inline": true,
+        "inlineSources": true
+      }
     }
   }
 }
