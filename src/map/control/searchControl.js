@@ -43,7 +43,7 @@ export default function() {
 // SearchGeoportail Control
   var locCtrl = new ol_control_SearchGeoportail({
     apiKey: 'essentiels',
-    // authentication: config.auth,
+    version: 'gpf',
     placeholder: "rechercher...",
     target: $('#search [data-role="onglet-li"][data-list="adress"]').get(0)
   });
@@ -71,7 +71,7 @@ export default function() {
   // Search Parcelle
   var searchParcel = new ol_control_SearchGeoportailParcelle({
     apiKey: 'essentiels',
-    // authentication: config.auth,
+    version: 'gpf',
     target: $('#search [data-role="onglet-li"][data-list="parcel"]').get(0)
   });
   map.addControl(searchParcel);
