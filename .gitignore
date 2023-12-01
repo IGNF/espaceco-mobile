@@ -13,3 +13,5 @@ www
 cordovapp-*
 # OS X
 .DS_Store
+typings/
+jsconfig.json

@@ -60,10 +60,14 @@ function addLayers (layers) {
   layers.forEach((l) => {
     if (caps[l]) {
       let options = { hidpi: false, visible: wapp.param.visibleLayers[l] || false };
-      let tileOptions = { authentication: config.auth };
+      let tileOptions = {};
+      if (caps[l].server) tileOptions['server'] = caps[l].server;
       if (!caps[l]['key']) {
         options['gppKey'] = config.apiKey;
         tileOptions['gppKey'] = config.apiKey;
+      } else {
+        options['gppKey'] = caps[l]['key'];
+        tileOptions['gppKey'] = caps[l]['key'];
       }
       const gpl = new ol_layer_Geoportail(l, options, tileOptions);
       if (geoportailOverlays[l]) {

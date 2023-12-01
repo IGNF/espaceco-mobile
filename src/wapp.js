@@ -103,8 +103,7 @@ import Layer from 'ol/layer/Layer'
     this.cache = new CacheMap(
       wapp, 
       layerCache, {
-        apiKey: config.apiKey,
-        authentication: config.auth,
+        apiKey: null, // on veut utiliser celui du fichier capabilities
         loadPage: '#loadMap', 
         listMap: '#cartes [data-list="maps"] ul' 
       }
