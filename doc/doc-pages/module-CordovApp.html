@@ -33,7 +33,7 @@
 			<li class="dropdown">
 				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="CordovApp.File.html">CordovApp.File</a></li><li><a href="CordovApp.help.html">CordovApp.help</a></li><li><a href="wapp.html">wapp</a></li>
+					<li><a href="wapp.html">wapp</a></li>
 				</ul>
 			</li>
 			
@@ -47,7 +47,14 @@
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="CordovApp.html">CordovApp</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="RIPart.html">RIPart</a></li>
+					<li><a href="Dialog.html">Dialog</a></li><li><a href="EditionError.html">EditionError</a></li><li><a href="EditonTools.html">EditonTools</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="global.html#disableList">disableList</a></li><li><a href="global.html#editionMode">editionMode</a></li><li><a href="global.html#endTracking">endTracking</a></li><li><a href="global.html#filterFeature">filterFeature</a></li><li><a href="global.html#getFeatureTitle">getFeatureTitle</a></li><li><a href="global.html#getPosition">getPosition</a></li><li><a href="global.html#getUserLayers">getUserLayers</a></li><li><a href="global.html#initDocumentForm">initDocumentForm</a></li><li><a href="global.html#initReport">initReport</a></li><li><a href="global.html#layerReport">layerReport</a></li><li><a href="global.html#nextTrack">nextTrack</a></li><li><a href="global.html#pauseTracking">pauseTracking</a></li><li><a href="global.html#quitEditionMode">quitEditionMode</a></li><li><a href="global.html#removeUserLayer">removeUserLayer</a></li><li><a href="global.html#reportStyle">reportStyle</a></li><li><a href="global.html#saveConflicts">saveConflicts</a></li><li><a href="global.html#savePosition">savePosition</a></li><li><a href="global.html#saveTracking">saveTracking</a></li><li><a href="global.html#setDeport">setDeport</a></li><li><a href="global.html#showConflicts">showConflicts</a></li><li><a href="global.html#showFeature">showFeature</a></li><li><a href="global.html#showFeatureInfo">showFeatureInfo</a></li><li><a href="global.html#showGeorem">showGeorem</a></li><li><a href="global.html#showSlider">showSlider</a></li><li><a href="global.html#showWFSFeature">showWFSFeature</a></li><li><a href="global.html#showWMSFeature">showWMSFeature</a></li><li><a href="global.html#startDirectGPS">startDirectGPS</a></li><li><a href="global.html#startTracking">startTracking</a></li><li><a href="global.html#stopTracking">stopTracking</a></li><li><a href="global.html#time">time</a></li>
 				</ul>
 			</li>
 			
@@ -91,27 +98,32 @@
     <div class="container-overview">
     
         
-            <div class="description"><p>Afin de simplifier l'utilisation de Cordova, un base applicative a été développée : 
+            <div class="description"><p>Afin de simplifier l'utilisation de Cordova, un base applicative a été développée :
 <a href="module-CordovApp.html">CordovApp</a> (dans le répertoire <code>./js/wapp</code> de l'application).</p>
 <p>Le but est de simplifier et unifier l'initialisation des applications Cordova.</p>
-<h2>Objet CordovApp</h2><p>L'objet <a href="CordovApp.html">CordovApp</a> définit une application standard et prend en charge :
+<h2>Objet CordovApp</h2>
+<p>L'objet CordovApp définit une application standard et prend en charge :
 l'initialisation de l'application
 la mise en pause ou la fermeture de l'application
 la gestion des bouton android (menu/backbutton)
 la sauvegarde des paramètres
 le chargement des pages et des templates
 ainsi que quelques fonctionnalités utiles (input clear, gestion du focus ).</p>
-<p>La première chose à faire est donc de créer une application et surcharger les 
-fonctionnalités utiles (<a href="CordovApp.html#initialize">initialize</a>, 
-<a href="CordovApp.html#onMenuButton">onMenuButton</a>, <a href="CordovApp.html#pause">pause</a>, 
-<a href="CordovApp.html#resume">resume</a>, <a href="CordovApp.html#quit">quit</a>).<br>La fonction initialize est appelée lorsque le système est initialisé et l'application 
+<p>La première chose à faire est donc de créer une application et surcharger les
+fonctionnalités utiles (initialize,
+onMenuButton, pause,
+resume, quit).<br>
+La fonction initialize est appelée lorsque le système est initialisé et l'application
 peut se lancer.</p>
 <pre class="prettyprint source"><code>var wapp = new CordovApp(
 {   // Initilize the application map 
     initialize: function() 
     {    // initialiser l'application
     }
-});</code></pre><h2>Fonctionnalités</h2><p>Outre la gestion du <a href="CordovApp.html#initialize">lancement</a> de l'application, l'objet <a href="CordovApp.html">CordovApp</a> permet 
+});
+</code></pre>
+<h2>Fonctionnalités</h2>
+<p>Outre la gestion du lancement de l'application, l'objet CordovApp permet
 également :</p>
 <ul>
 <li><a href="module-CordovApp-Pages.html">la gestion de pages</a></li>
@@ -224,7 +236,7 @@ peut se lancer.</p>
 
 
 <span class="jsdoc-message">
-	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a>
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a>
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>

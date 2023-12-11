@@ -67,9 +67,13 @@ function addLayers (layers) {
         if (layer.geoservice.length) {
           options["minZoom"] = layer.geoservice["min-zoom"];
           options["maxZoom"] = layer.geoservice["max-zoom"];
+        } else {
+          options['gppKey'] = caps[l]['key'];
+          tileOptions['gppKey'] = caps[l]['key'];
         }
       }
-      let tileOptions = { authentication: config.auth };
+      let tileOptions = {};
+      if (caps[l].server) tileOptions['server'] = caps[l].server;
       if (!caps[name]['key']) {
         options['gppKey'] = config.apiKey;
         tileOptions['gppKey'] = config.apiKey;
