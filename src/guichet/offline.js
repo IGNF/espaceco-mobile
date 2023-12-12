@@ -181,6 +181,12 @@ function initOffline(wapp) {
     });
 
     $('.close', cacheExtentPage).on("click", () => {
+        let name = cacheExtentPage.attr('data-name');
+        let type = cacheExtentPage.attr("data-type");
+        if (type == 'custom' && !cacheExtents.get(name).length) {
+            cacheExtents.addExtent(name, wapp.map.getView().calculateExtent(wapp.map.getSize()));
+        }
+
         wapp.select.getFeatures().clear();
         extentLayer.setVisible(false);
 

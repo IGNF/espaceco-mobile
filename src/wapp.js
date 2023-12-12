@@ -209,7 +209,7 @@ import CollabVector from 'cordovapp/ol/layer/CollabVector'
       let message = false;
       if(online && navigator.connection.type == Connection.NONE) {
         message = "Aucune connexion active sur l'appareil."
-      } else if(!online && !wapp.getCache(wapp.guichet).cache) {
+      } else if(!online && !wapp.getCache(wapp.guichet).cache && (!wapp.param.cacheMap || !wapp.param.cacheMap.length)) {
         message = "Aucune donnée chargée en cache.";
       }
 
@@ -231,6 +231,7 @@ import CollabVector from 'cordovapp/ol/layer/CollabVector'
   /**
    * Switch mode en ligne / hors ligne
    * sur les couches wfs collaboratif
+   * on switche egalement les geoservices
    * @param {bool} online 
    * @param {Collection<Layer>} layers
    * @param {boolean} silent pas d'affichage de la notification
@@ -243,7 +244,11 @@ import CollabVector from 'cordovapp/ol/layer/CollabVector'
     }
     if (!layers) layers = wapp.map.getLayers();
     layers.forEach((l) => {
-      if (l.getLayers) {
+      if (l.getLayers && 'geoportailGroup' === l.get('name')) {
+        l.setVisible(online);
+      } else if (l.getLayers && 'cache' === l.get('name')) {
+        l.setVisible(!online);
+      } else if (l.getLayers) {
         wapp.switchLayersOnline(online, l.getLayers(), true);
       } else if (l instanceof ol_layer_CollabVector) {
         l.online(online);
