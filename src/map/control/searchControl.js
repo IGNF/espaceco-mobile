@@ -32,7 +32,7 @@ function centerMap(coord) {
       }));
       map.animateFeature (f, new ol_featureAnimation_Zoom({
         fade: ol_easing_easeOut,
-        duration: 3000,
+        duration: 4000,
         easing: ol_easing_easeOut
       }));
     }, i*1000);
