@@ -62,18 +62,19 @@ function addLayers (layers) {
       if (layer && layer.geoservice && layer.geoservice.description) {
         options["desc"] = layer.geoservice.description;
       }
+      let tileOptions = {};
       if (layer && Object.keys(layer).length) {
         options["opacity"] = name in wapp.param.visibleLayers ? wapp.param.visibleLayers[name] : (layer.opacity || 1);
         if (layer.geoservice.length) {
           options["minZoom"] = layer.geoservice["min-zoom"];
           options["maxZoom"] = layer.geoservice["max-zoom"];
         } else {
-          options['gppKey'] = caps[l]['key'];
-          tileOptions['gppKey'] = caps[l]['key'];
+          options['gppKey'] = caps[name]['key'];
+          tileOptions['gppKey'] = caps[name]['key'];
         }
       }
-      let tileOptions = {};
-      if (caps[l].server) tileOptions['server'] = caps[l].server;
+      
+      if (caps[name].server) tileOptions['server'] = caps[name].server;
       if (!caps[name]['key']) {
         options['gppKey'] = config.apiKey;
         tileOptions['gppKey'] = config.apiKey;
