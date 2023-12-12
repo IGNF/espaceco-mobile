@@ -30,6 +30,7 @@
         <allow-intent href="market:*" />
         <preference name="AndroidXEnabled" value="true" />
         <preference name="AndroidInsecureFileModeEnabled" value="true" />
+        <hook type="after_prepare" src="stripExtraWriteExternalStoragePerm.js" />
     </platform>
     <platform name="ios">
         <preference name="DisallowOverscroll" value="true" />
