@@ -14,6 +14,15 @@ var offlinePage;
 
 var cacheExtents;
 
+//on cache le switch mode si aucune couche hors ligne definie
+var manageToggleVis = function() {
+    let $menu =$('[data-template="principal"]');
+    let currentGuichet = wapp.vectorCache.getCurrentGuichet();
+    const hasVectorCache = wapp.getCache(currentGuichet);
+    let smaps = wapp.param.cacheMap ? wapp.param.cacheMap : [];
+    (smaps.length || hasVectorCache.cache) ? $menu.addClass("hasCache") : $menu.removeClass("hasCache");
+}
+
 var refreshCacheAreas = function(domId, hasCache) {
     // zones utilisees par le cache guichet
     $(domId).empty();
@@ -197,6 +206,9 @@ function initOffline(wapp) {
         redrawExtent();
     });
 
+    offlinePage.on("hidepage", function() {
+        manageToggleVis();
+    })
 
     // onglet de gestion du mode hors ligne
     offlinePage.on("showpage", function() {
@@ -515,6 +527,8 @@ function initOffline(wapp) {
         wapp.cache.silentErrors = true;
         downloadCacheMap();
     });
+
+    manageToggleVis();
 }
 
 export default initOffline;

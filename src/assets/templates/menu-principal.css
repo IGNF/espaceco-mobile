@@ -88,7 +88,17 @@
 }
 
 [data-role='menu'] .toggle-right {
+  display: none;
+}
+
+[data-role='menu'].hasCache .toggle-right {
+  display: block;
   position: absolute;
   top: 30%;
   right: -0.8em;
+}
+
+.userinfo {
+  font-size: 0.8em;
+  padding-left: 1em;
 }
