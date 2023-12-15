@@ -153,6 +153,7 @@ wapp.toggleLayerGuichet = function (elt) {
 /** Goto location using external app
  */
 wapp.goto = function() {
+  wapp.saveContext();
   let where = wapp.map.getView().getCenter();
   // Center on selection
   const feature = wapp.select.getFeatures().item(0);
@@ -164,6 +165,9 @@ wapp.goto = function() {
   // Get LonLat
   where = transform(where, wapp.map.getView().getProjection(), 'EPSG:4326');
   // Goto
-  if (wapp.getPlatformId()==='ios') window.cordova.InAppBrowser.open('maps://?q='+where[1]+','+where[0], '_system');
-  else window.open('geo://0,0?q='+where[1]+','+where[0], '_system');
+  setTimeout(() => { //pour donner le temps au contexte de s'enregistrer
+    if (wapp.getPlatformId()==='ios') window.cordova.InAppBrowser.open('maps://?q='+where[1]+','+where[0], '_system');
+    else window.open('geo://0,0?q='+where[1]+','+where[0], '_system');
+  }, 800)
+  
 }
