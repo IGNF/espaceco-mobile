@@ -100,11 +100,7 @@ wapp.editFeature = function(closeOnSubmit) {
 
       // Get modifications
       for (let name in attr) {
-        if (attr[name] && attr[name].cnt && parseInt(attr[name].ctn) != 0) {
-          if (feature.get(name) && attr[name].cnt != feature.get(name).cnt) {
-            feature.set(name, attr[name]);
-          }
-        } else if (attr[name] !=  feature.get(name)) {
+        if (attr[name] !=  feature.get(name)) {
           feature.set(name, attr[name]);
         }
       }
