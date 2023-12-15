@@ -324,7 +324,7 @@ function initReport(wapp) {
       // Send next
       for (var i=0; i<self.param.georems.length; i++) {
         var grem = self.param.georems[i];
-        if (!grem.id && !grem.error) {
+        if ((!grem.id || grem.photosToSend) && !grem.error) {
           n++;
           self.postLocalRem (i, { 
             info: "Envoi des signalements ("+n+"/"+nb+")", 
