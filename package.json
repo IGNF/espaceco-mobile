@@ -6,7 +6,7 @@
   "scripts": {
     "clean-dist": "rm -rf www && mkdir www",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./scripts/setproject.js && parcel ./src/index.html --out-dir ./www",
+    "start": "node ./scripts/setproject.js && parcel ./src/index.html --dist-dir ./www",
     "backup": "node ./scripts/backup.js",
     "lint": "eslint --fix src/ || exit 0",
     "build-dev": "npm run clean-dist && node ./scripts/setproject.js && parcel build ./src/index.html --no-optimize --no-content-hash --public-url . --dist-dir ./www",

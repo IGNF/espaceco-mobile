@@ -51,6 +51,10 @@
   height: 1.3em;
 }
 
+.icn-bar > i.pending-status .tag {
+  display: none;
+}
+
 .couches .couche.online > .icn-bar > .fa-search,
 .couches .couche.online > .icn-bar > .fa-cloud-download,
 .couches .couche.online > .icn-bar > .fa-refresh,

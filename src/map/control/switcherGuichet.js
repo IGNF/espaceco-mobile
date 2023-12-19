@@ -107,6 +107,8 @@ export default function(wapp) {
         className: 'fa fa-send fa-disable ',
         click: () => {
           if (saveBtn.classList.contains("fa-disable")) return;
+          saveBtn.classList.add("pending-status");
+          saveBtn.classList.remove("fa-send")
           if (layer.get('cache')) {
             //on sauvegarde et on recharge les donnees en cache
             let cache = wapp.getCache(wapp.guichet).cache;
@@ -129,6 +131,12 @@ export default function(wapp) {
         },
         parent: div
       });
+
+      layer.getSource().on("saveend", () => {
+        saveBtn.classList.remove("pending-status");
+        saveBtn.classList.add("fa-send");
+      });
+
       // Reset
       const reset = ol_ext_element.create('I', {
         className: 'fa fa-undo',

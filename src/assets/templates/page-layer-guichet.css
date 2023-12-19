@@ -116,3 +116,20 @@
   -webkit-transform: translateY(-50%);
   transform: translateY(-50%);
 }
+
+@keyframes spinner-border {
+  to {
+      transform: rotate(1turn)
+  }
+}
+
+.pending-status {
+  animation: spinner-border .75s linear infinite;
+  border: .25em solid;
+  border-radius: 50%;
+  border-right: .25em solid transparent;
+  display: inline-block;
+  height: 1em;
+  vertical-align: -.125em;
+  width: 1em !important
+}
