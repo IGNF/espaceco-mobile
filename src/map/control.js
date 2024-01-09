@@ -104,6 +104,7 @@ export default function(wapp) {
     className: 'centergps',
     html: "<i class='fa tools-locate'></i>",
     handleClick: () => {
+      let stopRecenter = false;
       if (!init) {
         centerLocation(wapp.interactions.geolocation);
         centerLocation(wapp.interactions.reportGeolocation);
@@ -115,8 +116,10 @@ export default function(wapp) {
         recenter = true;
       } else {
         recenter = false;
+        if (centerGPS.element.classList.contains('center')) stopRecenter = true;
         centerGPS.element.classList.remove('center');
       }
+      if (stopRecenter) return;
       wapp.interactions.geolocation.setFollowTrack('auto');
       wapp.interactions.reportGeolocation.setFollowTrack('auto');
       if (!wapp.interactions.geolocation.getActive() && !wapp.interactions.reportGeolocation.getActive()) {
