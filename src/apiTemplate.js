@@ -15,10 +15,13 @@ wapp.selectGPS = function() {
     null,
     (source) => {
       wapp.param.gpsSource = 'internal';
+      
       navigator.geolocation.setSource(source,
         (e) => {
           if (e.type === 'external') {
             $('#options .sourcegps div').html('GPS externe ('+e.name+')');
+          } else {
+            $('#options .sourcegps div').html('GPS interne');
           }
           wapp.param.gpsSource = e.type;
         }, 
