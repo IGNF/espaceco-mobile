@@ -29,7 +29,7 @@
     "cordova-plugin-geolocation": "^4.0.2",
     "cordova-plugin-listpicker": "^2.2.2",
     "cordova-plugin-network-information": "^2.0.2",
-    "cordovapp": "git+http://gitlab.dockerforge.ign.fr/express/cordovapp.git",
+    "cordovapp": "git+http://gitlab.dockerforge.ign.fr/express/cordovapp.git#7ce62de54ddd17df34dcc5b69fa5dc5e936bae5d",
     "dotenv": "^16.0.3",
     "jquery": "^3.4.1",
     "mongo-parse": "^2.1.0",
