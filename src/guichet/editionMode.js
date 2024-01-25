@@ -44,7 +44,7 @@ $('#fiche').on('hidepage', () => {
  * @param {CollabVector} [layer] the layer to edit (if none quit edition mode)
  */
 const editionMode = function(wapp, layer) {
-  if (!layer || layer.get('role') !== 'edit') {
+  if (!layer || layer.get('role').indexOf('edit') == -1) {
     quitEditionMode()
     return;
   }
