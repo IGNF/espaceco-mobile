@@ -202,7 +202,7 @@ wapp.initGuichets = function() {
     
     g.layers.forEach((layer) => {
       let type = layer.type;
-      if (type != 'WFS' && layer.url && layer.layer && layer.url.indexOf("geoportail") != -1) {
+      if (type != 'WFS' && layer.url && layer.layer && (layer.url.indexOf("geoportail") != -1 || layer.url.indexOf("data.geopf") != -1)) {
         type = 'GeoPortail';
       }
 
