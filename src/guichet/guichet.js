@@ -263,7 +263,7 @@ wapp.setGuichet = function(groupe) {
     for (let i in layers) {
       let geoservice = layers[i].geoservice;
       let type = geoservice ? geoservice.type : 'WFS';
-      if (type != 'WFS' && (geoservice.url.indexOf('geoportail') != -1 || geoservice.url.indexOf('data.geopf') != -1)) {
+      if (type == 'WMTS' && (geoservice.url.indexOf('geoportail') != -1 || geoservice.url.indexOf('data.geopf') != -1)) {
         geoportailLayers[geoservice.layers] = layers[i];
       }
     }
