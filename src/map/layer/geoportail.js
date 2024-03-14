@@ -58,7 +58,6 @@ function addLayers (layers) {
   layers.sort((a,b) => keys.indexOf(a) - keys.indexOf(b));
   const caps = window.geoportailConfig.capabilities['default'];
   layers.forEach((l) => {
-    console.log(l);console.log(caps);
     if (caps[l]) {
       let options = { hidpi: false, visible: wapp.param.visibleLayers[l] || false };
       let tileOptions = {};
