@@ -46,6 +46,14 @@ wapp.editFeature = function(closeOnSubmit) {
     form.init();
     initDocumentForm();
   });
+  $(window).on('new_json_object_event', (event, jsonFormId) => {
+    $(".feature-form .far").each((i, e) => {
+      $(e).addClass('fa').removeClass('far');
+    });
+    $(`#${jsonFormId} .fa-trash-alt`).each((i, e) => {
+      $(e).addClass('fa-trash').removeClass('fa-trash-alt');
+    });
+  });
   
   // Buttons
   const li = ol_ext_element.create('LI', {
