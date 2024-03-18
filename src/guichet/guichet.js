@@ -1,6 +1,7 @@
 ﻿/* Gestion des guichets
 */
 import ol_layer_Vector_WFS from 'cordovapp/ol/layer/WFS'
+import { messageDlg } from 'cordovapp/cordovapp/dialog'
 
 import wapp from '../wapp'
 import CordovApp from 'cordovapp/CordovApp'
@@ -201,9 +202,18 @@ wapp.initGuichets = function() {
       .appendTo(ul);
     li.on("click", () => {
       if (!li.hasClass('selected')) {
-        wapp.setGuichet(li.data('groupe'));
-        //wapp.hidePage();
-        wapp.showPage('layer-guichet')
+        messageDlg ("Etes vous sûrs de vouloir changer de groupe?",
+          "Changement de groupe", {
+            ok: "confirmer",
+            cancel: "annuler"
+          },
+          function (b) {
+            if (b == "ok") {
+              wapp.setGuichet(li.data('groupe'));
+              //wapp.hidePage();
+              wapp.showPage('layer-guichet')
+            }
+          });        
       } else {
         wapp.setGuichet();
         // Faire clignoter
