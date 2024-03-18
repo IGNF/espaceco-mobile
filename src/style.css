@@ -487,6 +487,15 @@ body.trackingGeorem #fiche .signaler .movePosition {
   background: #396;
 }
 
+#fiche .signaler .photo .fa-camera .fa-plus {
+  display: block;
+  position: absolute;
+  right: 34px;
+  bottom: 38px;
+  font-size: 17px;
+  color: #eee;
+}
+
 
 /** */
 [data-list=signal] .formulaire {

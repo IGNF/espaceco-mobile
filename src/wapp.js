@@ -883,7 +883,7 @@ wapp.connect = function() {
       let status = prettyError['code'];
 			switch (status) {
         case 401: 
-					msg = [ "Accès interdit" , "Utilisateur inconnu." ];
+					msg = [ "Echec de connexion" , prettyError.message ];
 					break;
 				case 400:
 					msg = [ "Connexion", prettyError.message ];
