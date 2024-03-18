@@ -490,9 +490,9 @@ body.trackingGeorem #fiche .signaler .movePosition {
 #fiche .signaler .photo .fa-camera .fa-plus {
   display: block;
   position: absolute;
-  right: 34px;
-  bottom: 38px;
-  font-size: 17px;
+  right: 2.5em;
+  bottom: 3.2em;
+  font-size: 20%;
   color: #eee;
 }
 
