@@ -27,7 +27,7 @@ function filterFeature (f) {
     if (filter.date > f.get('report').updating_date) return true;
   }
   if (filter.mine) {
-    if (f.get('report').author == wapp.userManager.userId) return true;
+    if (f.get('report').author.id != wapp.userManager.userId) return true;
   }
   if (filter.istheme) {
     let found = false;
