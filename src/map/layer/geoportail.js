@@ -41,7 +41,7 @@ function addLayers (layers) {
   //on ordonne les couches selon leur ordre dans visibleLayers (chargement depuis cache) ou selon le parametre order (au premier chargement)
   let cacheOrdered = true;
   for (var key in layers) {
-    if (!key in wapp.param.visibleLayers) {
+    if (!(key in wapp.param.visibleLayers)) {
       cacheOrdered = false;
       break;
     }
