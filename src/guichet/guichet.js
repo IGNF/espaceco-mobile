@@ -222,7 +222,7 @@ wapp.initGuichets = function() {
       }
     });
     $('.title', li).text(g.name);
-    $('.description', li).text(g.description)
+    $('.description', li).html(g.description)
     $('.fa-info-circle', li).on('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
