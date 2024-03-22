@@ -199,6 +199,12 @@ function initReport(wapp) {
       wapp.report.param = { georems:[], nbrem:0 };
       wapp.report.saveParam();
       wapp.report.formElement.removeClass("connected");
+      layerCroquis.getSource().clear();
+      wapp.map.getLayers().forEach(function(l) {
+        if (l.get('name') === 'Trace') {
+          l.getSource().clear();
+        }
+      })
     });
   });
   wapp.report = new Report(apiClient, {

@@ -393,7 +393,6 @@ wapp.modifyGeorem = function() {
   var grem = f.get('georem');
   // Get feature if  croquis
   if (f.layer === wapp.report.croquis) grem = grem.get('georem');
-console.log('modify', f, grem)
   wapp.select.selectFeature();
   if (grem) wapp.report.showFormulaire (grem);
 };
