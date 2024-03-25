@@ -87,6 +87,14 @@
   display: block;
 }
 
+.offline-element {
+  display: none;
+}
+
+.guichet .offline-element {
+  display: block;
+}
+
 [data-role='menu'] .toggle-right {
   display: none;
 }
