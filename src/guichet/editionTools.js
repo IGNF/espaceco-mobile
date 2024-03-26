@@ -88,10 +88,12 @@ class EditonTools extends ol_Object {
       })
       // Add feature to current layer
       drawi.on('drawend', e => {
-        this.layer.getSource().addFeature(e.feature)
+        e.feature.isNew = true;
+        let source = this.layer.getSource();
+        source.addFeature(e.feature)
         wapp.showSelect({ features: [e.feature] });
         wapp.showOnglet('info')
-        wapp.editFeature(true);
+        wapp.editFeature(true, source);
         /*
         drawi.removeButton('ol-button-trash');
         // Undo button

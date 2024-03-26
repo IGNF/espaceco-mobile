@@ -18,11 +18,15 @@ const initDocumentForm = function () {
  * Edit current feature
  * @param {boolean} [closeOnSubmit=false]
  */ 
-wapp.editFeature = function(closeOnSubmit) {
+wapp.editFeature = function(closeOnSubmit, source) {
   const feature = this.select.getFeatures().item(0);
   if (!feature) return;
 
   let editProperties = feature.getProperties();
+  //en cas de creation on ne veut pas passer de valeurs
+  // ne serait ce que null qui est une valeur en soi (permet de vider un champs)
+  let isNew = (('isNew' in feature) && feature.isNew) ? true : false;
+  if (isNew) editProperties = null;
 
   // Mode edition
   const div = document.querySelector('#fiche .selection');
@@ -68,6 +72,8 @@ wapp.editFeature = function(closeOnSubmit) {
     click: () => {
       if (closeOnSubmit) {
         wapp.hidePage(); 
+        let f = wapp.select.getFeatures().item(0);
+        if (('isNew' in f) && f.isNew && source) source.removeFeature(f);
         wapp.select.getFeatures().clear(); 
         wapp.onSelect();
       } else {
@@ -114,6 +120,7 @@ wapp.editFeature = function(closeOnSubmit) {
           feature.set(name, attr[name]);
         }
       }
+      feature.isNew = false;
       // Back to selection
       if (closeOnSubmit) {
         wapp.hidePage(); 
