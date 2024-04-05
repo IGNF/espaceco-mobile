@@ -1,7 +1,7 @@
 ﻿/** Config */
 export default {
   // App version
-  version: "2.3.7",
+  version: "2.3.9",
 
   // Geoportail APIkey
   apiKey: "gpf",
