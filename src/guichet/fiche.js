@@ -281,6 +281,10 @@ function showGeorem(div, georem, newOne) {
       $('.status', li).addClass(r.status).text(reportStatus[r.status] || 'Réponse');
       $('.content', li).text(r.content);
       $('.sendrep', li).click(() => {
+        if (navigator.connection.type == Connection.NONE) {
+          wapp.alert("Envoi impossible, merci de réessayer quand l'application sera de nouveau connectée au réseau.");
+          return;
+        }
         wapp.wait('Envoi en cours...')
         wapp.report.postLocalRep(georem, r, {
           cback: (georem, error) => {
