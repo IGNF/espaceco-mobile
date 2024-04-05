@@ -164,28 +164,13 @@ function showSlider() {
  * @param {boolean} newOne if not false add a delete button (c est la propriete report du feature lorsqu elle existe)
  */
 function showGeorem(div, georem, newOne) {
-  // pour une alerte existante le feature ne contient pas l info du nom de l auteur
-  // il faut faire un get report pour recuperer l info du nom de l auteur
-  // ne marche que si l utilisateur est connecte
-  if (georem.id && !georem.complete && wapp.report.apiClient.isConnected()) {
-    wapp.wait(true);
-    wapp.report.apiClient.getReport(georem.id).then((response) => {
-      wapp.wait(false);
-      let report = response.data;
-      georem.author = report.author;
-      for (let i in report.replies) {
-        report.replies[i].author_name = report.replies[i].author.username;
-        report.replies[i].date = moment(report.replies[i].date).format('YYYY-MM-DD HH:mm:ss');
-      }
-      georem.replies = report.replies;
-      georem.complete = report.complete = true;
-      showGeorem(div, report, newOne);
-    }).catch((error) => {
-      wapp.wait(false);
-      wapp.alert("Une erreur s'est produite lors de la récupération du signalement.");
-    });
-    return;
+  if (georem.id) {
+    for (let i in georem.replies) {
+      georem.replies[i].author_name = georem.replies[i].author.username;
+      georem.replies[i].date = moment(georem.replies[i].date).format('YYYY-MM-DD HH:mm:ss');
+    }
   }
+ 
   div.addClass("georem").removeClass("fiche");
   if (georem.sketch) {
     try {
