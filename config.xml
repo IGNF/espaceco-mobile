@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="fr.ign.guichet" version='3.0.1'>
+<widget id="fr.ign.guichet" version='3.0.2'>
     <name>Espace collaboratif IGN</name>
     <description>
       La solution IGN pour saisir et partager des signalements issus du terrain.
