@@ -208,7 +208,7 @@ function showGeorem(div, georem, newOne) {
   for (let i in georem.photos) {
     let count = i;
     count++;
-    $('.photo.img'+count).attr('src', georem.photos[i]).show();
+    $('.photo.img'+count, div).attr('src', CordovApp.File.getFileURI(georem.photos[i])).show();
   }
 
   const georemDiv = $(".georem", div);
