@@ -1,6 +1,6 @@
 {
   "name": "guichet-mobile",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "Espace collaboratif mobile",
   "directories": {},
   "scripts": {
@@ -30,7 +30,7 @@
     "cordova-plugin-geolocation": "^4.0.2",
     "cordova-plugin-listpicker": "^2.2.2",
     "cordova-plugin-network-information": "^2.0.2",
-    "cordovapp": "git+http://gitlab.dockerforge.ign.fr/express/cordovapp.git#1e04ff1249d72750aab1d3fbed9f85d7b57312f8",
+    "cordovapp": "git+http://gitlab.dockerforge.ign.fr/express/cordovapp.git#52ee11b389f07454fc746d0fa3c3bb67b237c5ed",
     "dotenv": "^16.0.3",
     "jquery": "^3.4.1",
     "lightningcss": "^1.22.1",

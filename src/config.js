@@ -3,7 +3,7 @@
 /** Default Config */
 const config = {
   // App version
-  version: "3.0.2",
+  version: "3.0.3",
 
   // Geoportail APIkey
   apiKey: "2wd9sfsi5hews9yxcr95i6br",
