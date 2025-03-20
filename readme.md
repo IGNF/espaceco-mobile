@@ -212,11 +212,13 @@ La publication se fait sur la [console du playstore](https://play.google.com/app
 ### App Store
 
 NB: fr.ign.guichet ayant été refusé par Apple l'ID de l'application iOS est : `fr.ign.collaboratif`
+Modifier dans le .env : APPLI_ID=fr.ign.collaboratif
 
 fr.ign.navi-forest pour Naviforest
 
 La publication se fait sur la [AppleStore connect](https://appstoreconnect.apple.com/apps).
 Il est nécessaire d'avoir un [compte développeur](https://developer.apple.com/account/) associé au compte IGN - Institut national de l'information géographique et forestière.
+Pour déployer une nouvelle version de l'appli, il faut un compte avec les droits Admin.
 
 NB: A l'installation du plugin camera, il faut ajouter les variables nécessaires pour éviter un retour négatif d'iTunes.
 ````
