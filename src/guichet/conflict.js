@@ -153,15 +153,32 @@ function showConflicts(layer, conflicts) {
  */
 wapp.handleConflict = function(transaction, layer) {
   const conflicts = transaction.conflicts;
+
+  // Vérifie s'il y a des conflits
+  if (conflicts.length === 0) {
+    wapp.message('Aucun conflit détecté.', 'Conflits');
+    return;
+  }
+
+  // Crée un message détaillé pour chaque conflit
+  let conflictDetails = conflicts.map((conflict, index) => {
+    return `Conflit ${index + 1}: ${conflict.type || 'Type inconnu'} - ${conflict.description || 'Aucune description disponible'}`;
+  }).join('\n');
+
+  // Affiche le message avec les détails des conflits
   wapp.message(
-    'Détection de '+conflicts.length+' conflit(s)...', 
-    'Conflits', 
-    { ok:'Traiter les conflits', cancel:'Annuler' },
+    `Détection de ${conflicts.length} conflit(s)...\n\n${conflictDetails}`,
+    'Conflits',
+    { ok: 'Traiter les conflits', cancel: 'Annuler' },
     (b) => {
       if (b === 'ok') {
         showConflicts(layer, conflicts);
       }
     }
   );
-  console.log(layer, transaction);
+
+   // Affiche les détails dans la console
+  console.log('Couche:', layer);
+  console.log('Transaction:', transaction);
+  console.log('Détails des conflits:', conflictDetails);
 };
