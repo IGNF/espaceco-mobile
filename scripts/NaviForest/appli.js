@@ -28,7 +28,7 @@ wapp.ready(() => {
   document.querySelector('[data-role="menu"] .header').onclick = () => {
     if (!wapp.getIdGuichet()) {
       wapp.alert(
-        'Votre compte ne permet pas d\'accéder aux guichet Naviforest !', 
+        'Votre compte ne permet pas d\'accéder au guichet Naviforest !', 
         'NaviForest'
       )
     }

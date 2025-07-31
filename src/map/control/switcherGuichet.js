@@ -98,7 +98,7 @@ export default function(wapp) {
       parent: e.li
     });
 
-    var locked = table.read_only || layer.get('edit') === false || !table.tile_zoom_level || layer.get('role') !== 'edit';
+    var locked = table.read_only || layer.get('edit') === false || !table.tile_zoom_level || layer.get('role').indexOf('edit') == -1;
 
     //sauvegarde
     if (table && !locked) {
@@ -175,7 +175,7 @@ export default function(wapp) {
       // Couche editable
       oldiv.addClass('offline')
       // Edition tools
-      if (layer.get('role') === 'edit') {
+      if (layer.get('role').indexOf('edit') != -1) {
         ol_ext_element.create('I', {
           className: 'fa fa-pencil-square-o',
           click: (e) => { editionMode(wapp, layer) },
@@ -185,7 +185,7 @@ export default function(wapp) {
     }
       
     // Enable selection
-    let noEdit = !table || table.read_only || !table.tile_zoom_level || layer.get('role') !== 'edit';
+    let noEdit = !table || table.read_only || !table.tile_zoom_level || layer.get('role').indexOf('edit') == -1;
     const edit = ol_ext_element.create('I', {
       className: 'fa',
       click: () => {

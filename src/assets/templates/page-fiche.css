@@ -327,6 +327,29 @@ screen and (orientation:portrait) and (max-height:1023px) {
 #fiche ul li.edition.error input {
   border-color: red;
 }
+#fiche .feature-form .table {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.8em;
+}
+
+#fiche .feature-form .table tr{
+  display: flex;
+}
+
+#fiche .feature-form .table tr td{
+  flex: 1;
+  max-width: 50%;
+}
+
+#fiche .feature-form .table tr[data-type="jsonvalue"] td{
+  flex: 1;
+  max-width: 100%;
+}
+
+#fiche li.attributes {
+  padding: 0.5em;
+}
 
 #fiche .attributes div {
   white-space: nowrap;

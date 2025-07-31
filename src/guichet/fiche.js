@@ -164,28 +164,13 @@ function showSlider() {
  * @param {boolean} newOne if not false add a delete button (c est la propriete report du feature lorsqu elle existe)
  */
 function showGeorem(div, georem, newOne) {
-  // pour une alerte existante le feature ne contient pas l info du nom de l auteur
-  // il faut faire un get report pour recuperer l info du nom de l auteur
-  // ne marche que si l utilisateur est connecte
-  if (georem.id && !georem.complete && wapp.report.apiClient.isConnected()) {
-    wapp.wait(true);
-    wapp.report.apiClient.getReport(georem.id).then((response) => {
-      wapp.wait(false);
-      let report = response.data;
-      georem.author = report.author;
-      for (let i in report.replies) {
-        report.replies[i].author_name = report.replies[i].author.username;
-        report.replies[i].date = moment(report.replies[i].date).format('YYYY-MM-DD HH:mm:ss');
-      }
-      georem.replies = report.replies;
-      georem.complete = report.complete = true;
-      showGeorem(div, report, newOne);
-    }).catch((error) => {
-      wapp.wait(false);
-      wapp.alert("Une erreur s'est produite lors de la récupération du signalement.");
-    });
-    return;
+  if (georem.id) {
+    for (let i in georem.replies) {
+      georem.replies[i].author_name = georem.replies[i].author.username;
+      georem.replies[i].date = moment(georem.replies[i].date).format('YYYY-MM-DD HH:mm:ss');
+    }
   }
+ 
   div.addClass("georem").removeClass("fiche");
   if (georem.sketch) {
     try {
@@ -223,7 +208,7 @@ function showGeorem(div, georem, newOne) {
   for (let i in georem.photos) {
     let count = i;
     count++;
-    $('.photo.img'+count).attr('src', georem.photos[i]).show();
+    $('.photo.img'+count, div).attr('src', CordovApp.File.getFileURI(georem.photos[i])).show();
   }
 
   const georemDiv = $(".georem", div);
@@ -281,6 +266,10 @@ function showGeorem(div, georem, newOne) {
       $('.status', li).addClass(r.status).text(reportStatus[r.status] || 'Réponse');
       $('.content', li).text(r.content);
       $('.sendrep', li).click(() => {
+        if (navigator.connection.type == Connection.NONE) {
+          wapp.alert("Envoi impossible, merci de réessayer quand l'application sera de nouveau connectée au réseau.");
+          return;
+        }
         wapp.wait('Envoi en cours...')
         wapp.report.postLocalRep(georem, r, {
           cback: (georem, error) => {
@@ -319,7 +308,7 @@ function showGeorem(div, georem, newOne) {
  */
 function showFeature(ul, f, th) {
   // Objet d'un guichet
-  const isEdit = wapp.isCordova && !f.layer.getTable().read_only && f.layer.get('role') === 'edit';
+  const isEdit = wapp.isCordova && !f.layer.getTable().read_only && f.layer.get('role').indexOf('edit') != -1;
   if (isEdit) {
     $('.edit', ul.parent()).show();
   }

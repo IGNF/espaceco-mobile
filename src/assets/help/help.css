@@ -159,6 +159,12 @@
   max-width: 100%;
 }
 
+@media screen and (max-width: 600px) and (orientation: portrait) {
+  #help .offline {
+    left: 0em;
+  }
+}
+
 @media screen and (min-width: 1024px) and (orientation: landscape) {
   #help .guichet-edition {
     right: 50%;

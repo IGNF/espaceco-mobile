@@ -610,7 +610,7 @@ wapp.setDebugMode = function() {
   // Mode debug en qualif
   if (this.param.options.qlf) {
     $(".debug").show();
-    $('#options .qlf').text(this.param.options.qlf.replace('https://qlf-collaboratif.ign.fr/', '').replace('/gcms/api/', ''));
+    $('#options .qlf').text(this.param.options.qlf.replace('https://qlf-collaboratif.cegedim-hds.fr/', '').replace('/gcms/api/', ''));
   }
 };
 
@@ -619,7 +619,7 @@ wapp.setQualif = function() {
   if (!this.param.options.qlfList) this.param.options.qlfList = {};
   var choice = {};
   choice[process.env.BASE_API_URL] = 'Espace Co';
-  choice['https://qlf-collaboratif.ign.fr/collaboratif-develop/gcms/api/'] = 'Collaboratif-develop';
+  choice['https://qlf-collaboratif.cegedim-hds.fr/collaboratif-develop/gcms/api/'] = 'Collaboratif-develop';
   
   for (let i in this.param.options.qlfList) {
     choice[this.param.options.qlfList[i]] = i;
@@ -883,7 +883,7 @@ wapp.connect = function() {
       let status = prettyError['code'];
 			switch (status) {
         case 401: 
-					msg = [ "Accès interdit" , "Utilisateur inconnu." ];
+					msg = [ "Echec de connexion" , prettyError.message ];
 					break;
 				case 400:
 					msg = [ "Connexion", prettyError.message ];

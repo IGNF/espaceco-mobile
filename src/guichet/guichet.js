@@ -1,6 +1,7 @@
 ﻿/* Gestion des guichets
 */
 import ol_layer_Vector_WFS from 'cordovapp/ol/layer/WFS'
+import { messageDlg } from 'cordovapp/cordovapp/dialog'
 
 import wapp from '../wapp'
 import CordovApp from 'cordovapp/CordovApp'
@@ -201,9 +202,18 @@ wapp.initGuichets = function() {
       .appendTo(ul);
     li.on("click", () => {
       if (!li.hasClass('selected')) {
-        wapp.setGuichet(li.data('groupe'));
-        //wapp.hidePage();
-        wapp.showPage('layer-guichet')
+        messageDlg ("Etes vous sûrs de vouloir changer de groupe?",
+          "Changement de groupe", {
+            ok: "confirmer",
+            cancel: "annuler"
+          },
+          function (b) {
+            if (b == "ok") {
+              wapp.setGuichet(li.data('groupe'));
+              //wapp.hidePage();
+              wapp.showPage('layer-guichet')
+            }
+          });        
       } else {
         wapp.setGuichet();
         // Faire clignoter
@@ -212,7 +222,7 @@ wapp.initGuichets = function() {
       }
     });
     $('.title', li).text(g.name);
-    $('.description', li).text(g.description)
+    $('.description', li).html(g.description)
     $('.fa-info-circle', li).on('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -263,7 +273,7 @@ wapp.setGuichet = function(groupe) {
     for (let i in layers) {
       let geoservice = layers[i].geoservice;
       let type = geoservice ? geoservice.type : 'WFS';
-      if (type != 'WFS' && geoservice.url.indexOf('geoportail') != -1) {
+      if (type == 'WMTS' && (geoservice.url.indexOf('geoportail') != -1 || geoservice.url.indexOf('data.geopf') != -1)) {
         geoportailLayers[geoservice.layers] = layers[i];
       }
     }
@@ -383,7 +393,6 @@ wapp.modifyGeorem = function() {
   var grem = f.get('georem');
   // Get feature if  croquis
   if (f.layer === wapp.report.croquis) grem = grem.get('georem');
-console.log('modify', f, grem)
   wapp.select.selectFeature();
   if (grem) wapp.report.showFormulaire (grem);
 };
