@@ -115,7 +115,8 @@ En cas de supression de fichier dans ce répertoire, il est nécessaire de détr
 
 ## Dépendances
 
-Le projet dépend de la bibliothèque [Cordovapp](http://gitlab.dockerforge.ign.fr/express/cordovapp) qui mutualise le code de l'application et l'accès à [l'espace collaboratif](https://espacecollaboratif.ign.fr/).
+Le projet dépend de la bibliothèque [mobile-core](https://github.com/IGNF/mobile-core) qui mutualise le code de l'application et l'accès à [l'espace collaboratif](https://espacecollaboratif.ign.fr/).
+mobile-core (github) est le nom de migration de Cordovapp (gitlab)
 La documentation de la librairie est disponible sur le [wiki du Gitlab](http://gitlab.dockerforge.ign.fr/express/cordovapp/wikis/home).
 
 La bibliothèque est installée avec les dépendance du projet lors de la commande `npm install`.
