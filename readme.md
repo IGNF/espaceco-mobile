@@ -123,3 +123,7 @@ La bibliothèque est installée avec les dépendance du projet lors de la comman
 Vous pouvez également cloner le dépôt dans le répertoire `node_modules` pour avoir accès au code et le mettre à jour.
 
 **Attention** : le code est mutualisé entre plusieurs applications, veillez donc à vérifier que les modifications n'auront pas d'impacte sur les autres développements (ou utiliser une branche de développement).
+
+## Débug et développement
+
+cf [wiki](https://github.com/IGNF/espaceco-mobile/wiki/Debugage-et-d%C3%A9veloppement)
