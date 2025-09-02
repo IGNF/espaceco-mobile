@@ -73,7 +73,8 @@
   },
   "cordova": {
     "platforms": [
-      "android"
+      "android",
+      "ios"
     ],
     "plugins": {
       "cordova-plugin-file": {},
@@ -87,8 +88,7 @@
       "cordova-plugin-insomnia": {},
       "cordova-plugin-camera": {
         "CAMERA_USAGE_DESCRIPTION": "pour illustrez vos contributions",
-        "PHOTOLIBRARY_USAGE_DESCRIPTION": "pour illustrez vos contributions",
-        "ANDROIDX_CORE_VERSION": "1.6.+"
+        "PHOTOLIBRARY_USAGE_DESCRIPTION": "pour illustrez vos contributions"
       },
       "cordova-plugin-inappbrowser": {},
       "cordova-plugin-background-mode": {},
