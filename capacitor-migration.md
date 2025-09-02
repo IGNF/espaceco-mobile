@@ -29,5 +29,5 @@
 ## Possibilités
 
 Il existe deux possibilités pour la migration :
-- Utiliser Capacitor majoritairement pour l'aspect pratique du développement et du build, en remplaçant simplement les modules network et geolocation
+- Utiliser Capacitor majoritairement pour l'aspect pratique du développement et du build, en remplaçant simplement les modules intégrés dans l'app (marqués d'un ✅)
 - Intégrer Capacitor plus en profondeur, en réécrivant l'intégration native de cordovapp
