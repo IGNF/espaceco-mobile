@@ -11,7 +11,7 @@
 
 **Les modules Cordova intégrés directement dans l'app qui seraient à modifier :**
 
-- ✅ cordova-plugin-network-information (wapp.js & fiche.js) => https://capacitorjs.com/docs/apis/network
+- ✅ cordova-plugin-network-information (wapp.js & fiche.js - cordovapp/report ReportForm.js L 724) => https://capacitorjs.com/docs/apis/network
 - ✅ cordova-plugin-geolocation (wapp.js & apiTemplate.js) => https://capacitorjs.com/docs/apis/geolocation
 - ✅ cordova-plugin-insomnia (interaction.js, georemGPS.js) => https://github.com/capacitor-community/keep-awake
 - ✅ cordova-plugin-email-composer => https://github.com/EinfachHans/capacitor-email-composer

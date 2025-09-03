@@ -1,5 +1,7 @@
 import wapp from '../wapp'
 
+import { Network } from '@capacitor/network'
+
 import {containsCoordinate as ol_extent_containsCoordinate} from 'ol/extent'
 import {getCenter as ol_extent_getCenter} from 'ol/extent'
 import ol_layer_Vector_CollabVector from 'cordovapp/ol/layer/CollabVector'
@@ -266,24 +268,26 @@ function showGeorem(div, georem, newOne) {
       $('.status', li).addClass(r.status).text(reportStatus[r.status] || 'Réponse');
       $('.content', li).text(r.content);
       $('.sendrep', li).click(() => {
-        if (navigator.connection.type == Connection.NONE) {
-          wapp.alert("Envoi impossible, merci de réessayer quand l'application sera de nouveau connectée au réseau.");
-          return;
-        }
-        wapp.wait('Envoi en cours...')
-        wapp.report.postLocalRep(georem, r, {
-          cback: (georem, error) => {
-            showGeorem(div, georem, newOne);
-            wapp.wait(false);
-            if (error) {
-              var msg = "Impossible d'envoyer la réponse.<br/>";
-              let prettyError = prettifyAxiosError(error);
-              $("<i>").addClass('error')
-                .html("<br/>Erreur : "+ prettyError['code'] + ":" + prettyError['message'] +"</i>")
-                .appendTo(msg);
-              wapp.alert(msg);
-            }
+        Network.getStatus().then((network) => {
+          if (!network.connected) {
+            wapp.alert("Envoi impossible, merci de réessayer quand l'application sera de nouveau connectée au réseau.");
+            return;
           }
+          wapp.wait('Envoi en cours...')
+          wapp.report.postLocalRep(georem, r, {
+            cback: (georem, error) => {
+              showGeorem(div, georem, newOne);
+              wapp.wait(false);
+              if (error) {
+                var msg = "Impossible d'envoyer la réponse.<br/>";
+                let prettyError = prettifyAxiosError(error);
+                $("<i>").addClass('error')
+                  .html("<br/>Erreur : " + prettyError['code'] + ":" + prettyError['message'] + "</i>")
+                  .appendTo(msg);
+                wapp.alert(msg);
+              }
+            }
+          });
         });
       });
       $('.delrep', li).click(() => {

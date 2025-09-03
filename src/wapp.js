@@ -34,6 +34,8 @@ import * as fs from 'fs';
 import { prettifyAxiosError } from 'cordovapp/collaboratif/errorHelper'
 import CollabVector from 'cordovapp/ol/layer/CollabVector'
 
+import { Network } from '@capacitor/network';
+
 
 /** Web application pour l'acces a l'espace collaboratif depuis un mobile.
  * 
@@ -149,12 +151,13 @@ var wapp = new CordovApp({
 
     wapp.setDebugMode();
 
+
     //si on a de nouveau du reseau et aucun token il faut reinitialiser l'authentification
-    document.addEventListener("online", () => {
-      if (wapp.userManager.apiClient.isConnected() === false) {
+    Network.addListener('networkStatusChange', status => {
+      if (status.connected && wapp.userManager.apiClient.isConnected() === false) {
         wapp.userManager.apiClient.disconnect();
       }
-    }, false)
+    });
 
     // Scroll top a l affichage des attributs d un feature
     $('#fiche').on('showpage', function () {
@@ -204,21 +207,24 @@ var wapp = new CordovApp({
     // Mode hors ligne
     const onlineSwitcher = $("[data-role='menu'] .offline");
     onlineSwitcher.on("click", function () {
-      let online = !$(this).prop('checked');
+      const self = this;
+      let online = !$(self).prop('checked');
 
       let message = false;
-      if (online && navigator.connection.type == Connection.NONE) {
-        message = "Aucune connexion active sur l'appareil."
-      } else if (!online && !wapp.getCache(wapp.guichet).cache && (!wapp.param.cacheMap || !wapp.param.cacheMap.length)) {
-        message = "Aucune donnée chargée en cache.";
-      }
+      Network.getStatus().then((networkStatus) => {
+        if (online && networkStatus.connectionType === 'none') {
+          message = "Aucune connexion active sur l'appareil.";
+        } else if (!online && !wapp.getCache(wapp.guichet).cache && (!wapp.param.cacheMap || !wapp.param.cacheMap.length)) {
+          message = "Aucune donnée chargée en cache.";
+        }
 
-      if (message) {
-        wapp.alert(message, 'Erreur', () => { $(this).prop('checked', online); });
-      } else {
-        wapp.switchLayersOnline(online);
-      }
-      wapp.toggleMenu();
+        if (message) {
+          wapp.alert(message, 'Erreur', () => { $(self).prop('checked', online); });
+        } else {
+          wapp.switchLayersOnline(online);
+        }
+        wapp.toggleMenu();
+      });
     });
 
     initOffline(wapp);
