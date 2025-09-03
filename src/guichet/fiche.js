@@ -208,9 +208,18 @@ function showGeorem(div, georem, newOne) {
     $(this).attr('src', '');
   });
   for (let i in georem.photos) {
-    let count = i;
-    count++;
-    $('.photo.img'+count, div).attr('src', CordovApp.File.getFileURI(georem.photos[i])).show();
+    let count = i; count++;
+    let p = georem.photos[i];
+    let src = '';
+    if (typeof p === 'string') {
+      if (/^data:|^https?:/i.test(p)) src = p;
+      else if (/^file:/i.test(p)) {
+        try { const { Capacitor } = require('@capacitor/core'); src = Capacitor.convertFileSrc ? Capacitor.convertFileSrc(p) : p; } catch(e) { src = p; }
+      } else {
+        try { src = CordovApp.File.getFileURI(p); } catch(e) { src = p; }
+      }
+    }
+    $('.photo.img'+count, div).attr('src', src).show();
   }
 
   const georemDiv = $(".georem", div);

@@ -31,7 +31,9 @@
   "dependencies": {
     "@capacitor/android": "^7.4.3",
     "@capacitor/app": "7.0.2",
+    "@capacitor/camera": "^7.0.2",
     "@capacitor/core": "7.4.3",
+    "@capacitor/filesystem": "^7.1.4",
     "@capacitor/ios": "^7.4.3",
     "@capacitor/keyboard": "^7.0.2",
     "@capacitor/network": "^7.0.2",

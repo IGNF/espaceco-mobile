@@ -1,4 +1,5 @@
 import Report from 'cordovapp/report/ReportForm'
+import installReportPhotoCapacitor from '../capacitor-hooks/photo-handler'
 import UserManagerTemplating from 'cordovapp/collaboratif/UserManagerTemplating'
 import map from '../map/map'
 import {ApiClient} from 'collaboratif-client-api';
@@ -275,6 +276,9 @@ function initReport(wapp) {
       return true;
     }
   });
+
+  // Install Capacitor photo adapter for the form (camera + filesystem)
+  try { installReportPhotoCapacitor(wapp); } catch(e) { console.warn('Capacitor photo adapter not installed', e); }
 
   /**
    * post des georems locales sans interruption en cas d erreur
