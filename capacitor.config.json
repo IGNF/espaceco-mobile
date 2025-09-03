@@ -1,0 +1,10 @@
+{
+  "appId": "guichet.mobile",
+  "appName": "guichet-mobile",
+  "webDir": "www",
+  "cordova": {
+    "preferences": {
+      "BackupWebStorage": "none"
+    }
+  }
+}

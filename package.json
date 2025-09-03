@@ -21,6 +21,12 @@
   },
   "homepage": "https://github.com/IGNF/espaceco-mobile",
   "dependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/app": "7.0.2",
+    "@capacitor/core": "7.4.3",
+    "@capacitor/ios": "^7.4.3",
+    "@capacitor/keyboard": "^7.0.2",
+    "@capacitor/status-bar": "^7.0.2",
     "ajv": "6.12.*",
     "cordova": "^12.0.0",
     "cordova-plugin-bluetooth-serial": "github:giuseppelanzi/BluetoothSerial",
@@ -41,6 +47,7 @@
     "webfontloader": "^1.6.28"
   },
   "devDependencies": {
+    "@capacitor/cli": "7.4.3",
     "@parcel/transformer-sass": "^2.10.3",
     "buffer": "^6.0.3",
     "clean-css": "^3.4.19",
