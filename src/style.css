@@ -295,6 +295,32 @@ div.debug,
   height: 2em;
   padding: 0.5em;
 }
+
+/* iOS-only safe-area adjustments */
+.platform-ios #signaler,
+.platform-ios #signalerGPS {
+  bottom: calc(20px + constant(safe-area-inset-bottom));
+  bottom: calc(20px + env(safe-area-inset-bottom));
+}
+
+.platform-ios #selection {
+  bottom: calc(20px + constant(safe-area-inset-bottom));
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  padding: 0.5em 2.5em calc(0.5em + constant(safe-area-inset-bottom)) 2em;
+  padding: 0.5em 2.5em calc(0.5em + env(safe-area-inset-bottom)) 2em;
+}
+
+.platform-ios #info {
+  bottom: calc(1em + constant(safe-area-inset-bottom));
+  bottom: calc(1em + env(safe-area-inset-bottom));
+}
+
+.platform-ios #loadGuichet,
+.platform-ios #cacheExtent,
+.platform-ios #loadMap {
+  bottom: constant(safe-area-inset-bottom);
+  bottom: env(safe-area-inset-bottom);
+}
 #loadGuichet .button,
 #cacheExtent .button,
 #loadMap .button {
