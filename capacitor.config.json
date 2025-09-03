@@ -1,6 +1,6 @@
 {
-  "appId": "guichet.mobile",
-  "appName": "guichet-mobile",
+  "appId": "fr.ign.guichet",
+  "appName": "Espace collaboratif IGN",
   "webDir": "www",
   "cordova": {
     "preferences": {
