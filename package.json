@@ -29,7 +29,7 @@
     "cordova-plugin-geolocation": "^4.0.2",
     "cordova-plugin-listpicker": "^2.2.2",
     "cordova-plugin-network-information": "^2.0.2",
-    "mobile-core": "https://github.com/IGNF/mobile-core.git",
+    "cordovapp": "https://github.com/IGNF/cordovapp.git",
     "dotenv": "^16.0.3",
     "jquery": "^3.4.1",
     "lightningcss": "^1.22.1",
