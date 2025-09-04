@@ -1,34 +1,60 @@
 import { Capacitor } from '@capacitor/core'
 
+// Helpers & constants
+const CDV_HTTP_REGEX = /^https?:\/\/localhost\/__cdvfile_([^/]+)__\/(.+)/i
+const CDVFILE_REGEX = /^cdvfile:\/\/localhost\/([^/]+)\/(.+)/i
+const CAPACITOR_FILE_REGEX = /^(capacitor:\/\/localhost|https?:\/\/localhost)\/_capacitor_file_/i
+
+function getCordovaFile() {
+  return (typeof window !== 'undefined' && window.cordova && window.cordova.file) ? window.cordova.file : null
+}
+
+const FS_NAME_TO_PROP = {
+  'files': 'dataDirectory',
+  'files-external': 'externalDataDirectory',
+  'cache': 'cacheDirectory',
+  'cache-external': 'externalCacheDirectory',
+  'documents': 'documentsDirectory',
+  'sdcard': 'externalRootDirectory',
+  'assets': 'applicationDirectory',
+  'root': 'externalRootDirectory'
+}
+
+function resolveBaseFromFsName(fsName) {
+  const cf = getCordovaFile()
+  if (!cf) return null
+  const prop = FS_NAME_TO_PROP[fsName]
+  return prop ? (cf[prop] || null) : null
+}
+
+function ensureTrailingSlash(path) {
+  return /\/$/.test(path) ? path : path + '/'
+}
+
+function convertWithCapacitor(fileUrl) {
+  try {
+    return Capacitor.convertFileSrc ? Capacitor.convertFileSrc(fileUrl) : fileUrl
+  } catch (e) {
+    console.warn('Capacitor.convertFileSrc failed:', e)
+    return fileUrl
+  }
+}
+
 // convertit une URL Cordova en une URL resolvable par Capacitor/qui s'affiche dans la webview
 export function convertPhotoToDisplaySrc(photoPath) {
   if (typeof photoPath !== 'string' || !photoPath) {
     return '';
   }
 
-  const cdvHttpMatch = /^https?:\/\/localhost\/__cdvfile_([^/]+)__\/(.+)/i.exec(photoPath);
+  const cdvHttpMatch = CDV_HTTP_REGEX.exec(photoPath);
   if (cdvHttpMatch) {
     const fsName = cdvHttpMatch[1];
     const rest = cdvHttpMatch[2];
     try {
-      const base = (function mapFsNameToBase() {
-        const cf = (typeof window !== 'undefined' && window.cordova && window.cordova.file) ? window.cordova.file : null;
-        if (!cf) return null;
-        switch (fsName) {
-          case 'files': return cf.dataDirectory || null;
-          case 'files-external': return cf.externalDataDirectory || null;
-          case 'cache': return cf.cacheDirectory || null;
-          case 'cache-external': return cf.externalCacheDirectory || null;
-          case 'documents': return cf.documentsDirectory || null;
-          case 'sdcard': return cf.externalRootDirectory || null;
-          case 'assets': return cf.applicationDirectory || null;
-          case 'root': return cf.externalRootDirectory || null;
-          default: return null;
-        }
-      })();
+      const base = resolveBaseFromFsName(fsName);
       if (base) {
-        const fileUrl = base.replace(/\/$/, '/') + rest;
-        const conv = Capacitor.convertFileSrc ? Capacitor.convertFileSrc(fileUrl) : fileUrl;
+        const fileUrl = ensureTrailingSlash(base) + rest;
+        const conv = convertWithCapacitor(fileUrl);
         return conv;
       }
       // Fallback
@@ -38,28 +64,15 @@ export function convertPhotoToDisplaySrc(photoPath) {
     }
   }
 
-  const cdvMatch = /^cdvfile:\/\/localhost\/([^/]+)\/(.+)/i.exec(photoPath);
+  const cdvMatch = CDVFILE_REGEX.exec(photoPath);
   if (cdvMatch) {
     const fsName = cdvMatch[1];
     const rest = cdvMatch[2];
     try {
-      const cf = (typeof window !== 'undefined' && window.cordova && window.cordova.file) ? window.cordova.file : null;
-      let base = null;
-      if (cf) {
-        switch (fsName) {
-          case 'files': base = cf.dataDirectory; break;
-          case 'files-external': base = cf.externalDataDirectory; break;
-          case 'cache': base = cf.cacheDirectory; break;
-          case 'cache-external': base = cf.externalCacheDirectory; break;
-          case 'documents': base = cf.documentsDirectory; break;
-          case 'sdcard': base = cf.externalRootDirectory; break;
-          case 'assets': base = cf.applicationDirectory; break;
-          case 'root': base = cf.externalRootDirectory; break;
-        }
-      }
+      const base = resolveBaseFromFsName(fsName);
       if (base) {
-        const fileUrl = base.replace(/\/$/, '/') + rest;
-        const conv = Capacitor.convertFileSrc ? Capacitor.convertFileSrc(fileUrl) : fileUrl;
+        const fileUrl = ensureTrailingSlash(base) + rest;
+        const conv = convertWithCapacitor(fileUrl);
         return conv;
       }
     } catch (e) {
@@ -73,14 +86,14 @@ export function convertPhotoToDisplaySrc(photoPath) {
   }
 
   // si c'est une URL Capacitor, c'est ok
-  if (/^(capacitor:\/\/localhost|https?:\/\/localhost)\/_capacitor_file_/i.test(photoPath)) {
+  if (CAPACITOR_FILE_REGEX.test(photoPath)) {
     return photoPath;
   }
 
   // si c'est une URL Cordova, convert via Capacitor
   if (/^(cdvfile:|content:|file:)/i.test(photoPath) || /__cdvfile_/i.test(photoPath)) {
     try {
-      const newPath = Capacitor.convertFileSrc ? Capacitor.convertFileSrc(photoPath) : photoPath;
+      const newPath = convertWithCapacitor(photoPath);
       return newPath;
     } catch (e) {
       console.warn('Failed to convert URI with Capacitor:', e);
@@ -93,7 +106,7 @@ export function convertPhotoToDisplaySrc(photoPath) {
       const resolved = window.CordovApp && window.CordovApp.File && window.CordovApp.File.getFileURI
         ? window.CordovApp.File.getFileURI(photoPath)
         : photoPath;
-      const conv = Capacitor.convertFileSrc ? Capacitor.convertFileSrc(resolved) : resolved;
+      const conv = convertWithCapacitor(resolved);
       return conv;
     } catch (e) {
       console.warn('Failed to resolve/convert Cordova-style path:', e);
@@ -106,7 +119,7 @@ export function convertPhotoToDisplaySrc(photoPath) {
       ? window.CordovApp.File.getFileURI(photoPath)
       : photoPath;
     if (/^(file:|content:)/i.test(newPath)) {
-      const conv = Capacitor.convertFileSrc ? Capacitor.convertFileSrc(newPath) : newPath;
+      const conv = convertWithCapacitor(newPath);
       return conv;
     }
     return newPath;
@@ -147,50 +160,24 @@ export function toResolvableFileUri(photoPath) {
   // déjà une URL file/content
   if (/^(file:|content:)/i.test(photoPath)) return photoPath;
 
-  const cdvHttpMatch = /^https?:\/\/localhost\/__cdvfile_([^/]+)__\/(.+)/i.exec(photoPath);
+  const cdvHttpMatch = CDV_HTTP_REGEX.exec(photoPath);
   // si c'est une URL Cordova
   if (cdvHttpMatch) {
     const fsName = cdvHttpMatch[1];
     const rest = cdvHttpMatch[2];
-    const cf = (typeof window !== 'undefined' && window.cordova && window.cordova.file) ? window.cordova.file : null;
-    if (cf) {
-      let base = null;
-      switch (fsName) {
-        case 'files': base = cf.dataDirectory; break;
-        case 'files-external': base = cf.externalDataDirectory; break;
-        case 'cache': base = cf.cacheDirectory; break;
-        case 'cache-external': base = cf.externalCacheDirectory; break;
-        case 'documents': base = cf.documentsDirectory; break;
-        case 'sdcard': base = cf.externalRootDirectory; break;
-        case 'assets': base = cf.applicationDirectory; break;
-        case 'root': base = cf.externalRootDirectory; break;
-      }
-      if (base) return base.replace(/\/$/, '/') + rest;
-    }
+    const base = resolveBaseFromFsName(fsName);
+    if (base) return ensureTrailingSlash(base) + rest;
     // fallback à une URL Cordova
     return `cdvfile://localhost/${fsName}/${rest}`;
   }
 
   // si c'est une URL Cordova (non http)
-  const cdvMatch = /^cdvfile:\/\/localhost\/([^/]+)\/(.+)/i.exec(photoPath);
+  const cdvMatch = CDVFILE_REGEX.exec(photoPath);
   if (cdvMatch) {
     const fsName = cdvMatch[1];
     const rest = cdvMatch[2];
-    const cf = (typeof window !== 'undefined' && window.cordova && window.cordova.file) ? window.cordova.file : null;
-    if (cf) {
-      let base = null;
-      switch (fsName) {
-        case 'files': base = cf.dataDirectory; break;
-        case 'files-external': base = cf.externalDataDirectory; break;
-        case 'cache': base = cf.cacheDirectory; break;
-        case 'cache-external': base = cf.externalCacheDirectory; break;
-        case 'documents': base = cf.documentsDirectory; break;
-        case 'sdcard': base = cf.externalRootDirectory; break;
-        case 'assets': base = cf.applicationDirectory; break;
-        case 'root': base = cf.externalRootDirectory; break;
-      }
-      if (base) return base.replace(/\/$/, '/') + rest;
-    }
+    const base = resolveBaseFromFsName(fsName);
+    if (base) return ensureTrailingSlash(base) + rest;
   }
 
   // autres (http(s) data URL, pseudo roots, etc.)
