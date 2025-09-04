@@ -1,6 +1,6 @@
-import { Capacitor } from '@capacitor/core'
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
 import { Filesystem, Directory } from '@capacitor/filesystem'
+import { convertPhotoToDisplaySrc } from './photo-utils'
 
 export default function installReportPhotoCapacitor(wapp) {
   if (!wapp || !wapp.report) return;
@@ -44,7 +44,7 @@ export default function installReportPhotoCapacitor(wapp) {
       }).then(function() {
         return Filesystem.getUri({ path, directory: Directory.Data });
       }).then(function(result) {
-        const displaySrc = Capacitor.convertFileSrc ? Capacitor.convertFileSrc(result.uri) : `data:image/jpeg;base64,${photo.base64String}`;
+        const displaySrc = convertPhotoToDisplaySrc(result.uri);
         return { uri: result.uri, displaySrc };
       });
     });
@@ -118,4 +118,97 @@ export default function installReportPhotoCapacitor(wapp) {
       return _origSave(georem, ...rest);
     }
   }
+
+  // Override the ReportForm's showGeorem method to fix Android photo display
+  // const _origShowGeorem = wapp.report.showGeorem && wapp.report.showGeorem.bind(wapp.report);
+  // if (_origShowGeorem) {
+  //   wapp.report.showGeorem = function(georem) {
+  //     const result = _origShowGeorem(georem);
+      
+  //     // After the original showGeorem runs, fix any problematic photo URLs
+  //     setTimeout(function() {
+  //       // Check both form element and any georem displays (like onglet-georem)
+  //       const containers = [wapp.report.formElement, '#fiche .georem'];
+        
+  //       containers.forEach(container => {
+  //         $(container).find('.photo img, img.photo').each(function() {
+  //           const currentSrc = $(this).attr('src');
+  //           if (currentSrc && /https?:\/\/localhost\/__cdvfile/.test(currentSrc)) {
+  //             console.log('Fixing problematic photo URL:', currentSrc);
+  //             const photoData = $(this).data('photo');
+  //             if (photoData) {
+  //               const fixedSrc = convertPhotoToDisplaySrc(photoData);
+  //               console.log('Fixed photo URL from', currentSrc, 'to', fixedSrc);
+  //               $(this).attr('src', fixedSrc);
+  //             } else {
+  //               // If no photo data, try to extract filename and reconstruct path
+  //               const filenameMatch = currentSrc.match(/([^/]+\.jpg)$/);
+  //               if (filenameMatch) {
+  //                 const filename = filenameMatch[1];
+  //                 console.log('Attempting to reconstruct path for filename:', filename);
+  //                 // Try common photo locations
+  //                 const possiblePaths = [
+  //                   `file:///data/user/0/fr.ign.guichet/files/${filename}`,
+  //                   `file:///data/user/0/fr.ign.guichet/files/cache-signalements/${filename}`
+  //                 ];
+                  
+  //                 for (const path of possiblePaths) {
+  //                   const fixedSrc = convertPhotoToDisplaySrc(path);
+  //                   if (fixedSrc !== path) { // If conversion changed something, use it
+  //                     console.log('Reconstructed photo URL:', fixedSrc);
+  //                     $(this).attr('src', fixedSrc);
+  //                     break;
+  //                   }
+  //                 }
+  //               }
+  //             }
+  //           }
+  //         });
+  //       });
+  //     }, 100);
+      
+  //     return result;
+  //   };
+  // }
+
+  // // Also add a general photo URL fixer that can be triggered manually
+  // wapp.fixPhotoPaths = function() {
+  //   console.log('Manually fixing photo paths...');
+  //   $('#fiche .georem img.photo, #fiche .georem .photo img').each(function() {
+  //     const currentSrc = $(this).attr('src');
+  //     if (currentSrc && /https?:\/\/localhost\/__cdvfile/.test(currentSrc)) {
+  //       console.log('Found problematic photo URL:', currentSrc);
+  //       const photoData = $(this).data('photo');
+  //       if (photoData) {
+  //         const fixedSrc = convertPhotoToDisplaySrc(photoData);
+  //         console.log('Fixed using photo data:', fixedSrc);
+  //         $(this).attr('src', fixedSrc);
+  //       } else {
+  //         const filenameMatch = currentSrc.match(/([^/]+\.jpg)$/);
+  //         if (filenameMatch) {
+  //           const filename = filenameMatch[1];
+  //           const reconstructedPath = `file:///data/user/0/fr.ign.guichet/files/${filename}`;
+  //           const fixedSrc = convertPhotoToDisplaySrc(reconstructedPath);
+  //           console.log('Fixed using reconstructed path:', fixedSrc);
+  //           $(this).attr('src', fixedSrc);
+  //         }
+  //       }
+  //     }
+  //   });
+  // };
+
+  // // Override wapp.showSelect to fix photos when showing georem details
+  // const _origShowSelect = wapp.showSelect && wapp.showSelect.bind(wapp);
+  // if (_origShowSelect) {
+  //   wapp.showSelect = function(...args) {
+  //     const result = _origShowSelect(...args);
+      
+  //     // After showing selection, fix any problematic photo URLs
+  //     setTimeout(function() {
+  //       wapp.fixPhotoPaths();
+  //     }, 200);
+      
+  //     return result;
+  //   };
+  // }
 }

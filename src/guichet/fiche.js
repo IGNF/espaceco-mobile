@@ -1,6 +1,7 @@
 import wapp from '../wapp'
 
 import { Network } from '@capacitor/network'
+import { convertPhotoToDisplaySrc } from '../capacitor-hooks/photo-utils'
 
 import {containsCoordinate as ol_extent_containsCoordinate} from 'ol/extent'
 import {getCenter as ol_extent_getCenter} from 'ol/extent'
@@ -14,6 +15,7 @@ import moment from 'moment';
 import { prettifyAxiosError } from 'cordovapp/collaboratif/errorHelper'
 
 var slider, docForm;
+
 
 /** Show Visibulle / thematics in the selection bar
  * @param {ol/Feature} f
@@ -166,6 +168,7 @@ function showSlider() {
  * @param {boolean} newOne if not false add a delete button (c est la propriete report du feature lorsqu elle existe)
  */
 function showGeorem(div, georem, newOne) {
+  console.log('showGeorem', georem);
   if (georem.id) {
     for (let i in georem.replies) {
       georem.replies[i].author_name = georem.replies[i].author.username;
@@ -204,9 +207,12 @@ function showGeorem(div, georem, newOne) {
   
   georem.attText = georem.attText.trim();
 
-  $('img.photo', div).each(function(i) {
+  // Clear existing photo sources
+  $('img.photo', div).each(function() {
+    // $(this).attr('src', '').hide();
     $(this).attr('src', '');
   });
+
   for (let i in georem.photos) {
     let count = i; count++;
     let p = georem.photos[i];
@@ -221,6 +227,19 @@ function showGeorem(div, georem, newOne) {
     }
     $('.photo.img'+count, div).attr('src', src).show();
   }
+  
+  // Process and display photos
+  // if (georem.photos && Array.isArray(georem.photos)) {
+  //   for (let i = 0; i < georem.photos.length; i++) {
+  //     const photoPath = georem.photos[i];
+  //     const count = i + 1; // Photo indices are 1-based (img1, img2, etc.)
+  //     const src = convertPhotoToDisplaySrc(photoPath);
+      
+  //     if (src) {
+  //       $('.photo.img' + count, div).attr('src', src).show();
+  //     }
+  //   }
+  // }
 
   const georemDiv = $(".georem", div);
   // Show attributes
