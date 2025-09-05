@@ -29,6 +29,7 @@
   },
   "homepage": "https://github.com/IGNF/espaceco-mobile",
   "dependencies": {
+    "@capacitor-community/keep-awake": "^7.1.0",
     "@capacitor/android": "^7.4.3",
     "@capacitor/app": "7.0.2",
     "@capacitor/camera": "^7.0.2",
@@ -69,7 +70,6 @@
     "cordova-plugin-email-composer": "^0.10.1",
     "cordova-plugin-file": "^8.1.3",
     "cordova-plugin-inappbrowser": "^6.0.0",
-    "cordova-plugin-insomnia": "github:EddyVerbruggen/Insomnia-PhoneGap-Plugin",
     "crypto-browserify": "^3.12.0",
     "eslint": "^6.5.1",
     "events": "^3.3.0",
@@ -100,7 +100,6 @@
         "GPS_REQUIRED": "true"
       },
       "cordova-plugin-bluetooth-geolocation": {},
-      "cordova-plugin-insomnia": {},
       "cordova-plugin-inappbrowser": {},
       "cordova-plugin-background-mode": {},
       "cordova-plugin-email-composer": {},

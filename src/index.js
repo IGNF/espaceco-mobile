@@ -21,13 +21,13 @@ import { StatusBar } from '@capacitor/status-bar'
 // Function to initialize/reset iOS StatusBar configuration
 function initializeIOSStatusBar() {
   if (typeof window !== 'undefined' && Capacitor.getPlatform && Capacitor.getPlatform() === 'ios') {
-    try { 
-      StatusBar.setOverlaysWebView({ overlay: false }) 
+    try {
+      StatusBar.setOverlaysWebView({ overlay: false })
       // Additional StatusBar settings to ensure proper behavior
       StatusBar.setStyle({ style: 'dark' }) // test without this
       StatusBar.show()
     } catch (e) { /* noop */ }
-    try { 
+    try {
       document.documentElement.classList.add('platform-ios')  // test without this
       // Force a reflow to ensure proper layout
       // document.body.offsetHeight
@@ -44,14 +44,14 @@ window.initializeIOSStatusBar = initializeIOSStatusBar
 // Add event listeners to detect when the app regains focus (e.g., after camera closes)
 // This provides an additional safety net for StatusBar reset
 if (typeof window !== 'undefined' && Capacitor.getPlatform && Capacitor.getPlatform() === 'ios') {
-  document.addEventListener('visibilitychange', function() {
+  document.addEventListener('visibilitychange', function () {
     if (!document.hidden) {
       // App regained focus, reset StatusBar after a short delay
       setTimeout(initializeIOSStatusBar, 100);
     }
   });
-  
-  window.addEventListener('focus', function() {
+
+  window.addEventListener('focus', function () {
     // Window regained focus, reset StatusBar after a short delay
     setTimeout(initializeIOSStatusBar, 100);
   });
