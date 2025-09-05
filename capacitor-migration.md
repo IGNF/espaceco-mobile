@@ -11,14 +11,14 @@
 
 **Les modules Cordova intégrés directement dans l'app qui seraient à modifier :**
 
+- ❌ cordova-plugin-geolocation (wapp.js & apiTemplate.js) => https://capacitorjs.com/docs/apis/geolocation
+- ❌ cordova-plugin-bluetooth-serial - **Android uniquement ?** - (apiTemplate, wapp.js - wapp.selectGPS()): https://github.com/giuseppelanzi/BluetoothSerial
+- ⏳ cordova-plugin-inappbrowser => https://capacitorjs.com/docs/apis/browser
+- ⏳ cordova-plugin-email-composer => https://github.com/EinfachHans/capacitor-email-composer
+- ⏳ cordova-plugin-device => https://capacitorjs.com/docs/apis/device
 - ✅ cordova-plugin-network-information (wapp.js & fiche.js - cordovapp/report ReportForm.js L 724) => https://capacitorjs.com/docs/apis/network
-- ✅ cordova-plugin-geolocation (wapp.js & apiTemplate.js) => https://capacitorjs.com/docs/apis/geolocation
 - ✅ cordova-plugin-insomnia (interaction.js, georemGPS.js) => https://github.com/capacitor-community/keep-awake
-- ✅ cordova-plugin-email-composer => https://github.com/EinfachHans/capacitor-email-composer
 - ✅ cordova-plugin-camera => https://capacitorjs.com/docs/apis/camera
-- ✅ cordova-plugin-device => https://capacitorjs.com/docs/apis/device
-- ✅ cordova-plugin-inappbrowser => https://capacitorjs.com/docs/apis/browser
-- ⚠️ cordova-plugin-bluetooth-serial - **Android uniquement ?** - (apiTemplate, wapp.js - wapp.selectGPS()): https://github.com/giuseppelanzi/BluetoothSerial - pourrait rester tel quel, à tester dans le POC -
 
 **D'autres modules semblent ne pas être utilisés ? À confirmer :**
 
@@ -29,5 +29,5 @@
 ## Possibilités
 
 Il existe deux possibilités pour la migration :
-- Utiliser Capacitor majoritairement pour l'aspect pratique du développement et du build, en remplaçant simplement les modules intégrés dans l'app (marqués d'un ✅)
+- Utiliser Capacitor majoritairement pour l'aspect pratique du développement et du build, en remplaçant simplement les modules intégrés dans l'app (marqués d'un ⏳)
 - Intégrer Capacitor plus en profondeur, en réécrivant l'intégration native de cordovapp

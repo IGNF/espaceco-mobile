@@ -4,45 +4,48 @@ import wapp from './wapp'
 import CordovApp from 'cordovapp/CordovApp'
 import { transform } from 'ol/proj';
 
+import { getDeviceOs } from './capacitor-hooks/device-helper'
+import { AppLauncher } from '@capacitor/app-launcher'
+
 /** Select external GPS
  */
-wapp.selectGPS = function() {
+wapp.selectGPS = function () {
   // var menu = $('#options .sourcegps div').html(internal);
   wapp.selectDialog({
-      internal: 'GPS interne',
-      external: 'GPS externe (bluetooth)'
-    },
+    internal: 'GPS interne',
+    external: 'GPS externe (bluetooth)'
+  },
     null,
     (source) => {
       wapp.param.gpsSource = 'internal';
-      
+
       navigator.geolocation.setSource(source,
         (e) => {
           if (e.type === 'external') {
-            $('#options .sourcegps div').html('GPS externe ('+e.name+')');
+            $('#options .sourcegps div').html('GPS externe (' + e.name + ')');
           } else {
             $('#options .sourcegps div').html('GPS interne');
           }
           wapp.param.gpsSource = e.type;
-        }, 
+        },
         () => {
           wapp.alert('Impossible de se connecter au GPS externe.<br/>Vérifiez que le bluetooth est bien activé et le GPS allumé...');
         });
-    },{
-      title: 'Sélectionner la source GPS'
-    }
+    }, {
+    title: 'Sélectionner la source GPS'
+  }
   );
   if (window.bluetoothSerial && !bluetoothSerial.isok) {
     bluetoothSerial.isok = true;
     const con = bluetoothSerial.connect;
     bluetoothSerial.connect = function (macAddress_or_uuid, connectSuccess, connectFailure) {
       var tout = setTimeout(() => { wapp.wait('Recherche du GPS'); }, 500);
-      con.call(bluetoothSerial, macAddress_or_uuid, 
+      con.call(bluetoothSerial, macAddress_or_uuid,
         (a) => {
           clearTimeout(tout);
           wapp.wait(false);
-          connectSuccess(a); 
-        }, () => { 
+          connectSuccess(a);
+        }, () => {
           clearTimeout(tout);
           wapp.wait(false);
           wapp.alert('Impossible de se connecter au GPS.');
@@ -56,7 +59,7 @@ wapp.selectGPS = function() {
 /** 
  * Cloner le signalement
  */
-wapp.cloneGeorem = function() {
+wapp.cloneGeorem = function () {
   if (wapp.select.getFeatures().array_.length != 1) {
     wapp.alert("Sélectionner une seule alerte");
     return;
@@ -86,7 +89,7 @@ wapp.cloneGeorem = function() {
     georem = featureGeorem.values_.georem;
 
     theme = georem.theme;
-    if (!theme && typeof georem.attributes[0].theme != undefined){
+    if (!theme && typeof georem.attributes[0].theme != undefined) {
       theme = georem.attributes[0].theme;
       themes = `${georem.attributes[0].community_id}::${theme}`;
     } else {
@@ -97,11 +100,11 @@ wapp.cloneGeorem = function() {
     wapp.alert("Sélectionner une alerte");
     return;
   }
-  
-  let p = transform(wapp.map.getView().getCenter(), wapp.map.getView().getProjection(),'EPSG:4326');
-  let wkt="POINT(" + p[0] + " " + p[1] + ")";
 
-  let clone =  {
+  let p = transform(wapp.map.getView().getCenter(), wapp.map.getView().getProjection(), 'EPSG:4326');
+  let wkt = "POINT(" + p[0] + " " + p[1] + ")";
+
+  let clone = {
     geometry: wkt,
     sketch: undefined,
     comment: georem.comment ? georem.comment : "",
@@ -110,7 +113,7 @@ wapp.cloneGeorem = function() {
     themes: themes,
     theme: theme,
     attributes: attributes,
-    attText : georem.attText
+    attText: georem.attText
   };
 
   wapp.report.saveLocalRem(clone, null, (e) => {
@@ -130,17 +133,17 @@ wapp.cloneGeorem = function() {
 
 /** Afficher la legende
  */
-wapp.showLegend = function() {
-  wapp.dialog.show( CordovApp.template('dialog-legend'), { 
-    className: 'legend', 
-    anim: !wapp.hasDialog(), 
-    closeBox: true 
+wapp.showLegend = function () {
+  wapp.dialog.show(CordovApp.template('dialog-legend'), {
+    className: 'legend',
+    anim: !wapp.hasDialog(),
+    closeBox: true
   })
 };
 
 /** Filtrage des signalement
  */
-wapp.filterGeorem = function() {
+wapp.filterGeorem = function () {
   wapp.showPage('filter');
 };
 
@@ -155,7 +158,7 @@ wapp.toggleLayerGuichet = function (elt) {
 
 /** Goto location using external app
  */
-wapp.goto = function() {
+wapp.goto = function () {
   wapp.saveContext();
   let where = wapp.map.getView().getCenter();
   // Center on selection
@@ -169,8 +172,8 @@ wapp.goto = function() {
   where = transform(where, wapp.map.getView().getProjection(), 'EPSG:4326');
   // Goto
   setTimeout(() => { //pour donner le temps au contexte de s'enregistrer
-    if (wapp.getPlatformId()==='ios') window.cordova.InAppBrowser.open('maps://?q='+where[1]+','+where[0], '_system');
-    else window.open('geo://0,0?q='+where[1]+','+where[0], '_system');
+    const url = getDeviceOs() === 'ios' ? 'maps://?q=' + where[1] + ',' + where[0] : 'geo://0,0?q=' + where[1] + ',' + where[0]
+    AppLauncher.openUrl({ url: url })
   }, 800)
-  
+
 }
