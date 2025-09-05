@@ -3,31 +3,20 @@
 
 ## État des lieux
 
-**Il semblerait qu'une partie des références à Cordova viennent du module interne CordovApp, particulièrement :**
-
-- cordovapp/photo.js : appareil photo
-- cordovapp/File.js : file system
-- cordovapp/CordovApp.js : dialogs (navigator.notification)
-
-**Les modules Cordova intégrés directement dans l'app qui seraient à modifier :**
+**Les modules Cordova qui seraient à modifier :**
 
 - ❌ cordova-plugin-geolocation (wapp.js & apiTemplate.js) => https://capacitorjs.com/docs/apis/geolocation
 - ❌ cordova-plugin-bluetooth-serial - **Android uniquement ?** - (apiTemplate, wapp.js - wapp.selectGPS()): https://github.com/giuseppelanzi/BluetoothSerial
-- ⏳ cordova-plugin-inappbrowser => https://capacitorjs.com/docs/apis/browser
+- ⏳ cordova-plugin-background-mode → ⚠️ Utilisé par CordovApp (CacheMap.js)
 - ⏳ cordova-plugin-email-composer => https://github.com/EinfachHans/capacitor-email-composer
-- ⏳ cordova-plugin-device => https://capacitorjs.com/docs/apis/device
-- ✅ cordova-plugin-network-information (wapp.js & fiche.js - cordovapp/report ReportForm.js L 724) => https://capacitorjs.com/docs/apis/network
-- ✅ cordova-plugin-insomnia (interaction.js, georemGPS.js) => https://github.com/capacitor-community/keep-awake
-- ✅ cordova-plugin-camera => https://capacitorjs.com/docs/apis/camera
+- ⏳ cordova-plugin-device => https://capacitorjs.com/docs/apis/device → Non utilisé ?
+- ⏳ cordova-plugin-listpicker → Non utilisé ?
+- ✅ cordova-plugin-inappbrowser (remplacé par AppLauncher)
+- ✅ cordova-plugin-network-information
+- ✅ cordova-plugin-insomnia
+- ✅ cordova-plugin-camera
 
-**D'autres modules semblent ne pas être utilisés ? À confirmer :**
-
-- cordova-plugin-listpicker (aucune référence à listpicker.xxx)
-- cordova-plugin-background-mode (aucune référence à backgroundMode.xxx)
-- cordova-plugin-device (aucune référence à device.xxx)
-
-## Possibilités
-
-Il existe deux possibilités pour la migration :
-- Utiliser Capacitor majoritairement pour l'aspect pratique du développement et du build, en remplaçant simplement les modules intégrés dans l'app (marqués d'un ⏳)
-- Intégrer Capacitor plus en profondeur, en réécrivant l'intégration native de cordovapp
+## Légende
+❌ = Plugins à ne pas migrer en l'état (trop de dépendances, ou pas d'équivalence Capacitor existant)
+⏳ = À migrer OU supprimer si non utilisé
+✅ = Déjà migré
