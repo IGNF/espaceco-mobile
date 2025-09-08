@@ -718,20 +718,18 @@ wapp.saveGPS = function () {
       + "-" + ("00" + (d.getMonth() + 1)).slice(-2)
       + "-" + ("00" + d.getDate()).slice(-2);
     var filename = d + ".gpx";
-    var path = filename;
 
     // Ecrit le fichier dans le cache de l'application avec Capacitor Filesystem
     Filesystem.writeFile({
-      path: path,
+      path: filename,
       data: gpx,
       directory: Directory.Cache,
       encoding: Encoding.UTF8,
       recursive: true
     })
-      .then(() => Filesystem.getUri({ path: path, directory: Directory.Cache }))
+      .then(() => Filesystem.getUri({ path: filename, directory: Directory.Cache }))
       .then(({ uri }) => {
         if (typeof uri === 'string' && /^file:\/\//i.test(uri)) {
-          console.log('saveGPS absolute path', uri);
           const absolutePath = uri.replace(/^file:\/\//i, '');
           const attachments = [{ type: 'absolute', path: absolutePath, name: filename }];
 
