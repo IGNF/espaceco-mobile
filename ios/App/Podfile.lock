@@ -10,6 +10,8 @@ PODS:
   - CapacitorCommunityKeepAwake (7.1.0):
     - Capacitor
   - CapacitorCordova (7.4.3)
+  - CapacitorEmailComposer (7.0.2):
+    - Capacitor
   - CapacitorFilesystem (7.1.4):
     - Capacitor
     - IONFilesystemLib (~> 1.0.1)
@@ -31,6 +33,7 @@ DEPENDENCIES:
   - "CapacitorCamera (from `../../node_modules/@capacitor/camera`)"
   - "CapacitorCommunityKeepAwake (from `../../node_modules/@capacitor-community/keep-awake`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
+  - CapacitorEmailComposer (from `../../node_modules/capacitor-email-composer`)
   - "CapacitorFilesystem (from `../../node_modules/@capacitor/filesystem`)"
   - "CapacitorKeyboard (from `../../node_modules/@capacitor/keyboard`)"
   - "CapacitorNetwork (from `../../node_modules/@capacitor/network`)"
@@ -55,6 +58,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor-community/keep-awake"
   CapacitorCordova:
     :path: "../../node_modules/@capacitor/ios"
+  CapacitorEmailComposer:
+    :path: "../../node_modules/capacitor-email-composer"
   CapacitorFilesystem:
     :path: "../../node_modules/@capacitor/filesystem"
   CapacitorKeyboard:
@@ -75,14 +80,15 @@ SPEC CHECKSUMS:
   CapacitorCamera: f9e54db0a18bb218a8dc360907d63aaefe9209ff
   CapacitorCommunityKeepAwake: 05c75aab989f60e621870cf03b24a144a5544c30
   CapacitorCordova: 435121e81a2df4d0034f0fb11fcefab5104cfdb5
+  CapacitorEmailComposer: 47e488b85f3a4400e3b616fe56b5b9f65a4aa2f3
   CapacitorFilesystem: f9bd850c41e048180e5dc0cbb90f2033ede9d2cc
   CapacitorKeyboard: a86aa9e4741b6444a802df26440a92ae041b34a6
   CapacitorNetwork: 695069886b3c5ed514db69aa3d026b8dc3c03a6b
   CapacitorStatusBar: e04d05e121d5a5979c29eb4249186a4e4a84cacb
-  CordovaPlugins: a3b4e11747cfa46a27ba506df3baa2915f20b508
+  CordovaPlugins: b38736629d47ac8d59cee202e01a4a895620d372
   CordovaPluginsResources: da93847212bf7b16ba770e4d6c3e7dba820174c7
   IONFilesystemLib: 89258b8e3e85465da93127d25d7ce37f977e8a6f
 
-PODFILE CHECKSUM: d52d8d520cedc7b59756d32bde1d04518aef0fbf
+PODFILE CHECKSUM: 6d279852aad93593d4dfe8a25e253a5eff8fcf35
 
 COCOAPODS: 1.16.2

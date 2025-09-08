@@ -35,6 +35,8 @@ import { prettifyAxiosError } from 'cordovapp/collaboratif/errorHelper'
 import CollabVector from 'cordovapp/ol/layer/CollabVector'
 
 import { Network } from '@capacitor/network';
+import { EmailComposer } from 'capacitor-email-composer';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 
 
 /** Web application pour l'acces a l'espace collaboratif depuis un mobile.
@@ -710,23 +712,40 @@ wapp.saveGPS = function () {
     var gpx = '<?xml version="1.0"?>' + format.writeFeatures([f], {
       featureProjection: wapp.map.getView().getProjection()
     });
-
     // Nom sur la date d'aujourd'hui
     var d = new Date();
     d = d.getFullYear()
       + "-" + ("00" + (d.getMonth() + 1)).slice(-2)
       + "-" + ("00" + d.getDate()).slice(-2);
     var filename = d + ".gpx";
-    var path = "TMP/" + filename;
+    var path = filename;
 
-    CordovApp.File.write(path, gpx, function (fileEntry) {
-      cordova.plugins.email.open({
-        subject: 'Trace GPX Espace Collaboratif Mobile du ' + d,
-        attachments: CordovApp.File.getFileURI(fileEntry.toURL())
+    // Ecrit le fichier dans le cache de l'application avec Capacitor Filesystem
+    Filesystem.writeFile({
+      path: path,
+      data: gpx,
+      directory: Directory.Cache,
+      encoding: Encoding.UTF8,
+      recursive: true
+    })
+      .then(() => Filesystem.getUri({ path: path, directory: Directory.Cache }))
+      .then(({ uri }) => {
+        if (typeof uri === 'string' && /^file:\/\//i.test(uri)) {
+          console.log('saveGPS absolute path', uri);
+          const absolutePath = uri.replace(/^file:\/\//i, '');
+          const attachments = [{ type: 'absolute', path: absolutePath, name: filename }];
+
+          return EmailComposer.open({
+            subject: 'Trace GPX Espace Collaboratif Mobile du ' + d,
+            attachments: attachments
+          });
+        } else {
+          console.log('saveGPS failed because no absolute path');
+        }
+      })
+      .catch((e) => {
+        console.error('saveGPS email error', e);
       });
-    }, function () {
-      wapp.alert("Impossible de créer le fichier");
-    });
   }
 };
 
