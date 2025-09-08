@@ -33,7 +33,10 @@ export default function installReportPhotoCapacitor(wapp) {
         resultType: CameraResultType.Base64,
         source: CameraSource.Prompt,
         correctOrientation: true,
-        saveToGallery: false
+        saveToGallery: false,
+        promptLabelCancel: 'Annuler',
+        promptLabelPhoto: 'De la galerie',
+        promptLabelPicture: 'Prendre une photo'
       });
     }).then(function (photo) {
       const fileName = `photo_${Date.now()}.jpeg`;
