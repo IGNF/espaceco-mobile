@@ -19,6 +19,14 @@ npm uninstall cordova-ios
 # Remove Cordova directories
 rm -r platforms plugins
 
+# Remove entries from .gitignore for Cordova directories
+# Use GNU sed if available, otherwise use BSD/macOS sed
+if sed --version >/dev/null 2>&1; then
+  sed -i -E '/^(platforms|plugins)\/?$/d' .gitignore
+else
+  sed -E -i '' '/^(platforms|plugins)\/?$/d' .gitignore
+fi
+
 # Install dependencies and sync Capacitor
 npm install
 npx cap sync
