@@ -45,15 +45,17 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
-  <key>NSLocationWhenInUseUsageDescription</key>
-  <string>This app requires access to location when in use.</string>
-  <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-  <string>This app requires access to location when in use.</string>
-  <key>NSPhotoLibraryAddUsageDescription</key>
-  <string>Pour illustrer vos contributions</string>
-  <key>NSPhotoLibraryUsageDescription</key>
-  <string>Pour illustrer vos contributions</string>
-  <key>NSCameraUsageDescription</key>
-  <string>Pour illustrer vos contributions</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Pour localiser vos signalements</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Pour localiser vos signalements</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Pour illustrer vos contributions</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Pour illustrer vos contributions</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Pour illustrer vos contributions</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Pour la fonctionnalité de localisation par GPS.</string>
 </dict>
 </plist>
