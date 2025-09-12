@@ -1,4 +1,4 @@
-require('dotenv').config();
+// require('dotenv').config();
 import 'collab-form/scss/main.scss'
 import './style.css'
 import './i18n'

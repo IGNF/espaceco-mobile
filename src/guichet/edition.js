@@ -2,7 +2,7 @@
 
 import wapp from '../wapp'
 import ol_ext_element from 'ol-ext/util/element'
-const collabForm = require('collab-form');
+import { createFormForTable } from 'collab-form';
 import { alertDlg } from 'cordovapp/cordovapp/dialog'
 import { DocumentForm } from 'cordovapp/collaboratif/DocumentForm'
 
@@ -45,7 +45,7 @@ wapp.editFeature = function(closeOnSubmit, source) {
     }
   }
   // Formulaire
-  let form = collabForm.createFormForTable($(ul), "form-atts", table, editProperties, "mobile");
+  let form = createFormForTable($(ul), "form-atts", table, editProperties, "mobile");
   $(".feature-form").ready(function(){
     form.init();
     initDocumentForm();
