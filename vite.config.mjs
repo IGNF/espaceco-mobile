@@ -10,8 +10,11 @@ export default defineConfig(({ mode }) => {
     publicDir: 'assets',
     build: {
       outDir: '../www',
-      sourcemap: false,
-      emptyOutDir: true
+      sourcemap: true,
+      emptyOutDir: true,
+      commonjsOptions: {
+        transformMixedEsModules: true
+      }
     },
     server: {
       host: true,
@@ -21,6 +24,10 @@ export default defineConfig(({ mode }) => {
       'process.env': Object.fromEntries(
         Object.entries(env).map(([k, v]) => [k, JSON.stringify(v)])
       )
+    },
+    optimizeDeps: {
+      include: ['collaboratif-client-api', 'collab-form'],
+      esbuildOptions: { supported: { 'dynamic-import': true } }
     }
   }
 })
