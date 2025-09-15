@@ -1,13 +1,18 @@
 import { defineConfig, loadEnv } from 'vite'
 
 export default defineConfig(({ mode }) => {
-  // Load env files (.env, .env.local, .env.development, etc.)
   const env = loadEnv(mode, process.cwd(), '')
 
   return {
     root: 'src',
     base: './',
     publicDir: 'assets',
+    resolve: {
+      alias: [
+        // Normalisation des imports cordovapp vers la racine du projet
+        { find: /^(?:\.\.\/)+src\//, replacement: '/' }
+      ]
+    },
     build: {
       outDir: '../www',
       sourcemap: true,
