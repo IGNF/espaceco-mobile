@@ -26,7 +26,17 @@ export default defineConfig(({ mode }) => {
       )
     },
     optimizeDeps: {
-      include: ['collaboratif-client-api', 'collab-form'],
+      // Pré-bundled modules
+      include: [
+        'collaboratif-client-api',
+        'collab-form',
+        'webfontloader',
+        'rbush',
+        'quickselect',
+        'moment'
+      ],
+      // Évite le pré-bundling de ces modules (cause des problèmes de dépendances)
+      exclude: ['cordovapp/report/ReportForm'],
       esbuildOptions: { supported: { 'dynamic-import': true } }
     }
   }
