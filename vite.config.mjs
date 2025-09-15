@@ -26,9 +26,7 @@ export default defineConfig(({ mode }) => {
       port: 1234
     },
     define: {
-      'process.env': Object.fromEntries(
-        Object.entries(env).map(([k, v]) => [k, JSON.stringify(v)])
-      )
+      'process.env': JSON.stringify(env)
     },
     optimizeDeps: {
       // Pré-bundled modules
