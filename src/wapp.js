@@ -37,6 +37,7 @@ import CollabVector from 'cordovapp/ol/layer/CollabVector'
 import { Network } from '@capacitor/network';
 import { EmailComposer } from 'capacitor-email-composer';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { convertPhotoToDisplaySrc } from './capacitor-hooks/photo-utils'
 
 
 /** Web application pour l'acces a l'espace collaboratif depuis un mobile.
@@ -801,16 +802,58 @@ wapp.communityChoice = function () {
 /** Recupere le logo d'un goupe
  * @param {any} g le groupe
  * @param {function} cback callback fonction qui renvoie le nom du fichier
+ * NOTE :
+ * Ce code a été modifié pour utiliser Capacitor File API au lieu de Cordova File API
+ * pour résoudre les problèmes de compatibilité avec Capacitor
  */
 wapp.getLogo = function (g, cback, scope) {
-  CordovApp.File.getFile("TMP/logo/" + (g ? g.id : '_nologo_'),
-    function (fileEntry) {
-      cback.call(scope, CordovApp.File.getFileURI(fileEntry.toURL()));
-    },
-    function () {
-      cback.call(scope, g ? g.logo_url : null);
+  const id = g && g.id ? String(g.id) : '_nologo_';
+  const tryPaths = [`logo/${id}`, `TMP/logo/${id}`];
+  const tryDirs = [Directory.Data, Directory.Cache];
+
+  function tryNext(indexPath, indexDir) {
+    if (indexPath >= tryPaths.length) {
+      // Try legacy Cordova file API as last resort
+      if (window.CordovApp && window.CordovApp.File && window.CordovApp.File.getFile) {
+        window.CordovApp.File.getFile(
+          "TMP/logo/" + id,
+          function (fileEntry) {
+            const uri = window.CordovApp.File.getFileURI(fileEntry.toURL());
+            const displaySrc = convertPhotoToDisplaySrc(uri);
+            cback.call(scope, displaySrc || (g ? g.logo_url : null));
+          },
+          function () {
+            cback.call(scope, g ? g.logo_url : null);
+          }
+        );
+      } else {
+        cback.call(scope, g ? g.logo_url : null);
+      }
+      return;
     }
-  );
+
+    if (indexDir >= tryDirs.length) {
+      return tryNext(indexPath + 1, 0);
+    }
+
+    const p = tryPaths[indexPath];
+    const d = tryDirs[indexDir];
+    Filesystem.stat({ path: p, directory: d })
+      .then(function () { return Filesystem.getUri({ path: p, directory: d }); })
+      .then(function (res) {
+        const displaySrc = convertPhotoToDisplaySrc(res.uri);
+        if (displaySrc) {
+          cback.call(scope, displaySrc);
+        } else {
+          tryNext(indexPath, indexDir + 1);
+        }
+      })
+      .catch(function () {
+        tryNext(indexPath, indexDir + 1);
+      });
+  }
+
+  tryNext(0, 0);
 };
 
 /* config is in wapp * /
