@@ -47,7 +47,7 @@
     "cordova-plugin-dialogs": "^2.0.2",
     "cordova-plugin-geolocation": "^4.0.2",
     "cordova-plugin-listpicker": "^2.2.2",
-    "cordovapp": "https://github.com/IGNF/mobile-core.git",
+    "cordovapp": "github:IGNF/mobile-core#vite-support",
     "dotenv": "^16.0.3",
     "jquery": "^3.4.1",
     "lightningcss": "^1.22.1",
