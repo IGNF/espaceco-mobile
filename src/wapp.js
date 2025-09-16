@@ -678,13 +678,6 @@ wapp.setQualif = function () {
  * @returns {Object} {"authBaseUrl": "...", "clientId": "...", "clientSecret": "..."}
  */
 wapp.getAuthParameters = function (url) {
-  console.log("process.env.BASE_API_URL", process.env.BASE_API_URL);
-  console.log("process.env.QLF_BASE_AUTH_URL", process.env.QLF_BASE_AUTH_URL);
-  console.log("process.env.QLF_COLLAB_API_CLIENT_ID", process.env.QLF_COLLAB_API_CLIENT_ID);
-  console.log("process.env.QLF_COLLAB_API_CLIENT_SECRET", process.env.QLF_COLLAB_API_CLIENT_SECRET);
-  console.log("process.env.BASE_AUTH_URL", process.env.BASE_AUTH_URL);
-  console.log("process.env.COLLAB_API_CLIENT_ID", process.env.COLLAB_API_CLIENT_ID);
-  console.log("process.env.COLLAB_API_CLIENT_SECRET", process.env.COLLAB_API_CLIENT_SECRET);
   if (url != process.env.BASE_API_URL) {
     return {
       "authBaseUrl": process.env.QLF_BASE_AUTH_URL,
