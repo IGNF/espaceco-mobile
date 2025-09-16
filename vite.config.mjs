@@ -15,8 +15,10 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       outDir: '../www',
-      sourcemap: true,
+      sourcemap: mode === 'development',
       emptyOutDir: true,
+      minify: mode === 'development' ? false : 'esbuild',
+      cssMinify: mode === 'development' ? false : true,
       commonjsOptions: {
         transformMixedEsModules: true
       }
