@@ -1,0 +1,22 @@
+name: Android CI/CD (placeholder)
+
+on:
+  push:
+    branches: ["ci-cd"]
+  workflow_dispatch:
+
+jobs:
+  echo:
+    name: Echo Android pipeline placeholder
+    runs-on: ubuntu-latest
+    # Ensure manual runs only proceed on the ci-cd branch
+    if: github.ref == 'refs/heads/ci-cd'
+    steps:
+      - name: Print context
+        run: |
+          echo "Android workflow triggered on: $GITHUB_REF"
+          echo "Repository: $GITHUB_REPOSITORY"
+          echo "Commit: $GITHUB_SHA"
+          echo "Actor: $GITHUB_ACTOR"
+          echo "This is a placeholder Android pipeline."
+
