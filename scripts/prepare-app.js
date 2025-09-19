@@ -112,15 +112,44 @@ try {
 // TODO : ajouter la gestion des assets splash et android background/foreground
 const resourcesDir = path.join(root, 'resources');
 fse.ensureDirSync(resourcesDir);
+const originDir = path.join(root, 'scripts', selected, 'assets');
 
-// Utilise le logo de l'app selectionnée comme base icon si possible
+// Définit les images (icon, splash, android-background, android-foreground) à utiliser pour la génération des assets natifs
 const iconPath = path.join(resourcesDir, 'icon.png');
+const splashPath = path.join(resourcesDir, 'splash.png');
+const splashDarkPath = path.join(resourcesDir, 'splash-dark.png');
+const androidBackgroundPath = path.join(resourcesDir, 'android', 'icon-background.png');
+const androidForegroundPath = path.join(resourcesDir, 'android', 'icon-foreground.png');
 try {
-  if (fs.existsSync(logoSrc)) {
-    fse.copyFileSync(logoSrc, iconPath);
-    console.log(`- Updated resources/icon.png from ${selected} logo`);
+  if (fs.existsSync(iconPath)) {
+    fse.copyFileSync(path.join(originDir, 'icon.png'), iconPath);
+    console.log(`- Updated resources/icon.png from ${selected} icon`);
   } else {
     console.log('- Kept existing resources/icon.png');
+  }
+  if (fs.existsSync(splashPath)) {
+    fse.copyFileSync(path.join(originDir, 'splash.png'), splashPath);
+    console.log(`- Updated resources/splash.png from ${selected} splash`);
+  } else {
+    console.log('- Kept existing resources/splash.png');
+  }
+  if (fs.existsSync(splashDarkPath)) {
+    fse.copyFileSync(path.join(originDir, 'splash-dark.png'), splashDarkPath);
+    console.log(`- Updated resources/splash-dark.png from ${selected} splash-dark`);
+  } else {
+    console.log('- Kept existing resources/splash-dark.png');
+  }
+  if (fs.existsSync(androidBackgroundPath)) {
+    fse.copyFileSync(path.join(originDir, 'android', 'icon-background.png'), androidBackgroundPath);
+    console.log(`- Updated resources/android-background.png from ${selected} android-background`);
+  } else {
+    console.log('- Kept existing resources/android-background.png');
+  }
+  if (fs.existsSync(androidForegroundPath)) {
+    fse.copyFileSync(path.join(originDir, 'android', 'icon-foreground.png'), androidForegroundPath);
+    console.log(`- Updated resources/android-foreground.png from ${selected} android-foreground`);
+  } else {
+    console.log('- Kept existing resources/android-foreground.png');
   }
 } catch (e) {
   console.warn(`- Unable to update resources/icon.png: ${e.message}`);
