@@ -22,7 +22,7 @@ jobs:
           cache: npm
 
       - name: Create empty .env
-        run: : > .env
+        run: touch .env
 
       - name: Make envfile (override with secrets)
         run: |
