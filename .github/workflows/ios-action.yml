@@ -40,20 +40,8 @@ jobs:
           [ -n "${{ secrets.APPLI_ID }}" ] && echo "APPLI_ID=${{ secrets.APPLI_ID }}" >> .env || true
           [ -n "${{ secrets.APPLI_NAME }}" ] && echo "APPLI_NAME=${{ secrets.APPLI_NAME }}" >> .env || true
 
-      - name: Show .env (redacted)
-        run: |
-          echo "Effective .env (values redacted):"
-          awk -F= 'NF{v=$0; sub(/^[^=]*=/,"",v); k=$1; if (length(v)>0) { printf "%s=%s***\n", k, substr(v,1,5) } else { printf "%s=\n", k } }' .env
-
       - name: Install dependencies
         run: npm ci
 
       - name: Build web bundle
         run: npm run build
-
-      - name: Upload www artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: web-bundle-www
-          path: www
-          if-no-files-found: error
