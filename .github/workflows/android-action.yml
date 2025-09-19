@@ -46,3 +46,9 @@ jobs:
 
       - name: Build web bundle
         run: npm run build
+
+      - name: Generate Capacitor assets (Android)
+        run: npx @capacitor/assets generate --android
+
+      - name: Capacitor sync (Android)
+        run: npx cap sync android
