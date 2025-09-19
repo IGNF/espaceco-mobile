@@ -43,7 +43,7 @@ jobs:
       - name: Show .env (redacted)
         run: |
           echo "Effective .env (values redacted):"
-          awk -F= 'NF{val=$0; sub(/^[^=]*=/,"",val); print $1"=" (length(val)>0?"***":"")}' .env
+          awk -F= 'NF{v=$0; sub(/^[^=]*=/,"",v); k=$1; if (length(v)>0) { printf "%s=%s***\n", k, substr(v,1,5) } else { printf "%s=\n", k } }' .env
 
       - name: Install dependencies
         run: npm ci
