@@ -52,3 +52,78 @@ jobs:
 
       - name: Capacitor sync (Android)
         run: npx cap sync android
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: 21
+
+      - name: Check Android build-tools
+        run: |
+          ls -la /usr/local/lib/android/sdk/build-tools/ || true
+
+      - name: Detect selected app and signing params
+        id: detect_app
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f scripts/.selected-app ]]; then
+            app=$(tr -d '\r\n' < scripts/.selected-app)
+          else
+            # Default to EspaceCo
+            app="EspaceCo"
+          fi
+          echo "Selected app: $app"
+          # Choose alias + key password per selected app
+          if [[ "$app" == "NaviForest" ]]; then
+            echo "SIGNING_ALIAS=${{ secrets.ALIAS_NAVIFOREST }}" >> "$GITHUB_ENV"
+            echo "SIGNING_KEY_PASSWORD=${{ secrets.KEY_PASSWORD_NAVIFOREST }}" >> "$GITHUB_ENV"
+          else
+            # Default to EspaceCo
+            echo "SIGNING_ALIAS=${{ secrets.ALIAS_ESPACECO }}" >> "$GITHUB_ENV"
+            echo "SIGNING_KEY_PASSWORD=${{ secrets.KEY_PASSWORD_ESPACECO }}" >> "$GITHUB_ENV"
+          fi
+          # Derive package name from updated Gradle config
+          pkg=$(sed -n 's/.*applicationId\s*"\([^"]*\)".*/\1/p' android/app/build.gradle | head -n1)
+          if [[ -n "$pkg" ]]; then
+            echo "PACKAGE_NAME=$pkg" >> "$GITHUB_ENV"
+          fi
+
+      - name: Build Android release (APK + AAB)
+        run: |
+          cd android
+          ./gradlew --no-daemon assembleRelease bundleRelease
+
+      - name: Sign Android App Bundle (AAB)
+        id: sign_aab
+        uses: r0adkll/sign-android-release@v1
+        with:
+          # Sign the generated AAB in the release output directory
+          releaseDirectory: android/app/build/outputs/bundle/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ env.SIGNING_ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          # keyPassword is optional; set if your keystore uses a distinct key password
+          keyPassword: ${{ env.SIGNING_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+
+      - name: Upload signed bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-signed-aab
+          path: ${{ steps.sign_aab.outputs.signedReleaseFile }}
+          retention-days: 3
+
+      # NEED GOOGLE DEVELOPER ACCESS TO DO THE FOLLOWING
+      # - name: Deploy to Play Store (internal track)
+      #   if: ${{ secrets.SERVICE_ACCOUNT_JSON != '' }}
+      #   uses: r0adkll/upload-google-play@v1
+      #   with:
+      #     serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+      #     packageName: ${{ env.PACKAGE_NAME }}
+      #     releaseFiles: ${{ steps.sign_aab.outputs.signedReleaseFile }}
+      #     track: internal
+      #     status: completed
+      #     inAppUpdatePriority: 5
