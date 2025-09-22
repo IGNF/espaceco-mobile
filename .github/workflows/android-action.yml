@@ -63,6 +63,14 @@ jobs:
         run: |
           ls -la /usr/local/lib/android/sdk/build-tools/ || true
 
+      - name: Sanity check Android resources
+        run: |
+          echo "Listing android/app/src/main/res folders:" &&
+          ls -la android/app/src/main/res || true &&
+          echo "values:" && ls -la android/app/src/main/res/values || true &&
+          echo "xml:" && ls -la android/app/src/main/res/xml || true &&
+          echo "layout:" && ls -la android/app/src/main/res/layout || true
+
       - name: Detect selected app and signing params
         id: detect_app
         shell: bash
