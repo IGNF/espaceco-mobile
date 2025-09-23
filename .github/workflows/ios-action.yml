@@ -88,10 +88,8 @@ jobs:
       - name: Build archive
         env:
           TEAM_ID: ${{ secrets.APPSTORE_TEAM_ID }}
-          PROFILE_NAME: ${{ secrets.APPSTORE_PROFILE_NAME }}
         run: |
           set -euo pipefail
-          # If your workspace/scheme paths differ, adjust.
           cd ios/App
           xcodebuild \
             -workspace "App.xcworkspace" \
@@ -101,8 +99,11 @@ jobs:
             -destination "generic/platform=iOS" \
             DEVELOPMENT_TEAM="$TEAM_ID" \
             CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            PROVISIONING_PROFILE="" \
             clean archive
 
       # - name: Export IPA
