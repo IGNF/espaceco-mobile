@@ -113,6 +113,15 @@ jobs:
       #     path: ${{ runner.temp }}/export/*.ipa
       #     retention-days: 3
 
+      # - name: Save App Store Connect API key (.p8)
+      #   env:
+      #     API_KEY_B64: ${{ secrets.APPSTORE_API_PRIVATE_KEY }} # base64 of AuthKey_XXXXXX.p8
+      #   run: |
+      #     set -euo pipefail
+      #     mkdir -p ~/private_keys
+      #     echo -n "$API_KEY_B64" | base64 --decode \
+      #     > ~/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8
+
       # - name: Upload to TestFlight
       #   env:
       #     API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
