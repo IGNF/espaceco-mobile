@@ -10,7 +10,8 @@ jobs:
     name: Build web bundle (www)
     runs-on: ubuntu-latest
     # Ensure manual runs only proceed on the ci-cd branch
-    if: github.ref == 'refs/heads/ci-cd'
+    # if: github.ref == 'refs/heads/ci-cd'
+    if: ${{ false }} # temporarily disabled
     steps:
       - name: Checkout
         uses: actions/checkout@v4

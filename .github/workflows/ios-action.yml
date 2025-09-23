@@ -1,53 +1,53 @@
 # name: iOS CI/CD
 
-# on:
-#   push:
-#     branches: ["ci-cd"]
-#   workflow_dispatch:
+on:
+  push:
+    branches: ["ci-cd"]
+  workflow_dispatch:
 
-# jobs:
-#   build-web:
-#     name: Build web bundle (www)
-#     runs-on: macos-15
-#     # Ensure manual runs only proceed on the ci-cd branch
-#     if: github.ref == 'refs/heads/ci-cd'
-#     steps:
-#       - name: Checkout
-#         uses: actions/checkout@v4
+jobs:
+  build-web:
+    name: Build web bundle (www)
+    runs-on: macos-15
+    # Ensure manual runs only proceed on the ci-cd branch
+    if: github.ref == 'refs/heads/ci-cd'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-#       - name: Setup Node.js
-#         uses: actions/setup-node@v4
-#         with:
-#           node-version: 20
-#           cache: npm
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
 
-#       - name: Create empty .env
-#         run: touch .env
+      - name: Create empty .env
+        run: touch .env
 
-#       - name: Make envfile (override with secrets)
-#         run: |
-#           set -euo pipefail
-#           [ -n "${{ secrets.COLLAB_API_CLIENT_ID }}" ] && echo "COLLAB_API_CLIENT_ID=${{ secrets.COLLAB_API_CLIENT_ID }}" >> .env || true
-#           [ -n "${{ secrets.COLLAB_API_CLIENT_SECRET }}" ] && echo "COLLAB_API_CLIENT_SECRET=${{ secrets.COLLAB_API_CLIENT_SECRET }}" >> .env || true
-#           [ -n "${{ secrets.BASE_AUTH_URL }}" ] && echo "BASE_AUTH_URL=${{ secrets.BASE_AUTH_URL }}" >> .env || true
-#           [ -n "${{ secrets.QLF_COLLAB_API_CLIENT_ID }}" ] && echo "QLF_COLLAB_API_CLIENT_ID=${{ secrets.QLF_COLLAB_API_CLIENT_ID }}" >> .env || true
-#           [ -n "${{ secrets.QLF_COLLAB_API_CLIENT_SECRET }}" ] && echo "QLF_COLLAB_API_CLIENT_SECRET=${{ secrets.QLF_COLLAB_API_CLIENT_SECRET }}" >> .env || true
-#           [ -n "${{ secrets.QLF_BASE_AUTH_URL }}" ] && echo "QLF_BASE_AUTH_URL=${{ secrets.QLF_BASE_AUTH_URL }}" >> .env || true
-#           [ -n "${{ secrets.BASE_API_URL }}" ] && echo "BASE_API_URL=${{ secrets.BASE_API_URL }}" >> .env || true
-#           [ -n "${{ secrets.SECRET }}" ] && echo "SECRET=${{ secrets.SECRET }}" >> .env || true
-#           # App selection/name identifiers (optional overrides, defined in the config.js files)
-#           [ -n "${{ secrets.APPLI }}" ] && echo "APPLI=${{ secrets.APPLI }}" >> .env || true
-#           [ -n "${{ secrets.APPLI_ID }}" ] && echo "APPLI_ID=${{ secrets.APPLI_ID }}" >> .env || true
-#           [ -n "${{ secrets.APPLI_NAME }}" ] && echo "APPLI_NAME=${{ secrets.APPLI_NAME }}" >> .env || true
+      - name: Make envfile (override with secrets)
+        run: |
+          set -euo pipefail
+          [ -n "${{ secrets.COLLAB_API_CLIENT_ID }}" ] && echo "COLLAB_API_CLIENT_ID=${{ secrets.COLLAB_API_CLIENT_ID }}" >> .env || true
+          [ -n "${{ secrets.COLLAB_API_CLIENT_SECRET }}" ] && echo "COLLAB_API_CLIENT_SECRET=${{ secrets.COLLAB_API_CLIENT_SECRET }}" >> .env || true
+          [ -n "${{ secrets.BASE_AUTH_URL }}" ] && echo "BASE_AUTH_URL=${{ secrets.BASE_AUTH_URL }}" >> .env || true
+          [ -n "${{ secrets.QLF_COLLAB_API_CLIENT_ID }}" ] && echo "QLF_COLLAB_API_CLIENT_ID=${{ secrets.QLF_COLLAB_API_CLIENT_ID }}" >> .env || true
+          [ -n "${{ secrets.QLF_COLLAB_API_CLIENT_SECRET }}" ] && echo "QLF_COLLAB_API_CLIENT_SECRET=${{ secrets.QLF_COLLAB_API_CLIENT_SECRET }}" >> .env || true
+          [ -n "${{ secrets.QLF_BASE_AUTH_URL }}" ] && echo "QLF_BASE_AUTH_URL=${{ secrets.QLF_BASE_AUTH_URL }}" >> .env || true
+          [ -n "${{ secrets.BASE_API_URL }}" ] && echo "BASE_API_URL=${{ secrets.BASE_API_URL }}" >> .env || true
+          [ -n "${{ secrets.SECRET }}" ] && echo "SECRET=${{ secrets.SECRET }}" >> .env || true
+          # App selection/name identifiers (optional overrides, defined in the config.js files)
+          [ -n "${{ secrets.APPLI }}" ] && echo "APPLI=${{ secrets.APPLI }}" >> .env || true
+          [ -n "${{ secrets.APPLI_ID }}" ] && echo "APPLI_ID=${{ secrets.APPLI_ID }}" >> .env || true
+          [ -n "${{ secrets.APPLI_NAME }}" ] && echo "APPLI_NAME=${{ secrets.APPLI_NAME }}" >> .env || true
 
-#       - name: Install dependencies
-#         run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-#       - name: Build web bundle
-#         run: npm run build
+      - name: Build web bundle
+        run: npm run build
       
-#       - name: Generate Capacitor assets (iOS)
-#         run: npx @capacitor/assets generate --ios
+      - name: Generate Capacitor assets (iOS)
+        run: npx @capacitor/assets generate --ios
 
-#       - name: Capacitor sync (iOS)
-#         run: npx cap sync ios
+      - name: Capacitor sync (iOS)
+        run: npx cap sync ios
