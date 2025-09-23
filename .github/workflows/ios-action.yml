@@ -76,21 +76,21 @@ jobs:
           mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
           cp "$PROFILE" "$HOME/Library/MobileDevice/Provisioning Profiles/"
 
-      # - name: Build archive
-      #   env:
-      #     TEAM_ID: ${{ secrets.APPSTORE_TEAM_ID }}
-      #   run: |
-      #     set -euo pipefail
-      #     # If your workspace/scheme paths differ, adjust.
-      #     cd ios/App
-      #     xcodebuild \
-      #       -workspace "App.xcworkspace" \
-      #       -scheme "App" \
-      #       -configuration "Release Production" \
-      #       -archivePath "$GITHUB_WORKSPACE/App.xcarchive" \
-      #       -destination "generic/platform=iOS" \
-      #       DEVELOPMENT_TEAM="$TEAM_ID" \
-      #       clean archive
+      - name: Build archive
+        env:
+          TEAM_ID: ${{ secrets.APPSTORE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          # If your workspace/scheme paths differ, adjust.
+          cd ios/App
+          xcodebuild \
+            -workspace "App.xcworkspace" \
+            -scheme "App" \
+            -configuration "Release Production" \
+            -archivePath "$GITHUB_WORKSPACE/App.xcarchive" \
+            -destination "generic/platform=iOS" \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            clean archive
 
       # - name: Export IPA
       #   env:
