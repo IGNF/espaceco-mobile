@@ -106,18 +106,18 @@ jobs:
             PROVISIONING_PROFILE="" \
             clean archive
 
-      # - name: Export IPA
-      #   env:
-      #     EXPORT_PLIST_B64: ${{ secrets.IOS_EXPORT_PRODUCTION }} # base64 of ExportOptions.plist (method=app-store, signingStyle=manual, provisioningProfiles map)
-      #   run: |
-      #     set -euo pipefail
-      #     EXPORT_PLIST=$RUNNER_TEMP/ExportOptions.plist
-      #     echo -n "$EXPORT_PLIST_B64" | base64 --decode > "$EXPORT_PLIST"
-      #     cd ios/App
-      #     xcodebuild -exportArchive \
-      #       -archivePath "$GITHUB_WORKSPACE/App.xcarchive" \
-      #       -exportOptionsPlist "$EXPORT_PLIST" \
-      #       -exportPath "$RUNNER_TEMP/export"
+      - name: Export IPA
+        env:
+          EXPORT_PLIST_B64: ${{ secrets.IOS_EXPORT_PRODUCTION }}
+        run: |
+          set -euo pipefail
+          EXPORT_PLIST=$RUNNER_TEMP/ExportOptions.plist
+          echo -n "$EXPORT_PLIST_B64" | base64 --decode > "$EXPORT_PLIST"
+          cd ios/App
+          xcodebuild -exportArchive \
+            -archivePath "$GITHUB_WORKSPACE/App.xcarchive" \
+            -exportOptionsPlist "$EXPORT_PLIST" \
+            -exportPath "$RUNNER_TEMP/export"
 
       # - name: Save App Store Connect API key (.p8)
       #   env:
