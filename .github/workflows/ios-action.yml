@@ -45,9 +45,82 @@ jobs:
 
       - name: Build web bundle
         run: npm run build
-      
+
       - name: Generate Capacitor assets (iOS)
         run: npx @capacitor/assets generate --ios
 
       - name: Capacitor sync (iOS)
         run: npx cap sync ios
+
+      - name: Install Apple distribution cert & App Store profile
+        env:
+          DISTRIBUTION_CERTIFICATE_P12: ${{ secrets.DISTRIBUTION_CERTIFICATE_P12 }}
+          P12_PASSWORD_DISTR: ${{ secrets.P12_PASSWORD_DISTR }}
+          APPSTORE_PROFILE_BASE64: ${{ secrets.DEPLOY_PROVISION_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          set -euo pipefail
+          CERT_P12=$RUNNER_TEMP/dist.p12
+          PROFILE=$RUNNER_TEMP/appstore.mobileprovision
+          KEYCHAIN=$RUNNER_TEMP/app-signing.keychain-db
+
+          echo -n "$DISTRIBUTION_CERTIFICATE_P12" | base64 --decode > "$CERT_P12"
+          echo -n "$APPSTORE_PROFILE_BASE64" | base64 --decode > "$PROFILE"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security import "$CERT_P12" -P "$P12_PASSWORD_DISTR" -A -t cert -f pkcs12 -k "$KEYCHAIN"
+          security list-keychain -d user -s "$KEYCHAIN"
+
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          cp "$PROFILE" "$HOME/Library/MobileDevice/Provisioning Profiles/"
+
+      # - name: Build archive
+      #   env:
+      #     TEAM_ID: ${{ secrets.APPSTORE_TEAM_ID }}
+      #   run: |
+      #     set -euo pipefail
+      #     # If your workspace/scheme paths differ, adjust.
+      #     cd ios/App
+      #     xcodebuild \
+      #       -workspace "App.xcworkspace" \
+      #       -scheme "App" \
+      #       -configuration "Release Production" \
+      #       -archivePath "$GITHUB_WORKSPACE/App.xcarchive" \
+      #       -destination "generic/platform=iOS" \
+      #       DEVELOPMENT_TEAM="$TEAM_ID" \
+      #       clean archive
+
+      # - name: Export IPA
+      #   env:
+      #     EXPORT_PLIST_B64: ${{ secrets.IOS_EXPORT_PRODUCTION }} # base64 of ExportOptions.plist (method=app-store, signingStyle=manual, provisioningProfiles map)
+      #   run: |
+      #     set -euo pipefail
+      #     EXPORT_PLIST=$RUNNER_TEMP/ExportOptions.plist
+      #     echo -n "$EXPORT_PLIST_B64" | base64 --decode > "$EXPORT_PLIST"
+      #     cd ios/App
+      #     xcodebuild -exportArchive \
+      #       -archivePath "$GITHUB_WORKSPACE/App.xcarchive" \
+      #       -exportOptionsPlist "$EXPORT_PLIST" \
+      #       -exportPath "$RUNNER_TEMP/export"
+
+      # # Optional: keep if you want to fetch the IPA from Actions
+      # - name: Upload IPA artifact (optional)
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: App-ipa
+      #     path: ${{ runner.temp }}/export/*.ipa
+      #     retention-days: 3
+
+      # - name: Upload to TestFlight
+      #   env:
+      #     API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+      #     API_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+      #   run: |
+      #     set -euo pipefail
+      #     IPA=$(ls $RUNNER_TEMP/export/*.ipa | head -n 1)
+      #     xcrun iTMSTransporter -m upload \
+      #       -assetFile "$IPA" \
+      #       -apiKey "$API_KEY_ID" \
+      #       -apiIssuer "$API_ISSUER_ID"
