@@ -84,61 +84,61 @@ jobs:
             -scheme "App" \
             -configuration "Release Production" | egrep "CODE_SIGN|PROVISION|PRODUCT_BUNDLE_IDENTIFIER|DEVELOPMENT_TEAM"
 
-      - name: Show code signing identities
-        run: |
-          security find-identity -v -p codesigning
-
-      - name: Inspect provisioning profile
-        run: |
-          PROFILE=$(ls "$HOME/Library/MobileDevice/Provisioning Profiles"/*.mobileprovision | head -n1)
-          security cms -D -i "$PROFILE" > $RUNNER_TEMP/profile.plist
-          echo "Profile Name: $(/usr/libexec/PlistBuddy -c 'Print Name' $RUNNER_TEMP/profile.plist)"
-          echo "Bundle ID:    $(/usr/libexec/PlistBuddy -c 'Print Entitlements:application-identifier' $RUNNER_TEMP/profile.plist)"
-          # Print SHA-1 fingerprints of DeveloperCertificates embedded in the profile
-          python3 - <<'PY'
-          import plistlib, base64, subprocess, os
-          p=plistlib.load(open(os.environ['RUNNER_TEMP']+'/profile.plist','rb'))
-          for i, der_b64 in enumerate(p.get('DeveloperCertificates', [])):
-              der = base64.b64decode(der_b64)
-              path = f"{os.environ['RUNNER_TEMP']}/cert{i}.cer"
-              open(path,'wb').write(der)
-              out = subprocess.check_output(['openssl','x509','-inform','DER','-in',path,'-noout','-subject','-serial','-fingerprint','-sha1']).decode()
-              print(f"Profile cert[{i}]:\n{out}")
-          PY
-
-      # - name: Build archive
-      #   env:
-      #     TEAM_ID: ${{ secrets.APPSTORE_TEAM_ID }}
+      # - name: Show code signing identities
       #   run: |
-      #     set -euo pipefail
-      #     cd ios/App
-      #     xcodebuild \
-      #       -workspace "App.xcworkspace" \
-      #       -scheme "App" \
-      #       -configuration "Release Production" \
-      #       -archivePath "$GITHUB_WORKSPACE/App.xcarchive" \
-      #       -destination "generic/platform=iOS" \
-      #       DEVELOPMENT_TEAM="$TEAM_ID" \
-      #       CODE_SIGN_STYLE=Manual \
-      #       CODE_SIGNING_ALLOWED=NO \
-      #       CODE_SIGNING_REQUIRED=NO \
-      #       CODE_SIGN_IDENTITY="" \
-      #       PROVISIONING_PROFILE_SPECIFIER="" \
-      #       PROVISIONING_PROFILE="" \
-      #       clean archive
+      #     security find-identity -v -p codesigning
 
-      # - name: Export IPA
-      #   env:
-      #     EXPORT_PLIST_B64: ${{ secrets.IOS_EXPORT_PRODUCTION }}
+      # - name: Inspect provisioning profile
       #   run: |
-      #     set -euo pipefail
-      #     EXPORT_PLIST=$RUNNER_TEMP/ExportOptions.plist
-      #     echo -n "$EXPORT_PLIST_B64" | base64 --decode > "$EXPORT_PLIST"
-      #     cd ios/App
-      #     xcodebuild -exportArchive \
-      #       -archivePath "$GITHUB_WORKSPACE/App.xcarchive" \
-      #       -exportOptionsPlist "$EXPORT_PLIST" \
-      #       -exportPath "$RUNNER_TEMP/export"
+      #     PROFILE=$(ls "$HOME/Library/MobileDevice/Provisioning Profiles"/*.mobileprovision | head -n1)
+      #     security cms -D -i "$PROFILE" > $RUNNER_TEMP/profile.plist
+      #     echo "Profile Name: $(/usr/libexec/PlistBuddy -c 'Print Name' $RUNNER_TEMP/profile.plist)"
+      #     echo "Bundle ID:    $(/usr/libexec/PlistBuddy -c 'Print Entitlements:application-identifier' $RUNNER_TEMP/profile.plist)"
+      #     # Print SHA-1 fingerprints of DeveloperCertificates embedded in the profile
+      #     python3 - <<'PY'
+      #     import plistlib, base64, subprocess, os
+      #     p=plistlib.load(open(os.environ['RUNNER_TEMP']+'/profile.plist','rb'))
+      #     for i, der_b64 in enumerate(p.get('DeveloperCertificates', [])):
+      #         der = base64.b64decode(der_b64)
+      #         path = f"{os.environ['RUNNER_TEMP']}/cert{i}.cer"
+      #         open(path,'wb').write(der)
+      #         out = subprocess.check_output(['openssl','x509','-inform','DER','-in',path,'-noout','-subject','-serial','-fingerprint','-sha1']).decode()
+      #         print(f"Profile cert[{i}]:\n{out}")
+      #     PY
+
+      - name: Build archive
+        env:
+          TEAM_ID: ${{ secrets.APPSTORE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          cd ios/App
+          xcodebuild \
+            -workspace "App.xcworkspace" \
+            -scheme "App" \
+            -configuration "Release Production" \
+            -archivePath "$GITHUB_WORKSPACE/App.xcarchive" \
+            -destination "generic/platform=iOS" \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            PROVISIONING_PROFILE="" \
+            clean archive
+
+      - name: Export IPA
+        env:
+          EXPORT_PLIST_B64: ${{ secrets.IOS_EXPORT_PRODUCTION }}
+        run: |
+          set -euo pipefail
+          EXPORT_PLIST=$RUNNER_TEMP/ExportOptions.plist
+          echo -n "$EXPORT_PLIST_B64" | base64 --decode > "$EXPORT_PLIST"
+          cd ios/App
+          xcodebuild -exportArchive \
+            -archivePath "$GITHUB_WORKSPACE/App.xcarchive" \
+            -exportOptionsPlist "$EXPORT_PLIST" \
+            -exportPath "$RUNNER_TEMP/export"
 
       # - name: Save App Store Connect API key (.p8)
       #   env:
