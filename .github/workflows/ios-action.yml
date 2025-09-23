@@ -76,9 +76,19 @@ jobs:
           mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
           cp "$PROFILE" "$HOME/Library/MobileDevice/Provisioning Profiles/"
 
+
+      - name: Show build settings
+        run: |
+          cd ios/App
+          xcodebuild -showBuildSettings \
+            -workspace "App.xcworkspace" \
+            -scheme "App" \
+            -configuration "Release Production" | egrep "CODE_SIGN|PROVISION|PRODUCT_BUNDLE_IDENTIFIER|DEVELOPMENT_TEAM"
+
       - name: Build archive
         env:
           TEAM_ID: ${{ secrets.APPSTORE_TEAM_ID }}
+          PROFILE_NAME: ${{ secrets.APPSTORE_PROFILE_NAME }}
         run: |
           set -euo pipefail
           # If your workspace/scheme paths differ, adjust.
@@ -90,6 +100,9 @@ jobs:
             -archivePath "$GITHUB_WORKSPACE/App.xcarchive" \
             -destination "generic/platform=iOS" \
             DEVELOPMENT_TEAM="$TEAM_ID" \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
+            PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
             clean archive
 
       # - name: Export IPA
@@ -104,14 +117,6 @@ jobs:
       #       -archivePath "$GITHUB_WORKSPACE/App.xcarchive" \
       #       -exportOptionsPlist "$EXPORT_PLIST" \
       #       -exportPath "$RUNNER_TEMP/export"
-
-      # # Optional: keep if you want to fetch the IPA from Actions
-      # - name: Upload IPA artifact (optional)
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: App-ipa
-      #     path: ${{ runner.temp }}/export/*.ipa
-      #     retention-days: 3
 
       # - name: Save App Store Connect API key (.p8)
       #   env:
