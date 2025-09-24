@@ -38,6 +38,8 @@ function addLayers (layers) {
   let layersArr = Object.keys(layers);
   let oneVisible = false;
   const caps = window.geoportailConfig.capabilities['default'];
+  console.log("addLayers", layers.length, layers)
+  console.log("caps", caps.length, caps)
   //on ordonne les couches selon leur ordre dans visibleLayers (chargement depuis cache) ou selon le parametre order (au premier chargement)
   let cacheOrdered = true;
   for (var key in layers) {
@@ -55,7 +57,8 @@ function addLayers (layers) {
   for (var i in layersArr) {
     let name = layersArr[i];
     let layer = layers[name];
-    if (caps[name]) {
+    /* if (caps[name]) {
+      console.log("caps name", name, caps[name])
       let visible = name in wapp.param.visibleLayers ? wapp.param.visibleLayers[name] : (layer.visibility || false);
       if (visible) oneVisible = true;
       let options = { hidpi: false, visible: visible};
@@ -83,7 +86,38 @@ function addLayers (layers) {
       geoportailLayer.getLayers().push(gpl);
     } else {
       console.warn('[GEOPORATAIL-CONFIG] Bad layer: ', name);
+    } */
+    
+    let visible = name in wapp.param.visibleLayers ? wapp.param.visibleLayers[name] : (layer.visibility || false);
+    if (visible) oneVisible = true;
+    let options = { hidpi: false, visible: visible};
+    if (layer && layer.geoservice && layer.geoservice.description) {
+      options["desc"] = layer.geoservice.description;
     }
+    let tileOptions = {};
+    if (layer && Object.keys(layer).length) {
+      options["opacity"] = name in wapp.param.visibleLayers ? wapp.param.visibleLayers[name] : (layer.opacity || 1);
+      console.log("layer", layer.geoservice.length)
+      if (layer.geoservice.length) {
+        console.log("tada")
+        options["minZoom"] = layer.geoservice["min-zoom"];
+        options["maxZoom"] = layer.geoservice["max-zoom"];
+        options['gppKey'] = config.apiKey;
+        tileOptions['gppKey'] = config.apiKey;
+      } else {
+        if(caps[name]) {
+          console.log("hello", caps[name])
+          options['gppKey'] = caps[name]['key'];
+          tileOptions['gppKey'] = caps[name]['key'];
+          tileOptions['server'] = caps[name].server;
+        }
+        else {
+          console.warn('[GEOPORTAIL-CONFIG] Bad layer: ', name);
+        }
+      }
+    }
+    const gpl = new ol_layer_Geoportail(name, options, tileOptions);
+    geoportailLayer.getLayers().push(gpl);
   }
   geoportailLayer.setVisible(true);
   if (!oneVisible) {
