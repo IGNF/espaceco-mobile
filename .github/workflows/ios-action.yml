@@ -142,9 +142,9 @@ jobs:
             -scheme "App" \
             -configuration "Release Production" | egrep "CODE_SIGN|PROVISION|PRODUCT_BUNDLE_IDENTIFIER|DEVELOPMENT_TEAM"
 
-      # - name: Show code signing identities
-      #   run: |
-      #     security find-identity -v -p codesigning
+      - name: Show code signing identities
+        run: |
+          security find-identity -v -p codesigning
 
       # - name: Inspect provisioning profile
       #   run: |
