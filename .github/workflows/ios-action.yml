@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-web:
-    name: Build web bundle (www)
+  build-and-deploy-app:
+    name: Build and Deploy iOS App
     runs-on: macos-15
     # Ensure manual runs only proceed on the ci-cd branch
     if: github.ref == 'refs/heads/ci-cd'
@@ -202,9 +202,17 @@ jobs:
           API_KEY_B64: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
         run: |
           set -euo pipefail
+          key_id="${{ secrets.APPSTORE_API_KEY_ID }}"
+          [ -z "$key_id" ] && {
+            echo "APPSTORE_API_KEY_ID secret is missing" >&2
+            exit 1
+          }
           mkdir -p ~/private_keys
+          mkdir -p ~/.appstoreconnect/private_keys
           echo -n "$API_KEY_B64" | base64 --decode \
           > ~/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8
+          cp ~/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8 \
+            ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8
 
       - name: Upload to TestFlight
         env:
@@ -213,7 +221,12 @@ jobs:
         run: |
           set -euo pipefail
           IPA=$(ls $RUNNER_TEMP/export/*.ipa | head -n 1)
-          xcrun iTMSTransporter -m upload \
-            -assetFile "$IPA" \
-            -apiKey "$API_KEY_ID" \
-            -apiIssuer "$API_ISSUER_ID"
+          if [[ -z "$IPA" || ! -f "$IPA" ]]; then
+            echo "No IPA found to upload" >&2
+            exit 1
+          fi
+          xcrun altool --upload-app \
+            --type ios \
+            --file "$IPA" \
+            --apiKey "$API_KEY_ID" \
+            --apiIssuer "$API_ISSUER_ID"
