@@ -67,6 +67,8 @@ jobs:
           set -euo pipefail
 
           app="EspaceCo"
+          appstore_profile=""
+          export_plist=""
           if [[ -f "$SELECTED_APP_FILE" ]]; then
             candidate=$(tr -d '\r\n' < "$SELECTED_APP_FILE")
             if [[ "$candidate" == "NaviForest" || "$candidate" == "EspaceCo" ]]; then
@@ -79,7 +81,7 @@ jobs:
           if [[ "$app" == "NaviForest" ]]; then
             appstore_profile="$NAVIFOREST_APPSTORE_PROFILE"
             export_plist="$NAVIFOREST_EXPORT_PLIST"
-            if [[ -z "$profile" || -z "$appstore_profile" || -z "$export_plist" ]]; then
+            if [[ -z "$appstore_profile" || -z "$export_plist" ]]; then
               echo "Missing NaviForest secrets; using EspaceCo configuration" >&2
               app="EspaceCo"
             fi
@@ -90,16 +92,13 @@ jobs:
             export_plist="$ESPACECO_EXPORT_PLIST"
           fi
 
-          if [[ -z "${profile}" ]]; then
-            echo "Missing provisioning profile secret for $app" >&2
-            exit 1
-          fi
           if [[ -z "${export_plist}" ]]; then
             echo "Missing export options plist secret for $app" >&2
             exit 1
           fi
           if [[ -z "${appstore_profile}" ]]; then
-            appstore_profile="$profile"
+            echo "Missing provisioning profile secret for $app" >&2
+            exit 1
           fi
 
           echo "Selected app: $app"
