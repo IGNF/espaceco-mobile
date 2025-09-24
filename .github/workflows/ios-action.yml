@@ -141,9 +141,9 @@ jobs:
             -scheme "App" \
             -configuration "Release Production" | egrep "CODE_SIGN|PROVISION|PRODUCT_BUNDLE_IDENTIFIER|DEVELOPMENT_TEAM"
 
-      - name: Show code signing identities
-        run: |
-          security find-identity -v -p codesigning
+      # - name: Show code signing identities
+      #   run: |
+      #     security find-identity -v -p codesigning
 
       # - name: Inspect provisioning profile
       #   run: |
@@ -197,23 +197,23 @@ jobs:
             -exportOptionsPlist "$EXPORT_PLIST" \
             -exportPath "$RUNNER_TEMP/export"
 
-      # - name: Save App Store Connect API key (.p8)
-      #   env:
-      #     API_KEY_B64: ${{ secrets.APPSTORE_API_PRIVATE_KEY }} # base64 of AuthKey_XXXXXX.p8
-      #   run: |
-      #     set -euo pipefail
-      #     mkdir -p ~/private_keys
-      #     echo -n "$API_KEY_B64" | base64 --decode \
-      #     > ~/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8
+      - name: Save App Store Connect API key (.p8)
+        env:
+          API_KEY_B64: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/private_keys
+          echo -n "$API_KEY_B64" | base64 --decode \
+          > ~/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8
 
-      # - name: Upload to TestFlight
-      #   env:
-      #     API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
-      #     API_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
-      #   run: |
-      #     set -euo pipefail
-      #     IPA=$(ls $RUNNER_TEMP/export/*.ipa | head -n 1)
-      #     xcrun iTMSTransporter -m upload \
-      #       -assetFile "$IPA" \
-      #       -apiKey "$API_KEY_ID" \
-      #       -apiIssuer "$API_ISSUER_ID"
+      - name: Upload to TestFlight
+        env:
+          API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          API_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+        run: |
+          set -euo pipefail
+          IPA=$(ls $RUNNER_TEMP/export/*.ipa | head -n 1)
+          xcrun iTMSTransporter -m upload \
+            -assetFile "$IPA" \
+            -apiKey "$API_KEY_ID" \
+            -apiIssuer "$API_ISSUER_ID"
