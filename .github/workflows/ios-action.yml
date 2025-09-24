@@ -77,7 +77,6 @@ jobs:
           fi
 
           if [[ "$app" == "NaviForest" ]]; then
-            profile="$NAVIFOREST_DEPLOY_PROFILE"
             appstore_profile="$NAVIFOREST_APPSTORE_PROFILE"
             export_plist="$NAVIFOREST_EXPORT_PLIST"
             if [[ -z "$profile" || -z "$appstore_profile" || -z "$export_plist" ]]; then
