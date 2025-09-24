@@ -52,11 +52,70 @@ jobs:
       - name: Capacitor sync (iOS)
         run: npx cap sync ios
 
+      - name: Detect selected app and iOS signing params
+        id: detect_ios_app
+        shell: bash
+        env:
+          SELECTED_APP_FILE: scripts/.selected-app
+          # ESPACECO_DEPLOY_PROFILE: ${{ secrets.DEPLOY_PROVISION_PROFILE_BASE64_ESPACECO }}
+          ESPACECO_APPSTORE_PROFILE: ${{ secrets.DEPLOY_PROVISION_PROFILE_BASE64_ESPACECO }}
+          ESPACECO_EXPORT_PLIST: ${{ secrets.IOS_EXPORT_PRODUCTION_ESPACECO }}
+          # NAVIFOREST_DEPLOY_PROFILE: ${{ secrets.DEPLOY_PROVISION_PROFILE_BASE64_NAVIFOREST }}
+          NAVIFOREST_APPSTORE_PROFILE: ${{ secrets.DEPLOY_PROVISION_PROFILE_BASE64_NAVIFOREST }}
+          NAVIFOREST_EXPORT_PLIST: ${{ secrets.IOS_EXPORT_PRODUCTION_NAVIFOREST }}
+        run: |
+          set -euo pipefail
+
+          app="EspaceCo"
+          if [[ -f "$SELECTED_APP_FILE" ]]; then
+            candidate=$(tr -d '\r\n' < "$SELECTED_APP_FILE")
+            if [[ "$candidate" == "NaviForest" || "$candidate" == "EspaceCo" ]]; then
+              app="$candidate"
+            else
+              echo "Unknown app '$candidate' in $SELECTED_APP_FILE, defaulting to EspaceCo" >&2
+            fi
+          fi
+
+          if [[ "$app" == "NaviForest" ]]; then
+            profile="$NAVIFOREST_DEPLOY_PROFILE"
+            appstore_profile="$NAVIFOREST_APPSTORE_PROFILE"
+            export_plist="$NAVIFOREST_EXPORT_PLIST"
+            if [[ -z "$profile" || -z "$appstore_profile" || -z "$export_plist" ]]; then
+              echo "Missing NaviForest secrets; using EspaceCo configuration" >&2
+              app="EspaceCo"
+            fi
+          fi
+
+          if [[ "$app" == "EspaceCo" ]]; then
+            appstore_profile="$ESPACECO_APPSTORE_PROFILE"
+            export_plist="$ESPACECO_EXPORT_PLIST"
+          fi
+
+          if [[ -z "${profile}" ]]; then
+            echo "Missing provisioning profile secret for $app" >&2
+            exit 1
+          fi
+          if [[ -z "${export_plist}" ]]; then
+            echo "Missing export options plist secret for $app" >&2
+            exit 1
+          fi
+          if [[ -z "${appstore_profile}" ]]; then
+            appstore_profile="$profile"
+          fi
+
+          echo "Selected app: $app"
+
+          {
+            printf 'SELECTED_APP=%s\n' "$app"
+            printf 'APPSTORE_PROFILE_BASE64<<EOF\n%s\nEOF\n' "$appstore_profile"
+            printf 'IOS_EXPORT_PRODUCTION<<EOF\n%s\nEOF\n' "$export_plist"
+          } >> "$GITHUB_ENV"
+
       - name: Install Apple distribution cert & App Store profile
         env:
           DISTRIBUTION_CERTIFICATE_P12: ${{ secrets.DISTRIBUTION_CERTIFICATE_P12 }}
           P12_PASSWORD_DISTR: ${{ secrets.P12_PASSWORD_DISTR }}
-          APPSTORE_PROFILE_BASE64: ${{ secrets.DEPLOY_PROVISION_PROFILE_BASE64 }}
+          APPSTORE_PROFILE_BASE64: ${{ env.APPSTORE_PROFILE_BASE64 }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
           set -euo pipefail
@@ -129,7 +188,7 @@ jobs:
 
       - name: Export IPA
         env:
-          EXPORT_PLIST_B64: ${{ secrets.IOS_EXPORT_PRODUCTION }}
+          EXPORT_PLIST_B64: ${{ env.IOS_EXPORT_PRODUCTION }}
         run: |
           set -euo pipefail
           EXPORT_PLIST=$RUNNER_TEMP/ExportOptions.plist
