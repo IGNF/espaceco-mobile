@@ -2,15 +2,14 @@
 
 on:
   push:
-    branches: ["ci-cd"]
+    tags:
+      - deploy/ios/*
   workflow_dispatch:
 
 jobs:
   build-and-deploy-app:
     name: Build and Deploy iOS App
     runs-on: macos-15
-    # Ensure manual runs only proceed on the ci-cd branch
-    if: github.ref == 'refs/heads/ci-cd'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -57,10 +56,8 @@ jobs:
         shell: bash
         env:
           SELECTED_APP_FILE: scripts/.selected-app
-          # ESPACECO_DEPLOY_PROFILE: ${{ secrets.DEPLOY_PROVISION_PROFILE_BASE64_ESPACECO }}
           ESPACECO_APPSTORE_PROFILE: ${{ secrets.DEPLOY_PROVISION_PROFILE_BASE64_ESPACECO }}
           ESPACECO_EXPORT_PLIST: ${{ secrets.IOS_EXPORT_PRODUCTION_ESPACECO }}
-          # NAVIFOREST_DEPLOY_PROFILE: ${{ secrets.DEPLOY_PROVISION_PROFILE_BASE64_NAVIFOREST }}
           NAVIFOREST_APPSTORE_PROFILE: ${{ secrets.DEPLOY_PROVISION_PROFILE_BASE64_NAVIFOREST }}
           NAVIFOREST_EXPORT_PLIST: ${{ secrets.IOS_EXPORT_PRODUCTION_NAVIFOREST }}
         run: |

@@ -8,8 +8,8 @@
     "start": "node ./scripts/prepare-app.js && vite",
     "backup": "node ./scripts/backup.js",
     "lint": "eslint --fix src/ || exit 0",
-    "build-dev": "node ./scripts/prepare-app.js --bump-build && vite build --mode development",
-    "build": "node ./scripts/prepare-app.js --bump-build && vite build",
+    "build-dev": "node ./scripts/prepare-app.js && vite build --mode development",
+    "build": "node ./scripts/prepare-app.js && vite build",
     "selectapp": "node ./scripts/selectapp.js",
     "selectapp:naviforest": "node ./scripts/selectapp.js --naviforest",
     "selectapp:espaceco": "node ./scripts/selectapp.js --espaceco",
@@ -20,7 +20,10 @@
     "capacitor-run-android": "npm run capacitor-build && npx cap run android",
     "capacitor-run-android-dev": "npm run capacitor-build-dev && npx cap run android",
     "open-xcode": "npx cap open ios",
-    "open-android": "npx cap open android"
+    "open-android": "npx cap open android",
+    "deploy:ios": "node ./scripts/deploy.js ios",
+    "deploy:android": "node ./scripts/deploy.js android",
+    "deploy": "node ./scripts/deploy.js both"
   },
   "repository": {},
   "keywords": [],
