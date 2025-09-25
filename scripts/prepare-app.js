@@ -218,62 +218,29 @@ try {
   console.warn('- Warning: unable to fully update native project files:', e.message);
 }
 
-// 6) Synchronise la version de l'app à partir de package.json et incrémente les numéros de build natifs si demandé
-// Note : le numéro de build n'est pas incrémenté si on ne fait qu'un simple npm start (il faut lancer un build pour incrémenter le numéro de build)
+// 6) Synchronise la version de l'app à partir de package.json (sans incrémenter les numéros de build)
 try {
   const pkgPath = path.join(root, 'package.json');
   const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
   const version = String(pkg.version || '').trim();
   if (!version) throw new Error('No version found in package.json');
-  const bumpBuild = process.argv.includes('--bump-build');
 
-  // Android: set versionName et incrémente versionCode
+  // Android: synchronise versionName avec package.json (sans modifier versionCode)
   const gradle = path.join(root, 'android', 'app', 'build.gradle');
   if (fs.existsSync(gradle)) {
     let txt = fs.readFileSync(gradle, 'utf8');
-    // Met à jour versionName
     txt = txt.replace(/versionName\s+"[^"]+"/, `versionName "${version}"`);
-    if (bumpBuild) {
-      // Incrémente versionCode (utilise max+1 si multiple occurrences)
-      const codes = Array.from(txt.matchAll(/versionCode\s+(\d+)/g)).map(m => parseInt(m[1], 10));
-      if (codes.length) {
-        const next = Math.max(...codes) + 1;
-        txt = txt.replace(/versionCode\s+\d+/g, `versionCode ${next}`);
-        fs.writeFileSync(gradle, txt, 'utf8');
-        console.log(`- Android: versionName=${version}, versionCode=${next}`);
-      } else {
-        fs.writeFileSync(gradle, txt, 'utf8');
-        console.log(`- Android: versionName=${version} (no versionCode found)`);
-      }
-    } else {
-      fs.writeFileSync(gradle, txt, 'utf8');
-      console.log(`- Android: versionName=${version} (build number inchangé)`);
-    }
+    fs.writeFileSync(gradle, txt, 'utf8');
+    console.log(`- Android: versionName=${version} (build number unchanged)`);
   }
 
-  // iOS: set MARKETING_VERSION et incrémente CURRENT_PROJECT_VERSION dans project.pbxproj
+  // iOS: synchronise MARKETING_VERSION avec package.json (sans modifier CURRENT_PROJECT_VERSION)
   const pbxproj = path.join(root, 'ios', 'App', 'App.xcodeproj', 'project.pbxproj');
   if (fs.existsSync(pbxproj)) {
     let txt = fs.readFileSync(pbxproj, 'utf8');
-    // Met à jour MARKETING_VERSION
     txt = txt.replace(/MARKETING_VERSION = [^;]+;/g, `MARKETING_VERSION = ${version};`);
-    if (bumpBuild) {
-      // Incrémente CURRENT_PROJECT_VERSION
-      const matches = Array.from(txt.matchAll(/CURRENT_PROJECT_VERSION = (\d+);/g));
-      if (matches.length) {
-        const maxCur = Math.max(...matches.map(m => parseInt(m[1], 10)));
-        const next = maxCur + 1;
-        txt = txt.replace(/CURRENT_PROJECT_VERSION = \d+;/g, `CURRENT_PROJECT_VERSION = ${next};`);
-        fs.writeFileSync(pbxproj, txt, 'utf8');
-        console.log(`- iOS: MARKETING_VERSION=${version}, CURRENT_PROJECT_VERSION=${next}`);
-      } else {
-        fs.writeFileSync(pbxproj, txt, 'utf8');
-        console.log(`- iOS: MARKETING_VERSION=${version} (no CURRENT_PROJECT_VERSION found)`);
-      }
-    } else {
-      fs.writeFileSync(pbxproj, txt, 'utf8');
-      console.log(`- iOS: MARKETING_VERSION=${version} (build number inchangé)`);
-    }
+    fs.writeFileSync(pbxproj, txt, 'utf8');
+    console.log(`- iOS: MARKETING_VERSION=${version} (build number unchanged)`);
   }
 } catch (e) {
   console.warn('- Warning: unable to sync versions/build numbers:', e.message);
