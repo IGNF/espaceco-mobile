@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-web:
-    name: Build web bundle (www)
+  build-and-deploy-android-app:
+    name: Build and Deploy Android App
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
