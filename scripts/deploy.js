@@ -21,10 +21,10 @@ function runCapture(cmd) {
 
 function ensureCleanGit() {
   const status = runCapture('git status --porcelain');
-  // if (status) {
-  //   console.error('Working tree is not clean. Commit or stash changes before deployment.');
-  //   process.exit(1);
-  // }
+  if (status) {
+    console.error('Working tree is not clean. Commit or stash changes before deployment.');
+    process.exit(1);
+  }
 }
 
 function ensureSelectedApp() {
@@ -97,12 +97,6 @@ function main() {
   } catch (err) {
     console.error(`Failed to bump build numbers: ${err.message}`);
     process.exit(1);
-  }
-
-  const statusAfterBump = runCapture('git status --porcelain');
-  if (!statusAfterBump) {
-    console.log('No changes detected after bump. Nothing to do.');
-    return;
   }
 
   stageChanges();

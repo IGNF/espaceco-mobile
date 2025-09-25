@@ -59,27 +59,4 @@ function bumpBuild(targetsArg) {
   return result;
 }
 
-function runFromCli() {
-  const arg = (process.argv[2] || 'both').toLowerCase();
-  let targets;
-  if (arg === 'both') {
-    targets = ['android', 'ios'];
-  } else if (VALID_TARGETS.has(arg)) {
-    targets = [arg];
-  } else {
-    console.error('Unknown target: use "ios", "android" or "both".');
-    process.exit(1);
-  }
-  try {
-    bumpBuild(targets);
-  } catch (err) {
-    console.error(err.message);
-    process.exit(1);
-  }
-}
-
-if (require.main === module) {
-  runFromCli();
-}
-
 module.exports = { bumpBuild };
