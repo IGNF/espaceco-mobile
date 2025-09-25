@@ -4,7 +4,7 @@ export default {
   name: "Naviforest",
   displayName: "Naviforest",
   ios:{
-    bundleId: "fr.ign.naviforest"
+    bundleId: "fr.ign.navi-forest"
   },
   android:{
     packageName: "fr.ign.naviforest"
