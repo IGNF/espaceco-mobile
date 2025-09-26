@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "fr.ign.guichet"
+    namespace "fr.ign.naviforest"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "fr.ign.guichet"
+        applicationId "fr.ign.naviforest"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 15
