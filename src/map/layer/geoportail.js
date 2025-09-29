@@ -38,8 +38,6 @@ function addLayers (layers) {
   let layersArr = Object.keys(layers);
   let oneVisible = false;
   const caps = window.geoportailConfig.capabilities['default'];
-  console.log("addLayers", layers.length, layers)
-  console.log("caps", caps.length, caps)
   //on ordonne les couches selon leur ordre dans visibleLayers (chargement depuis cache) ou selon le parametre order (au premier chargement)
   let cacheOrdered = true;
   for (var key in layers) {
@@ -97,16 +95,16 @@ function addLayers (layers) {
     let tileOptions = {};
     if (layer && Object.keys(layer).length) {
       options["opacity"] = name in wapp.param.visibleLayers ? wapp.param.visibleLayers[name] : (layer.opacity || 1);
-      console.log("layer", layer.geoservice.length)
-      if (layer.geoservice.length) {
-        console.log("tada")
+      url = layer.geoservice["url"]
+      console.log(url.split("?")[0], config.apiKey, caps[name]['key'])
+      if (layer.geoservice) {
         options["minZoom"] = layer.geoservice["min-zoom"];
         options["maxZoom"] = layer.geoservice["max-zoom"];
-        options['gppKey'] = config.apiKey;
-        tileOptions['gppKey'] = config.apiKey;
+        tileOptions['server'] = url.split("?")[0];
+        url.includes("private") ? tileOptions['gppKey'] = "ign_scan_ws" : tileOptions['gppKey'] = "gpf"
+        options['gppKey'] = tileOptions['gppKey']
       } else {
         if(caps[name]) {
-          console.log("hello", caps[name])
           options['gppKey'] = caps[name]['key'];
           tileOptions['gppKey'] = caps[name]['key'];
           tileOptions['server'] = caps[name].server;
