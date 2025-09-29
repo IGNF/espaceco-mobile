@@ -84,10 +84,12 @@ jobs:
           echo "Selected app: $app"
           # Choose alias + key password per selected app
           if [[ "$app" == "NaviForest" ]]; then
+            echo "SIGNING_KEY=${{ secrets.SIGNING_KEY_NAVIFOREST }}" >> "$GITHUB_ENV"
             echo "SIGNING_ALIAS=${{ secrets.ALIAS_NAVIFOREST }}" >> "$GITHUB_ENV"
             echo "SIGNING_KEY_PASSWORD=${{ secrets.KEY_PASSWORD_NAVIFOREST }}" >> "$GITHUB_ENV"
           else
             # Default to EspaceCo
+            echo "SIGNING_KEY=${{ secrets.SIGNING_KEY }}" >> "$GITHUB_ENV"
             echo "SIGNING_ALIAS=${{ secrets.ALIAS_ESPACECO }}" >> "$GITHUB_ENV"
             echo "SIGNING_KEY_PASSWORD=${{ secrets.KEY_PASSWORD_ESPACECO }}" >> "$GITHUB_ENV"
           fi
@@ -108,7 +110,7 @@ jobs:
         with:
           # Sign the generated AAB in the release output directory
           releaseDirectory: android/app/build/outputs/bundle/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          signingKeyBase64: ${{ env.SIGNING_KEY }}
           alias: ${{ env.SIGNING_ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           # keyPassword is optional; set if your keystore uses a distinct key password
