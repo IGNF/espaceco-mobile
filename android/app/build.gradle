@@ -1,14 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "fr.ign.guichet"
+    namespace "fr.ign.naviforest"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "fr.ign.guichet"
+        applicationId "fr.ign.naviforest"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 30008
-        versionName "3.0.7"
+        versionCode 20003
+        versionName "2.0.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
