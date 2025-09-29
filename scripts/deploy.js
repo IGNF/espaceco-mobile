@@ -89,7 +89,7 @@ function main() {
   }
   const targets = targetArg === 'both' ? ['android', 'ios'] : [targetArg];
 
-  ensureCleanGit();
+  // ensureCleanGit();
   ensureSelectedApp();
 
   try {

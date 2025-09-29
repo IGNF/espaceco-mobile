@@ -1,127 +1,162 @@
 import wapp from './wapp'
+import { getFreeDiskSpaceBytes, getDirectoryUsage, getDirectoryChildrenUsage } from './capacitor-hooks/file-handler'
 import CordovApp from 'cordovapp/CordovApp'
 
 /**
- * Affichage de la maitenance
+ * Affichage de la maintenance
  * @param {boolean} nodelay 
  */
 wapp.maintenance = function(nodelay) {
-  // Calcul avec un delais pour l'affichage
   if (!nodelay) {
-    $("#maintenance").addClass('calculating');
-    $("#maintenance .pie p").text('calcul');
-    setTimeout(function(){
-      wapp.maintenance(true);
+    $("#maintenance").addClass('calculating')
+    $("#maintenance .pie p").text('calcul')
+    setTimeout(function() {
+      wapp.maintenance(true)
     }, 500)
-    return;
-  }
-  // Info
-  var freeDiskSpace = 0;
-  var cacheImage = {};
-  var cacheVecteur = {};
-
-  // Affichage des infos (en asynchrone)
-  var count = 0;
-  function countCache(cache, className) {
-    var ul = $("#maintenance .resume");
-    var s = 0;
-    for (var i in cache) {
-      var c = cache[i];
-      s += c.size;
-      $("<li>").append($('<p>').addClass('title').text(i))
-        .append($('<p>').text(c.nb+' fichiers - '+(c.size/1024/1024).toFixed(2)+' Mo'))
-        .appendTo(ul);
-    }
-    $("#maintenance .info span."+className).text((s/1024/1024).toFixed(2));
-    return s;
+    return
   }
 
-  function show(async) {
-    if (async) {
-      count--;
-      if (!count) {
-        console.log(freeDiskSpace, cacheImage, cacheVecteur);
-        $("#maintenance .info span.diskspace").text((freeDiskSpace/1024/1024).toFixed(1));
-        $("#maintenance .resume").html('');
-        var total = countCache(cacheImage, 'cimage') 
-                  + countCache(cacheVecteur, 'cvector');
-        total /= 1024;
-        if (total) {
-          var n = total / (total + freeDiskSpace) * 360;
-          console.log(n, total, freeDiskSpace)
-          if (total/1024/1024 > .5) $("#maintenance .pie p").text((total/1024/1024).toFixed(1)+' Go');
-          else $("#maintenance .pie p").text((total/1024).toFixed(1)+' Mo');
-          if (n<180) {
-            $("#maintenance .pie .sector50").hide();
-            $("#maintenance .pie .sector").css({ transform: "rotate(-180deg)" });
-            $("#maintenance .pie .sector > div").css({ transform: "rotate("+(180+n)+"deg)" });
-          } else {
-            $("#maintenance .pie .sector50").show();
-            $("#maintenance .pie .sector").css({ transform: "rotate("+(n-360)+"deg)" });
-            $("#maintenance .pie .sector > div").css({ transform: "rotate(0deg)" });
-          }
-        } 
-        $("#maintenance").removeClass('calculating');
-      }
-    } else {
-      count++;
-      setTimeout(function(){ show(true); }, 200);
-    }
-    return;
-  }
-  
-  // Espace libre
-  CordovApp.File.getFreeDiskSpace(function (s){
-    freeDiskSpace = s;
-    show();
-  });
+  const maintenanceEl = $('#maintenance')
+  const pieLabel = $("#maintenance .pie p")
+  maintenanceEl.addClass('calculating')
+  pieLabel.text('calcul')
 
-  /* Calcul du cache */
-  // Add to cache
-  function addCache(ldir, cache, name) {
-    if (!cache[name]) cache[name] = { nb:0, size:0 };
-    for (var i=0, f; f=ldir[i]; i++) {
-      if (f.isFile) {
-        CordovApp.File.info("FILE/"+f.fullPath, function(f){
-          cache[name].nb++;
-          cache[name].size += f.size;
-          show();
-        });
+  function accumulate(cache, name, stats) {
+    if (!stats || (!stats.fileCount && !stats.size)) return
+    const key = name || 'Divers'
+    if (!cache[key]) cache[key] = { nb: 0, size: 0 }
+    cache[key].nb += stats.fileCount
+    cache[key].size += stats.size
+  }
+
+  function renderCache(cache, className) {
+    const ul = $("#maintenance .resume")
+    let total = 0
+    Object.keys(cache).forEach(key => {
+      const info = cache[key]
+      total += info.size
+      $("<li>")
+        .append($('<p>').addClass('title').text(key))
+        .append($('<p>').text(info.nb + ' fichiers - ' + (info.size / 1024 / 1024).toFixed(2) + ' Mo'))
+        .appendTo(ul)
+    })
+    $("#maintenance .info span." + className).text((total / 1024 / 1024).toFixed(2))
+    return total
+  }
+
+  function updatePie(totalBytes, freeBytes) {
+    const sector = $("#maintenance .pie .sector")
+    const sectorFront = $("#maintenance .pie .sector > div")
+    const sector50 = $("#maintenance .pie .sector50")
+    if (typeof freeBytes !== 'number' || freeBytes <= 0) {
+      sector50.hide()
+      sector.css({ transform: '' })
+      sectorFront.css({ transform: '' })
+      if (totalBytes > 0) {
+        if (totalBytes / 1024 / 1024 / 1024 > 0.5) {
+          pieLabel.text((totalBytes / 1024 / 1024 / 1024).toFixed(1) + ' Go')
+        } else {
+          pieLabel.text((totalBytes / 1024 / 1024).toFixed(1) + ' Mo')
+        }
       } else {
-        getCache(f, cache, name);
+        pieLabel.text('--')
       }
+      return
+    }
+
+    const angle = totalBytes ? totalBytes / (totalBytes + freeBytes) * 360 : 0
+    if (totalBytes / 1024 / 1024 / 1024 > 0.5) {
+      pieLabel.text((totalBytes / 1024 / 1024 / 1024).toFixed(1) + ' Go')
+    } else if (totalBytes > 0) {
+      pieLabel.text((totalBytes / 1024 / 1024).toFixed(1) + ' Mo')
+    } else {
+      pieLabel.text('0 Mo')
+    }
+
+    if (angle < 180) {
+      sector50.hide()
+      sector.css({ transform: 'rotate(-180deg)' })
+      sectorFront.css({ transform: 'rotate(' + (180 + angle) + 'deg)' })
+    } else {
+      sector50.show()
+      sector.css({ transform: 'rotate(' + (angle - 360) + 'deg)' })
+      sectorFront.css({ transform: 'rotate(0deg)' })
     }
   }
 
-  // Calcul du cache
-  function getCache(d, cache, name) {
-    name = name || d.name;
-    if (/^G\d*$/.test(name)) {
-      var n = parseInt(name.replace(/^G/,''));
-      var community = wapp.userManager.getGroupById(n);
-      if (community) name = community.name;
-    }
-    CordovApp.File.listDirectory('FILE/'+d.fullPath, (ldir) => addCache(ldir, cache, name));
-  }
+  Promise.all([
+    getFreeDiskSpaceBytes(),
+    getDirectoryUsage('FILE/cache-signalements'),
+    getDirectoryChildrenUsage('FILE/geoportail'),
+    getDirectoryChildrenUsage('FILE/cache')
+  ]).then(([freeDiskSpace, signalementsStats, geoportailStats, cacheStats]) => {
+    const cacheImage = {}
+    const cacheVecteur = {}
 
-  // Cache signalements
-  CordovApp.File.listDirectory('FILE/cache-signalements', (ldir) => addCache(ldir, cacheVecteur, 'Signalements'));
-  
-  // Cache geoportail
-  CordovApp.File.listDirectory('FILE/geoportail',
-    function(l) {
-      for (var i=0, d; d=l[i]; i++) {
-        getCache(d, cacheImage);
+    // capacitor: 71038139596
+    // cordovapp: 91089224 (more correct although not accurate)
+
+    console.log("freeDiskSpace from capacitor", freeDiskSpace)
+
+    CordovApp.File.getFreeDiskSpace(function (s){
+      console.log("freeDiskSpace from cordovapp", s)
+    });
+
+    console.log('signalementsStats', signalementsStats)
+    console.log('geoportailStats', geoportailStats)
+    console.log('cacheStats', cacheStats)
+    console.log('freeDiskSpace', freeDiskSpace)
+
+    accumulate(cacheVecteur, 'Signalements', signalementsStats)
+
+    if (geoportailStats && geoportailStats.directories) {
+      geoportailStats.directories.forEach(dirStats => {
+        let name = dirStats.name || 'Geoportail'
+        if (/^G\d*$/.test(name)) {
+          const groupId = parseInt(name.replace(/^G/, ''), 10)
+          const community = Number.isNaN(groupId) ? null : wapp.userManager.getGroupById(groupId)
+          if (community && community.name) name = community.name
+        }
+        accumulate(cacheImage, name, dirStats)
+      })
+      if (geoportailStats.rootFiles && geoportailStats.rootFiles.fileCount) {
+        accumulate(cacheImage, 'Geoportail', geoportailStats.rootFiles)
       }
     }
-  );
 
-  // Cache vecteur
-  CordovApp.File.listDirectory('FILE/cache',
-    function(l) {
-      for (var i=0, d; d=l[i]; i++) {
-        getCache(d, cacheVecteur);
+    if (cacheStats && cacheStats.directories) {
+      cacheStats.directories.forEach(dirStats => {
+        let name = dirStats.name || 'Cache'
+        if (/^G\d*$/.test(name)) {
+          const groupId = parseInt(name.replace(/^G/, ''), 10)
+          const community = Number.isNaN(groupId) ? null : wapp.userManager.getGroupById(groupId)
+          if (community && community.name) name = community.name
+        }
+        accumulate(cacheVecteur, name, dirStats)
+      })
+      if (cacheStats.rootFiles && cacheStats.rootFiles.fileCount) {
+        accumulate(cacheVecteur, 'Cache', cacheStats.rootFiles)
       }
     }
-  );
-};
+
+    $("#maintenance .resume").html('')
+    const totalCache = renderCache(cacheImage, 'cimage') + renderCache(cacheVecteur, 'cvector')
+
+    if (typeof freeDiskSpace === 'number') {
+      // 71038139596
+      $("#maintenance .info span.diskspace").text((freeDiskSpace / 1024 / 1024).toFixed(1))
+    } else {
+      $("#maintenance .info span.diskspace").text('--')
+    }
+
+    updatePie(totalCache, typeof freeDiskSpace === 'number' ? freeDiskSpace : null)
+
+    maintenanceEl.removeClass('calculating')
+  }).catch(err => {
+    console.error('Maintenance data loading failed', err)
+    $("#maintenance .info span.diskspace").text('--')
+    pieLabel.text('--')
+    $("#maintenance .resume").html('')
+    maintenanceEl.removeClass('calculating')
+  })
+}

@@ -124,13 +124,13 @@ jobs:
           retention-days: 3
 
       # NEED GOOGLE DEVELOPER ACCESS TO DO THE FOLLOWING
-      # - name: Deploy to Play Store (internal track)
-      #   if: ${{ secrets.SERVICE_ACCOUNT_JSON != '' }}
-      #   uses: r0adkll/upload-google-play@v1
-      #   with:
-      #     serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
-      #     packageName: ${{ env.PACKAGE_NAME }}
-      #     releaseFiles: ${{ steps.sign_aab.outputs.signedReleaseFile }}
-      #     track: internal
-      #     status: completed
-      #     inAppUpdatePriority: 5
+      - name: Deploy to Play Store (internal track)
+        if: ${{ secrets.SERVICE_ACCOUNT_JSON != '' }}
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: ${{ env.PACKAGE_NAME }}
+          releaseFiles: ${{ steps.sign_aab.outputs.signedReleaseFile }}
+          track: internal
+          status: completed
+          inAppUpdatePriority: 5
