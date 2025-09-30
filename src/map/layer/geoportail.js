@@ -96,7 +96,6 @@ function addLayers (layers) {
     if (layer && Object.keys(layer).length) {
       options["opacity"] = name in wapp.param.visibleLayers ? wapp.param.visibleLayers[name] : (layer.opacity || 1);
       url = layer.geoservice["url"]
-      console.log(url.split("?")[0], config.apiKey, caps[name]['key'])
       if (layer.geoservice) {
         options["minZoom"] = layer.geoservice["min-zoom"];
         options["maxZoom"] = layer.geoservice["max-zoom"];
