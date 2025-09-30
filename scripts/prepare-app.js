@@ -200,8 +200,10 @@ try {
     if (fs.existsSync(manifest)) {
       let txt = fs.readFileSync(manifest, 'utf8');
       txt = txt.replace(/\$\{applicationId\}/g, androidPackage);
+      // Met à jour l'autorité FileProvider pour correspondre au package
+      txt = txt.replace(/android:authorities="[^"]+\.fileprovider"/, `android:authorities="${androidPackage}.fileprovider"`);
       fs.writeFileSync(manifest, txt, 'utf8');
-      console.log('- Android: Updated manifest authorities with package');
+      console.log(`- Android: Updated manifest authorities with package (FileProvider: ${androidPackage}.fileprovider)`);
     }
 
     // Met à jour strings.xml: app_name, title_activity_main, package_name, custom_url_scheme
