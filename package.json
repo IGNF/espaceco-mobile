@@ -34,6 +34,7 @@
   },
   "homepage": "https://github.com/IGNF/espaceco-mobile",
   "dependencies": {
+    "@capacitor-community/device": "^7.0.0",
     "@capacitor-community/keep-awake": "^7.1.0",
     "@capacitor/android": "^7.4.3",
     "@capacitor/app": "7.0.2",

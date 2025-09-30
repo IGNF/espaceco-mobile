@@ -1,4 +1,6 @@
 import { Filesystem, Directory } from '@capacitor/filesystem'
+import { CommunityDevice, CommunityDeviceInfo } from '@capacitor-community/device';
+import { getDeviceOs } from './device-helper';
 
 const PREFIX_MAP = {
   FILE: Directory.Data,
@@ -177,11 +179,18 @@ function queryNavigatorStorage() {
 }
 
 export async function getFreeDiskSpaceBytes() {
-  const estimated = await queryNavigatorStorage()
-  if (typeof estimated === 'number') {
-    return estimated
+  if (getDeviceOs() === 'android') {
+    console.log('getFreeDiskSpaceBytes android')
+    return CommunityDevice.getInfo().then(CommunityDeviceInfo => {
+    console.log('info', CommunityDeviceInfo)
+      return CommunityDeviceInfo.realDiskFree
+    })
   }
-  return null
+  else {
+    // ios or web
+    console.log('getFreeDiskSpaceBytes ios or web')
+    return Promise.resolve(null);
+  }
 }
 
 export async function listDirectoryEntries(rawPath) {

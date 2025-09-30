@@ -1,6 +1,5 @@
 import wapp from './wapp'
 import { getFreeDiskSpaceBytes, getDirectoryUsage, getDirectoryChildrenUsage } from './capacitor-hooks/file-handler'
-import CordovApp from 'cordovapp/CordovApp'
 
 /**
  * Affichage de la maintenance
@@ -98,10 +97,6 @@ wapp.maintenance = function(nodelay) {
 
     console.log("freeDiskSpace from capacitor", freeDiskSpace)
 
-    CordovApp.File.getFreeDiskSpace(function (s){
-      console.log("freeDiskSpace from cordovapp", s)
-    });
-
     console.log('signalementsStats', signalementsStats)
     console.log('geoportailStats', geoportailStats)
     console.log('cacheStats', cacheStats)
@@ -145,8 +140,10 @@ wapp.maintenance = function(nodelay) {
     if (typeof freeDiskSpace === 'number') {
       // 71038139596
       $("#maintenance .info span.diskspace").text((freeDiskSpace / 1024 / 1024).toFixed(1))
+      $("#maintenance .info .diskspace-parent-element").show()
     } else {
       $("#maintenance .info span.diskspace").text('--')
+      $("#maintenance .info .diskspace-parent-element").hide()
     }
 
     updatePie(totalCache, typeof freeDiskSpace === 'number' ? freeDiskSpace : null)

@@ -12,5 +12,50 @@
     "preferences": {
       "BackupWebStorage": "none"
     }
+  },
+  "includePlugins": [],
+  "android": {
+    "includePlugins": [
+      "@capacitor/app",
+      "@capacitor/app-launcher",
+      "@capacitor/camera",
+      "@capacitor/filesystem",
+      "@capacitor/keyboard",
+      "@capacitor/network",
+      "@capacitor/status-bar",
+      "@capacitor-community/keep-awake",
+      "@capacitor-community/device",
+      "capacitor-email-composer",
+      "@capawesome/capacitor-android-edge-to-edge-support",
+      "cordova-plugin-bluetooth-serial",
+      "cordova-plugin-dialogs",
+      "cordova-plugin-geolocation",
+      "cordova-plugin-listpicker",
+      "cordova-plugin-background-mode",
+      "cordova-plugin-bluetooth-geolocation",
+      "cordova-plugin-device",
+      "cordova-plugin-file"
+    ]
+  },
+  "ios": {
+    "includePlugins": [
+      "@capacitor/app",
+      "@capacitor/app-launcher",
+      "@capacitor/camera",
+      "@capacitor/filesystem",
+      "@capacitor/keyboard",
+      "@capacitor/network",
+      "@capacitor/status-bar",
+      "@capacitor-community/keep-awake",
+      "capacitor-email-composer",
+      "cordova-plugin-bluetooth-serial",
+      "cordova-plugin-dialogs",
+      "cordova-plugin-geolocation",
+      "cordova-plugin-listpicker",
+      "cordova-plugin-background-mode",
+      "cordova-plugin-bluetooth-geolocation",
+      "cordova-plugin-device",
+      "cordova-plugin-file"
+    ]
   }
 }
