@@ -218,14 +218,12 @@ try {
   console.warn('- Warning: unable to fully update native project files:', e.message);
 }
 
-// 6) Synchronise la version de l'app à partir de package.json (sans incrémenter les numéros de build)
+// 6) Synchronise la version de l'app à partir de la configuration (sans incrémenter les numéros de build)
 try {
-  const pkgPath = path.join(root, 'package.json');
-  const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-  const version = String(pkg.version || '').trim();
-  if (!version) throw new Error('No version found in package.json');
+  const version = String(appCfg.versionNumber || '').trim();
+  if (!version) throw new Error('No versionNumber defined in app config');
 
-  // Android: synchronise versionName avec package.json (sans modifier versionCode)
+  // Android: synchronise versionName avec la config (sans modifier versionCode)
   const gradle = path.join(root, 'android', 'app', 'build.gradle');
   if (fs.existsSync(gradle)) {
     let txt = fs.readFileSync(gradle, 'utf8');
@@ -234,7 +232,7 @@ try {
     console.log(`- Android: versionName=${version} (build number unchanged)`);
   }
 
-  // iOS: synchronise MARKETING_VERSION avec package.json (sans modifier CURRENT_PROJECT_VERSION)
+  // iOS: synchronise MARKETING_VERSION avec la config (sans modifier CURRENT_PROJECT_VERSION)
   const pbxproj = path.join(root, 'ios', 'App', 'App.xcodeproj', 'project.pbxproj');
   if (fs.existsSync(pbxproj)) {
     let txt = fs.readFileSync(pbxproj, 'utf8');

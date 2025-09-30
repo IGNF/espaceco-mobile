@@ -62,14 +62,6 @@ jobs:
         run: |
           ls -la /usr/local/lib/android/sdk/build-tools/ || true
 
-      - name: Sanity check Android resources
-        run: |
-          echo "Listing android/app/src/main/res folders:" &&
-          ls -la android/app/src/main/res || true &&
-          echo "values:" && ls -la android/app/src/main/res/values || true &&
-          echo "xml:" && ls -la android/app/src/main/res/xml || true &&
-          echo "layout:" && ls -la android/app/src/main/res/layout || true
-
       - name: Detect selected app and signing params
         id: detect_app
         shell: bash
@@ -84,10 +76,12 @@ jobs:
           echo "Selected app: $app"
           # Choose alias + key password per selected app
           if [[ "$app" == "NaviForest" ]]; then
+            echo "SIGNING_KEY=${{ secrets.SIGNING_KEY_NAVIFOREST }}" >> "$GITHUB_ENV"
             echo "SIGNING_ALIAS=${{ secrets.ALIAS_NAVIFOREST }}" >> "$GITHUB_ENV"
             echo "SIGNING_KEY_PASSWORD=${{ secrets.KEY_PASSWORD_NAVIFOREST }}" >> "$GITHUB_ENV"
           else
             # Default to EspaceCo
+            echo "SIGNING_KEY=${{ secrets.SIGNING_KEY_ESPACECO }}" >> "$GITHUB_ENV"
             echo "SIGNING_ALIAS=${{ secrets.ALIAS_ESPACECO }}" >> "$GITHUB_ENV"
             echo "SIGNING_KEY_PASSWORD=${{ secrets.KEY_PASSWORD_ESPACECO }}" >> "$GITHUB_ENV"
           fi
@@ -108,10 +102,9 @@ jobs:
         with:
           # Sign the generated AAB in the release output directory
           releaseDirectory: android/app/build/outputs/bundle/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          signingKeyBase64: ${{ env.SIGNING_KEY }}
           alias: ${{ env.SIGNING_ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          # keyPassword is optional; set if your keystore uses a distinct key password
           keyPassword: ${{ env.SIGNING_KEY_PASSWORD }}
         env:
           BUILD_TOOLS_VERSION: "34.0.0"
@@ -123,7 +116,6 @@ jobs:
           path: ${{ steps.sign_aab.outputs.signedReleaseFile }}
           retention-days: 3
 
-      # NEED GOOGLE DEVELOPER ACCESS TO DO THE FOLLOWING
       - name: Deploy to Play Store (internal track)
         uses: r0adkll/upload-google-play@v1
         with:
