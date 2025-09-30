@@ -178,9 +178,13 @@ function queryNavigatorStorage() {
   return Promise.resolve(null)
 }
 
+/**
+ * iOS does not allow to get the free disk space (unless we create a privacy manifest file)
+ * So we fetch this value for Android only
+ * @returns {Promise<number | null>}
+ */
 export async function getFreeDiskSpaceBytes() {
   if (getDeviceOs() === 'android') {
-    console.log('getFreeDiskSpaceBytes android')
     return CommunityDevice.getInfo().then(CommunityDeviceInfo => {
     console.log('info', CommunityDeviceInfo)
       return CommunityDeviceInfo.realDiskFree
@@ -188,7 +192,6 @@ export async function getFreeDiskSpaceBytes() {
   }
   else {
     // ios or web
-    console.log('getFreeDiskSpaceBytes ios or web')
     return Promise.resolve(null);
   }
 }

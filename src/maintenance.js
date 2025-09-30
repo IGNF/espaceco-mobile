@@ -92,15 +92,9 @@ wapp.maintenance = function(nodelay) {
     const cacheImage = {}
     const cacheVecteur = {}
 
-    // capacitor: 71038139596
-    // cordovapp: 91089224 (more correct although not accurate)
-
-    console.log("freeDiskSpace from capacitor", freeDiskSpace)
-
     console.log('signalementsStats', signalementsStats)
     console.log('geoportailStats', geoportailStats)
     console.log('cacheStats', cacheStats)
-    console.log('freeDiskSpace', freeDiskSpace)
 
     accumulate(cacheVecteur, 'Signalements', signalementsStats)
 
@@ -138,10 +132,9 @@ wapp.maintenance = function(nodelay) {
     const totalCache = renderCache(cacheImage, 'cimage') + renderCache(cacheVecteur, 'cvector')
 
     if (typeof freeDiskSpace === 'number') {
-      // 71038139596
-      $("#maintenance .info span.diskspace").text((freeDiskSpace / 1024 / 1024).toFixed(1))
+      $("#maintenance .info span.diskspace").text((freeDiskSpace / 1000 / 1000 / 1000).toFixed(1))
       $("#maintenance .info .diskspace-parent-element").show()
-    } else {
+    } else { // ios or web - we don't display the diskspace
       $("#maintenance .info span.diskspace").text('--')
       $("#maintenance .info .diskspace-parent-element").hide()
     }
