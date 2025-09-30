@@ -3,6 +3,7 @@ const fs = require('fs');
 const fse = require('fs-extra');
 const path = require('path');
 const vm = require('vm');
+const { execSync } = require('child_process');
 
 const root = process.cwd();
 let selectionFile = path.join(root, 'scripts', '.selected-app');
@@ -151,12 +152,15 @@ try {
   } else {
     console.log('- Kept existing resources/android-foreground.png');
   }
+
+  // generate assets using capacitor
+  execSync('npx @capacitor/assets generate --android', { stdio: 'inherit' });
+  execSync('npx @capacitor/assets generate --ios', { stdio: 'inherit' });
+
 } catch (e) {
   console.warn(`- Unable to update resources/icon.png: ${e.message}`);
 }
 
-// On ne génère pas les assets ici, on le fait dans la CI avec la commande :
-//    `npx @capacitor/assets generate`
 console.log('Preparation complete.');
 
 // 5) Applique les identifiants et les noms directement dans les projets natifs pour assurer la correction
