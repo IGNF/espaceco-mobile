@@ -5,6 +5,17 @@ const CDV_HTTP_REGEX = /^https?:\/\/localhost\/__cdvfile_([^/]+)__\/(.+)/i
 const CDVFILE_REGEX = /^cdvfile:\/\/localhost\/([^/]+)\/(.+)/i
 const CAPACITOR_FILE_REGEX = /^(capacitor:\/\/localhost|https?:\/\/localhost)\/_capacitor_file_/i
 
+const LEGACY_PREFIX_RULES = [
+  { regex: /^TMP(?=\/|$)/i, props: ['externalDataDirectory', 'dataDirectory'] },
+  { regex: /^SDFILE(?=\/|$)/i, props: ['externalDataDirectory', 'dataDirectory'] },
+  { regex: /^SDCACHE(?=\/|$)/i, props: ['externalCacheDirectory', 'cacheDirectory'] },
+  { regex: /^SD(?=\/|$)/i, props: ['externalRootDirectory', 'documentsDirectory'] },
+  { regex: /^ASSET(?=\/|$)/i, props: ['applicationDirectory'] },
+  { regex: /^CACHE(?=\/|$)/i, props: ['cacheDirectory'] },
+  { regex: /^FILE(?=\/|$)/i, props: ['dataDirectory'] },
+  { regex: /^APP(?=\/|$)/i, props: ['applicationStorageDirectory'] }
+];
+
 function getCordovaFile() {
   return (typeof window !== 'undefined' && window.cordova && window.cordova.file) ? window.cordova.file : null
 }
@@ -38,6 +49,27 @@ function convertWithCapacitor(fileUrl) {
     console.warn('Capacitor.convertFileSrc failed:', e)
     return fileUrl
   }
+}
+
+function resolveLegacyPseudoPath(photoPath) {
+  if (typeof photoPath !== 'string' || !photoPath) return photoPath
+  if (/^(file:|content:)/i.test(photoPath)) return photoPath
+
+  const cf = getCordovaFile()
+  if (!cf) return photoPath
+
+  const sanitized = photoPath.replace(/^\/+/, '')
+  for (const rule of LEGACY_PREFIX_RULES) {
+    if (rule.regex.test(sanitized)) {
+      const rest = sanitized.replace(rule.regex, '').replace(/^\//, '')
+      const base = rule.props.map(prop => cf[prop]).find(Boolean)
+      if (base) {
+        return ensureTrailingSlash(base) + rest
+      }
+    }
+  }
+
+  return photoPath
 }
 
 // convertit une URL Cordova en une URL resolvable par Capacitor/qui s'affiche dans la webview
@@ -102,31 +134,21 @@ export function convertPhotoToDisplaySrc(photoPath) {
   
   // en cas d'URL type file/tmp/cache/asset/app, on essaye de la résoudre avec Cordova
   if (/^(FILE\/?|TMP\/?|CACHE\/?|ASSET\/?|APP\/?)/i.test(photoPath)) {
-    try {
-      const resolved = window.CordovApp && window.CordovApp.File && window.CordovApp.File.getFileURI
-        ? window.CordovApp.File.getFileURI(photoPath)
-        : photoPath;
-      const conv = convertWithCapacitor(resolved);
-      return conv;
-    } catch (e) {
-      console.warn('Failed to resolve/convert Cordova-style path:', e);
+    const resolved = resolveLegacyPseudoPath(photoPath);
+    if (resolved && resolved !== photoPath) {
+      return convertWithCapacitor(resolved);
     }
   }
 
-  // si c'est une URL relative ou autre format, on essaye de la résoudre avec CordovApp.File
-  try {
-    const newPath = window.CordovApp && window.CordovApp.File && window.CordovApp.File.getFileURI
-      ? window.CordovApp.File.getFileURI(photoPath)
-      : photoPath;
-    if (/^(file:|content:)/i.test(newPath)) {
-      const conv = convertWithCapacitor(newPath);
-      return conv;
+  // si c'est une URL relative ou autre format, on tente de la convertir via les chemins legacy
+  const resolved = resolveLegacyPseudoPath(photoPath);
+  if (resolved && resolved !== photoPath) {
+    if (/^(file:|content:)/i.test(resolved)) {
+      return convertWithCapacitor(resolved);
     }
-    return newPath;
-  } catch (e) {
-    console.warn('Failed to get file URI with CordovApp.File:', e);
-    return photoPath;
+    return resolved;
   }
+  return photoPath;
 }
 
 export function isValidPhotoPath(photoPath) {
@@ -179,6 +201,9 @@ export function toResolvableFileUri(photoPath) {
     const base = resolveBaseFromFsName(fsName);
     if (base) return ensureTrailingSlash(base) + rest;
   }
+
+  const resolved = resolveLegacyPseudoPath(photoPath);
+  if (resolved && resolved !== photoPath) return resolved;
 
   // autres (http(s) data URL, pseudo roots, etc.)
   return photoPath;

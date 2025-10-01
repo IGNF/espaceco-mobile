@@ -90,10 +90,12 @@ export default function installReportPhotoCapacitor(wapp) {
       // on la réinitialise donc
       if (window.initializeIOSStatusBar) {
         setTimeout(window.initializeIOSStatusBar, 100);
+        // Il se peut que la vue ait besoin d'un certain temps avant que le code ne puisse s'exécuter. On fait donc un second timeout
+        setTimeout(window.initializeIOSStatusBar, 500);
       }
     }.bind(this)).catch(function (e) {
       console.warn('Photo capture canceled or failed', e);
-
+      
       if (window.initializeIOSStatusBar) {
         setTimeout(window.initializeIOSStatusBar, 100);
       }
