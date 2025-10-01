@@ -178,6 +178,26 @@ function initReport(wapp) {
   wapp.userManager = new UserManagerTemplating(apiClient, {
     infoElement: '#options .connect span.connected' //[data-input-role="info"]
   })
+
+  // Surcharge le code de CordovApp.UserManagerTemplating pour utiliser les nouvelles fonctions de Capacitor
+  if (wapp.userManager) {
+    wapp.userManager.getLogo = function (community, callback, scope) {
+      return wapp.getLogo(community, callback, scope || this)
+    }
+
+    wapp.userManager.refreshGroupInfos = function (community = '') {
+      const self = this
+      wapp.getLogo(community, function (logoSrc) {
+        const safeSrc = logoSrc || 'img/ign.png'
+        const $logos = $("img.logo")
+        wapp.applyLogoSrc($logos, safeSrc)
+        $logos.show()
+      }, self)
+
+      const info = (community ? `${community.name || ''}<br/>` : '') + (self.param.username || 'Espace collaboratif')
+      $(".userinfo").html(info)
+    }
+  }
   $(() => {
     wapp.userManager.initialize();
 

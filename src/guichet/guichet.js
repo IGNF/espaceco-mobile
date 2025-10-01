@@ -5,6 +5,7 @@ import { messageDlg } from 'cordovapp/cordovapp/dialog'
 
 import wapp from '../wapp'
 import CordovApp from 'cordovapp/CordovApp'
+import { writeBinaryFile } from '../capacitor-hooks/file-handler'
 import setGeoportailLayers from '../map/layer/geoportail'
 import './layer'
 import './edition'
@@ -13,13 +14,13 @@ import './fiche'
 import { prettifyAxiosError } from 'cordovapp/collaboratif/errorHelper'
 
 let template = null;
-let saveLayers = function(layers) {
+let saveLayers = function (layers) {
   const l = layers.pop();
   if (l) {
-    if (typeof(l.getSource().nbModifications) == 'function' && l.getSource().nbModifications() > 0) {
-      wapp.wait('Sauvegarde des modifications...<br/>'+l.get('title'));
-      l.getSource().save(()=>{
-        wapp.notification(l.get('title')+' sauvegardé...');
+    if (typeof (l.getSource().nbModifications) == 'function' && l.getSource().nbModifications() > 0) {
+      wapp.wait('Sauvegarde des modifications...<br/>' + l.get('title'));
+      l.getSource().save(() => {
+        wapp.notification(l.get('title') + ' sauvegardé...');
         // Next
         saveLayers(layers);
       }, (error, transaction) => {
@@ -30,7 +31,7 @@ let saveLayers = function(layers) {
           wapp.handleConflict(transaction, l);
         } else {
           let prettyError = prettifyAxiosError(error);
-          wapp.alert('Impossible de sauvegarder '+l.get('title')+'<br/><i class="error">'+prettyError.message+'</i>');
+          wapp.alert('Impossible de sauvegarder ' + l.get('title') + '<br/><i class="error">' + prettyError.message + '</i>');
         }
       });
     } else {
@@ -40,7 +41,7 @@ let saveLayers = function(layers) {
     wapp.wait(false);
     wapp.hidePage();
   }
-} 
+}
 
 /** Recherche des layers offline du groupe
  * @param {*} groupe
@@ -53,9 +54,9 @@ wapp.getCache = function (groupe) {
   if (groupe && groupe.layers) {
     const cache = wapp.param.vectorCache;
     groupe.layers.forEach((l) => {
-      if (l.type==='feature-type') {
+      if (l.type === 'feature-type') {
         // Has authentication ?
-        info.auth = info.auth || l.username; 
+        info.auth = info.auth || l.username;
         // Hors ligne ?
         cache.forEach(c => {
           if (c.id_guichet === groupe.id) {
@@ -85,16 +86,21 @@ wapp.dialogInfoGuichet = function (groupe) {
 
   /// Dialogue
   var page = CordovApp.template("dialog-infoguichet");
-  wapp.dialog.show (page, {
+  wapp.dialog.show(page, {
     className: 'infoguichet',
-    buttons: { submit:"OK"},
+    buttons: { submit: "OK" },
   });
 
   wapp.vectorCache.setCurrentGuichet(groupe);
   // Logo
-  $('img', page).hide();
-  wapp.getLogo(groupe, function(src) {
-    $('img', page).attr('src',src).show();
+  const $dialogLogo = $('img', page).hide();
+  wapp.getLogo(groupe, function (src) {
+    if (src) {
+      wapp.applyLogoSrc($dialogLogo, src);
+    } else {
+      $dialogLogo.attr('src', src);
+    }
+    $dialogLogo.show();
   });
   // Nom, description
   var ul = $("ul.layers", page).html('');
@@ -108,9 +114,9 @@ wapp.dialogInfoGuichet = function (groupe) {
         .append($('<h4>').html(l.table.title))
         .append($('<div>').text(l.table.description))
         .appendTo(ul);
-    } else if ( l.geoservice && l.geoservice.type ==='WFS') {
+    } else if (l.geoservice && l.geoservice.type === 'WFS') {
       $('<li>').html('')
-        .append($('<h4>').html(l.geoservice.title+' <i>(externe)</i>'))
+        .append($('<h4>').html(l.geoservice.title + ' <i>(externe)</i>'))
         .append($('<div>').text(l.geoservice.description))
         .appendTo(ul);
     }
@@ -122,7 +128,7 @@ wapp.dialogInfoGuichet = function (groupe) {
       .click(function () {
         // Remove credentials
         var layer;
-        for (var k=0, l; l=groupe.layers[k]; k++) {
+        for (var k = 0, l; l = groupe.layers[k]; k++) {
           if (l.username) layer = l;
           delete l.password;
         }
@@ -130,26 +136,26 @@ wapp.dialogInfoGuichet = function (groupe) {
         if (wapp.userManager.param.active_community === groupe.id) wapp.setGuichet();
         wapp.report.saveParam();
         // Clear credentials
-        var win = window.open('logout.html','_blank','clearsessioncache=yes,hidden=yes');
-        setTimeout(function(){ win.close(); }, 100);
+        var win = window.open('logout.html', '_blank', 'clearsessioncache=yes,hidden=yes');
+        setTimeout(function () { win.close(); }, 100);
 
         // Ask for new credentials
         var content = CordovApp.template("dialog-authenticate");
         $('span', content).text(layer.geoservice.name);
-        wapp.dialog.show (content, {
-          title: "Connexion", 
-          buttons: { submit:"OK", cancel:"Annuler" },
-          callback: function(b) {
-            if (b=='submit') {
+        wapp.dialog.show(content, {
+          title: "Connexion",
+          buttons: { submit: "OK", cancel: "Annuler" },
+          callback: function (b) {
+            if (b == 'submit') {
               var cryp = new ol_layer_Vector_WFS();
-              for (var k=0, l; l=groupe.layers[k]; k++) {
+              for (var k = 0, l; l = groupe.layers[k]; k++) {
                 if (l.username) {
                   l.username = $('.nom', content).val() || 'none';
                   l.password = cryp.crypt($('.pwd', content).val());
                 }
               }
               if (current === groupe.id) wapp.setGuichet(current);
-            } 
+            }
           }
         });
       })
@@ -164,7 +170,7 @@ wapp.dialogInfoGuichet = function (groupe) {
 
 /** Recherche des guichets de l'utilisateur
  */
-wapp.initGuichets = function() {
+wapp.initGuichets = function () {
   // Reset list
   var ul = $('#communities [data-role="content"] ul');
   if (!template) template = $('[data-role="template"]', ul).html();
@@ -174,51 +180,53 @@ wapp.initGuichets = function() {
     setGeoportailLayers();
     return;
   }
-   
+
   // Recherche des groupes
   var groupes = wapp.userManager.param.communities || [];
-  const geoportailLayers = {};
+  // const geoportailLayers = {};
   var current;
   groupes.forEach((g) => {
-    if (wapp.noguichetConfig !== undefined  ) {
-      if (g.id != wapp.noguichetConfig){
+    if (wapp.noguichetConfig !== undefined) {
+      if (g.id != wapp.noguichetConfig) {
         return;
       }
     }
-    console.log('Guichets: '+ g.id);
+    console.log('Guichets: ' + g.id);
     // Chargement des logos
     if (g.logo_url) {
-      wapp.userManager.apiClient.getDocument(encodeURI(g.logo_url)).then((response) => {
-        CordovApp.File.saveData(response.data, "TMP/logo/"+g.id, null, null, true);
-      });
+      wapp.userManager.apiClient.getDocument(encodeURI(g.logo_url))
+        .then((response) => writeBinaryFile(`TMP/logo/${g.id}`, response.data))
+        .catch((error) => {
+          console.warn('Unable to cache logo', g.id, error)
+        })
     }
     if (wapp.noguichetConfig !== undefined && wapp.noguichetConfig == g.id) {
       current = g
     }
     else if (wapp.userManager.param.active_community == g.id) current = g;
-  
+
     var li = $('<li>').html(template)
       .data('groupe', g)
       .appendTo(ul);
     li.on("click", () => {
       if (!li.hasClass('selected')) {
-        messageDlg ("Etes vous sûrs de vouloir changer de groupe?",
+        messageDlg("Etes vous sûrs de vouloir changer de groupe?",
           "Changement de groupe", {
-            ok: "confirmer",
-            cancel: "annuler"
-          },
+          ok: "confirmer",
+          cancel: "annuler"
+        },
           function (b) {
             if (b == "ok") {
               wapp.setGuichet(li.data('groupe'));
               //wapp.hidePage();
               wapp.showPage('layer-guichet')
             }
-          });        
+          });
       } else {
         wapp.setGuichet();
         // Faire clignoter
         li.addClass('active');
-        setTimeout(function(){ li.removeClass('active'); }, 200);
+        setTimeout(function () { li.removeClass('active'); }, 200);
       }
     });
     $('.title', li).text(g.name);
@@ -229,8 +237,14 @@ wapp.initGuichets = function() {
       wapp.dialogInfoGuichet(li.data('groupe'));
     });
     $('img', li).hide();
-    wapp.getLogo (g, (f) => {
-      $('img', li).attr('src',f).show();
+    wapp.getLogo(g, (f) => {
+      const $logo = $('img', li);
+      if (f) {
+        wapp.applyLogoSrc($logo, f);
+      } else {
+        $logo.attr('src', f);
+      }
+      $logo.show();
     });
   });
 
@@ -250,22 +264,22 @@ wapp.initGuichets = function() {
  * Guichet en cours de modification
  * @param {Integer|Object} groupe le groupe ou l identifiant du groupe
  */
-wapp.setGuichet = function(groupe) {
-  if (typeof(groupe)==='number') {
+wapp.setGuichet = function (groupe) {
+  if (typeof (groupe) === 'number') {
     groupe = wapp.userManager.getGroupById(groupe);
   }
-  if (!groupe) groupe = { };
+  if (!groupe) groupe = {};
   wapp.select.getFeatures().clear();
 
   // Check if has groupe
   if (wapp.userManager.param && wapp.userManager.param.communities) {
-    if (wapp.userManager.param.communities.length) document.body.setAttribute('data-guichet', groupe.id || 'none' );
+    if (wapp.userManager.param.communities.length) document.body.setAttribute('data-guichet', groupe.id || 'none');
     else document.body.removeAttribute('data-guichet');
   } else {
     document.body.removeAttribute('data-guichet');
   }
 
-  var success =  function(community) {
+  var success = function (community) {
     wapp.guichet = community;
     wapp.onSelect();
     let layers = community.layers;
@@ -279,8 +293,8 @@ wapp.setGuichet = function(groupe) {
     }
 
     // Mettre a jour la liste
-    $('#communities li').each(function() {
-      if ($(this).data('groupe')===groupe) $(this).addClass('selected');
+    $('#communities li').each(function () {
+      if ($(this).data('groupe') === groupe) $(this).addClass('selected');
       else $(this).removeClass('selected');
     });
 
@@ -291,13 +305,15 @@ wapp.setGuichet = function(groupe) {
     // Mettre à jour le logo affiché dans le menu principal avec une URL compatible Capacitor
     // NOTE : ce code surcharge simplement l'implémentation de CordovApp.UserManagerTemplating.refreshGroupInfos, qui utilise toujours le fichier Cordova File API, et non Capacitor File API
     try {
-      wapp.getLogo(community, function(src) {
+      wapp.getLogo(community, function (src) {
         const safeSrc = src || 'img/ign.png';
-        $("img.logo:not(.back)").attr('src', safeSrc).show();
+        const $headerLogo = $("img.logo:not(.back)");
+        wapp.applyLogoSrc($headerLogo, safeSrc);
+        $headerLogo.show();
       });
     } catch (e) { /* ignore */ }
 
-    $("#couches").on('showpage', function(){
+    $("#couches").on('showpage', function () {
       let nbModifs = 0;
       let layers = wapp.getLayerGuichet().getLayers().getArray();
       for (let i in layers) {
@@ -307,7 +323,7 @@ wapp.setGuichet = function(groupe) {
       $(".fa-send .tag", gdiv).text(nbModifs);
     });
 
-    $(".fa-send", gdiv).on('click', function(){
+    $(".fa-send", gdiv).on('click', function () {
       if (parseInt($(".fa-send .tag", gdiv).text()) < 1) {
         wapp.alert("Toutes les modifications ont déjà été envoyées.");
         return;
@@ -329,16 +345,18 @@ wapp.setGuichet = function(groupe) {
     //on recharge la couche des signalements
     wapp.report.signalements.getSource().getSource().clear();
   };
-  
+
   // Synchroniser le logo du menu lors d'un changement de groupe (événement hérité)
   // NOTE : ce code surcharge simplement l'implémentation de CordovApp.UserManagerTemplating.refreshGroupInfos, qui utilise toujours le fichier Cordova File API, et non Capacitor File API
   try {
-    $(document).on('changegroup', function(e) {
+    $(document).on('changegroup', function (e) {
       const community = (e && e.community) ? e.community : wapp.guichet;
       if (!community) return;
-      wapp.getLogo(community, function(src) {
+      wapp.getLogo(community, function (src) {
         const safeSrc = src || 'img/ign.png';
-        $("img.logo:not(.back)").attr('src', safeSrc).show();
+        const $headerLogo = $("img.logo:not(.back)");
+        wapp.applyLogoSrc($headerLogo, safeSrc);
+        $headerLogo.show();
       });
     });
   } catch (e) { /* ignore */ }
@@ -366,9 +384,9 @@ wapp.setGuichet = function(groupe) {
 
 /** Affichage des infos du guichet
  */
-wapp.setInfoGuichet = function(groupe) {
+wapp.setInfoGuichet = function (groupe) {
   var content = document.querySelector('#layer-guichet .guichet');
-  console.log('setInfoGuichet',groupe);
+  console.log('setInfoGuichet', groupe);
 
   // Affichage du groupe
   wapp.vectorCache.setCurrentGuichet(groupe);
@@ -376,8 +394,12 @@ wapp.setInfoGuichet = function(groupe) {
   // Display info
   $('h3', content).text(groupe.name || '');
   $('img', content).hide();
-  wapp.getLogo(groupe, function(src) {
-    if (src) $('img', content).attr('src',src).show();
+  wapp.getLogo(groupe, function (src) {
+    if (src) {
+      const $infoLogo = $('img', content);
+      wapp.applyLogoSrc($infoLogo, src);
+      $infoLogo.show();
+    }
   });
 };
 
@@ -385,23 +407,23 @@ wapp.setInfoGuichet = function(groupe) {
 /**
  * Guichet en cours
  */
-wapp.getIdGuichet = function(){
+wapp.getIdGuichet = function () {
   return wapp.userManager.param.active_community;
 };
 
 /** Envoyer le signalements courant
 */
-wapp.postGeorem = function() {
+wapp.postGeorem = function () {
   var f = wapp.select.getFeatures().item(0);
   var grem = f.get('georem');
   wapp.select.selectFeature();
-  if (grem) wapp.report.postLocalRem (grem, {
-    cback: function(prem) {
+  if (grem) wapp.report.postLocalRem(grem, {
+    cback: function (prem) {
       f = wapp.report.getFeature(prem);
       wapp.select.selectFeature(f, wapp.report.layer);
       wapp.wait(false)
     },
-    error: function(e, msg) {
+    error: function (e, msg) {
       wapp.select.selectFeature(f, wapp.report.layer);
       wapp.alert(msg);
     }
@@ -410,32 +432,32 @@ wapp.postGeorem = function() {
 
 /** Modifier le signalements courant
 */
-wapp.modifyGeorem = function() {
+wapp.modifyGeorem = function () {
   var f = wapp.select.getFeatures().item(0);
   var grem = f.get('georem');
   // Get feature if  croquis
   if (f.layer === wapp.report.croquis) grem = grem.get('georem');
   wapp.select.selectFeature();
-  if (grem) wapp.report.showFormulaire (grem);
+  if (grem) wapp.report.showFormulaire(grem);
 };
 
 /** Supprimer le signalement courant
  * @param {boolean} warning Ask before delete
  */
-wapp.delGeorem = function(warning) {
+wapp.delGeorem = function (warning) {
   var f = wapp.select.getFeatures().item(0);
   var grem = f.get('georem');
   if (warning) {
     const hasResp = grem.responses ? '<br/><i class="fa fa-warning"></i> Ce signalement contient des réponses non envoyées...' : '';
-    wapp.message('Voulez-vous vraiment supprimer le signalement ?'+hasResp, 'Suppression', 
-      { ok:'ok', cancel:'annuler' },
-      function(bt) {
-        if (bt==='ok') wapp.delGeorem();
+    wapp.message('Voulez-vous vraiment supprimer le signalement ?' + hasResp, 'Suppression',
+      { ok: 'ok', cancel: 'annuler' },
+      function (bt) {
+        if (bt === 'ok') wapp.delGeorem();
       });
   } else {
     if (grem) {
       wapp.select.getFeatures().clear();
-      wapp.report.delLocalRem (grem);
+      wapp.report.delLocalRem(grem);
       wapp.showSelect();
     }
   }
@@ -444,7 +466,7 @@ wapp.delGeorem = function(warning) {
 /** Format geom string
  * @param {ol.geom}
  */
-wapp.getGeomFr = function(g) {
+wapp.getGeomFr = function (g) {
   switch (g.getType()) {
     case 'LineString': return 'Ligne';
     case 'Polygon': return 'Surface';
@@ -454,7 +476,7 @@ wapp.getGeomFr = function(g) {
 
 /** Afficher le formulaire de signalement
 */
-wapp.showReportForm = function() {
+wapp.showReportForm = function () {
   //wapp.showOnglet("signal");
   wapp.showPage('fiche', 'signal');
 };
@@ -480,19 +502,19 @@ wapp.centerCache = function () {
 
 /** Mise a jour du cache courant
  */
-wapp.updateCache = function(layer) {
+wapp.updateCache = function (layer) {
   wapp.message(
     'Mettre à jour les données du guichet. Si vous continuez, toutes vos modifications seront envoyées.<br/><i>Cette opération peut être longue</i>',
-    'Mise à jour', 
-    { ok:'Mettre à jour', cancel:'annuler' },
+    'Mise à jour',
+    { ok: 'Mettre à jour', cancel: 'annuler' },
     (b) => {
-      if (b==='ok') {
+      if (b === 'ok') {
         const hasCache = wapp.getCache(wapp.guichet);
         if (hasCache) {
           //wapp.vectorCache.updateCache(hasCache.cache)
           const layers = layer ? [layer] : wapp.getLayerGuichet().getLayers().getArray().slice();
           wapp.saveContext();
-          wapp.vectorCache.saveLayer (layers, hasCache.cache);
+          wapp.vectorCache.saveLayer(layers, hasCache.cache);
         }
       }
     }
@@ -502,11 +524,11 @@ wapp.updateCache = function(layer) {
 /** Ajouter un layer au cache
  * @param {ol.layer.CollabVector} layer
  */
-wapp.appendLayerToCache = function(layer) {
+wapp.appendLayerToCache = function (layer) {
   if (!layer.table) return;
   var name = layer.table.name
   var guichet = this.vectorCache.getCurrentGuichet();
-  for (var i=0, l; l = guichet.layers[i]; i++) {
+  for (var i = 0, l; l = guichet.layers[i]; i++) {
     if (l.type === 'feature-type' && l.table.tile_zoom_level && name === l.table.name) {
       break;
     }
@@ -514,10 +536,10 @@ wapp.appendLayerToCache = function(layer) {
   if (l) {
     wapp.message(
       'Ajouter une couche en édition<br/><i>Cette opération peut être longue...</i>',
-      'Edition', 
+      'Edition',
       { ok: 'Ajouter', cancel: 'Annuler' },
       (b) => {
-        if (b==='ok') {
+        if (b === 'ok') {
           // Add to cache
           const cache = wapp.getCache(wapp.guichet).cache;
           cache.layers.push(l);
@@ -537,13 +559,13 @@ wapp.appendLayerToCache = function(layer) {
 
 /** Mettre a jour la carte
 */
-$("#fiche").on("showpage hidepage", function() {
+$("#fiche").on("showpage hidepage", function () {
   wapp.map.updateSize();
 });
 
 /** Affichage de la page du guichet
  */
-wapp.showGuichet= function() {
+wapp.showGuichet = function () {
   if (!wapp.userManager.param.communities) {
     wapp.alert(CordovApp.template('dialog-noconnect'));
   } else if (wapp.userManager.param.communities.length) {

@@ -802,36 +802,17 @@ wapp.communityChoice = function () {
 /** Recupere le logo d'un goupe
  * @param {any} g le groupe
  * @param {function} cback callback fonction qui renvoie le nom du fichier
- * NOTE :
- * Ce code a été modifié pour utiliser Capacitor File API au lieu de Cordova File API
- * pour résoudre les problèmes de compatibilité avec Capacitor
+ * Utilise exclusivement l'API Capacitor FileSystem pour résoudre le chemin d'accès local
  */
 wapp.getLogo = function (g, cback, scope) {
   const id = g && g.id ? String(g.id) : '_nologo_';
   const tryPaths = [`logo/${id}`, `TMP/logo/${id}`];
   const tryDirs = [Directory.Data, Directory.Cache];
-
   function tryNext(indexPath, indexDir) {
     if (indexPath >= tryPaths.length) {
-      // Try legacy Cordova file API as last resort
-      if (window.CordovApp && window.CordovApp.File && window.CordovApp.File.getFile) {
-        window.CordovApp.File.getFile(
-          "TMP/logo/" + id,
-          function (fileEntry) {
-            const uri = window.CordovApp.File.getFileURI(fileEntry.toURL());
-            const displaySrc = convertPhotoToDisplaySrc(uri);
-            cback.call(scope, displaySrc || (g ? g.logo_url : null));
-          },
-          function () {
-            cback.call(scope, g ? g.logo_url : null);
-          }
-        );
-      } else {
-        cback.call(scope, g ? g.logo_url : null);
-      }
+      cback.call(scope, g ? g.logo_url : null);
       return;
     }
-
     if (indexDir >= tryDirs.length) {
       return tryNext(indexPath + 1, 0);
     }
@@ -854,6 +835,31 @@ wapp.getLogo = function (g, cback, scope) {
   }
 
   tryNext(0, 0);
+};
+
+/**
+ * Forcer l'URL du logo dans le DOM, même si un script legacy tente de la remplacer
+ * @param {JQuery | Element | string} targets
+ * @param {string} src
+ */
+wapp.applyLogoSrc = function (targets, src) {
+  if (!src) return;
+  const $elements = targets && targets.jquery ? targets : $(targets);
+  if (!$elements || !$elements.length) return;
+
+  const ensureSrc = () => {
+    $elements.each((_, element) => {
+      if (!element) return;
+      const current = element.getAttribute('src') || '';
+      if (current !== src || /__cdvfile_/i.test(current)) {
+        element.setAttribute('src', src);
+      }
+    });
+  };
+
+  ensureSrc();
+  // Rejoue la fonction après 300ms pour s'assurer que le logo est bien chargé
+  setTimeout(ensureSrc, 300);
 };
 
 /* config is in wapp * /

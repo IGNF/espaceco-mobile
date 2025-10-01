@@ -85,9 +85,9 @@ export function convertPhotoToDisplaySrc(photoPath) {
     return photoPath;
   }
 
-  // si c'est une URL Capacitor, c'est ok
+  // si c'est une URL Capacitor, on la convertit pour l'afficher dans la webview
   if (CAPACITOR_FILE_REGEX.test(photoPath)) {
-    return photoPath;
+    return convertWithCapacitor(photoPath);
   }
 
   // si c'est une URL Cordova, convert via Capacitor
