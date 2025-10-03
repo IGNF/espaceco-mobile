@@ -61,4 +61,3 @@ if (getDeviceOs() === 'ios') {
 window.wapp = wapp;
 // DEBUG
 window.CordovApp = CordovApp;
-window.CordovFile = CordovApp.File;
