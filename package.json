@@ -1,6 +1,6 @@
 {
   "name": "guichet-mobile",
-  "version": "3.0.5",
+  "version": "3.0.6",
   "description": "Espace collaboratif mobile",
   "directories": {},
   "scripts": {
@@ -33,6 +33,7 @@
     "dotenv": "^16.0.3",
     "jquery": "^3.4.1",
     "lightningcss": "^1.22.1",
+    "math-intrinsics": "^1.1.0",
     "mongo-parse": "^2.1.0",
     "ol": "^5.3.3",
     "ol-ext": "v4.0.17",
@@ -44,7 +45,7 @@
     "@parcel/transformer-sass": "^2.10.3",
     "buffer": "^6.0.3",
     "clean-css": "^3.4.19",
-    "cordova-android": "^13.0.0",
+    "cordova-android": "^14.0.1",
     "cordova-ios": "^7.1.1",
     "cordova-plugin-background-mode": "github:brunochikuji/cordova-plugin-background-mode",
     "cordova-plugin-bluetooth-geolocation": "github:viglino/cordova-plugin-bluetooth-geolocation",
@@ -58,7 +59,7 @@
     "events": "^3.3.0",
     "gulp-jsdoc3": "^3.0.0",
     "os-browserify": "^0.3.0",
-    "parcel": "2.10.*",
+    "parcel": "^2.16.0",
     "parcel-reporter-static-files-copy": "^1.5.0",
     "path-browserify": "^1.0.1",
     "process": "^0.11.10",
