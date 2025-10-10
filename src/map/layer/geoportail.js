@@ -70,7 +70,8 @@ function addLayers (layers) {
         options["maxZoom"] = layer.geoservice.max_zoom;
       }
       tileOptions['server'] = url.split("?")[0];
-      url.includes("private") ? tileOptions['gppKey'] = "ign_scan_ws" : tileOptions['gppKey'] = "gpf"
+      url.includes("private") ? tileOptions['server'] = "https://data.geopf.fr/private/wmts" : tileOptions['server'] = "https://data.geopf.fr/wmts";
+      url.includes("private") ? tileOptions['gppKey'] = "ign_scan_ws" : tileOptions['gppKey'] = "gpf";
       options['gppKey'] = tileOptions['gppKey']
 
       const gpl = new ol_layer_Geoportail(name, options, tileOptions);
