@@ -69,9 +69,19 @@ function addLayers (layers) {
         options["minZoom"] = layer.geoservice.min_zoom;
         options["maxZoom"] = layer.geoservice.max_zoom;
       }
-      tileOptions['server'] = url.split("?")[0];
-      url.includes("private") ? tileOptions['server'] = "https://data.geopf.fr/private/wmts" : tileOptions['server'] = "https://data.geopf.fr/wmts";
-      url.includes("private") ? tileOptions['gppKey'] = "ign_scan_ws" : tileOptions['gppKey'] = "gpf";
+      
+      //Change les options en fonctions de l'url récupérée
+      let serverUrl = url.split("?")[0];
+      if(serverUrl.includes("private")){
+          tileOptions['server'] = "https://data.geopf.fr/private/wmts";
+          tileOptions['gppKey'] = "ign_scan_ws";
+      } else if(serverUrl.includes("data.geopf")){
+          tileOptions['server'] = "https://data.geopf.fr/wmts";
+          tileOptions['gppKey'] = "gpf"
+      } else {
+          tileOptions['server'] = "https://wxs.ign.fr/proxy/";
+          tileOptions['gppKey'] = config.apiKey;
+      }
       options['gppKey'] = tileOptions['gppKey']
 
       const gpl = new ol_layer_Geoportail(name, options, tileOptions);
