@@ -13,6 +13,7 @@
     "selectapp": "node ./scripts/selectapp.js && npm run build",
     "selectapp:naviforest": "node ./scripts/selectapp.js --naviforest && npm run build",
     "selectapp:espaceco": "node ./scripts/selectapp.js --espaceco && npm run build",
+    "generate-apk": "bash ./scripts/generate-apk.sh",
     "capacitor-build-dev": "npm run build-dev && npx cap sync",
     "capacitor-build": "npm run build && npx cap sync",
     "capacitor-run-ios": "npm run capacitor-build && npx cap run ios",
