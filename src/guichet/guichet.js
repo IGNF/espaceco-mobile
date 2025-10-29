@@ -288,6 +288,15 @@ wapp.setGuichet = function(groupe) {
     const gdiv = $('#couches .couches .couche.guichet');
     $('.name', gdiv).text(wapp.guichet.name || '');
 
+    // Mettre à jour le logo affiché dans le menu principal avec une URL compatible Capacitor
+    // NOTE : ce code surcharge simplement l'implémentation de CordovApp.UserManagerTemplating.refreshGroupInfos, qui utilise toujours le fichier Cordova File API, et non Capacitor File API
+    try {
+      wapp.getLogo(community, function(src) {
+        const safeSrc = src || 'img/ign.png';
+        $("img.logo:not(.back)").attr('src', safeSrc).show();
+      });
+    } catch (e) { /* ignore */ }
+
     $("#couches").on('showpage', function(){
       let nbModifs = 0;
       let layers = wapp.getLayerGuichet().getLayers().getArray();
@@ -321,6 +330,19 @@ wapp.setGuichet = function(groupe) {
     wapp.report.signalements.getSource().getSource().clear();
   };
   
+  // Synchroniser le logo du menu lors d'un changement de groupe (événement hérité)
+  // NOTE : ce code surcharge simplement l'implémentation de CordovApp.UserManagerTemplating.refreshGroupInfos, qui utilise toujours le fichier Cordova File API, et non Capacitor File API
+  try {
+    $(document).on('changegroup', function(e) {
+      const community = (e && e.community) ? e.community : wapp.guichet;
+      if (!community) return;
+      wapp.getLogo(community, function(src) {
+        const safeSrc = src || 'img/ign.png';
+        $("img.logo:not(.back)").attr('src', safeSrc).show();
+      });
+    });
+  } catch (e) { /* ignore */ }
+
   // Nouveau guichet
   if (groupe && groupe.id) {
     wapp.waitLogo("Chargement du groupe", true);

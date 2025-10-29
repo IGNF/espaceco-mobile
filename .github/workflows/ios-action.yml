@@ -1,0 +1,207 @@
+# name: iOS CI/CD
+
+on:
+  push:
+    tags:
+      - deploy/ios/*
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy-ios-app:
+    name: Build and Deploy iOS App
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Create empty .env
+        run: touch .env
+
+      - name: Make envfile (override with secrets)
+        run: |
+          set -euo pipefail
+          [ -n "${{ secrets.COLLAB_API_CLIENT_ID }}" ] && echo "COLLAB_API_CLIENT_ID=${{ secrets.COLLAB_API_CLIENT_ID }}" >> .env || true
+          [ -n "${{ secrets.COLLAB_API_CLIENT_SECRET }}" ] && echo "COLLAB_API_CLIENT_SECRET=${{ secrets.COLLAB_API_CLIENT_SECRET }}" >> .env || true
+          [ -n "${{ secrets.BASE_AUTH_URL }}" ] && echo "BASE_AUTH_URL=${{ secrets.BASE_AUTH_URL }}" >> .env || true
+          [ -n "${{ secrets.QLF_COLLAB_API_CLIENT_ID }}" ] && echo "QLF_COLLAB_API_CLIENT_ID=${{ secrets.QLF_COLLAB_API_CLIENT_ID }}" >> .env || true
+          [ -n "${{ secrets.QLF_COLLAB_API_CLIENT_SECRET }}" ] && echo "QLF_COLLAB_API_CLIENT_SECRET=${{ secrets.QLF_COLLAB_API_CLIENT_SECRET }}" >> .env || true
+          [ -n "${{ secrets.QLF_BASE_AUTH_URL }}" ] && echo "QLF_BASE_AUTH_URL=${{ secrets.QLF_BASE_AUTH_URL }}" >> .env || true
+          [ -n "${{ secrets.BASE_API_URL }}" ] && echo "BASE_API_URL=${{ secrets.BASE_API_URL }}" >> .env || true
+          [ -n "${{ secrets.SECRET }}" ] && echo "SECRET=${{ secrets.SECRET }}" >> .env || true
+          # App selection/name identifiers (optional overrides, defined in the config.js files)
+          [ -n "${{ secrets.APPLI }}" ] && echo "APPLI=${{ secrets.APPLI }}" >> .env || true
+          [ -n "${{ secrets.APPLI_ID }}" ] && echo "APPLI_ID=${{ secrets.APPLI_ID }}" >> .env || true
+          [ -n "${{ secrets.APPLI_NAME }}" ] && echo "APPLI_NAME=${{ secrets.APPLI_NAME }}" >> .env || true
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web bundle
+        run: npm run build
+
+      - name: Generate Capacitor assets (iOS)
+        run: npx @capacitor/assets generate --ios
+
+      - name: Capacitor sync (iOS)
+        run: npx cap sync ios
+
+      - name: Detect selected app and iOS signing params
+        id: detect_ios_app
+        shell: bash
+        env:
+          SELECTED_APP_FILE: scripts/.selected-app
+          ESPACECO_APPSTORE_PROFILE: ${{ secrets.DEPLOY_PROVISION_PROFILE_BASE64_ESPACECO }}
+          ESPACECO_EXPORT_PLIST: ${{ secrets.IOS_EXPORT_PRODUCTION_ESPACECO }}
+          NAVIFOREST_APPSTORE_PROFILE: ${{ secrets.DEPLOY_PROVISION_PROFILE_BASE64_NAVIFOREST }}
+          NAVIFOREST_EXPORT_PLIST: ${{ secrets.IOS_EXPORT_PRODUCTION_NAVIFOREST }}
+        run: |
+          set -euo pipefail
+
+          app="EspaceCo"
+          appstore_profile=""
+          export_plist=""
+          if [[ -f "$SELECTED_APP_FILE" ]]; then
+            candidate=$(tr -d '\r\n' < "$SELECTED_APP_FILE")
+            if [[ "$candidate" == "NaviForest" || "$candidate" == "EspaceCo" ]]; then
+              app="$candidate"
+            else
+              echo "Unknown app '$candidate' in $SELECTED_APP_FILE, defaulting to EspaceCo" >&2
+            fi
+          fi
+
+          if [[ "$app" == "NaviForest" ]]; then
+            appstore_profile="$NAVIFOREST_APPSTORE_PROFILE"
+            export_plist="$NAVIFOREST_EXPORT_PLIST"
+            if [[ -z "$appstore_profile" || -z "$export_plist" ]]; then
+              echo "Missing NaviForest secrets; using EspaceCo configuration" >&2
+              app="EspaceCo"
+            fi
+          fi
+
+          if [[ "$app" == "EspaceCo" ]]; then
+            appstore_profile="$ESPACECO_APPSTORE_PROFILE"
+            export_plist="$ESPACECO_EXPORT_PLIST"
+          fi
+
+          if [[ -z "${export_plist}" ]]; then
+            echo "Missing export options plist secret for $app" >&2
+            exit 1
+          fi
+          if [[ -z "${appstore_profile}" ]]; then
+            echo "Missing provisioning profile secret for $app" >&2
+            exit 1
+          fi
+
+          echo "Selected app: $app"
+
+          {
+            printf 'SELECTED_APP=%s\n' "$app"
+            printf 'APPSTORE_PROFILE_BASE64<<EOF\n%s\nEOF\n' "$appstore_profile"
+            printf 'IOS_EXPORT_PRODUCTION<<EOF\n%s\nEOF\n' "$export_plist"
+          } >> "$GITHUB_ENV"
+
+      - name: Install Apple distribution cert & App Store profile
+        env:
+          DISTRIBUTION_CERTIFICATE_P12: ${{ secrets.DISTRIBUTION_CERTIFICATE_P12 }}
+          P12_PASSWORD_DISTR: ${{ secrets.P12_PASSWORD_DISTR }}
+          APPSTORE_PROFILE_BASE64: ${{ env.APPSTORE_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          set -euo pipefail
+          CERT_P12=$RUNNER_TEMP/dist.p12
+          PROFILE=$RUNNER_TEMP/appstore.mobileprovision
+          KEYCHAIN=$RUNNER_TEMP/app-signing.keychain-db
+
+          echo -n "$DISTRIBUTION_CERTIFICATE_P12" | base64 --decode > "$CERT_P12"
+          echo -n "$APPSTORE_PROFILE_BASE64" | base64 --decode > "$PROFILE"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security import "$CERT_P12" -P "$P12_PASSWORD_DISTR" -A -t cert -f pkcs12 -k "$KEYCHAIN"
+          security list-keychain -d user -s "$KEYCHAIN"
+
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          cp "$PROFILE" "$HOME/Library/MobileDevice/Provisioning Profiles/"
+
+      - name: Show build settings
+        run: |
+          cd ios/App
+          xcodebuild -showBuildSettings \
+            -workspace "App.xcworkspace" \
+            -scheme "App" \
+            -configuration "Release Production" | egrep "CODE_SIGN|PROVISION|PRODUCT_BUNDLE_IDENTIFIER|DEVELOPMENT_TEAM"
+
+      - name: Build archive
+        env:
+          TEAM_ID: ${{ secrets.APPSTORE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          cd ios/App
+          xcodebuild \
+            -workspace "App.xcworkspace" \
+            -scheme "App" \
+            -configuration "Release Production" \
+            -archivePath "$GITHUB_WORKSPACE/App.xcarchive" \
+            -destination "generic/platform=iOS" \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            PROVISIONING_PROFILE="" \
+            clean archive
+
+      - name: Export IPA
+        env:
+          EXPORT_PLIST_B64: ${{ env.IOS_EXPORT_PRODUCTION }}
+        run: |
+          set -euo pipefail
+          EXPORT_PLIST=$RUNNER_TEMP/ExportOptions.plist
+          echo -n "$EXPORT_PLIST_B64" | base64 --decode > "$EXPORT_PLIST"
+          cd ios/App
+          xcodebuild -exportArchive \
+            -archivePath "$GITHUB_WORKSPACE/App.xcarchive" \
+            -exportOptionsPlist "$EXPORT_PLIST" \
+            -exportPath "$RUNNER_TEMP/export"
+
+      - name: Save App Store Connect API key (.p8)
+        env:
+          API_KEY_B64: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          key_id="${{ secrets.APPSTORE_API_KEY_ID }}"
+          [ -z "$key_id" ] && {
+            echo "APPSTORE_API_KEY_ID secret is missing" >&2
+            exit 1
+          }
+          mkdir -p ~/private_keys
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo -n "$API_KEY_B64" | base64 --decode \
+          > ~/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8
+          cp ~/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8 \
+            ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8
+
+      - name: Upload to TestFlight
+        env:
+          API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          API_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+        run: |
+          set -euo pipefail
+          IPA=$(ls $RUNNER_TEMP/export/*.ipa | head -n 1)
+          if [[ -z "$IPA" || ! -f "$IPA" ]]; then
+            echo "No IPA found to upload" >&2
+            exit 1
+          fi
+          xcrun altool --upload-app \
+            --type ios \
+            --file "$IPA" \
+            --apiKey "$API_KEY_ID" \
+            --apiIssuer "$API_ISSUER_ID"

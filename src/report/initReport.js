@@ -1,4 +1,6 @@
 import Report from 'cordovapp/report/ReportForm'
+import installReportPhotoCapacitor from '../capacitor-hooks/photo-handler'
+import { toResolvableFileUri } from '../capacitor-hooks/photo-utils'
 import UserManagerTemplating from 'cordovapp/collaboratif/UserManagerTemplating'
 import map from '../map/map'
 import {ApiClient} from 'collaboratif-client-api';
@@ -275,6 +277,36 @@ function initReport(wapp) {
       return true;
     }
   });
+
+  // fait en sorte d'avoir des URLs resolvables pour l'upload des photos
+  if (wapp.report && typeof wapp.report.postPhotosPending === 'function') {
+    const _origPostPhotosPending = wapp.report.postPhotosPending.bind(wapp.report);
+    wapp.report.postPhotosPending = function(reportId, grem, cback) {
+      try {
+        if (grem && Array.isArray(grem.photos)) {
+          grem.photos = grem.photos.map(p => toResolvableFileUri(p));
+        }
+      } catch(e) { /* */ }
+      return _origPostPhotosPending(reportId, grem, cback);
+    }
+  }
+
+  // fait en sorte d'avoir des URLs resolvables pour la suppression des photos
+  if (wapp.report && typeof wapp.report.delLocalRem === 'function') {
+    const _origDelLocalRem = wapp.report.delLocalRem.bind(wapp.report);
+    wapp.report.delLocalRem = function(i, silent) {
+      try {
+        const idx = this.getIndice(i);
+        const grem = this.param.georems[idx];
+        if (grem && Array.isArray(grem.photos)) {
+          grem.photos = grem.photos.map(p => toResolvableFileUri(p));
+        }
+      } catch(e) { /* */ }
+      return _origDelLocalRem(i, silent);
+    }
+  }
+
+  try { installReportPhotoCapacitor(wapp); } catch(e) { console.warn('Capacitor photo adapter not installed', e); }
 
   /**
    * post des georems locales sans interruption en cas d erreur

@@ -6,6 +6,12 @@
   bottom: 4em;
 }
 
+/* iOS-only safe area for bottom */
+.platform-ios #map {
+  bottom: calc(4em + constant(safe-area-inset-bottom));
+  bottom: calc(4em + env(safe-area-inset-bottom));
+}
+
 #map .ol-attribution a {
   text-decoration: none;
   color: #000;

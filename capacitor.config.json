@@ -1,0 +1,16 @@
+{
+  "appId": "fr.ign.espaceco",
+  "appName": "Espace collaboratif IGN",
+  "webDir": "www",
+  "server": {
+    "allowNavigation": [
+      "*://*.ign.fr/*",
+      "https://iam-ign-qa-ext.cegedim.cloud/*"
+    ]
+  },
+  "cordova": {
+    "preferences": {
+      "BackupWebStorage": "none"
+    }
+  }
+}

@@ -8,6 +8,8 @@ import { toLonLat } from 'ol/proj';
 import Audio from 'cordovapp/media/Audio'
 import GeolocationCacheRecorder from '../map/interaction/GeolocationCacheRecorder'
 
+import { keepDeviceAwake, allowDeviceSleep } from '../capacitor-hooks/keep-awake';
+
 const bip = new Audio({ source: './sound/bip.mp3' });
 const bip2 = new Audio({ source: './sound/bip2.mp3' });
 let geolocActive = false;
@@ -54,24 +56,24 @@ wapp.ready(() => {
   });
   GeolocationCacheRecorder.saveDraw(geolocation, startTracking);
   // Add nmea informations
-  geolocation.getPosition = function(loc) {
+  geolocation.getPosition = function (loc) {
     var pos = loc.getPosition();
-    pos.push (Math.round((loc.getAltitude()||0)*100)/100);
-    pos.push (Math.round((new Date()).getTime()/1000));
+    pos.push(Math.round((loc.getAltitude() || 0) * 100) / 100);
+    pos.push(Math.round((new Date()).getTime() / 1000));
     if (loc._position.nmea) {
       // Show icones
       $('.info', page).show();
-      pos.push (loc._position.nmea.geoidal);
+      pos.push(loc._position.nmea.geoidal);
       //$('.sats', page).html(loc._position.nmea.satsVisible+'/'+loc._position.nmea.satellites);
       // Deprecated
       $('.sats', page).html(loc._position.nmea.satsActive);
-      $('.speed', page).html(((loc._position.coords.speed*3600/1000)||'-') + ' km/h');
+      $('.speed', page).html(((loc._position.coords.speed * 3600 / 1000) || '-') + ' km/h');
       $('.pdop', page).html(loc._position.nmea.pdop);
     } else {
       // Hide icones
       $('.info', page).hide();
     }
-    return pos;  
+    return pos;
   }
   geolocation.on('change:active', () => {
     var param = getDeport();
@@ -79,12 +81,10 @@ wapp.ready(() => {
     geolocation.set('tolerance', param.tolerance);
   });
   // Prevent from falling asleep when geolocating
-  if (window.plugins && window.plugins.insomnia) {
-    geolocation.on('change:active', (e) => {
-      if (e.target.getActive()) window.plugins.insomnia.keepAwake();
-      else window.plugins.insomnia.allowSleepAgain();
-    });
-  }
+  geolocation.on('change:active', (e) => {
+    if (e.target.getActive()) keepDeviceAwake();
+    else allowDeviceSleep();
+  });
   // Drawing
   geolocation.on('drawing', (e) => {
     if (page.hasClass('track')) {
@@ -159,14 +159,14 @@ function setDeport(isCar) {
   // Plani
   $('.XY input[type="checkbox"]', template)
     .prop('checked', param.bxy)
-    .on('change', function() {
+    .on('change', function () {
       $('.XY input[type="number"]', template).prop('disabled', !$(this).prop('checked'));
     });
   $('.XY input[type="number"]', template).val(param.xy || 0).prop('disabled', !param.bxy);
   // Alti
   $('.Z input[type="checkbox"]', template)
     .prop('checked', param.bz)
-    .on('change', function() {
+    .on('change', function () {
       $('.Z input[type="number"]', template).prop('disabled', !$(this).prop('checked'));
     });
   $('.Z input[type="number"]', template).val(param.z || 0).prop('disabled', !param.bz);
@@ -202,11 +202,11 @@ let currentRem;
 
 /** Georem GPS */
 Report.prototype.georemGPS = function (georem) {
-//  console.log(georem)
+  //  console.log(georem)
   currentRem = georem;
   wapp.showPage('georemGPS');
   $('#georemGPS p.theme').text(georem.theme);
-//  page.show();
+  //  page.show();
   page.removeClass('track');
   page.removeClass('car');
   if (paramGPS.useCar) {
@@ -241,17 +241,17 @@ function saveTracking(e) {
       grem.lat = pt[1];
       // Add last point
       const lastPt = geolocation.geolocation.getPosition();
-      const lastTrackPt = geolocation.path_[geolocation.path_.length-1];
-      if (lastPt[0] !== lastTrackPt[0]  && lastPt[1] !== lastTrackPt[1]) {
+      const lastTrackPt = geolocation.path_[geolocation.path_.length - 1];
+      if (lastPt[0] !== lastTrackPt[0] && lastPt[1] !== lastTrackPt[1]) {
         geolocation.path_.push(lastPt);
         feature.getGeometry().appendCoordinate(lastPt);
       }
       // Nettoyage des NaN
       let coords = feature.getGeometry().getCoordinates();
-      for(let i = coords.length - 1; i >= 0; i--) {
+      for (let i = coords.length - 1; i >= 0; i--) {
         if (
-          ( isNaN(coords[i][0]) || isNaN(coords[i][1])
-          || !coords[i][0] || !coords[i][1])
+          (isNaN(coords[i][0]) || isNaN(coords[i][1])
+            || !coords[i][0] || !coords[i][1])
         ) {
           coords.splice(i, 1);
         }
@@ -259,7 +259,7 @@ function saveTracking(e) {
       feature.getGeometry().setCoordinates(coords);
 
       // Save GPS track (with nmea info)
-      if (geolocation.path_[0] && geolocation.path_[0][4]!==undefined) {
+      if (geolocation.path_[0] && geolocation.path_[0][4] !== undefined) {
         const nmea = [];
         geolocation.path_.forEach((c) => {
           nmea.push([c[3], c[4]]);
@@ -308,9 +308,9 @@ function endTracking() {
 
 /** Next track: save track and start a new one from end point
  */
-function nextTrack () {
+function nextTrack() {
   // En track and start a new one
-  const pt = geolocation.path_[geolocation.path_.length-1];
+  const pt = geolocation.path_[geolocation.path_.length - 1];
   // endTracking();
   // Start new
   startTracking();
@@ -323,13 +323,13 @@ function nextTrack () {
  * @param {boolean} again true to start new theme
  */
 function stopTracking(force, again) {
-  if (force!==true && page.hasClass('track')) {
+  if (force !== true && page.hasClass('track')) {
     wapp.message(
       'Voullez-vous interrompre la saisie ?<br/><i class="fa fa-warning fa-lg0 fa-fleft"></i> La saisie ne sera pas enregistrée...',
       'Trace en cours...',
-      { ok:'Interrompre', cancel:'Continuer'},
+      { ok: 'Interrompre', cancel: 'Continuer' },
       (b) => {
-        if (b==='ok') {
+        if (b === 'ok') {
           page.removeClass('track');
           stopTracking(true, again || true);
         }
@@ -348,7 +348,7 @@ function stopTracking(force, again) {
       wapp.interactions.geolocation.setActive(true);
       wapp.interactions.geolocation.pause(true);
     }
-  } else if (again==='choice') {
+  } else if (again === 'choice') {
     wapp.directGPS();
   }
 }
@@ -356,8 +356,8 @@ function stopTracking(force, again) {
 /** Saisie direct GPS (sans dialogue) */
 function startDirectGPS(c, theme) {
   var center = wapp.map.getView().getCenter();
-  let pos = toLonLat(center, wapp.map.getView().getProjection(),'EPSG:4326');
-  let wkt="POINT(" + pos[0] + " " + pos[1] + ")";
+  let pos = toLonLat(center, wapp.map.getView().getProjection(), 'EPSG:4326');
+  let wkt = "POINT(" + pos[0] + " " + pos[1] + ")";
   var georem = {
     attText: '',
     attributes: '',
@@ -371,7 +371,7 @@ function startDirectGPS(c, theme) {
     version: "0.1",
   }
   let attributes = {};
-  theme.attributes.forEach((a)=> {
+  theme.attributes.forEach((a) => {
     if (a.default) {
       attributes[a.name] = a.default;
     }
@@ -382,30 +382,30 @@ function startDirectGPS(c, theme) {
 }
 
 /** Choix du groupe pour un signelement direct GPS */
-wapp.directGPS = function() {
+wapp.directGPS = function () {
   var choix = {};
   var themes = {};
   var nb = 0;
-  let community_id =  wapp.report.param.profil.community_id;
+  let community_id = wapp.report.param.profil.community_id;
   wapp.report.param.themes.forEach((th) => {
     if (/^GPS@|^Rapide@/.test(th.theme)) {
-      choix[community_id+"::"+th.theme] = th.theme;
-      themes[community_id+"::"+th.theme] = th;
+      choix[community_id + "::" + th.theme] = th.theme;
+      themes[community_id + "::" + th.theme] = th;
       nb++;
     }
   });
-  if (nb>1) {
+  if (nb > 1) {
     wapp.selectDialog(choix, null, (c) => {
       startDirectGPS(c, themes[c]);
     }, {
-      buttons: { other: "Autres", cancel:"annuler" },
+      buttons: { other: "Autres", cancel: "annuler" },
       callback: (b) => {
-        if (b==='other') {
+        if (b === 'other') {
           wapp.report.showFormulaire('gps');
         }
       }
     });
-  } else if (nb===1) {
+  } else if (nb === 1) {
     var c = Object.keys(choix)[0];
     startDirectGPS(c, themes[c]);
   } else {
