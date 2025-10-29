@@ -55,7 +55,38 @@ function addLayers (layers) {
   for (var i in layersArr) {
     let name = layersArr[i];
     let layer = layers[name];
-    if (caps[name]) {
+    if(layer.geoservice){
+      let visible = name in wapp.param.visibleLayers ? wapp.param.visibleLayers[name] : (layer.visibility || false);
+      if (visible) oneVisible = true;
+      let options = { hidpi: false, visible: visible};
+      if (layer && layer.geoservice && layer.geoservice.description) {
+        options["desc"] = layer.geoservice.description;
+      }
+      let tileOptions = {};
+      const url = layer.geoservice.url;
+      if (layer && Object.keys(layer).length) {
+        options["opacity"] = name in wapp.param.visibleLayers ? wapp.param.visibleLayers[name] : (layer.opacity || 1);
+        options["minZoom"] = layer.geoservice.min_zoom;
+        options["maxZoom"] = layer.geoservice.max_zoom;
+      }
+      
+      //Change les options en fonctions de l'url récupérée
+      let serverUrl = url.split("?")[0];
+      if(serverUrl.includes("private")){
+          tileOptions['server'] = "https://data.geopf.fr/private/wmts";
+          tileOptions['gppKey'] = "ign_scan_ws";
+      } else if(serverUrl.includes("data.geopf")){
+          tileOptions['server'] = "https://data.geopf.fr/wmts";
+          tileOptions['gppKey'] = "gpf"
+      } else {
+          tileOptions['server'] = "https://wxs.ign.fr/proxy/";
+          tileOptions['gppKey'] = config.apiKey;
+      }
+      options['gppKey'] = tileOptions['gppKey']
+
+      const gpl = new ol_layer_Geoportail(name, options, tileOptions);
+      geoportailLayer.getLayers().push(gpl);
+    } else if (caps[name]) {
       let visible = name in wapp.param.visibleLayers ? wapp.param.visibleLayers[name] : (layer.visibility || false);
       if (visible) oneVisible = true;
       let options = { hidpi: false, visible: visible};
@@ -79,6 +110,7 @@ function addLayers (layers) {
         options['gppKey'] = config.apiKey;
         tileOptions['gppKey'] = config.apiKey;
       }
+
       const gpl = new ol_layer_Geoportail(name, options, tileOptions);
       geoportailLayer.getLayers().push(gpl);
     } else {
