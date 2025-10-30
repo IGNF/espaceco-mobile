@@ -21,7 +21,7 @@ build.json
 /naviforest/src/assets/templates/menu-principal.css.0
 /naviforest/src/assets/templates/menu-principal.html.0
 typings
-jsconfig.json
+/jsconfig.json
 
 resources/ios/**/*
 resources/android/**/*
