@@ -5,7 +5,7 @@ export default {
   name: "EspaceCo",
   displayName: "Espace collaboratif IGN",
   guichetID: undefined,
-  versionNumber: "3.0.7",
+  versionNumber: "3.0.8",
   ios:{
     bundleId: "fr.ign.collaboratif"
   },
