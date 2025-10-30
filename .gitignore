@@ -15,6 +15,7 @@ cordovapp-*
 src/appli
 platforms
 plugins
+build.json
 # OS X
 .DS_Store
 /naviforest/src/assets/templates/menu-principal.css.0
