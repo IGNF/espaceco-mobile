@@ -20,15 +20,33 @@ jobs:
           node-version: 20
           cache: npm
 
+      - name: Detect selected app
+        id: detect_app_early
+        run: |
+          set -euo pipefail
+          if [[ -f scripts/.selected-app ]]; then
+            app=$(tr -d '\r\n' < scripts/.selected-app)
+          else
+            app="EspaceCo"
+          fi
+          echo "Selected app: $app"
+          echo "SELECTED_APP=$app" >> "$GITHUB_ENV"
+
       - name: Create empty .env
         run: touch .env
 
       - name: Make envfile (override with secrets)
         run: |
           set -euo pipefail
-          # Only append keys that are set as secrets; later lines override earlier ones
-          [ -n "${{ secrets.COLLAB_API_CLIENT_ID }}" ] && echo "COLLAB_API_CLIENT_ID=${{ secrets.COLLAB_API_CLIENT_ID }}" >> .env || true
-          [ -n "${{ secrets.COLLAB_API_CLIENT_SECRET }}" ] && echo "COLLAB_API_CLIENT_SECRET=${{ secrets.COLLAB_API_CLIENT_SECRET }}" >> .env || true
+          # Set COLLAB_API_CLIENT_ID and COLLAB_API_CLIENT_SECRET based on selected app
+          if [[ "$SELECTED_APP" == "NaviForest" ]]; then
+            [ -n "${{ secrets.COLLAB_API_CLIENT_ID_NAVIFOREST }}" ] && echo "COLLAB_API_CLIENT_ID=${{ secrets.COLLAB_API_CLIENT_ID_NAVIFOREST }}" >> .env || true
+            [ -n "${{ secrets.COLLAB_API_CLIENT_SECRET_NAVIFOREST }}" ] && echo "COLLAB_API_CLIENT_SECRET=${{ secrets.COLLAB_API_CLIENT_SECRET_NAVIFOREST }}" >> .env || true
+          else
+            [ -n "${{ secrets.COLLAB_API_CLIENT_ID_ESPACECO }}" ] && echo "COLLAB_API_CLIENT_ID=${{ secrets.COLLAB_API_CLIENT_ID_ESPACECO }}" >> .env || true
+            [ -n "${{ secrets.COLLAB_API_CLIENT_SECRET_ESPACECO }}" ] && echo "COLLAB_API_CLIENT_SECRET=${{ secrets.COLLAB_API_CLIENT_SECRET_ESPACECO }}" >> .env || true
+          fi
+          # Other secrets (not app-dependent)
           [ -n "${{ secrets.BASE_AUTH_URL }}" ] && echo "BASE_AUTH_URL=${{ secrets.BASE_AUTH_URL }}" >> .env || true
           [ -n "${{ secrets.QLF_COLLAB_API_CLIENT_ID }}" ] && echo "QLF_COLLAB_API_CLIENT_ID=${{ secrets.QLF_COLLAB_API_CLIENT_ID }}" >> .env || true
           [ -n "${{ secrets.QLF_COLLAB_API_CLIENT_SECRET }}" ] && echo "QLF_COLLAB_API_CLIENT_SECRET=${{ secrets.QLF_COLLAB_API_CLIENT_SECRET }}" >> .env || true
@@ -62,25 +80,17 @@ jobs:
         run: |
           ls -la /usr/local/lib/android/sdk/build-tools/ || true
 
-      - name: Detect selected app and signing params
-        id: detect_app
+      - name: Set Android signing params
+        id: set_signing_params
         shell: bash
         run: |
           set -euo pipefail
-          if [[ -f scripts/.selected-app ]]; then
-            app=$(tr -d '\r\n' < scripts/.selected-app)
-          else
-            # Default to EspaceCo
-            app="EspaceCo"
-          fi
-          echo "Selected app: $app"
           # Choose alias + key password per selected app
-          if [[ "$app" == "NaviForest" ]]; then
+          if [[ "$SELECTED_APP" == "NaviForest" ]]; then
             echo "SIGNING_KEY=${{ secrets.SIGNING_KEY_NAVIFOREST }}" >> "$GITHUB_ENV"
             echo "SIGNING_ALIAS=${{ secrets.ALIAS_NAVIFOREST }}" >> "$GITHUB_ENV"
             echo "SIGNING_KEY_PASSWORD=${{ secrets.KEY_PASSWORD_NAVIFOREST }}" >> "$GITHUB_ENV"
           else
-            # Default to EspaceCo
             echo "SIGNING_KEY=${{ secrets.SIGNING_KEY_ESPACECO }}" >> "$GITHUB_ENV"
             echo "SIGNING_ALIAS=${{ secrets.ALIAS_ESPACECO }}" >> "$GITHUB_ENV"
             echo "SIGNING_KEY_PASSWORD=${{ secrets.KEY_PASSWORD_ESPACECO }}" >> "$GITHUB_ENV"
