@@ -224,7 +224,74 @@ try {
   console.warn('- Warning: unable to fully update native project files:', e.message);
 }
 
-// 6) Synchronise la version de l'app à partir de la configuration (sans incrémenter les numéros de build)
+// 6) Renomme le répertoire de l'activité principale Android pour correspondre au package
+try {
+  if (androidPackage) {
+    const javaBase = path.join(root, 'android', 'app', 'src', 'main', 'java');
+    const newPkgPath = androidPackage.replace(/\./g, path.sep);
+    const newActivityDir = path.join(javaBase, newPkgPath);
+    const newActivityFile = path.join(newActivityDir, 'MainActivity.java');
+
+    // Cherche le fichier MainActivity.java existant dans n'importe quel sous-répertoire
+    let existingActivityFile = null;
+    const findMainActivity = (dir) => {
+      if (!fs.existsSync(dir)) return;
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          findMainActivity(fullPath);
+        } else if (entry.name === 'MainActivity.java') {
+          existingActivityFile = fullPath;
+        }
+      }
+    };
+    findMainActivity(javaBase);
+
+    if (existingActivityFile) {
+      const existingDir = path.dirname(existingActivityFile);
+
+      // Si le répertoire est différent, déplace le fichier
+      if (existingDir !== newActivityDir) {
+        // Lit le contenu et met à jour la déclaration de package
+        let content = fs.readFileSync(existingActivityFile, 'utf8');
+        content = content.replace(/^package\s+[^;]+;/m, `package ${androidPackage};`);
+
+        // Crée le nouveau répertoire et écrit le fichier
+        fse.ensureDirSync(newActivityDir);
+        fs.writeFileSync(newActivityFile, content, 'utf8');
+        console.log(`- Android: Moved MainActivity.java to ${path.relative(root, newActivityFile)}`);
+
+        // Supprime l'ancien fichier et nettoie les répertoires vides
+        fs.unlinkSync(existingActivityFile);
+        let dirToClean = existingDir;
+        while (dirToClean !== javaBase && dirToClean.startsWith(javaBase)) {
+          const remaining = fs.readdirSync(dirToClean);
+          if (remaining.length === 0) {
+            fs.rmdirSync(dirToClean);
+            dirToClean = path.dirname(dirToClean);
+          } else {
+            break;
+          }
+        }
+      } else {
+        // Même répertoire, met à jour seulement la déclaration de package si nécessaire
+        let content = fs.readFileSync(existingActivityFile, 'utf8');
+        const updatedContent = content.replace(/^package\s+[^;]+;/m, `package ${androidPackage};`);
+        if (content !== updatedContent) {
+          fs.writeFileSync(existingActivityFile, updatedContent, 'utf8');
+          console.log(`- Android: Updated package declaration in MainActivity.java`);
+        }
+      }
+    } else {
+      console.warn('- Android: MainActivity.java not found, skipping activity path rename');
+    }
+  }
+} catch (e) {
+  console.warn('- Warning: unable to rename Android activity path:', e.message);
+}
+
+// 7) Synchronise la version de l'app à partir de la configuration (sans incrémenter les numéros de build)
 try {
   const version = String(appCfg.versionNumber || '').trim();
   if (!version) throw new Error('No versionNumber defined in app config');
