@@ -1,11 +1,10 @@
 {
   "appId": "fr.ign.espaceco",
-  "appName": "Naviforest",
+  "appName": "Espace collaboratif IGN",
   "webDir": "www",
   "server": {
     "allowNavigation": [
-      "*://*.ign.fr/*",
-      "https://iam-ign-qa-ext.cegedim.cloud/*"
+      "*://*.ign.fr/*"
     ]
   },
   "cordova": {
