@@ -69,83 +69,81 @@ jobs:
           echo "COLLAB_API_CLIENT_ID length: ${#CLIENT_ID}"
           echo "COLLAB_API_CLIENT_SECRET is set: $([ -n \"$CLIENT_SECRET\" ] && echo 'YES' || echo 'NO')"
           echo "COLLAB_API_CLIENT_SECRET length: ${#CLIENT_SECRET}"
-          echo "--- Early exit for testing (remove this step when done) ---"
-          exit 0
 
-      - name: Install dependencies
-        run: npm ci
+      # - name: Install dependencies
+      #   run: npm ci
 
-      - name: Build web bundle
-        run: npm run build
+      # - name: Build web bundle
+      #   run: npm run build
 
-      - name: Generate Capacitor assets (Android)
-        run: npx @capacitor/assets generate --android
+      # - name: Generate Capacitor assets (Android)
+      #   run: npx @capacitor/assets generate --android
 
-      - name: Capacitor sync (Android)
-        run: npx cap sync android
+      # - name: Capacitor sync (Android)
+      #   run: npx cap sync android
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: "temurin"
-          java-version: 21
+      # - name: Set up Java
+      #   uses: actions/setup-java@v4
+      #   with:
+      #     distribution: "temurin"
+      #     java-version: 21
 
-      - name: Check Android build-tools
-        run: |
-          ls -la /usr/local/lib/android/sdk/build-tools/ || true
+      # - name: Check Android build-tools
+      #   run: |
+      #     ls -la /usr/local/lib/android/sdk/build-tools/ || true
 
-      - name: Set Android signing params
-        id: set_signing_params
-        shell: bash
-        run: |
-          set -euo pipefail
-          # Choose alias + key password per selected app
-          if [[ "$SELECTED_APP" == "NaviForest" ]]; then
-            echo "SIGNING_KEY=${{ secrets.SIGNING_KEY_NAVIFOREST }}" >> "$GITHUB_ENV"
-            echo "SIGNING_ALIAS=${{ secrets.ALIAS_NAVIFOREST }}" >> "$GITHUB_ENV"
-            echo "SIGNING_KEY_PASSWORD=${{ secrets.KEY_PASSWORD_NAVIFOREST }}" >> "$GITHUB_ENV"
-          else
-            echo "SIGNING_KEY=${{ secrets.SIGNING_KEY_ESPACECO }}" >> "$GITHUB_ENV"
-            echo "SIGNING_ALIAS=${{ secrets.ALIAS_ESPACECO }}" >> "$GITHUB_ENV"
-            echo "SIGNING_KEY_PASSWORD=${{ secrets.KEY_PASSWORD_ESPACECO }}" >> "$GITHUB_ENV"
-          fi
-          # Derive package name from updated Gradle config
-          pkg=$(sed -n 's/.*applicationId\s*"\([^"]*\)".*/\1/p' android/app/build.gradle | head -n1)
-          if [[ -n "$pkg" ]]; then
-            echo "PACKAGE_NAME=$pkg" >> "$GITHUB_ENV"
-          fi
+      # - name: Set Android signing params
+      #   id: set_signing_params
+      #   shell: bash
+      #   run: |
+      #     set -euo pipefail
+      #     # Choose alias + key password per selected app
+      #     if [[ "$SELECTED_APP" == "NaviForest" ]]; then
+      #       echo "SIGNING_KEY=${{ secrets.SIGNING_KEY_NAVIFOREST }}" >> "$GITHUB_ENV"
+      #       echo "SIGNING_ALIAS=${{ secrets.ALIAS_NAVIFOREST }}" >> "$GITHUB_ENV"
+      #       echo "SIGNING_KEY_PASSWORD=${{ secrets.KEY_PASSWORD_NAVIFOREST }}" >> "$GITHUB_ENV"
+      #     else
+      #       echo "SIGNING_KEY=${{ secrets.SIGNING_KEY_ESPACECO }}" >> "$GITHUB_ENV"
+      #       echo "SIGNING_ALIAS=${{ secrets.ALIAS_ESPACECO }}" >> "$GITHUB_ENV"
+      #       echo "SIGNING_KEY_PASSWORD=${{ secrets.KEY_PASSWORD_ESPACECO }}" >> "$GITHUB_ENV"
+      #     fi
+      #     # Derive package name from updated Gradle config
+      #     pkg=$(sed -n 's/.*applicationId\s*"\([^"]*\)".*/\1/p' android/app/build.gradle | head -n1)
+      #     if [[ -n "$pkg" ]]; then
+      #       echo "PACKAGE_NAME=$pkg" >> "$GITHUB_ENV"
+      #     fi
 
-      - name: Build Android release (APK + AAB)
-        run: |
-          cd android
-          ./gradlew --no-daemon assembleRelease bundleRelease
+      # - name: Build Android release (APK + AAB)
+      #   run: |
+      #     cd android
+      #     ./gradlew --no-daemon assembleRelease bundleRelease
 
-      - name: Sign Android App Bundle (AAB)
-        id: sign_aab
-        uses: r0adkll/sign-android-release@v1
-        with:
-          # Sign the generated AAB in the release output directory
-          releaseDirectory: android/app/build/outputs/bundle/release
-          signingKeyBase64: ${{ env.SIGNING_KEY }}
-          alias: ${{ env.SIGNING_ALIAS }}
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword: ${{ env.SIGNING_KEY_PASSWORD }}
-        env:
-          BUILD_TOOLS_VERSION: "34.0.0"
+      # - name: Sign Android App Bundle (AAB)
+      #   id: sign_aab
+      #   uses: r0adkll/sign-android-release@v1
+      #   with:
+      #     # Sign the generated AAB in the release output directory
+      #     releaseDirectory: android/app/build/outputs/bundle/release
+      #     signingKeyBase64: ${{ env.SIGNING_KEY }}
+      #     alias: ${{ env.SIGNING_ALIAS }}
+      #     keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+      #     keyPassword: ${{ env.SIGNING_KEY_PASSWORD }}
+      #   env:
+      #     BUILD_TOOLS_VERSION: "34.0.0"
 
-      - name: Upload signed bundle artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-signed-aab
-          path: ${{ steps.sign_aab.outputs.signedReleaseFile }}
-          retention-days: 3
+      # - name: Upload signed bundle artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: android-signed-aab
+      #     path: ${{ steps.sign_aab.outputs.signedReleaseFile }}
+      #     retention-days: 3
 
-      - name: Deploy to Play Store (internal track)
-        uses: r0adkll/upload-google-play@v1
-        with:
-          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
-          packageName: ${{ env.PACKAGE_NAME }}
-          releaseFiles: ${{ steps.sign_aab.outputs.signedReleaseFile }}
-          track: internal
-          status: completed
-          inAppUpdatePriority: 5
+      # - name: Deploy to Play Store (internal track)
+      #   uses: r0adkll/upload-google-play@v1
+      #   with:
+      #     serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+      #     packageName: ${{ env.PACKAGE_NAME }}
+      #     releaseFiles: ${{ steps.sign_aab.outputs.signedReleaseFile }}
+      #     track: internal
+      #     status: completed
+      #     inAppUpdatePriority: 5
