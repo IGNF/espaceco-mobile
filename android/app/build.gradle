@@ -7,7 +7,7 @@ android {
         applicationId "fr.ign.guichet"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 30014
+        versionCode 30015
         versionName "3.0.8"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
