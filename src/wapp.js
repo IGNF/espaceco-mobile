@@ -648,7 +648,7 @@ wapp.setQualif = function () {
       } else if(this.param.options.qlf === process.env.QLF_BASE_API_URL){
         $('#options .qlf').text('Collaboratif-develop');
       } else {    
-        $('#options .qlf').text(this.param.options.qlf.replace('https://qlf-collaboratif', '').replace('.ign.fr/', '').replace('/gcms/api/', ''));
+        $('#options .qlf').text(this.param.options.qlf);
       }
       wapp.userManager.setServiceUrl(qlf);
       let authParams = wapp.getAuthParameters(qlf);
@@ -684,7 +684,7 @@ wapp.setQualif = function () {
               this.param.options.qlf = qlf;
               this.param.options.qlfList[v] = qlf;
               //---
-              $('#options .qlf').text(v);
+              $('#options .qlf').text(qlf);
               wapp.userManager.setServiceUrl(qlf);
               let authParams = wapp.getAuthParameters(qlf);
               wapp.userManager.switchAuthParams(authParams.authBaseUrl, authParams.clientId, authParams.clientSecret);
@@ -694,6 +694,7 @@ wapp.setQualif = function () {
       } else if (bt === 'raz') {
         console.log('raz')
         this.param.options.qlfList = {};
+        this.param.options.qlf = process.env.BASE_API_URL
       }
     }
   }
