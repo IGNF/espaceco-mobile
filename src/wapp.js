@@ -619,7 +619,13 @@ wapp.setDebugMode = function () {
   // Mode debug en qualif
   if (this.param.options.qlf) {
     $(".debug").show();
-    $('#options .qlf').text(this.param.options.qlf.replace('https://qlf-collaboratif.cegedim-hds.fr/', '').replace('/gcms/api/', ''));
+    if(this.param.options.qlf === process.env.BASE_API_URL){
+        $('#options .qlf').text('Espace Co');
+    } else if(this.param.options.qlf === process.env.QLF_BASE_API_URL){
+      $('#options .qlf').text('Collaboratif-develop');
+    } else {    
+      $('#options .qlf').text(this.param.options.qlf.replace('https://qlf-collaboratif', '').replace('.ign.fr/', '').replace('/gcms/api/', ''));
+    }
   }
 };
 
@@ -628,7 +634,7 @@ wapp.setQualif = function () {
   if (!this.param.options.qlfList) this.param.options.qlfList = {};
   var choice = {};
   choice[process.env.BASE_API_URL] = 'Espace Co';
-  choice['https://qlf-collaboratif.cegedim-hds.fr/collaboratif-develop/gcms/api/'] = 'Collaboratif-develop';
+  choice[process.env.QLF_BASE_API_URL] = 'Collaboratif-develop';
 
   for (let i in this.param.options.qlfList) {
     choice[this.param.options.qlfList[i]] = i;
@@ -637,7 +643,13 @@ wapp.setQualif = function () {
     this.param.options.qlf,
     (qlf) => {
       this.param.options.qlf = qlf;
-      $('#options .qlf').text(this.param.options.qlf.replace('https://qlf-collaboratif.ign.fr/', '').replace('/gcms/api/', '') || 'Espace Co');
+      if(this.param.options.qlf === process.env.BASE_API_URL){
+        $('#options .qlf').text('Espace Co');
+      } else if(this.param.options.qlf === process.env.QLF_BASE_API_URL){
+        $('#options .qlf').text('Collaboratif-develop');
+      } else {    
+        $('#options .qlf').text(this.param.options.qlf);
+      }
       wapp.userManager.setServiceUrl(qlf);
       let authParams = wapp.getAuthParameters(qlf);
       wapp.userManager.switchAuthParams(authParams.authBaseUrl, authParams.clientId, authParams.clientSecret);
@@ -654,9 +666,25 @@ wapp.setQualif = function () {
           null,
           (v) => {
             if (v) {
-              var qlf = this.param.options.qlf = 'https://qlf-collaboratif.ign.fr/' + v + '/gcms/api/';
-              this.param.options.qlfList[v] = 'https://qlf-collaboratif.ign.fr/' + v + '/gcms/api/';
-              $('#options .qlf').text(v);
+              // Ancien comportement : qlf = 'https://qlf-collaboratif.ign.fr/' + v + '/gcms/api/'
+              let qlf;
+              // Si v contient "http", c'est une URL
+              if (v.includes('http')) {
+                // Nettoie l'URL
+                qlf = v.trim();
+                // Ajoute /gcms/api/ si absent
+                if (!qlf.endsWith('/gcms/api/')) {
+                  qlf = qlf.replace(/\/$/, '') + '/gcms/api/';
+                }
+              } else {
+                // Changement de numéro de version seulement
+                qlf = 'https://qlf-collaboratif' + v + '.ign.fr/gcms/api/';
+              }
+              
+              this.param.options.qlf = qlf;
+              this.param.options.qlfList[v] = qlf;
+              //---
+              $('#options .qlf').text(qlf);
               wapp.userManager.setServiceUrl(qlf);
               let authParams = wapp.getAuthParameters(qlf);
               wapp.userManager.switchAuthParams(authParams.authBaseUrl, authParams.clientId, authParams.clientSecret);
@@ -666,6 +694,7 @@ wapp.setQualif = function () {
       } else if (bt === 'raz') {
         console.log('raz')
         this.param.options.qlfList = {};
+        this.param.options.qlf = process.env.BASE_API_URL
       }
     }
   }
