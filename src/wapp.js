@@ -673,15 +673,16 @@ wapp.setQualif = function () {
                 // Nettoie l'URL
                 qlf = v.trim();
                 // Ajoute /gcms/api/ si absent
-                if (!qlf.endsWith('/gcms/api/')) {
-                  qlf = qlf.replace(/\/$/, '') + '/gcms/api/';
+                if (!qlf.endsWith('/gcms/api')) {
+                  qlf = qlf.replace(/\/$/, '') + '/gcms/api';
                 }
               } else {
                 // Changement de numéro de version seulement
-                qlf = 'https://qlf-collaboratif' + v + '.ign.fr/gcms/api/';
+                qlf = 'https://qlf-collaboratif' + v + '.ign.fr/gcms/api';
               }
               
               this.param.options.qlf = qlf;
+              console.log(qlf)
               this.param.options.qlfList[v] = qlf;
               //---
               $('#options .qlf').text(qlf);
@@ -708,17 +709,17 @@ wapp.setQualif = function () {
  * @returns {Object} {"authBaseUrl": "...", "clientId": "...", "clientSecret": "..."}
  */
 wapp.getAuthParameters = function (url) {
-  if (url != process.env.BASE_API_URL) {
-    return {
-      "authBaseUrl": process.env.QLF_BASE_AUTH_URL,
-      "clientId": process.env.QLF_COLLAB_API_CLIENT_ID,
-      "clientSecret": process.env.QLF_COLLAB_API_CLIENT_SECRET
-    };
-  } else {
+  if (url == process.env.BASE_API_URL || url == process.env.QLF_BASE_API_URL) {
     return {
       "authBaseUrl": process.env.BASE_AUTH_URL,
       "clientId": process.env.COLLAB_API_CLIENT_ID,
       "clientSecret": process.env.COLLAB_API_CLIENT_SECRET
+    };
+  } else {
+    return {
+      "authBaseUrl": process.env.QLF_BASE_AUTH_URL,
+      "clientId": process.env.QLF_COLLAB_API_CLIENT_ID,
+      "clientSecret": process.env.QLF_COLLAB_API_CLIENT_SECRET
     };
   }
 }
