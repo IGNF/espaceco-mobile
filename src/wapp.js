@@ -682,7 +682,6 @@ wapp.setQualif = function () {
               }
               
               this.param.options.qlf = qlf;
-              console.log(qlf)
               this.param.options.qlfList[v] = qlf;
               //---
               $('#options .qlf').text(qlf);
@@ -696,6 +695,7 @@ wapp.setQualif = function () {
         console.log('raz')
         this.param.options.qlfList = {};
         this.param.options.qlf = process.env.BASE_API_URL
+        $('#options .qlf').text('Espace Co');
       }
     }
   }
