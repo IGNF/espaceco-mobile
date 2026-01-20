@@ -1,5 +1,5 @@
 PODS:
-  - Capacitor (7.4.3):
+  - Capacitor (7.4.4):
     - CapacitorCordova
   - CapacitorApp (7.0.2):
     - Capacitor
@@ -9,7 +9,7 @@ PODS:
     - Capacitor
   - CapacitorCommunityKeepAwake (7.1.0):
     - Capacitor
-  - CapacitorCordova (7.4.3)
+  - CapacitorCordova (7.4.4)
   - CapacitorEmailComposer (7.0.2):
     - Capacitor
   - CapacitorFilesystem (7.1.4):
@@ -74,12 +74,12 @@ EXTERNAL SOURCES:
     :path: "../capacitor-cordova-ios-plugins"
 
 SPEC CHECKSUMS:
-  Capacitor: 28d6c01026a9a3f7156529498ec1f389a2a28dbc
+  Capacitor: 358dd1c3fdd71d969547b17e159fd8a7736cb45f
   CapacitorApp: 1f6922c9c5c8b1c538d7fbe92ebe44a81b34bed3
   CapacitorAppLauncher: b70f649f609bab6412eccdd413bd7f0dd42df4a9
   CapacitorCamera: f9e54db0a18bb218a8dc360907d63aaefe9209ff
   CapacitorCommunityKeepAwake: 05c75aab989f60e621870cf03b24a144a5544c30
-  CapacitorCordova: 435121e81a2df4d0034f0fb11fcefab5104cfdb5
+  CapacitorCordova: bf648a636f3c153f652d312ae145fb508b6ffced
   CapacitorEmailComposer: 47e488b85f3a4400e3b616fe56b5b9f65a4aa2f3
   CapacitorFilesystem: f9bd850c41e048180e5dc0cbb90f2033ede9d2cc
   CapacitorKeyboard: 62f36104f26d53d8b3a2a43f2a69fe714f1777d5
