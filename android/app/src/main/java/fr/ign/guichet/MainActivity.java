@@ -1,4 +1,4 @@
-package fr.ign.naviforest;
+package fr.ign.guichet;
 
 import com.getcapacitor.BridgeActivity;
 

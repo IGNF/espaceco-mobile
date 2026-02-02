@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Naviforest</string>
-    <string name="title_activity_main">Naviforest</string>
-    <string name="package_name">fr.ign.naviforest</string>
-    <string name="custom_url_scheme">fr.ign.naviforest</string>
+    <string name="app_name">Espace collaboratif IGN</string>
+    <string name="title_activity_main">Espace collaboratif IGN</string>
+    <string name="package_name">fr.ign.guichet</string>
+    <string name="custom_url_scheme">fr.ign.guichet</string>
     <!-- Keep keys stable; values may be overridden per app if needed -->
 </resources>
 
