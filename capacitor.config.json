@@ -1,6 +1,6 @@
 {
   "appId": "fr.ign.espaceco",
-  "appName": "Espace collaboratif IGN",
+  "appName": "Naviforest",
   "webDir": "www",
   "server": {
     "allowNavigation": [
