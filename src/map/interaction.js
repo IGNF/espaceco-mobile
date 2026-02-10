@@ -224,7 +224,11 @@ export default function (wapp) {
     var pos = loc.getPosition();
     pos.push(Math.round((loc.getAltitude() || 0) * 100) / 100);
     pos.push(Math.round((new Date()).getTime() / 1000));
-    if (loc._position.nmea) pos.push(loc._position.nmea.geoidal);
+    if (loc._position.nmea) {
+      pos.push(loc._position.nmea.geoidal);
+      pos.push(loc._position.nmea.pdop); //GSA - satellites actifs et PDOP
+      pos.push(loc._position.coords.heading); //VTG - flèche de levé
+    }
     return pos;
   }
   map.addControl(geolocBar);
@@ -246,7 +250,7 @@ export default function (wapp) {
     if (geolocation.path_[0] && geolocation.path_[0][4] !== undefined) {
       const nmea = [];
       geolocation.path_.forEach((c) => {
-        nmea.push([c[3], c[4]]);
+        nmea.push([c[3], c[4], c[5], c[6]]);
       })
       e.feature.set('nmea', nmea);
     }
