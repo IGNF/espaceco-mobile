@@ -37,7 +37,7 @@
 }
 
 /* Prevent signalements */
-[data-layer-edition] #signaler,
+[data-layer-edition] #signaler, [data-layer-edition] #signalerGPS,
 [data-layer-edition] [data-list="signal"] {
   display: none;
 }
