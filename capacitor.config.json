@@ -9,7 +9,9 @@
   },
   "cordova": {
     "preferences": {
-      "BackupWebStorage": "none"
+      "BackupWebStorage": "none",
+      "bluetooth_restore_state": "true",
+      "accessBackgroundLocation": "false"
     }
   }
 }

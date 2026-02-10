@@ -19,6 +19,8 @@ import ol_control_GeolocationBar from 'ol-ext/control/GeolocationBar'
 import ol_Geolocation from 'ol/Geolocation'
 import GeolocationCacheRecorder from './interaction/GeolocationCacheRecorder'
 
+import ble from './cordova-plugin-ble-central'
+
 import { keepDeviceAwake, allowDeviceSleep } from '../capacitor-hooks/keep-awake';
 
 import { click as ol_events_condition_click } from 'ol/events/condition'
@@ -226,11 +228,20 @@ export default function (wapp) {
     pos.push(Math.round((new Date()).getTime() / 1000));
     if (loc._position.nmea) {
       pos.push(loc._position.nmea.geoidal);
+      pos.push(loc._position.nmea.quality); //GGA - fix qualification (null si non valide, 'fix' pour valid SPS fix, 'dgps-fix' pour valid DGPS fix)
       pos.push(loc._position.nmea.pdop); //GSA - satellites actifs et PDOP
       pos.push(loc._position.coords.heading); //VTG - flèche de levé
+      //TODO à tester avec GPS externe
+      ble.read(deviceId, '0x180F', '0x2A19', 
+      function(data) {
+        var batteryLevel = new Uint8Array(data)[0];
+        console.log('Batterie: ' + batteryLevel + '%');
+        }
+      );
     }
     return pos;
   }
+  
   map.addControl(geolocBar);
   const geolocation = wapp.interactions.geolocation = geolocBar.getInteraction();
   GeolocationCacheRecorder.saveDraw(geolocation);
@@ -250,7 +261,7 @@ export default function (wapp) {
     if (geolocation.path_[0] && geolocation.path_[0][4] !== undefined) {
       const nmea = [];
       geolocation.path_.forEach((c) => {
-        nmea.push([c[3], c[4], c[5], c[6]]);
+        nmea.push([c[3], c[4], c[5], c[6], c[7]]);
       })
       e.feature.set('nmea', nmea);
     }
