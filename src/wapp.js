@@ -235,6 +235,16 @@ var wapp = new CordovApp({
     if (wapp.param.gpsSource === 'external') wapp.selectGPS();
     // Fin
     //		wapp.wait(false);
+
+    // Initialiser BLE après deviceready
+    /* document.addEventListener('deviceready', function() {
+      if (window.ble) {
+        wapp.ble = window.ble;
+        console.log('BLE plugin disponible');
+      } else {
+        console.warn('BLE plugin non disponible');
+      }
+    }, false); */
   },
 
   /**

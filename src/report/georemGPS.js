@@ -24,8 +24,25 @@ let paramGPS = wappStorage('gpsTracking') || {
   track: []
 };
 
+/* var redStroke = new ol_style_Stroke({ color: "#f00", width: 2 });
+var whiteStroke = new ol_style_Stroke({ color: [255, 255, 255, 0.8], width: 5 });
+var redFill = new ol_style_Fill({ color: [255, 0, 0, 0.5] });
+const redStyle = [
+  new ol_style_Style({
+    image: new ol_style_Circle({ stroke: whiteStroke, fill: redFill, radius: 5 }),
+    stroke: whiteStroke,
+    fill: redFill
+  }),
+  new ol_style_Style({
+    image: new ol_style_Circle({ stroke: redStroke, radius: 5 }),
+    stroke: redStroke
+  })
+]; */
+
 /* The GPS interaction */
 let geolocation;
+// Pour lire les données bluetooth (ex: nmea) 
+//var ble = window.ble;
 
 wapp.ready(() => {
   // On group change, check if direct GPS is enabled
@@ -60,15 +77,28 @@ wapp.ready(() => {
     var pos = loc.getPosition();
     pos.push(Math.round((loc.getAltitude() || 0) * 100) / 100);
     pos.push(Math.round((new Date()).getTime() / 1000));
+
+    //TODO à tester avec GPS externe
+      /* ble.read(deviceId, '0x180F', '0x2A19', 
+      function(data) {
+        var batteryLevel = new Uint8Array(data)[0];
+        console.log('Batterie: ' + batteryLevel + '%');
+        }
+      ); */
+    
     if (loc._position.nmea) {
       // Show icones
       $('.info', page).show();
       pos.push(loc._position.nmea.geoidal);
       //$('.sats', page).html(loc._position.nmea.satsVisible+'/'+loc._position.nmea.satellites);
       // Deprecated
-      $('.sats', page).html(loc._position.nmea.satsActive);
+      //TODO fonction pour changer de couleur selon le résultat
+      $('.sats', page).html(loc._position.nmea.quality); //GGA - fix qualification (null si non valide, 'fix' pour valid SPS fix, 'dgps-fix' pour valid DGPS fix)
       $('.speed', page).html(((loc._position.coords.speed * 3600 / 1000) || '-') + ' km/h');
       $('.pdop', page).html(loc._position.nmea.pdop);
+      //TODO 
+      //$('.batt', page).html(batteryLevel + '%');
+      $('.batt', page).html('%');
     } else {
       // Hide icones
       $('.info', page).hide();
