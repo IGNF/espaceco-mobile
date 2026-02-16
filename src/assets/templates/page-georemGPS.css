@@ -146,6 +146,7 @@
   vertical-align: middle;
   margin: .2em .6em;
   transform: rotate(-20deg);
+  color: red;
 }
 #georemGPS p.info .satellite:before,
 #georemGPS p.info .satellite:after {

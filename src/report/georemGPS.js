@@ -70,20 +70,31 @@ wapp.ready(() => {
       //   console.log('Batterie: ' + batteryLevel + '%');
       //   }
       // );
-    
+
     if (loc._position.nmea) {
       // Show icones
       $('.info', page).show();
       pos.push(loc._position.nmea.geoidal);
-      //$('.sats', page).html(loc._position.nmea.satsVisible+'/'+loc._position.nmea.satellites);
-      // Deprecated
-      //TODO fonction pour changer de couleur selon le résultat
-      $('.sats', page).html(loc._position.nmea.quality); //GGA - fix qualification (null si non valide, 'fix' pour valid SPS fix, 'dgps-fix' pour valid DGPS fix)
+      //Deprecated : $('.sats', page).html(loc._position.nmea.satsVisible+'/'+loc._position.nmea.satellites);
       $('.speed', page).html(((loc._position.coords.speed * 3600 / 1000) || '-') + ' km/h');
       $('.pdop', page).html(loc._position.nmea.pdop);
-      //TODO 
+      //TODO afficher la batterie du GPS
       //$('.batt', page).html(batteryLevel + '%');
       $('.batt', page).html('%');
+
+      $('.sats', page).html(loc._position.nmea.quality); //GGA - fix qualification (null si non valide, 'fix' pour valid SPS fix, 'dgps-fix' pour valid DGPS fix)
+      //Change la couleur du satellite selon l'acquisition
+      switch (loc._position.nmea.quality) {
+        case 'fix':
+          $('.satellite', page).css('color', 'yellow');
+          break;
+        case 'dgps-fix':
+          $('.satellite', page).css('color', 'green');
+          break;
+        default:
+          $('.satellite', page).css('color', 'red');
+          break;
+      }
     } else {
       // Hide icones
       $('.info', page).hide();
