@@ -24,21 +24,6 @@ let paramGPS = wappStorage('gpsTracking') || {
   track: []
 };
 
-/* var redStroke = new ol_style_Stroke({ color: "#f00", width: 2 });
-var whiteStroke = new ol_style_Stroke({ color: [255, 255, 255, 0.8], width: 5 });
-var redFill = new ol_style_Fill({ color: [255, 0, 0, 0.5] });
-const redStyle = [
-  new ol_style_Style({
-    image: new ol_style_Circle({ stroke: whiteStroke, fill: redFill, radius: 5 }),
-    stroke: whiteStroke,
-    fill: redFill
-  }),
-  new ol_style_Style({
-    image: new ol_style_Circle({ stroke: redStroke, radius: 5 }),
-    stroke: redStroke
-  })
-]; */
-
 /* The GPS interaction */
 let geolocation;
 // Pour lire les données bluetooth (ex: nmea) 
@@ -79,12 +64,12 @@ wapp.ready(() => {
     pos.push(Math.round((new Date()).getTime() / 1000));
 
     //TODO à tester avec GPS externe
-      /* ble.read(deviceId, '0x180F', '0x2A19', 
-      function(data) {
-        var batteryLevel = new Uint8Array(data)[0];
-        console.log('Batterie: ' + batteryLevel + '%');
-        }
-      ); */
+      // ble.read(deviceId, '0x180F', '0x2A19', 
+      // function(data) {
+      //   var batteryLevel = new Uint8Array(data)[0];
+      //   console.log('Batterie: ' + batteryLevel + '%');
+      //   }
+      // );
     
     if (loc._position.nmea) {
       // Show icones
