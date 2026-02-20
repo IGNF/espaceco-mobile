@@ -63,38 +63,37 @@ wapp.ready(() => {
     pos.push(Math.round((loc.getAltitude() || 0) * 100) / 100);
     pos.push(Math.round((new Date()).getTime() / 1000));
 
-    //TODO à tester avec GPS externe
-      // ble.read(deviceId, '0x180F', '0x2A19', 
-      // function(data) {
-      //   var batteryLevel = new Uint8Array(data)[0];
-      //   console.log('Batterie: ' + batteryLevel + '%');
-      //   }
-      // );
+    //TODO à tester 
+    //testConnectBle();
 
     if (loc._position.nmea) {
       // Show icones
       $('.info', page).show();
       pos.push(loc._position.nmea.geoidal);
       //Deprecated : $('.sats', page).html(loc._position.nmea.satsVisible+'/'+loc._position.nmea.satellites);
-      $('.speed', page).html(((loc._position.coords.speed * 3600 / 1000) || '-') + ' km/h');
-      $('.pdop', page).html(loc._position.nmea.pdop);
+      //$('.speed', page).html(((loc._position.coords.speed * 3600 / 1000) || '-') + ' km/h');
+      if(loc._position.nmea.pdop != undefined) {
+        $('.pdop', page).html(loc._position.nmea.pdop);
+      } else {
+        $('.pdop', page).html('-');
+      }
       //TODO afficher la batterie du GPS
-      //$('.batt', page).html(batteryLevel + '%');
       $('.batt', page).html('%');
 
-      $('.sats', page).html(loc._position.nmea.quality); //GGA - fix qualification (null si non valide, 'fix' pour valid SPS fix, 'dgps-fix' pour valid DGPS fix)
+     // $('.sats', page).html(loc._position.nmea.quality); GGA - fix qualification (null si non valide, 'fix' pour valid SPS fix, 'dgps-fix' pour valid DGPS fix)
       //Change la couleur du satellite selon l'acquisition
       switch (loc._position.nmea.quality) {
         case 'fix':
-          $('.satellite', page).css('color', 'yellow');
+          $('.satellite', page).css('color', '#D6B820');
           break;
         case 'dgps-fix':
-          $('.satellite', page).css('color', 'green');
+          $('.satellite', page).css('color', '#32C21D');
           break;
         default:
-          $('.satellite', page).css('color', 'red');
+          $('.satellite', page).css('color', '#CF1919');
           break;
       }
+      $('.compass', page).html(loc._position.coords.heading);
     } else {
       // Hide icones
       $('.info', page).hide();
@@ -405,6 +404,35 @@ function startDirectGPS(c, theme) {
   georem.attributes = JSON.stringify(attributes);
   // Start 
   wapp.report.georemGPS(georem);
+}
+
+function testConnectBle() {
+  console.log('Requesting Bluetooth Device...');
+  navigator.bluetooth.requestDevice(
+    {filters: [{services: ['battery_service']}]})
+  .then(device => {
+    console.log('Connecting to GATT Server...');
+    return device.gatt.connect();
+  })
+  .then(server => {
+    console.log('Getting Battery Service...');
+    return server.getPrimaryService('battery_service');
+  })
+  .then(service => {
+    console.log('Getting Battery Level Characteristic...');
+    return service.getCharacteristic('battery_level');
+  })
+  .then(characteristic => {
+    console.log('Reading Battery Level...');
+    return characteristic.readValue();
+  })
+  .then(value => {
+    let batteryLevel = value.getUint8(0);
+    console.log('> Battery Level is ' + batteryLevel + '%');
+  })
+  .catch(error => {
+    console.log('Argh! ' + error);
+  });
 }
 
 /** Choix du groupe pour un signelement direct GPS */
