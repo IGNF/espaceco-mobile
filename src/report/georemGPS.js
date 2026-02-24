@@ -26,6 +26,7 @@ let paramGPS = wappStorage('gpsTracking') || {
 
 /* The GPS interaction */
 let geolocation;
+let batteryReadPending = false;
 
 wapp.ready(() => {
   // On group change, check if direct GPS is enabled
@@ -73,21 +74,30 @@ wapp.ready(() => {
         $('.pdop', page).html('-');
       }
 
-       //TODO afficher la batterie du GPS
-      /*   ble.read(
-        deviceId,   // l'ID du périphérique BLE connecté
-        '180F',     // UUID du Battery Service (sans 0x)
-        '2A19',     // UUID de la caractéristique Battery Level
-        function(data) {
-          const batteryLevel = new Uint8Array(data)[0]; // octet 0–100
-          console.log('Batterie : ' + batteryLevel + '%');
-          $('.batt', page).html(batteryLevel + '%');
+      //TODO déplacer là où on ne peut le lire qu'une fois
+      const deviceId = loc._position.source.identifier.match(/\(([^)]+)\)/)[1];
+      ble.connect(deviceId,
+        function(peripheral) {
+          // Connexion réussie, on peut lire la batterie
+          ble.read(
+            deviceId,
+            '180F',
+            '2A19',
+            function(data) {
+              const batteryLevel = new Uint8Array(data)[0];
+              $('.batt', page).html(batteryLevel + '%');
+            },
+            function(error) {
+              $('.batt', page).html('');
+              console.error('Erreur lecture batterie :', error);
+            }
+          );
         },
         function(error) {
-          console.error('Erreur lecture batterie :', error);
           $('.batt', page).html('');
+          console.error('Erreur connexion BLE :', error);
         }
-      ); */
+      );
       
      // $('.sats', page).html(loc._position.nmea.quality); GGA - fix qualification (null si non valide, 'fix' pour valid SPS fix, 'dgps-fix' pour valid DGPS fix)
       //Change la couleur du satellite selon l'acquisition
