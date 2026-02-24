@@ -49,7 +49,7 @@
     "@capawesome/capacitor-android-edge-to-edge-support": "^7.2.3",
     "ajv": "6.12.*",
     "capacitor-email-composer": "^7.0.2",
-    "cordova-plugin-ble-central": "^2.0.0",
+    "cordova-plugin-ble-central": "^2.0.0-slim",
     "cordova-plugin-bluetooth-serial": "github:giuseppelanzi/BluetoothSerial",
     "cordova-plugin-dialogs": "^2.0.2",
     "cordova-plugin-geolocation": "^4.0.2",
