@@ -26,7 +26,6 @@ let paramGPS = wappStorage('gpsTracking') || {
 
 /* The GPS interaction */
 let geolocation;
-let batteryReadPending = false;
 
 wapp.ready(() => {
   // On group change, check if direct GPS is enabled
@@ -58,9 +57,40 @@ wapp.ready(() => {
   GeolocationCacheRecorder.saveDraw(geolocation, startTracking);
   // Add nmea informations
   geolocation.getPosition = function (loc) {
+
     var pos = loc.getPosition();
     pos.push(Math.round((loc.getAltitude() || 0) * 100) / 100);
     pos.push(Math.round((new Date()).getTime() / 1000));
+
+    //Lecture de la batterie du GPS
+    const deviceId = loc._position.source.identifier.match(/\(([^)]+)\)/)[1];
+    ble.connect(deviceId,
+      function(peripheral) {
+        ble.read(
+          deviceId,
+          '180F',
+          '2A19',
+          function(data) {
+            const batteryLevel = new Uint8Array(data)[0];
+            $('.batt', page).html(batteryLevel + '%');
+            $('#battery-icon', page).removeClass('fa-battery-full fa-battery-three-quarters fa-battery-half fa-battery-quarter fa-battery-empty');
+            if (batteryLevel > 80) $('#battery-icon', page).addClass('fa-battery-full');
+            else if (batteryLevel > 60) $('#battery-icon', page).addClass('fa-battery-three-quarters');
+            else if (batteryLevel > 40) $('#battery-icon', page).addClass('fa-battery-half');
+            else if (batteryLevel > 20) $('#battery-icon', page).addClass('fa-battery-quarter');
+            else $('#battery-icon', page).addClass('fa-battery-empty');
+          },
+          function(error) {
+            $('.batt', page).html('');
+            console.error('Erreur lecture batterie :', error);
+          }
+        );
+      },
+      function(error) {
+        $('.batt', page).html('');
+        console.error('Erreur connexion BLE :', error);
+      }
+    );
 
     if (loc._position.nmea) {
       // Show icones
@@ -68,36 +98,13 @@ wapp.ready(() => {
       pos.push(loc._position.nmea.geoidal);
       //Deprecated : $('.sats', page).html(loc._position.nmea.satsVisible+'/'+loc._position.nmea.satellites);
       //$('.speed', page).html(((loc._position.coords.speed * 3600 / 1000) || '-') + ' km/h');
-      if(loc._position.nmea.pdop != undefined) {
-        $('.pdop', page).html(loc._position.nmea.pdop);
-      } else {
-        $('.pdop', page).html('-');
-      }
 
-      //TODO déplacer là où on ne peut le lire qu'une fois
-      const deviceId = loc._position.source.identifier.match(/\(([^)]+)\)/)[1];
-      ble.connect(deviceId,
-        function(peripheral) {
-          // Connexion réussie, on peut lire la batterie
-          ble.read(
-            deviceId,
-            '180F',
-            '2A19',
-            function(data) {
-              const batteryLevel = new Uint8Array(data)[0];
-              $('.batt', page).html(batteryLevel + '%');
-            },
-            function(error) {
-              $('.batt', page).html('');
-              console.error('Erreur lecture batterie :', error);
-            }
-          );
-        },
-        function(error) {
-          $('.batt', page).html('');
-          console.error('Erreur connexion BLE :', error);
-        }
-      );
+      //Précision du GPS (PDOP)
+      if(loc._position.nmea.pdop != undefined) {
+        $('.pdop', page).html('PDOP: ' + loc._position.nmea.pdop);
+      } else {
+        $('.pdop', page).html('PDOP: -');
+      }
       
      // $('.sats', page).html(loc._position.nmea.quality); GGA - fix qualification (null si non valide, 'fix' pour valid SPS fix, 'dgps-fix' pour valid DGPS fix)
       //Change la couleur du satellite selon l'acquisition
@@ -112,7 +119,16 @@ wapp.ready(() => {
           $('.satellite', page).css('color', '#CF1919');
           break;
       }
-      $('.compass', page).html(loc._position.coords.heading);
+
+      // Heading/Boussole
+      $('#compass-icon', page).removeClass('fa-compass');
+      if(!isNaN(loc._position.coords.heading)) {
+        $('#compass-icon', page).addClass('fa-compass');
+        $('.compass', page).html(loc._position.coords.heading);
+      } else {
+        $('.compass', page).html('');
+      }
+
     } else {
       // Hide icones
       $('.info', page).hide();
