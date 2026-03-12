@@ -2,6 +2,8 @@
 import 'collab-form/scss/main.scss'
 import './style.css'
 import './i18n'
+// Doit être importé avant georemGPS et apiTemplate pour enregistrer le listener deviceready
+import './capacitor-hooks/ble-gps'
 import wapp from './guichet/guichet'
 import './report/georemGPS'
 import './maintenance'

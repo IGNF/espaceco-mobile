@@ -1,6 +1,7 @@
 import CordovApp from 'cordovapp/CordovApp';
 import { wappStorage } from 'cordovapp/cordovapp/CordovApp'
 import Report from 'cordovapp/report/ReportForm'
+import { setBatteryCallback } from '../capacitor-hooks/ble-gps'
 import wapp from '../wapp'
 import map from '../map/map'
 import GeolocationDraw from 'ol-ext/interaction/GeolocationDraw'
@@ -55,6 +56,20 @@ wapp.ready(() => {
     minAccuracy: (wapp.param.options ? wapp.param.options.minGPSAccuracy || 20 : 20)
   });
   GeolocationCacheRecorder.saveDraw(geolocation, startTracking);
+
+  // Affichage du niveau de batterie du GPS BLE (mis à jour par ble-gps.js)
+  setBatteryCallback((level) => {
+    $('.batt', page).html(level + '%');
+    $('#battery-icon', page)
+      .removeClass('fa-battery-full fa-battery-three-quarters fa-battery-half fa-battery-quarter fa-battery-empty')
+      .addClass(
+        level > 80 ? 'fa-battery-full' :
+        level > 60 ? 'fa-battery-three-quarters' :
+        level > 40 ? 'fa-battery-half' :
+        level > 20 ? 'fa-battery-quarter' : 'fa-battery-empty'
+      );
+  });
+
   // Add nmea informations
   geolocation.getPosition = function (loc) {
 
@@ -62,37 +77,7 @@ wapp.ready(() => {
     pos.push(Math.round((loc.getAltitude() || 0) * 100) / 100);
     pos.push(Math.round((new Date()).getTime() / 1000));
 
-    //Lecture de la batterie du GPS
-    const deviceId = loc._position.source.identifier.match(/\(([^)]+)\)/)[1];
-    ble.connect(deviceId,
-      function(peripheral) {
-        ble.read(
-          deviceId,
-          '180F',
-          '2A19',
-          function(data) {
-            const batteryLevel = new Uint8Array(data)[0];
-            $('.batt', page).html(batteryLevel + '%');
-            $('#battery-icon', page).removeClass('fa-battery-full fa-battery-three-quarters fa-battery-half fa-battery-quarter fa-battery-empty');
-            if (batteryLevel > 80) $('#battery-icon', page).addClass('fa-battery-full');
-            else if (batteryLevel > 60) $('#battery-icon', page).addClass('fa-battery-three-quarters');
-            else if (batteryLevel > 40) $('#battery-icon', page).addClass('fa-battery-half');
-            else if (batteryLevel > 20) $('#battery-icon', page).addClass('fa-battery-quarter');
-            else $('#battery-icon', page).addClass('fa-battery-empty');
-          },
-          function(error) {
-            $('.batt', page).html('');
-            console.error('Erreur lecture batterie :', error);
-          }
-        );
-      },
-      function(error) {
-        $('.batt', page).html('');
-        console.error('Erreur connexion BLE :', error);
-      }
-    );
-
-    if (loc._position.nmea) {
+    if (loc._position && loc._position.nmea) {
       // Show icones
       $('.info', page).show();
       pos.push(loc._position.nmea.geoidal);

@@ -35,25 +35,8 @@ wapp.selectGPS = function () {
     title: 'Sélectionner la source GPS'
   }
   );
-  if (window.bluetoothSerial && !bluetoothSerial.isok) {
-    bluetoothSerial.isok = true;
-    const con = bluetoothSerial.connect;
-    bluetoothSerial.connect = function (macAddress_or_uuid, connectSuccess, connectFailure) {
-      var tout = setTimeout(() => { wapp.wait('Recherche du GPS'); }, 500);
-      con.call(bluetoothSerial, macAddress_or_uuid,
-        (a) => {
-          clearTimeout(tout);
-          wapp.wait(false);
-          connectSuccess(a);
-        }, () => {
-          clearTimeout(tout);
-          wapp.wait(false);
-          wapp.alert('Impossible de se connecter au GPS.');
-          connectFailure();
-        }
-      );
-    }
-  }
+  // La connexion GPS externe est désormais gérée par ble-gps.js via @capacitor-community/bluetooth-le.
+  // L'ancien monkey-patch bluetoothSerial.connect n'est plus nécessaire.
 };
 
 /** 
