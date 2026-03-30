@@ -1,13 +1,14 @@
 import CordovApp from 'cordovapp/CordovApp';
 import { wappStorage } from 'cordovapp/cordovapp/CordovApp'
 import Report from 'cordovapp/report/ReportForm'
-import { setBatteryCallback } from '../capacitor-hooks/ble-gps'
+import { setBatteryCallback, nmeaBuffer } from '../capacitor-hooks/ble-gps'
 import wapp from '../wapp'
 import map from '../map/map'
 import GeolocationDraw from 'ol-ext/interaction/GeolocationDraw'
 import { toLonLat } from 'ol/proj';
 import Audio from 'cordovapp/media/Audio'
 import GeolocationCacheRecorder from '../map/interaction/GeolocationCacheRecorder'
+
 
 import { keepDeviceAwake, allowDeviceSleep } from '../capacitor-hooks/keep-awake';
 
@@ -70,8 +71,13 @@ wapp.ready(() => {
       );
   });
 
+  console.log("nmeaBuffer1", nmeaBuffer);
+
   // Add nmea informations
   geolocation.getPosition = function (loc) {
+
+    console.log("nmeaBuffer2", nmeaBuffer);
+
 
     var pos = loc.getPosition();
     pos.push(Math.round((loc.getAltitude() || 0) * 100) / 100);

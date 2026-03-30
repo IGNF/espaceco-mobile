@@ -47,7 +47,7 @@ const QUALITY_MAP = {
 // État interne
 // ─────────────────────────────────────────────
 let gpsState     = {};
-let nmeaBuffer   = '';
+export let nmeaBuffer   = '';
 let currentDevice = null;
 let watchCallbacks = {};   // id → successCallback
 let batteryCallback = null;
@@ -79,35 +79,39 @@ function onNmeaChunk(chunk) {
 function processSentence(s) {
   const id = s.sentenceId;
 
-  if (id === 'GGA' && s.quality && s.quality !== 'invalid') {
+  if (id === 'GGA' && s.fixType && s.fixType !== 'invalid') {
     gpsState.lat        = s.latitude;
     gpsState.lon        = s.longitude;
     gpsState.alt        = s.altitudeMeters;
     gpsState.hdop       = s.horizontalDilution;
     gpsState.geoidal    = s.geoidalSeparation;
-    gpsState.quality    = QUALITY_MAP[s.quality] ?? null;
+    gpsState.quality    = QUALITY_MAP[s.fixType] ?? null;
     gpsState.satellites = s.satellitesInView;
-    gpsState.age        = s.ageOfDifferentialData;
-    gpsState.stationID  = s.differentialReferenceStationId;
     gpsState.time       = s.datetime;
     gpsState.lastFix    = Date.now();
 
-  } else if (id === 'RMC' && s.status === 'A') {
+  } else if (id === 'RMC' && s.status === 'valid') {
     gpsState.lat     = s.latitude;
     gpsState.lon     = s.longitude;
     gpsState.speed   = s.speedKnots;   // nœuds → converti en m/s dans buildPosition
     gpsState.heading = s.trackTrue;
     gpsState.time    = s.datetime;
+    gpsState.variation = s.variation;
+    gpsState.variationPole = s.variationPole;
     gpsState.lastFix = Date.now();
 
   } else if (id === 'GSA') {
-    gpsState.pdop       = s.pdop;
-    gpsState.hdop       = s.hdop;
-    gpsState.vdop       = s.vdop;
-    gpsState.satsActive = s.satelliteIds || [];
+    gpsState.pdop       = s.PDOP;
+    gpsState.hdop       = s.HDOP;
+    gpsState.vdop       = s.VDOP;
+    gpsState.selectionMode = s.selectionMode;
+    gpsState.fixMode    = s.fixMode;
+    gpsState.satsActive = s.satellites || [];
 
   } else if (id === 'GSV') {
     // Accumulation multi-messages : réinitialisation au premier message du cycle
+    gpsState.numberOfMessages = s.numberOfMessages;
+    gpsState.satellitesInView = s.satellitesInView;
     if (s.messageNumber === 1) gpsState._gsvTmp = [];
     if (s.satellites) gpsState._gsvTmp = (gpsState._gsvTmp || []).concat(s.satellites);
     if (s.messageNumber === s.totalMessages) gpsState.satsVisible = gpsState._gsvTmp;
@@ -295,7 +299,7 @@ async function setExternalMode(onSuccess, onError) {
 // Override de navigator.geolocation.setSource
 // S'enregistre après deviceready pour être sûr que le plugin Cordova a déjà initialisé.
 // ─────────────────────────────────────────────
-document.addEventListener('deviceready', () => {
+/* document.addEventListener('deviceready', () => {
   // Le plugin cordova-plugin-bluetooth-geolocation a déjà défini setSource
   // (mode internal = GPS natif, mode external = bluetoothSerial)
   // On remplace uniquement le mode external par notre implémentation BLE.
@@ -311,4 +315,4 @@ document.addEventListener('deviceready', () => {
       restoreInternalMode(cordovaSetSource, onSuccess, onError);
     }
   };
-}, false);
+}, false); */
