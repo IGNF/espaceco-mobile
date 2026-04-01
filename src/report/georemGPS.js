@@ -1,7 +1,7 @@
 import CordovApp from 'cordovapp/CordovApp';
 import { wappStorage } from 'cordovapp/cordovapp/CordovApp'
 import Report from 'cordovapp/report/ReportForm'
-import { setBatteryCallback, nmeaBuffer } from '../capacitor-hooks/ble-gps'
+import { setBatteryCallback, getNmeaBuffer } from '../capacitor-hooks/ble-gps'
 import wapp from '../wapp'
 import map from '../map/map'
 import GeolocationDraw from 'ol-ext/interaction/GeolocationDraw'
@@ -71,12 +71,10 @@ wapp.ready(() => {
       );
   });
 
-  console.log("nmeaBuffer1", nmeaBuffer);
-
   // Add nmea informations
   geolocation.getPosition = function (loc) {
 
-    console.log("nmeaBuffer2", nmeaBuffer);
+    console.log("nmeaBuffer2", getNmeaBuffer());
 
 
     var pos = loc.getPosition();

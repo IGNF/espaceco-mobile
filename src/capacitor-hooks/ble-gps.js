@@ -47,7 +47,8 @@ const QUALITY_MAP = {
 // État interne
 // ─────────────────────────────────────────────
 let gpsState     = {};
-export let nmeaBuffer   = '';
+let nmeaBuffer = '';
+export function getNmeaBuffer() { return nmeaBuffer; }
 let currentDevice = null;
 let watchCallbacks = {};   // id → successCallback
 let batteryCallback = null;
@@ -299,7 +300,7 @@ async function setExternalMode(onSuccess, onError) {
 // Override de navigator.geolocation.setSource
 // S'enregistre après deviceready pour être sûr que le plugin Cordova a déjà initialisé.
 // ─────────────────────────────────────────────
-/* document.addEventListener('deviceready', () => {
+document.addEventListener('deviceready', () => {
   // Le plugin cordova-plugin-bluetooth-geolocation a déjà défini setSource
   // (mode internal = GPS natif, mode external = bluetoothSerial)
   // On remplace uniquement le mode external par notre implémentation BLE.
@@ -315,4 +316,4 @@ async function setExternalMode(onSuccess, onError) {
       restoreInternalMode(cordovaSetSource, onSuccess, onError);
     }
   };
-}, false); */
+}, false);  
