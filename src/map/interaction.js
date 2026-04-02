@@ -19,8 +19,6 @@ import ol_control_GeolocationBar from 'ol-ext/control/GeolocationBar'
 import ol_Geolocation from 'ol/Geolocation'
 import GeolocationCacheRecorder from './interaction/GeolocationCacheRecorder'
 
-import { getNmeaBuffer } from '../capacitor-hooks/ble-gps'
-
 import { keepDeviceAwake, allowDeviceSleep } from '../capacitor-hooks/keep-awake';
 
 import { click as ol_events_condition_click } from 'ol/events/condition'
@@ -223,7 +221,7 @@ export default function (wapp) {
     minAccuracy: wapp.param.options.minGPSAccuracy || 20
   });
   geolocBar.getInteraction().getPosition = function (loc) {
-    console.log(getNmeaBuffer());
+    //TODO ajouter les infos nmea
 
     var pos = loc.getPosition();
     pos.push(Math.round((loc.getAltitude() || 0) * 100) / 100);

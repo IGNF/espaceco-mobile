@@ -1,7 +1,7 @@
 import CordovApp from 'cordovapp/CordovApp';
 import { wappStorage } from 'cordovapp/cordovapp/CordovApp'
 import Report from 'cordovapp/report/ReportForm'
-import { setBatteryCallback, getNmeaBuffer } from '../capacitor-hooks/ble-gps'
+import { setBatteryCallback, getNmeaParsed } from '../capacitor-hooks/ble-gps'
 import wapp from '../wapp'
 import map from '../map/map'
 import GeolocationDraw from 'ol-ext/interaction/GeolocationDraw'
@@ -58,7 +58,7 @@ wapp.ready(() => {
   });
   GeolocationCacheRecorder.saveDraw(geolocation, startTracking);
 
-  // Affichage du niveau de batterie du GPS BLE (mis à jour par ble-gps.js)
+  // Affichage du niveau de batterie du GPS BLE
   setBatteryCallback((level) => {
     $('.batt', page).html(level + '%');
     $('#battery-icon', page)
@@ -73,47 +73,49 @@ wapp.ready(() => {
 
   // Add nmea informations
   geolocation.getPosition = function (loc) {
-
-    console.log("nmeaBuffer2", getNmeaBuffer());
-
+    
+    let nmeaParsed = getNmeaParsed();
+    console.log("nmeaParsed", nmeaParsed);
 
     var pos = loc.getPosition();
     pos.push(Math.round((loc.getAltitude() || 0) * 100) / 100);
     pos.push(Math.round((new Date()).getTime() / 1000));
 
-    if (loc._position && loc._position.nmea) {
+    if (nmeaParsed) {
       // Show icones
       $('.info', page).show();
-      pos.push(loc._position.nmea.geoidal);
-      //Deprecated : $('.sats', page).html(loc._position.nmea.satsVisible+'/'+loc._position.nmea.satellites);
+      pos.push(nmeaParsed.geoidal);
+      //Deprecated : $('.sats', page).html(nmeaParsed.satsVisible+'/'+nmeaParsed.satellites);
       //$('.speed', page).html(((loc._position.coords.speed * 3600 / 1000) || '-') + ' km/h');
 
       //Précision du GPS (PDOP)
-      if(loc._position.nmea.pdop != undefined) {
-        $('.pdop', page).html('PDOP: ' + loc._position.nmea.pdop);
+      if(nmeaParsed.pdop != undefined) {
+        $('.pdop', page).html('PDOP: ' + nmeaParsed.pdop);
       } else {
         $('.pdop', page).html('PDOP: -');
       }
       
-     // $('.sats', page).html(loc._position.nmea.quality); GGA - fix qualification (null si non valide, 'fix' pour valid SPS fix, 'dgps-fix' pour valid DGPS fix)
+     // $('.sats', page).html(nmeaParsed.quality); GGA - fix qualification (null si non valide, 'fix' pour valid SPS fix, 'dgps-fix' pour valid DGPS fix)
       //Change la couleur du satellite selon l'acquisition
-      switch (loc._position.nmea.quality) {
-        case 'fix':
-          $('.satellite', page).css('color', '#D6B820');
-          break;
-        case 'dgps-fix':
-          $('.satellite', page).css('color', '#32C21D');
-          break;
-        default:
-          $('.satellite', page).css('color', '#CF1919');
-          break;
+      if(nmeaParsed.fixType) {
+        switch (nmeaParsed.fixType) {
+          case 'fix':
+            $('.satellite', page).css('color', '#D6B820');
+            break;
+          case 'dgps-fix':
+            $('.satellite', page).css('color', '#32C21D');
+            break;
+          default:
+            $('.satellite', page).css('color', '#CF1919');
+            break;
+        }
       }
 
       // Heading/Boussole
       $('#compass-icon', page).removeClass('fa-compass');
-      if(!isNaN(loc._position.coords.heading)) {
+      if(!isNaN(nmeaParsed.heading)) {
         $('#compass-icon', page).addClass('fa-compass');
-        $('.compass', page).html(loc._position.coords.heading);
+        $('.compass', page).html(nmeaParsed.heading);
       } else {
         $('.compass', page).html('');
       }

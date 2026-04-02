@@ -33,6 +33,7 @@ export const BATT_CHAR    = '00002a19-0000-1000-8000-00805f9b34fb';
 // Mapping qualité : nmea-simple → convention gps.js (utilisée dans georemGPS.js)
 // ─────────────────────────────────────────────
 const QUALITY_MAP = {
+  'fix':      'fix',
   'gps-fix':   'fix',
   'dgps-fix':  'dgps-fix',
   'pps-fix':   'pps-fix',
@@ -48,12 +49,13 @@ const QUALITY_MAP = {
 // ─────────────────────────────────────────────
 let gpsState     = {};
 let nmeaBuffer = '';
-export function getNmeaBuffer() { return nmeaBuffer; }
 let currentDevice = null;
 let watchCallbacks = {};   // id → successCallback
 let batteryCallback = null;
 let batteryTimer    = null;
 let bleInitialized  = false;
+let nmeaParsed = [];
+export function getNmeaParsed() { return nmeaParsed; }
 
 // ─────────────────────────────────────────────
 // Parsing NMEA
@@ -69,7 +71,8 @@ function onNmeaChunk(chunk) {
     if (!line.startsWith('$')) continue;
     try {
       const sentence = parseNmeaSentence(line);
-      processSentence(sentence);
+      nmeaParsed = processSentence(sentence);
+      console.log(nmeaParsed);
     } catch (_) {
       // phrase NMEA inconnue ou malformée — ignorée (ex. type NMEA 4.11 non supporté)
     }
@@ -86,7 +89,7 @@ function processSentence(s) {
     gpsState.alt        = s.altitudeMeters;
     gpsState.hdop       = s.horizontalDilution;
     gpsState.geoidal    = s.geoidalSeparation;
-    gpsState.quality    = QUALITY_MAP[s.fixType] ?? null;
+    gpsState.fixType    = QUALITY_MAP[s.fixType] ?? null;
     gpsState.satellites = s.satellitesInView;
     gpsState.time       = s.datetime;
     gpsState.lastFix    = Date.now();
@@ -121,9 +124,11 @@ function processSentence(s) {
   gpsState.lastSentence = s;
 
   // Déclenchement sur GGA ou RMC uniquement (position valide disponible)
-  if ((id === 'GGA' || id === 'RMC') && gpsState.lat && gpsState.lon && gpsState.time) {
+   if ((id === 'GGA' || id === 'RMC') && gpsState.lat && gpsState.lon && gpsState.time) {
     triggerWatchCallbacks();
-  }
+  } 
+
+  return gpsState;
 }
 
 // ─────────────────────────────────────────────
@@ -168,7 +173,7 @@ function buildPosition() {
     pdop:        gpsState.pdop       ?? null,
     hdop:        gpsState.hdop       ?? null,
     vdop:        gpsState.vdop       ?? null,
-    quality:     gpsState.quality    ?? null,   // 'fix', 'dgps-fix', 'rtk'…
+    quality:     gpsState.fixType    ?? null,   // 'fix', 'dgps-fix', 'rtk'…
     satellites:  gpsState.satellites ?? null,
     satsActive:  gpsState.satsActive  ? gpsState.satsActive.length  : 0,
     satsVisible: gpsState.satsVisible ? gpsState.satsVisible.length : 0,
