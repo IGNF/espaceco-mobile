@@ -42,6 +42,7 @@ const QUALITY_MAP = {
   'estimated': 'estimated',
   'manual':    'manual',
   'simulated': 'simulated',
+  'delta':     'delta',
 };
 
 // ─────────────────────────────────────────────
@@ -84,6 +85,7 @@ function processSentence(s) {
   const id = s.sentenceId;
 
   if (id === 'GGA' && s.fixType && s.fixType !== 'invalid') {
+    console.log('GGA parsed:', s);
     gpsState.lat        = s.latitude;
     gpsState.lon        = s.longitude;
     gpsState.alt        = s.altitudeMeters;

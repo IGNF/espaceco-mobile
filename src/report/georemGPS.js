@@ -75,7 +75,6 @@ wapp.ready(() => {
   geolocation.getPosition = function (loc) {
     
     let nmeaParsed = getNmeaParsed();
-    console.log("nmeaParsed", nmeaParsed);
 
     var pos = loc.getPosition();
     pos.push(Math.round((loc.getAltitude() || 0) * 100) / 100);
@@ -85,8 +84,6 @@ wapp.ready(() => {
       // Show icones
       $('.info', page).show();
       pos.push(nmeaParsed.geoidal);
-      //Deprecated : $('.sats', page).html(nmeaParsed.satsVisible+'/'+nmeaParsed.satellites);
-      //$('.speed', page).html(((loc._position.coords.speed * 3600 / 1000) || '-') + ' km/h');
 
       //Précision du GPS (PDOP)
       if(nmeaParsed.pdop != undefined) {
@@ -95,8 +92,7 @@ wapp.ready(() => {
         $('.pdop', page).html('PDOP: -');
       }
       
-     // $('.sats', page).html(nmeaParsed.quality); GGA - fix qualification (null si non valide, 'fix' pour valid SPS fix, 'dgps-fix' pour valid DGPS fix)
-      //Change la couleur du satellite selon l'acquisition
+     //Change la couleur du satellite selon l'acquisition
       if(nmeaParsed.fixType) {
         switch (nmeaParsed.fixType) {
           case 'fix':
@@ -104,6 +100,9 @@ wapp.ready(() => {
             break;
           case 'dgps-fix':
             $('.satellite', page).css('color', '#32C21D');
+            break;
+          case null:
+            $('.satellite', page).css('color', '#CF1919');
             break;
           default:
             $('.satellite', page).css('color', '#CF1919');

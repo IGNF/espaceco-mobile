@@ -129,8 +129,11 @@
 #georemGPS p.info {
   top: auto;
   bottom: 0;
-  width: auto;
+  width: 100%;
   padding: 0 .5em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 #georemGPS p.info .fa {
   border: 0;

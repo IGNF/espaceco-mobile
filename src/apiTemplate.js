@@ -35,8 +35,6 @@ wapp.selectGPS = function () {
     title: 'Sélectionner la source GPS'
   }
   );
-  // La connexion GPS externe est désormais gérée par ble-gps.js via @capacitor-community/bluetooth-le.
-  // L'ancien monkey-patch bluetoothSerial.connect n'est plus nécessaire.
 };
 
 /** 

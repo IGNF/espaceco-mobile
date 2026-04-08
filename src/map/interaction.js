@@ -20,6 +20,7 @@ import ol_Geolocation from 'ol/Geolocation'
 import GeolocationCacheRecorder from './interaction/GeolocationCacheRecorder'
 
 import { keepDeviceAwake, allowDeviceSleep } from '../capacitor-hooks/keep-awake';
+import { getNmeaParsed } from '../capacitor-hooks/ble-gps';
 
 import { click as ol_events_condition_click } from 'ol/events/condition'
 import { get as ol_proj_get } from 'ol/proj'
@@ -221,17 +222,15 @@ export default function (wapp) {
     minAccuracy: wapp.param.options.minGPSAccuracy || 20
   });
   geolocBar.getInteraction().getPosition = function (loc) {
-    //TODO ajouter les infos nmea
+    let nmeaParsed = getNmeaParsed();
 
     var pos = loc.getPosition();
     pos.push(Math.round((loc.getAltitude() || 0) * 100) / 100);
     pos.push(Math.round((new Date()).getTime() / 1000));
-    /* if (loc._position.nmea) {
-      pos.push(loc._position.nmea.geoidal);
-      pos.push(loc._position.nmea.quality); //GGA - fix qualification (null si non valide, 'fix' pour valid SPS fix, 'dgps-fix' pour valid DGPS fix)
-      pos.push(loc._position.nmea.pdop); //GSA - satellites actifs et PDOP
-      pos.push(loc._position.coords.heading); //VTG - flèche de levé
-    } */
+
+    if (nmeaParsed) {
+      pos.push(nmeaParsed.geoidal); 
+    }
     return pos;
   }
   
