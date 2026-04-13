@@ -1,25 +1,12 @@
 /**
  * BLE GPS — connexion GPS externe via Bluetooth Low Energy + parsing NMEA
  *
- * Remplace cordova-plugin-bluetooth-geolocation (bluetoothSerial + gps.js) par :
- *  - @capacitor-community/bluetooth-le  → connexion BLE
- *  - nmea-simple                        → parsing NMEA 4.11 complet
- *
- * Ce module monkey-patche navigator.geolocation.setSource('external')
- * afin que tout watchPosition reçoive des fake-Position construites depuis
- * les trames NMEA du GPS BLE, compatibles avec la structure attendue par
- * ol/Geolocation, interaction.js (_position.nmea, _position.source) et georemGPS.js.
- *
- * UUIDs par défaut : Nordic UART Service (NUS), le plus répandu sur les GPS BLE.
- * Remplacer NUS_SERVICE / NUS_TX_CHAR si votre récepteur utilise un service propriétaire.
  */
 
 import { BleClient, dataViewToText } from '@capacitor-community/bluetooth-le';
+import { Geolocation } from '@capacitor/geolocation';
 import { parseNmeaSentence } from 'nmea-simple';
 
-// ─────────────────────────────────────────────
-// UUIDs BLE — Nordic UART Service (NUS)
-// ─────────────────────────────────────────────
 /** Service NMEA : Nordic UART Service */
 export const NUS_SERVICE = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
 /** Caractéristique TX (données NMEA envoyées par le récepteur) */
@@ -29,9 +16,6 @@ export const BATT_SERVICE = '0000180f-0000-1000-8000-00805f9b34fb';
 /** Caractéristique Battery Level */
 export const BATT_CHAR    = '00002a19-0000-1000-8000-00805f9b34fb';
 
-// ─────────────────────────────────────────────
-// Mapping qualité : nmea-simple → convention gps.js (utilisée dans georemGPS.js)
-// ─────────────────────────────────────────────
 const QUALITY_MAP = {
   'fix':      'fix',
   'gps-fix':   'fix',
@@ -45,9 +29,6 @@ const QUALITY_MAP = {
   'delta':     'delta',
 };
 
-// ─────────────────────────────────────────────
-// État interne
-// ─────────────────────────────────────────────
 let gpsState     = {};
 let nmeaBuffer = '';
 let currentDevice = null;
@@ -58,11 +39,13 @@ let bleInitialized  = false;
 let nmeaParsed = [];
 export function getNmeaParsed() { return nmeaParsed; }
 
-// ─────────────────────────────────────────────
-// Parsing NMEA
-// ─────────────────────────────────────────────
+// Méthodes natives navigator.geolocation sauvegardées au démarrage
+let nativeWatchPosition;
+let nativeClearWatch;
+let nativeGetCurrentPosition;
 
-/** Accumule les chunks BLE (fragments de phrases NMEA) et traite les lignes complètes. */
+
+/** Accumule les chunks BLE (fragments de phrases NMEA) et traite les lignes complètes */
 function onNmeaChunk(chunk) {
   nmeaBuffer += chunk;
   const lines = nmeaBuffer.split(/\r?\n/);
@@ -75,7 +58,7 @@ function onNmeaChunk(chunk) {
       nmeaParsed = processSentence(sentence);
       console.log(nmeaParsed);
     } catch (_) {
-      // phrase NMEA inconnue ou malformée — ignorée (ex. type NMEA 4.11 non supporté)
+      // TODO logger l'erreur pour phrase NMEA inconnue 
     }
   }
 }
@@ -132,10 +115,6 @@ function processSentence(s) {
 
   return gpsState;
 }
-
-// ─────────────────────────────────────────────
-// Construction de la fake-Position
-// ─────────────────────────────────────────────
 
 /**
  * Construit un objet Position compatible avec la structure attendue par :
@@ -195,10 +174,6 @@ function triggerWatchCallbacks() {
   });
 }
 
-// ─────────────────────────────────────────────
-// Batterie
-// ─────────────────────────────────────────────
-
 /**
  * Enregistre un callback appelé avec le niveau de batterie (0-100) à chaque lecture.
  * @param {function(number):void} cb
@@ -218,12 +193,8 @@ async function readBattery() {
   }
 }
 
-// ─────────────────────────────────────────────
-// Gestion des modes GPS (interne / externe BLE)
-// ─────────────────────────────────────────────
-
-/** Restitue le mode GPS interne en déléguant au plugin Cordova. */
-function restoreInternalMode(cordovaSetSource, onSuccess, onError) {
+/** Restitue le mode GPS interne (navigator.geolocation natif). */
+function restoreInternalMode(onSuccess, onError) {
   // Nettoyer la connexion BLE courante
   if (batteryTimer) { clearInterval(batteryTimer); batteryTimer = null; }
   if (currentDevice) {
@@ -235,15 +206,15 @@ function restoreInternalMode(cordovaSetSource, onSuccess, onError) {
   gpsState       = {};
   nmeaBuffer     = '';
 
-  // Déléguer au plugin Cordova pour restaurer ses méthodes watchPosition/getCurrentPosition
-  if (typeof cordovaSetSource === 'function') {
-    cordovaSetSource.call(navigator.geolocation, 'internal', onSuccess, onError);
-  } else {
-    onSuccess && onSuccess({ type: 'internal' });
-  }
+  // Restaurer les méthodes natives sauvegardées au démarrage
+  if (nativeWatchPosition)      navigator.geolocation.watchPosition      = nativeWatchPosition;
+  if (nativeClearWatch)         navigator.geolocation.clearWatch         = nativeClearWatch;
+  if (nativeGetCurrentPosition) navigator.geolocation.getCurrentPosition = nativeGetCurrentPosition;
+
+  onSuccess && onSuccess({ type: 'internal' });
 }
 
-/** Connecte le GPS BLE et injecte les positions dans navigator.geolocation. */
+/** Connecte le GPS BLE et injecte les positions dans navigator.geolocation */
 async function setExternalMode(onSuccess, onError) {
   try {
     if (!bleInitialized) {
@@ -251,7 +222,7 @@ async function setExternalMode(onSuccess, onError) {
       bleInitialized = true;
     }
 
-    // Sélecteur de périphérique natif OS (remplace listpicker / cordova-plugin-bluetooth-serial)
+    // Sélecteur de périphérique natif OS
     const device = await BleClient.requestDevice({ services: [NUS_SERVICE] });
     currentDevice = device;
 
@@ -303,15 +274,17 @@ async function setExternalMode(onSuccess, onError) {
   }
 }
 
-// ─────────────────────────────────────────────
 // Override de navigator.geolocation.setSource
-// S'enregistre après deviceready pour être sûr que le plugin Cordova a déjà initialisé.
-// ─────────────────────────────────────────────
 document.addEventListener('deviceready', () => {
-  // Le plugin cordova-plugin-bluetooth-geolocation a déjà défini setSource
-  // (mode internal = GPS natif, mode external = bluetoothSerial)
-  // On remplace uniquement le mode external par notre implémentation BLE.
-  const cordovaSetSource = navigator.geolocation.setSource;
+  // Sauvegarder les méthodes natives de navigator.geolocation avant tout monkey-patch
+  nativeWatchPosition      = navigator.geolocation.watchPosition.bind(navigator.geolocation);
+  nativeClearWatch         = navigator.geolocation.clearWatch.bind(navigator.geolocation);
+  nativeGetCurrentPosition = navigator.geolocation.getCurrentPosition.bind(navigator.geolocation);
+
+  // Demander les permissions GPS dès le démarrage via @capacitor/geolocation
+  Geolocation.requestPermissions().catch((e) => {
+    console.warn('[ble-gps] requestPermissions:', e);
+  });
 
   navigator.geolocation.hasSource    = true;
   navigator.geolocation.canSetSource = true;
@@ -320,7 +293,7 @@ document.addEventListener('deviceready', () => {
     if (source === 'external') {
       setExternalMode(onSuccess, onError);
     } else {
-      restoreInternalMode(cordovaSetSource, onSuccess, onError);
+      restoreInternalMode(onSuccess, onError);
     }
   };
-}, false);  
+}, false);

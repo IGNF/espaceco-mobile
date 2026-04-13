@@ -37,6 +37,7 @@ import CollabVector from 'cordovapp/ol/layer/CollabVector'
 import { Network } from '@capacitor/network';
 import { EmailComposer } from 'capacitor-email-composer';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { Geolocation } from '@capacitor/geolocation';
 import { convertPhotoToDisplaySrc } from './capacitor-hooks/photo-utils'
 
 
@@ -54,8 +55,10 @@ var wapp = new CordovApp({
     // Affichage d'une patience avant lancement
     wapp.waitLogo("Chargement...", false);
     setTimeout(function () { wapp.initWapp(); }, 200);
-    // Force GPS
-    navigator.geolocation.getCurrentPosition((e) => { });
+    // Force GPS : demande les permissions puis active le GPS interne
+    Geolocation.requestPermissions().catch(() => {}).then(() => {
+      navigator.geolocation.getCurrentPosition(() => {}, () => {}, { enableHighAccuracy: true });
+    });
   },
 
   initWapp: function () {
