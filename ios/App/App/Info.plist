@@ -47,6 +47,8 @@
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Pour localiser vos signalements</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Localisation GPS requise</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Pour localiser vos signalements</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
