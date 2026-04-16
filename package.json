@@ -49,6 +49,7 @@
     "@capacitor/network": "^7.0.2",
     "@capacitor/status-bar": "^7.0.2",
     "@capawesome/capacitor-android-edge-to-edge-support": "^7.2.3",
+    "@e-is/capacitor-bluetooth-serial": "^6.0.3",
     "ajv": "6.12.*",
     "capacitor-email-composer": "^7.0.2",
     "cordova-plugin-dialogs": "^2.0.2",

@@ -35,5 +35,8 @@ project(':capacitor-status-bar').projectDir = new File('../node_modules/@capacit
 include ':capawesome-capacitor-android-edge-to-edge-support'
 project(':capawesome-capacitor-android-edge-to-edge-support').projectDir = new File('../node_modules/@capawesome/capacitor-android-edge-to-edge-support/android')
 
+include ':e-is-capacitor-bluetooth-serial'
+project(':e-is-capacitor-bluetooth-serial').projectDir = new File('../node_modules/@e-is/capacitor-bluetooth-serial/android')
+
 include ':capacitor-email-composer'
 project(':capacitor-email-composer').projectDir = new File('../node_modules/capacitor-email-composer/android')

@@ -5,6 +5,18 @@ import { transform } from 'ol/proj';
 
 import { getDeviceOs } from './capacitor-hooks/device-helper'
 import { AppLauncher } from '@capacitor/app-launcher'
+import { setSelectDialog, setLoadingFn } from './capacitor-hooks/ble-gps'
+
+// Injecter wapp.selectDialog dans ble-gps pour la sélection d'appareil
+setSelectDialog((choices, title, onSelect) => {
+  wapp.selectDialog(choices, null, onSelect, { title });
+});
+
+// Injecter l'indicateur de chargement pendant le scan Bluetooth
+setLoadingFn((show) => {
+  if (show) wapp.wait('<p>Recherche des appareils Bluetooth...</p>');
+  else wapp.wait(false);
+});
 
 /** Select external GPS
  */

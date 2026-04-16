@@ -3,18 +3,12 @@
  *
  */
 
-import { BleClient, dataViewToText } from '@capacitor-community/bluetooth-le';
+import { BluetoothSerial } from '@e-is/capacitor-bluetooth-serial';
 import { Geolocation } from '@capacitor/geolocation';
 import { parseNmeaSentence } from 'nmea-simple';
 
-/** Service NMEA : Nordic UART Service */
-export const NUS_SERVICE = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-/** Caractéristique TX (données NMEA envoyées par le récepteur) */
-export const NUS_TX_CHAR = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
-/** Service GATT Battery */
-export const BATT_SERVICE = '0000180f-0000-1000-8000-00805f9b34fb';
-/** Caractéristique Battery Level */
-export const BATT_CHAR    = '00002a19-0000-1000-8000-00805f9b34fb';
+/** Préfixes de noms des récepteurs GPS Bluetooth Classic reconnus */
+const GPS_PREFIXES = ['GPS', 'Geo', 'GEO', '160'];
 
 const QUALITY_MAP = {
   'fix':      'fix',
@@ -35,9 +29,25 @@ let currentDevice = null;
 let watchCallbacks = {};   // id → successCallback
 let batteryCallback = null;
 let batteryTimer    = null;
-let bleInitialized  = false;
+let nmeaListener    = null;
 let nmeaParsed = [];
 export function getNmeaParsed() { return nmeaParsed; }
+
+/** Fonction de sélection injectée depuis l'extérieur (évite la dépendance circulaire avec wapp) */
+let selectDialogFn = null;
+/**
+ * Injecter une fonction d'affichage de dialog de sélection.
+ * @param {function(choices: Object, title: string, onSelect: function): void} fn
+ */
+export function setSelectDialog(fn) { selectDialogFn = fn; }
+
+/** Fonction d'indicateur de chargement injectée depuis l'extérieur */
+let loadingFn = null;
+/**
+ * Injecter une fonction affichant/masquant un indicateur de chargement.
+ * @param {function(boolean): void} fn — appelée avec true pour afficher, false pour masquer
+ */
+export function setLoadingFn(fn) { loadingFn = fn; }
 
 // Méthodes natives navigator.geolocation sauvegardées au démarrage
 let nativeWatchPosition;
@@ -45,20 +55,89 @@ let nativeClearWatch;
 let nativeGetCurrentPosition;
 
 
-/** Accumule les chunks BLE (fragments de phrases NMEA) et traite les lignes complètes */
+/** Tente d'extraire le niveau de batterie d'une trame NMEA propriétaire ou d'une réponse AT.
+ *  Formats reconnus :
+ *  - $GPTXT,...,BAT:75%*XX  ou  battery=75
+ *  - AT+CBC → réponse : +CBC: 0,75,4200  (deuxième champ = pourcentage)
+ *  - $PGRMT,...  (Garmin propriétaire — le champ voltage est loggé brut)
+ */
+function tryParseBatteryFromLine(line) {
+  if (!batteryCallback) return;
+  // Sentence propriétaire $PGSTX : champ 11 (base 1) = niveau de batterie
+  // ex. $PGSTX,1,GAU,3,399977.984,,,,,,,75,,*26
+  if (line.startsWith('$PGSTX,')) {
+    const fields = line.split(',');
+    const level = parseInt(fields[11], 10);
+    if (!isNaN(level) && level >= 0 && level <= 100) { batteryCallback(level); return; }
+  }
+  // Réponse AT+CBC : +CBC: 0,75,4200
+  const atCbc = line.match(/\+CBC:\s*\d+,\s*(\d+)/);
+  if (atCbc) {
+    const level = parseInt(atCbc[1], 10);
+    if (level >= 0 && level <= 100) { batteryCallback(level); return; }
+  }
+  // Trames NMEA propriétaires BAT/battery
+  const m =
+    line.match(/[Bb][Aa][Tt](?:tery)?[=:]\s*(\d+)/)
+    || line.match(/\bBAT(?:T)?\b[^,]*,\s*(\d+)/i);
+  if (m) {
+    const level = parseInt(m[1], 10);
+    if (level >= 0 && level <= 100) batteryCallback(level);
+  }
+}
+
+/** Calcule le checksum XOR NMEA d'une sentence (entre $ et *). */
+function calcNmeaChecksum(sentence) {
+  const end = sentence.indexOf('*');
+  let cs = 0;
+  for (let i = 1; i < (end === -1 ? sentence.length : end); i++) {
+    cs ^= sentence.charCodeAt(i);
+  }
+  return cs.toString(16).toUpperCase().padStart(2, '0');
+}
+
+/** Retire le dernier champ NMEA et recalcule le checksum (pour sentences NMEA 4.1). */
+function stripLastNmeaField(sentence) {
+  const starIdx = sentence.lastIndexOf('*');
+  if (starIdx === -1) return null;
+  const body = sentence.slice(0, starIdx);
+  const lastComma = body.lastIndexOf(',');
+  if (lastComma === -1) return null;
+  const trimmed = body.slice(0, lastComma);
+  return trimmed + '*' + calcNmeaChecksum(trimmed);
+}
+
+/** Accumule les chunks Bluetooth Classic (fragments de phrases NMEA) et traite les lignes complètes */
 function onNmeaChunk(chunk) {
   nmeaBuffer += chunk;
   const lines = nmeaBuffer.split(/\r?\n/);
   nmeaBuffer = lines.pop();   // dernière ligne potentiellement incomplète
 
   for (const line of lines) {
+    // Tenter la batterie sur toutes les lignes (réponses AT incluses)
+    tryParseBatteryFromLine(line);
     if (!line.startsWith('$')) continue;
+    // Normaliser le talker ID vers GP pour compatibilité nmea-simple
+    // GN = multi-constellation, GL = GLONASS, GA = Galileo, GB = BeiDou
+    // Note: utiliser une fonction de remplacement pour éviter l'interprétation de '$' comme référence de capture
+    const normalized = line.replace(/^\$G[NLABP]/, () => '$GP');
     try {
-      const sentence = parseNmeaSentence(line);
+      const sentence = parseNmeaSentence(normalized);
       nmeaParsed = processSentence(sentence);
-      console.log(nmeaParsed);
-    } catch (_) {
-      // TODO logger l'erreur pour phrase NMEA inconnue 
+    } catch (err) {
+      // Tenter de stripper le dernier champ NMEA 4.1 et recalculer le checksum
+      const stripped = stripLastNmeaField(normalized);
+      if (stripped) {
+        try {
+          const sentence = parseNmeaSentence(stripped);
+          nmeaParsed = processSentence(sentence);
+          continue;
+        } catch (_) {}
+      }
+      // Ne pas loguer les sentences propriétaires connues (déjà traitées par tryParseBatteryFromLine)
+      if (!line.startsWith('$PGSTX,')) {
+        console.log('[ble-gps] unknown sentence', line, err.message);
+      }
     }
   }
 }
@@ -68,15 +147,14 @@ function processSentence(s) {
   const id = s.sentenceId;
 
   if (id === 'GGA' && s.fixType && s.fixType !== 'invalid') {
-    console.log('GGA parsed:', s);
     gpsState.lat        = s.latitude;
     gpsState.lon        = s.longitude;
     gpsState.alt        = s.altitudeMeters;
     gpsState.hdop       = s.horizontalDilution;
-    gpsState.geoidal    = s.geoidalSeparation;
+    gpsState.geoidal    = s.geoidalSeparation ?? s.geoidalSeperation ?? null;
     gpsState.fixType    = QUALITY_MAP[s.fixType] ?? null;
     gpsState.satellites = s.satellitesInView;
-    gpsState.time       = s.datetime;
+    gpsState.time       = s.datetime ?? s.time;
     gpsState.lastFix    = Date.now();
 
   } else if (id === 'RMC' && s.status === 'valid') {
@@ -176,30 +254,20 @@ function triggerWatchCallbacks() {
 
 /**
  * Enregistre un callback appelé avec le niveau de batterie (0-100) à chaque lecture.
+ * Détection basée sur les trames NMEA propriétaires reçues du GPS.
  * @param {function(number):void} cb
  */
 export function setBatteryCallback(cb) {
   batteryCallback = cb;
 }
 
-async function readBattery() {
-  if (!currentDevice) return;
-  try {
-    const value = await BleClient.read(currentDevice.deviceId, BATT_SERVICE, BATT_CHAR);
-    const level = new Uint8Array(value.buffer)[0];
-    if (batteryCallback) batteryCallback(level);
-  } catch (e) {
-    console.warn('[ble-gps] Lecture batterie échouée :', e);
-  }
-}
-
 /** Restitue le mode GPS interne (navigator.geolocation natif). */
 function restoreInternalMode(onSuccess, onError) {
-  // Nettoyer la connexion BLE courante
   if (batteryTimer) { clearInterval(batteryTimer); batteryTimer = null; }
   if (currentDevice) {
-    BleClient.stopNotifications(currentDevice.deviceId, NUS_SERVICE, NUS_TX_CHAR).catch(() => {});
-    BleClient.disconnect(currentDevice.deviceId).catch(() => {});
+    BluetoothSerial.stopNotifications({ address: currentDevice.deviceId }).catch(() => {});
+    if (nmeaListener) { nmeaListener.remove(); nmeaListener = null; }
+    BluetoothSerial.disconnect({ address: currentDevice.deviceId }).catch(() => {});
     currentDevice = null;
   }
   watchCallbacks = {};
@@ -214,32 +282,53 @@ function restoreInternalMode(onSuccess, onError) {
   onSuccess && onSuccess({ type: 'internal' });
 }
 
-/** Connecte le GPS BLE et injecte les positions dans navigator.geolocation */
+/** Connecte le GPS Bluetooth Classic (SPP) et injecte les positions dans navigator.geolocation */
 async function setExternalMode(onSuccess, onError) {
   try {
-    if (!bleInitialized) {
-      await BleClient.initialize({ androidNeverForLocation: false });
-      bleInitialized = true;
+    // Afficher l'indicateur de chargement pendant le scan
+    if (loadingFn) loadingFn(true);
+
+    // Récupérer les appareils appariés via scan Bluetooth Classic
+    const scanResult = await BluetoothSerial.scan().catch(() => ({ devices: [] }));
+
+    if (loadingFn) loadingFn(false);
+
+    const bonded = (scanResult.devices || []).map(d => ({ deviceId: d.address || d.id, name: d.name }));
+    const gpsDevices = bonded.filter(d => d.name && GPS_PREFIXES.some(p => d.name.startsWith(p)));
+    const candidates = gpsDevices.length > 0 ? gpsDevices : bonded;
+
+    let device;
+    if (candidates.length === 0) {
+      throw new Error('Aucun appareil Bluetooth appairé trouvé. Vérifiez les paramètres Bluetooth.');
+    } else if (candidates.length === 1) {
+      device = candidates[0];
+    } else if (selectDialogFn) {
+      const choice = {};
+      for (const d of candidates) {
+        choice[d.deviceId] = d.name || d.deviceId;
+      }
+      device = await new Promise((resolve, reject) => {
+        selectDialogFn(choice, 'Sélectionner le GPS Bluetooth', (selected) => {
+          const d = candidates.find(d => d.deviceId === selected);
+          if (d) resolve(d); else reject(new Error('Appareil non trouvé'));
+        });
+      });
+    } else {
+      // Pas de dialog injecté : prendre le premier GPS reconnu
+      device = candidates[0];
     }
 
-    // Sélecteur de périphérique natif OS
-    const device = await BleClient.requestDevice({ services: [NUS_SERVICE] });
     currentDevice = device;
 
-    await BleClient.connect(device.deviceId, (disconnectedId) => {
-      console.warn('[ble-gps] GPS BLE déconnecté :', disconnectedId);
-      currentDevice = null;
-      if (batteryTimer) { clearInterval(batteryTimer); batteryTimer = null; }
-    });
+    // Déconnexion préventive pour purger un état résiduel
+    await BluetoothSerial.disconnect({ address: device.deviceId }).catch(() => {});
+    await BluetoothSerial.connect({ address: device.deviceId });
 
-    // Abonnement aux trames NMEA (Nordic UART Service — TX characteristic)
-    await BleClient.startNotifications(device.deviceId, NUS_SERVICE, NUS_TX_CHAR, (value) => {
-      onNmeaChunk(dataViewToText(value));
+    // Abonnement aux trames NMEA ligne par ligne
+    nmeaListener = await BluetoothSerial.addListener('onRead', (data) => {
+      onNmeaChunk(data.value);
     });
-
-    // Batterie : lecture initiale + polling toutes les 60 s
-    readBattery();
-    batteryTimer = setInterval(readBattery, 60000);
+    await BluetoothSerial.startNotifications({ address: device.deviceId, delimiter: '\n' });
 
     // ── Remplacement des méthodes navigator.geolocation ──────────────────────
     // ol/Geolocation appellera watchPosition → notre version stocke le callback.
@@ -267,10 +356,12 @@ async function setExternalMode(onSuccess, onError) {
     });
 
   } catch (e) {
+    if (loadingFn) loadingFn(false);
+    const msg = e?.message || e?.errorMessage || String(e);
+    const code = e?.code !== undefined ? ` (code ${e.code})` : '';
     console.error('[ble-gps] Connexion BLE GPS échouée :', e);
-    // Nettoyage partiel si connexion échouée
     currentDevice = null;
-    onError && onError(e.message || String(e));
+    onError && onError(`Connexion échouée : ${msg}${code}`);
   }
 }
 
