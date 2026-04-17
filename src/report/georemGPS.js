@@ -95,13 +95,16 @@ wapp.ready(() => {
      //Change la couleur du satellite selon l'acquisition
       if(nmeaParsed.fixType) {
         switch (nmeaParsed.fixType) {
-          case 'fix':
+          case 'fix' || 'gps-fix':
             $('.satellite', page).css('color', '#D6B820');
             break;
-          case 'dgps-fix':
+          case 'dgps-fix' || 'pps-fix' || 'rtk' || 'rtk-float':
             $('.satellite', page).css('color', '#32C21D');
             break;
-          case null:
+          case 'estimated' || 'delta' || 'manual' || 'simulated':
+            $('.satellite', page).css('color', '#0000FF');
+            break;
+          case 'no-fix' || 'invalid' || null:
             $('.satellite', page).css('color', '#CF1919');
             break;
           default:

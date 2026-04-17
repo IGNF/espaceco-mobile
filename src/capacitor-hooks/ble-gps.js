@@ -11,16 +11,17 @@ import { parseNmeaSentence } from 'nmea-simple';
 const GPS_PREFIXES = ['GPS', 'Geo', 'GEO', '160'];
 
 const QUALITY_MAP = {
-  'fix':      'fix',
-  'gps-fix':   'fix',
-  'dgps-fix':  'dgps-fix',
-  'pps-fix':   'pps-fix',
-  'rtk':       'rtk',
-  'float-rtk': 'rtk-float',
-  'estimated': 'estimated',
-  'manual':    'manual',
-  'simulated': 'simulated',
-  'delta':     'delta',
+  'fix':      'fix', //fix GPS standard, 2D ou 3D
+  'gps-fix':   'fix', //fix GPS standard, 2D ou 3D
+  'dgps-fix':  'dgps-fix', // fix différentiel (DGPS) avec correction en temps réel
+  'pps-fix':   'pps-fix', // fix avec signal de synchronisation de précision (PPS) pour une meilleure précision temporelle
+  'rtk':       'rtk',  // fix cinématique en temps réel (RTK) avec corrections différentielles pour une précision centimétrique
+  'float-rtk': 'rtk-float', // fix RTK flottant (précision sub-métrique)
+  'estimated': 'estimated', // position estimée (ex. par inertie) sans fix GPS valide
+  'manual':    'manual', // position saisie manuellement par l'utilisateur
+  'simulated': 'simulated', // mode simulation (ex. pour tests) avec position générée artificiellement
+  'delta':     'delta', // navigation à partir d'une position de référence et de deltas (ex. pour GPS sans fil avec trames de déplacement uniquement)
+
 };
 
 let gpsState     = {};
@@ -131,6 +132,7 @@ function onNmeaChunk(chunk) {
         try {
           const sentence = parseNmeaSentence(stripped);
           nmeaParsed = processSentence(sentence);
+          console.log(nmeaParsed);
           continue;
         } catch (_) {}
       }
