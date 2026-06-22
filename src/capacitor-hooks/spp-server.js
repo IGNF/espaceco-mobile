@@ -3,7 +3,7 @@
  *
  * Permet au téléphone d'écouter en serveur SPP pour recevoir le flux NMEA d'un
  * récepteur GPS qui n'émet qu'en se connectant vers un port COM Bluetooth sortant
- * (ex. Trimble GeoExplorer / XT — sortie NMEA « Bluetooth (COM9) »).
+ * (ex. GeoXT — sortie NMEA « Bluetooth (COM9) »).
  *
  * Évènements :
  *   - 'onRead'   → { value: string }              (fragments de données reçues)

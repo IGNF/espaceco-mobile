@@ -29,7 +29,7 @@ import java.util.UUID;
  * Serveur RFCOMM Bluetooth Classic (SPP) hébergé par le téléphone.
  *
  * Nécessaire pour les récepteurs GPS qui ne savent émettre qu'en se connectant
- * vers un port COM Bluetooth SORTANT (ex. Trimble GeoExplorer / XT — sortie NMEA
+ * vers un port COM Bluetooth SORTANT (ex. GeoXT — sortie NMEA
  * sur « Bluetooth (COM9) »). Dans ce cas le récepteur est client : le téléphone
  * doit donc écouter en tant que serveur.
  *
@@ -46,7 +46,7 @@ public class SppServerPlugin extends Plugin {
     private static final String TAG = "SppServer";
     /** UUID du profil Serial Port Profile (SPP) standard. */
     private static final UUID SPP_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-    private static final String SDP_NAME = "EspaceCoGPS";
+    private static final String SDP_NAME = "EspaceCoGNSS";
 
     private BluetoothServerSocket serverSocketSecure;
     private BluetoothServerSocket serverSocketInsecure;
@@ -110,7 +110,7 @@ public class SppServerPlugin extends Plugin {
         Log.i(TAG, "Serveur SPP démarré (secure=" + (serverSocketSecure != null)
                 + ", insecure=" + (serverSocketInsecure != null) + "), en attente de connexion…");
         try {
-            Log.i(TAG, "Nom Bluetooth de CE téléphone (à cibler depuis le Trimble) : « " + adapter.getName() + " »");
+            Log.i(TAG, "Nom Bluetooth de CE téléphone : « " + adapter.getName() + " »");
         } catch (SecurityException ignored) {}
         emitStatus("listening", null);
         call.resolve();
@@ -131,7 +131,7 @@ public class SppServerPlugin extends Plugin {
 
     /**
      * Rend le téléphone découvrable (visible) en Bluetooth pendant une durée donnée,
-     * afin que le récepteur (Trimble) puisse le trouver pour configurer son port COM
+     * afin que le récepteur puisse le trouver pour configurer son port COM
      * sortant et s'y connecter. Affiche le dialogue système de demande de visibilité.
      */
     @PluginMethod
@@ -154,7 +154,7 @@ public class SppServerPlugin extends Plugin {
 
     /**
      * Diagnostic : liste les appareils Bluetooth appairés (bondés) avec le téléphone.
-     * Permet de vérifier si le récepteur (Trimble) a réussi son appairage : tant qu'il
+     * Permet de vérifier si le récepteur a réussi son appairage : tant qu'il
      * n'apparaît pas ici, son port COM sortant ne pourra pas cibler ce téléphone.
      */
     @PluginMethod

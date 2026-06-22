@@ -13,7 +13,7 @@ const GPS_PREFIXES = ['GPS', 'Geo', 'GEO', '160'];
 
 /** Entrée synthétique de la liste de sélection : « téléphone en serveur SPP ».
  *  À choisir pour les récepteurs qui n'émettent qu'en se connectant vers un port
- *  COM Bluetooth SORTANT (ex. Trimble GeoExplorer / XT — sortie NMEA « COM9 »). */
+ *  COM Bluetooth SORTANT (ex. GeoXT — sortie NMEA « COM9 »). */
 const SPP_SERVER_ID = '__spp_server__';
 
 /** Entrée synthétique : « appairer un nouveau récepteur ». Rend le téléphone visible
@@ -137,11 +137,11 @@ function stripLastNmeaField(sentence) {
   return trimmed + '*' + calcNmeaChecksum(trimmed);
 }
 
-/** Active le log brut de tout ce qui arrive du GPS (diagnostic récepteurs récalcitrants type Trimble).
+/** Active le log brut de tout ce qui arrive du GPS (diagnostic récepteurs récalcitrants type GeoXT).
  *  À passer à false une fois le diagnostic terminé. */
 const DEBUG_RAW_BLE = true;
 
-/** Affiche le chunk reçu en texte ET en hexadécimal (détection d'un flux binaire type TSIP Trimble). */
+/** Affiche le chunk reçu en texte ET en hexadécimal (détection d'un flux binaire type TSIP GeoXT). */
 function logRawChunk(chunk) {
   if (!DEBUG_RAW_BLE) return;
   let hex = '';
@@ -357,7 +357,7 @@ function installGeolocationOverride() {
   };
 }
 
-/** Mode serveur SPP : le téléphone écoute, le récepteur (Trimble/COM9 sortant) se connecte à lui.
+/** Mode serveur SPP : le téléphone écoute, le récepteur (GeoXT/COM9 sortant) se connecte à lui.
  *  @param {object} [opts]
  *  @param {boolean} [opts.discoverable] Rendre le téléphone visible (uniquement pour un 1er appairage). */
 async function setServerMode(onSuccess, onError, opts = {}) {
@@ -444,17 +444,17 @@ async function setExternalMode(onSuccess, onError) {
 
     const bonded = (scanResult.devices || []).map(d => ({ deviceId: d.address || d.id, name: d.name, class: d.class }));
     // On conserve TOUS les appareils appairés comme candidats : un récepteur ancien
-    // (Trimble…) peut avoir un nom non standard, voire aucun nom, et serait sinon écarté.
+    // (GeoXT…) peut avoir un nom non standard, voire aucun nom, et serait sinon écarté.
     const gpsDevices = bonded.filter(d => d.name && GPS_PREFIXES.some(p => d.name.startsWith(p)));
     const candidates = bonded;
 
     /** Libellé lisible : « Nom (adresse) » ou « (adresse) » si pas de nom. */
     const labelOf = (d) => (d.name ? `${d.name} (${d.deviceId})` : `? (${d.deviceId})`);
 
-    /** Entrée synthétique « téléphone en serveur SPP » (récepteurs sortants type Trimble/COM9). */
-    const serverEntry = { deviceId: SPP_SERVER_ID, name: '📡 Mode serveur (Trimble / récepteur COM9)' };
+    /** Entrée synthétique « téléphone en serveur SPP » (récepteurs sortants type GeoXT/COM9). */
+    const serverEntry = { deviceId: SPP_SERVER_ID, name: 'Mode serveur (GeoXT / récepteur COM9)' };
     /** Entrée synthétique « appairer un nouveau récepteur » (rend le téléphone visible). */
-    const pairEntry = { deviceId: SPP_PAIR_ID, name: '➕ Appairer un nouveau récepteur…' };
+    const pairEntry = { deviceId: SPP_PAIR_ID, name: 'Appairer un nouveau récepteur GNSS' };
 
     /** Dernier choix mémorisé (pour le proposer en tête). */
     let lastChoiceId = null;
@@ -491,7 +491,7 @@ async function setExternalMode(onSuccess, onError) {
       device = gpsDevices[0] || candidates[0];
     }
 
-    // Mode serveur : le téléphone écoute, le récepteur se connecte à lui (Trimble COM9 sortant).
+    // Mode serveur : le téléphone écoute, le récepteur se connecte à lui (GeoXT COM9 sortant).
     if (device.deviceId === SPP_SERVER_ID || device.deviceId === SPP_PAIR_ID) {
       if (loadingFn) loadingFn(false);
       // SPP_PAIR_ID : premier appairage → on rend le téléphone visible.
@@ -508,7 +508,7 @@ async function setExternalMode(onSuccess, onError) {
     await BluetoothSerial.disconnect({ address: device.deviceId }).catch(() => {});
 
     // Connexion : tente d'abord la socket sécurisée, puis insécure (requise par
-    // certains récepteurs anciens type Trimble qui refusent le RFCOMM sécurisé).
+    // certains récepteurs anciens type GeoXT qui refusent le RFCOMM sécurisé).
     try {
       await BluetoothSerial.connect({ address: device.deviceId });
       console.log('[ble-gps] connect (secure) OK');
