@@ -443,37 +443,23 @@ async function setExternalMode(onSuccess, onError) {
     if (loadingFn) loadingFn(false);
 
     const bonded = (scanResult.devices || []).map(d => ({ deviceId: d.address || d.id, name: d.name, class: d.class }));
-    // On conserve TOUS les appareils appairés comme candidats : un récepteur ancien
-    // (GeoXT…) peut avoir un nom non standard, voire aucun nom, et serait sinon écarté.
     const gpsDevices = bonded.filter(d => d.name && GPS_PREFIXES.some(p => d.name.startsWith(p)));
     const candidates = bonded;
 
-    /** Libellé lisible : « Nom (adresse) » ou « (adresse) » si pas de nom. */
+    // Libellé : « Nom (adresse) » ou « (adresse) » si pas de nom
     const labelOf = (d) => (d.name ? `${d.name} (${d.deviceId})` : `? (${d.deviceId})`);
 
-    /** Entrée synthétique « téléphone en serveur SPP » (récepteurs sortants type GeoXT/COM9). */
     const serverEntry = { deviceId: SPP_SERVER_ID, name: 'Mode serveur (GeoXT / récepteur COM9)' };
-    /** Entrée synthétique « appairer un nouveau récepteur » (rend le téléphone visible). */
     const pairEntry = { deviceId: SPP_PAIR_ID, name: 'Appairer un nouveau récepteur GNSS' };
-
-    /** Dernier choix mémorisé (pour le proposer en tête). */
-    let lastChoiceId = null;
-    try { lastChoiceId = localStorage.getItem(LAST_CHOICE_KEY); } catch (_) {}
 
     let device;
     if (selectDialogFn) {
       // Ordre : GPS reconnus, puis autres appairés, puis mode serveur, puis appairage.
       let ordered = [...gpsDevices, ...candidates.filter(d => !gpsDevices.includes(d)), serverEntry, pairEntry];
-      // Le dernier appareil utilisé est remonté en tête pour un accès en un geste.
-      if (lastChoiceId) {
-        const idx = ordered.findIndex(d => d.deviceId === lastChoiceId);
-        if (idx > 0) ordered = [ordered[idx], ...ordered.slice(0, idx), ...ordered.slice(idx + 1)];
-      }
       const choice = {};
       for (const d of ordered) {
         const isSynthetic = d.deviceId === SPP_SERVER_ID || d.deviceId === SPP_PAIR_ID;
         let label = isSynthetic ? d.name : labelOf(d);
-        if (d.deviceId === lastChoiceId) label = `✓ ${label} — dernier utilisé`;
         choice[d.deviceId] = label;
       }
       device = await new Promise((resolve, reject) => {

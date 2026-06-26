@@ -23,8 +23,8 @@ setLoadingFn((show) => {
 wapp.selectGPS = function () {
   // var menu = $('#options .sourcegps div').html(internal);
   wapp.selectDialog({
-    internal: 'GPS interne',
-    external: 'GPS externe (bluetooth)'
+    internal: 'GNSS interne',
+    external: 'GNSS externe (bluetooth)'
   },
     null,
     (source) => {
@@ -33,17 +33,17 @@ wapp.selectGPS = function () {
       navigator.geolocation.setSource(source,
         (e) => {
           if (e.type === 'external') {
-            $('#options .sourcegps div').html('GPS externe (' + e.name + ')');
+            $('#options .sourcegps div').html('GNSS externe (' + e.name + ')');
           } else {
-            $('#options .sourcegps div').html('GPS interne');
+            $('#options .sourcegps div').html('GNSS interne');
           }
           wapp.param.gpsSource = e.type;
         },
         () => {
-          wapp.alert('Impossible de se connecter au GPS externe.<br/>Vérifiez que le bluetooth est bien activé et le GPS allumé...');
+          wapp.alert('Impossible de se connecter au GNSS externe.<br/>Vérifiez que le bluetooth est bien activé et le GNSS allumé...');
         });
     }, {
-    title: 'Sélectionner la source GPS'
+    title: 'Sélectionner la source GNSS'
   }
   );
 };

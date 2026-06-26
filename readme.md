@@ -80,7 +80,7 @@ Afin de fonctionner l'application doit avoir accès :
 * au tranfert de fichier : pour l'échange de fichiers avec l'espace collaboratif,
 * aux notifications : pour l'affichage de certains dialogues,
 * à la caméra : pour prendre des photos,
-* au GPS : pour le positionnement.
+* au GNSS : pour le positionnement.
 * aux informations de connexion (réseau)
 
 Ceci nécessite d'ajouter les plugins suivant au projet :

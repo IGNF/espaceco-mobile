@@ -26,11 +26,11 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Serveur RFCOMM Bluetooth Classic (SPP) hébergé par le téléphone.
+ * Serveur RFCOMM Bluetooth Classic (SPP) hébergé par le device.
  *
- * Nécessaire pour les récepteurs GPS qui ne savent émettre qu'en se connectant
+ * Nécessaire pour les récepteurs GNSS qui ne savent émettre qu'en se connectant
  * vers un port COM Bluetooth SORTANT (ex. GeoXT — sortie NMEA
- * sur « Bluetooth (COM9) »). Dans ce cas le récepteur est client : le téléphone
+ * sur « Bluetooth (COM9) »). Dans ce cas le récepteur est client : le device
  * doit donc écouter en tant que serveur.
  *
  * On utilise une socket INSÉCURE (listenUsingInsecureRfcommWithServiceRecord) afin
@@ -110,7 +110,7 @@ public class SppServerPlugin extends Plugin {
         Log.i(TAG, "Serveur SPP démarré (secure=" + (serverSocketSecure != null)
                 + ", insecure=" + (serverSocketInsecure != null) + "), en attente de connexion…");
         try {
-            Log.i(TAG, "Nom Bluetooth de CE téléphone : « " + adapter.getName() + " »");
+            Log.i(TAG, "Nom Bluetooth de ce device : « " + adapter.getName() + " »");
         } catch (SecurityException ignored) {}
         emitStatus("listening", null);
         call.resolve();
@@ -130,7 +130,7 @@ public class SppServerPlugin extends Plugin {
     }
 
     /**
-     * Rend le téléphone découvrable (visible) en Bluetooth pendant une durée donnée,
+     * Rend le device découvrable (visible) en Bluetooth pendant une durée donnée,
      * afin que le récepteur puisse le trouver pour configurer son port COM
      * sortant et s'y connecter. Affiche le dialogue système de demande de visibilité.
      */
@@ -148,14 +148,14 @@ public class SppServerPlugin extends Plugin {
             }
             call.resolve();
         } catch (Exception e) {
-            call.reject("Impossible de rendre le téléphone découvrable : " + e.getMessage());
+            call.reject("Impossible de rendre l'appareil découvrable : " + e.getMessage());
         }
     }
 
     /**
-     * Diagnostic : liste les appareils Bluetooth appairés (bondés) avec le téléphone.
+     * Diagnostic : liste les appareils Bluetooth appairés (bondés) avec le device.
      * Permet de vérifier si le récepteur a réussi son appairage : tant qu'il
-     * n'apparaît pas ici, son port COM sortant ne pourra pas cibler ce téléphone.
+     * n'apparaît pas ici, son port COM sortant ne pourra pas cibler ce device.
      */
     @PluginMethod
     public void listBonded(PluginCall call) {
@@ -199,7 +199,7 @@ public class SppServerPlugin extends Plugin {
         while (running) {
             BluetoothSocket socket;
             try {
-                // Bloque jusqu'à ce qu'un client (le GPS) se connecte.
+                // Bloque jusqu'à ce qu'un client (le GNSS) se connecte.
                 socket = server.accept();
             } catch (IOException e) {
                 if (running) Log.w(TAG, "accept(" + label + ") interrompu : " + e.getMessage());
@@ -238,7 +238,7 @@ public class SppServerPlugin extends Plugin {
                     if (clientSocket == socket) clientSocket = null;
                 }
             }
-            // Le GPS peut se reconnecter : on boucle et on ré-accepte tant que running.
+            // Le GNSS peut se reconnecter : on boucle et on ré-accepte tant que running.
         }
     }
 
